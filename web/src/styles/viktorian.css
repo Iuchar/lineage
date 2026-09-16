@@ -1,0 +1,38 @@
+/* ═══ Викторианский: гравированные карточки, пыльца на фоне ═══ */
+[data-style=viktorian] { --mark: #63202a; --mark-fg: #f2e0c4; --label-past: #7c6a3c; --label-past-fg: #efe6cf;
+  --bg: #262721; --fg: #f2e8d2; --mut: #a09578; --acc: #b99a52; --edge: #3b382c;
+  --panelbg: #1b1c17; --link: #7c6a3c; --card: #2e2f27; --font: 'Playfair Display', Georgia, serif;
+  --orn: rgba(185,154,82,.11); }
+[data-style=viktorian][data-theme=light] { --mark: #7a2230; --mark-fg: #f6ead4; --bg: #efe9dc; --fg: #231f16; --mut: #7d7358; --acc: #8a6d28;
+  --panelbg: #e4ddcc; --link: #a9986a; --card: #fbf8ef; --edge: #cdc4ac; --orn: rgba(122,95,32,.12); }
+
+[data-style=viktorian] .canvas { background: var(--bg); }
+[data-style=viktorian] .node { font-family: var(--font); text-align: center; }
+[data-style=viktorian] .node .box { background: var(--card); border: 1px solid var(--link);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; }
+[data-style=viktorian] .node .box::after { /* одна внутренняя рамка вместо двух линеек */
+  content: ''; position: absolute; inset: 3px; border: 1px solid var(--link); opacity: .42; pointer-events: none; }
+[data-style=viktorian] .node .nm { font-size: 16px; font-weight: 700; color: var(--fg); letter-spacing: .005em; }
+[data-style=viktorian] .node .yr { font-family: 'PT Serif', serif; font-style: italic; font-size: 10.5px;
+  color: var(--mut); margin-top: 4px; }
+[data-style=viktorian] .node.sel .box { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(185,154,82,.2); }
+
+/* метка — лента-баньероль: плоское полотнище с ласточкиным хвостом, внутри две линейки канта */
+[data-style=viktorian] .node .badge { background: none; padding: 0; left: 8px; top: 100%; margin-top: 6px;
+  font-family: 'PT Serif', serif; font-size: 8px; letter-spacing: .18em; text-transform: uppercase; color: var(--mark-fg); }
+[data-style=viktorian] .node .badge i { display: block; position: relative; font-style: normal;
+  padding: 3px 15px; background: var(--mark);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%, 7px 50%); }
+[data-style=viktorian] .node .badge i::before,
+[data-style=viktorian] .node .badge i::after { content: ''; position: absolute; left: 10px; right: 10px;
+  height: 1px; background: currentColor; opacity: .42; }
+[data-style=viktorian] .node .badge i::before { top: 1.5px; }
+[data-style=viktorian] .node .badge i::after { bottom: 1.5px; }
+[data-style=viktorian] .node .badge.calm { color: var(--card); }
+[data-style=viktorian] .node .badge.calm i { background: var(--link); }
+
+/* выжжен из рода — креп с прогоревшим подолом на верхних 73 % карточки, плотность 60 % */
+[data-style=viktorian] .node.burnt .box::before { content: ''; position: absolute; left: 0; right: 0; top: 0;
+  height: 73%; z-index: 4; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27150%27%20height%3D%2744%27%20viewBox%3D%270%200%20150%2044%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3Cpattern%20id%3D%27g%27%20width%3D%273%27%20height%3D%273%27%20patternUnits%3D%27userSpaceOnUse%27%3E%3Crect%20width%3D%273%27%20height%3D%273%27%20fill%3D%27%230b0a09%27%20fill-opacity%3D%270.600%27%2F%3E%3Crect%20width%3D%273%27%20height%3D%271%27%20fill%3D%27%23ffffff%27%20fill-opacity%3D%270.054%27%2F%3E%3Crect%20width%3D%271%27%20height%3D%273%27%20fill%3D%27%23000000%27%20fill-opacity%3D%270.180%27%2F%3E%3C%2Fpattern%3E%3ClinearGradient%20id%3D%27e%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%27.34%27%20stop-color%3D%27%230b0a09%27%20stop-opacity%3D%270%27%2F%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%232a1809%27%20stop-opacity%3D%27.5%27%2F%3E%3Cstop%20offset%3D%27.70%27%20stop-color%3D%27%234a2510%27%20stop-opacity%3D%27.45%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%27M0%200%20H150%20V30%20C%20141%2034%20137%2027%20131%2029%20C%20124%2031%20122%2039%20114%2038%20C%20106%2037%20105%2028%2098%2029%20C%2090%2030%2089%2041%2080%2039%20C%2072%2037%2072%2028%2064%2029%20C%2056%2030%2057%2040%2048%2038%20C%2040%2036%2040%2027%2032%2029%20C%2025%2031%2025%2039%2017%2038%20C%2010%2037%208%2029%200%2031%20Z%27%20fill%3D%27url%28%23g%29%27%2F%3E%3Cpath%20d%3D%27M0%200%20H150%20V30%20C%20141%2034%20137%2027%20131%2029%20C%20124%2031%20122%2039%20114%2038%20C%20106%2037%20105%2028%2098%2029%20C%2090%2030%2089%2041%2080%2039%20C%2072%2037%2072%2028%2064%2029%20C%2056%2030%2057%2040%2048%2038%20C%2040%2036%2040%2027%2032%2029%20C%2025%2031%2025%2039%2017%2038%20C%2010%2037%208%2029%200%2031%20Z%27%20fill%3D%27url%28%23e%29%27%2F%3E%3Cpath%20d%3D%27M150%2030%20C%20141%2034%20137%2027%20131%2029%20C%20124%2031%20122%2039%20114%2038%20C%20106%2037%20105%2028%2098%2029%20C%2090%2030%2089%2041%2080%2039%20C%2072%2037%2072%2028%2064%2029%20C%2056%2030%2057%2040%2048%2038%20C%2040%2036%2040%2027%2032%2029%20C%2025%2031%2025%2039%2017%2038%20C%2010%2037%208%2029%200%2031%27%20fill%3D%27none%27%20stroke%3D%27%238a4a1c%27%20stroke-opacity%3D%27.5%27%20stroke-width%3D%27.8%27%2F%3E%3Cellipse%20cx%3D%27103%27%20cy%3D%2724%27%20rx%3D%274.6%27%20ry%3D%272.6%27%20fill%3D%27%230a0806%27%20fill-opacity%3D%27.9%27%2F%3E%3Cellipse%20cx%3D%27103%27%20cy%3D%2724%27%20rx%3D%274.6%27%20ry%3D%272.6%27%20fill%3D%27none%27%20stroke%3D%27%238a4a1c%27%20stroke-opacity%3D%27.55%27%20stroke-width%3D%27.8%27%2F%3E%3Cellipse%20cx%3D%2738%27%20cy%3D%2720%27%20rx%3D%273.2%27%20ry%3D%271.9%27%20fill%3D%27%230a0806%27%20fill-opacity%3D%27.85%27%2F%3E%3Cellipse%20cx%3D%2738%27%20cy%3D%2720%27%20rx%3D%273.2%27%20ry%3D%271.9%27%20fill%3D%27none%27%20stroke%3D%27%238a4a1c%27%20stroke-opacity%3D%27.45%27%20stroke-width%3D%27.7%27%2F%3E%3C%2Fsvg%3E") no-repeat top center/100% 100%; }
+[data-style=viktorian] .node.burnt .nm { color: var(--mut); }

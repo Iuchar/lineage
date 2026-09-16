@@ -1,0 +1,31 @@
+/* ═══ Ночной кабинет: картотека, латунь, лампа ═══ */
+[data-style=kabinet] { --label-past: #6b5636; --label-past-fg: #f0e5cf; --bg: #161310; --fg: #e9e2d4; --mut: #8d8171; --acc: #e0b96a; --edge: #2a231c;
+  --panelbg: #100e0c; --link: #57493a; --card: #221d18; --font: 'Literata', Georgia, serif; }
+[data-style=kabinet][data-theme=light] { --bg: #efe7d9; --fg: #211b13; --mut: #7c705e; --acc: #9a6c1c;
+  --panelbg: #e5dbc9; --link: #b4a389; --card: #fbf6ec; --edge: #cdbfa6; }
+
+[data-style=kabinet] .canvas { background: var(--bg);
+  background-image: repeating-linear-gradient(93deg, rgba(0,0,0,.14) 0 7px, rgba(255,255,255,.02) 7px 14px); }
+/* лампа светит на выбранного */
+[data-style=kabinet] .canvas::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 340px 240px at var(--lampx, 50%) var(--lampy, 40%),
+             rgba(224,185,106,.17), rgba(224,185,106,0) 70%); }
+[data-style=kabinet][data-theme=light] .canvas::after {
+  background: radial-gradient(ellipse 340px 240px at var(--lampx, 50%) var(--lampy, 40%),
+             rgba(0,0,0,.09), rgba(0,0,0,0) 70%); }
+
+[data-style=kabinet] .node { font-family: var(--font); }
+[data-style=kabinet] .node .box { background: var(--card); border: 1px solid var(--edge); padding: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.4); }
+[data-style=kabinet] .node .box::before { content: ''; position: absolute; left: 10px; top: -5px; width: 26px; height: 5px;
+  background: var(--label-past); border-radius: 2px 2px 0 0; }
+[data-style=kabinet] .node .nm { font-size: 15px; font-weight: 600; color: var(--fg); }
+[data-style=kabinet] .node .yr { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--mut); margin-top: 6px; }
+[data-style=kabinet] .node.sel .box { border-color: var(--acc); box-shadow: 0 0 24px rgba(224,185,106,.25); }
+[data-style=kabinet] .node.sel .box::before { background: var(--acc); }
+[data-style=kabinet] .node .badge { font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: .06em;
+  text-transform: uppercase; background: var(--acc); color: #171310; padding: 2px 7px; left: 0; top: 100%; margin-top: 5px; }
+
+/* выжжен из рода — знак не решён, пока пунктирная рамка и зачёркнутое имя */
+[data-style=kabinet] .node.burnt .box { border-style: dashed; opacity: .45; }
+[data-style=kabinet] .node.burnt .nm { text-decoration: line-through; }

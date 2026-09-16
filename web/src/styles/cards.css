@@ -1,0 +1,10 @@
+/* общие части карточки, у всех стилей */
+.node { position: absolute; cursor: pointer; user-select: none; }
+.node .box { position: relative; width: 100%; height: 100%; }
+.node .nm { line-height: 1.05; }
+.node .yr { white-space: nowrap; }
+.node .badge { position: absolute; white-space: nowrap; pointer-events: none; }
+.node .badge i { font-style: normal; }
+.node .por { display: none; }
+.node .ord { display: none; }
+.stub { opacity: .55; }

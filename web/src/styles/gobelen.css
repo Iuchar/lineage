@@ -1,0 +1,32 @@
+/* ═══ Гобелен: тканое полотно, медальоны, стежки ═══ */
+/* полотно: мореный дуб в тёмной теме, небелёная шерсть в светлой */
+[data-style=gobelen] { --st-old: #8a7a5e; --st-new: #9d8b68; --bg: #241a12; --fg: #eadfc4; --mut: #a08d70; --acc: #c8a44e; --edge: #3a2c1e;
+  --panelbg: #19110a; --link: #7d6b52; --warp: rgba(0,0,0,.2); --weft: rgba(255,236,196,.035);
+  --font: 'Cormorant Garamond', Georgia, serif; --hand: 'Caveat', cursive; }
+[data-style=gobelen][data-theme=light] { --st-old: #9c9070; --st-new: #7d7154; --bg: #ded2b6; --fg: #2c2a20; --mut: #6f6851; --acc: #8a6a24;
+  --panelbg: #d2c5a6; --link: #8d8163; --edge: #bcae8c; --warp: rgba(84,70,40,.14); --weft: rgba(255,255,255,.3); }
+
+/* фактура — узелки на пересечениях нитей: точка не выстраивается в линию, муару нечего усиливать */
+[data-style=gobelen] .canvas { background: var(--bg);
+  background-image: radial-gradient(circle at 3.5px 3.5px, var(--weft) 1px, transparent 1.4px),
+                    radial-gradient(circle at 10.5px 10.5px, var(--weft) 1px, transparent 1.4px),
+                    radial-gradient(circle at 10.5px 3.5px, var(--warp) 1px, transparent 1.4px),
+                    radial-gradient(circle at 3.5px 10.5px, var(--warp) 1px, transparent 1.4px);
+  background-size: 14px 14px; }
+
+[data-style=gobelen] .node { font-family: var(--font); text-align: center; }
+[data-style=gobelen] .node .ord { display: block; height: 20px; line-height: 20px; font-family: var(--hand);
+  font-size: 15px; color: #a9b5a0; text-align: center; }
+[data-style=gobelen] .node .por { display: block; width: 56px; height: 56px; margin: 0 auto; border-radius: 50%;
+  border: 1.5px solid var(--acc); background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.09), rgba(0,0,0,.35)); }
+[data-style=gobelen] .node .nm { font-size: 18px; color: var(--fg); margin-top: 9px; }
+[data-style=gobelen] .node .yr { font-family: var(--hand); font-size: 14px; color: var(--mut); }
+[data-style=gobelen] .node.sel .por { border-width: 2px; box-shadow: 0 0 18px rgba(200,164,78,.5); }
+[data-style=gobelen] .node .badge { font-family: var(--hand); font-size: 12px; color: #f0dfae; background: #7a2230;
+  border-radius: 10px; padding: 1px 9px; left: 50%; transform: translateX(-50%); top: 124px; }
+
+/* выжжен из рода — в медальоне прожжена дыра */
+[data-style=gobelen] .node.burnt .por { border-color: transparent;
+  background: radial-gradient(circle, #0b0e0c 42%, #2a1e10 64%, rgba(0,0,0,0) 76%); }
+[data-style=gobelen] .node.burnt .nm { color: #6f6551; text-decoration: line-through; text-decoration-thickness: 1px; }
+[data-style=gobelen] .node.burnt .yr { color: #5d5647; }

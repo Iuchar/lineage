@@ -1,0 +1,19 @@
+/* ═══ Линейка дат: накладка поверх карты ═══ */
+.ruler { position: absolute; left: 0; top: 0; bottom: 0; width: 212px; pointer-events: none; z-index: 5;
+  background: linear-gradient(90deg, var(--bg) 74%, rgba(0,0,0,0)); border-right: 1px solid var(--edge); }
+/* шкала лет */
+.ruler .tick { position: absolute; left: 52px; width: 12px; height: 1px; background: var(--edge); }
+.ruler .tick.big { left: 44px; width: 20px; opacity: .9; }
+.ruler .yr { position: absolute; left: 0; width: 40px; text-align: right; transform: translateY(-50%);
+  font: 500 9.5px/1 'IBM Plex Mono', monospace; color: var(--mut); letter-spacing: .02em; }
+.ruler .yr.big { color: var(--fg); }
+.ruler .axis { position: absolute; left: 64px; width: 1px; background: var(--edge); }
+/* полосы поколений */
+.ruler .band { position: absolute; width: 2px; background: var(--acc); opacity: .62; }
+.ruler .band.thin { width: 1px; opacity: .3; }
+.ruler .band.on { opacity: 1; }
+.ruler .cap { position: absolute; width: 8px; height: 1px; background: var(--acc); opacity: .62; }
+.ruler .glab { position: absolute; transform: translateY(-50%); white-space: nowrap;
+  font: 500 8px/1.5 'IBM Plex Mono', monospace; color: var(--mut); letter-spacing: .13em; text-transform: uppercase; }
+.ruler .glab.on { color: var(--acc); }
+.ruler .glab small { display: block; font-size: 8.5px; letter-spacing: .02em; text-transform: none; opacity: .8; }

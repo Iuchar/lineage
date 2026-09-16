@@ -1,0 +1,26 @@
+/* ═══ Полотно II: только типографика, без рамок ═══ */
+[data-style=polotno] { --bg: #0b0a09; --fg: #f3ede3; --mut: #7f7869; --acc: #e8563c; --edge: #211e1a;
+  --panelbg: #0b0a09; --link: #4d4740; --font: 'Cormorant Garamond', Georgia, serif;
+  --m1: #a39a8e; --m0: #6f6a60; --char-hot: #8a5520; --char-mid: #3d2c1e; --char-cold: #211a15; }
+[data-style=polotno][data-theme=light] { --bg: #fbf8f3; --fg: #15120e; --mut: #8d8577; --acc: #c2352a;
+  --panelbg: #fbf8f3; --link: #b3ab9a; --edge: #e2dccf; --m1: #6b6357; --m0: #a29a8c;
+  --char-hot: #8a4a17; --char-mid: #4a3524; --char-cold: #241c15; }
+
+[data-style=polotno] .canvas { background: var(--bg); }
+[data-style=polotno] .node .nm { font-family: var(--font); font-weight: 300; font-size: 26px; line-height: 1;
+  color: var(--fg); letter-spacing: -.01em; }
+[data-style=polotno] .node .yr { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .06em;
+  color: var(--mut); margin-top: 8px; }
+[data-style=polotno] .node.sel .nm { color: var(--acc); }
+[data-style=polotno] .node .badge { font-size: 8.5px; letter-spacing: .11em; text-transform: uppercase; color: var(--acc);
+  border-bottom: 1px solid var(--acc); left: 0; top: 50px; font-family: 'Golos Text', sans-serif; }
+
+/* выжжен из рода — буквы обуглены, под строкой тлеет полоска углей по ширине имени */
+[data-style=polotno] .node.burnt .nm { display: inline-block; position: relative; text-decoration: none;
+  color: transparent;
+  background: linear-gradient(var(--char-hot) 6%, var(--char-mid) 48%, var(--char-cold) 94%);
+  -webkit-background-clip: text; background-clip: text; }
+[data-style=polotno] .node.burnt .nm::after { content: ''; position: absolute; left: 1px; right: 3px; bottom: -1px;
+  height: 2px; border-radius: 1px;
+  background: linear-gradient(90deg, transparent, #c0561f 16%, #f0873a 44%, #c0561f 70%, transparent);
+  box-shadow: 0 0 8px rgba(224,110,40,.5); }

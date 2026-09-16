@@ -12,6 +12,7 @@
     "fixtures": "uv run --project ../server python -m app.dev fixtures src/layout/fixtures"
   },
   "devDependencies": {
+    "@types/node": "^24.13.5",
     "openapi-typescript": "^7.13.0",
     "typescript": "^5.9.3",
     "vite": "^8.3.0",

@@ -1,0 +1,245 @@
+// Холст рода: раскладка → карточки и связи → карта с протяжкой и зумом, линейка поверх.
+
+import type { ClanTree } from "../api/types";
+import { layoutTree, type LayoutResult } from "../layout/layout";
+import { STYLE_METRICS, type StyleName } from "../layout/metrics";
+import { drawCards, NO_MARKS, type PersonMarks } from "./cards";
+import { drawLinks } from "./links";
+import { drawRuler } from "./ruler";
+import { centreOn, fitAll, keepAnchor, type View, zoomAt } from "./view";
+
+export interface CanvasState {
+  style: StyleName;
+  ruler: boolean;
+  rootAtBottom: boolean;
+}
+
+// пыльца на фоне викторианского стиля — крошечные искры и точки, фактура бумаги
+const POLLEN = (color: string, width: number, height: number) =>
+  `<defs><pattern id="vic" width="58" height="58" patternUnits="userSpaceOnUse">` +
+  `<g fill="none" stroke="${color}" stroke-width=".9" stroke-linecap="round">` +
+  `<path d="M15 9 v5 M15 18 v5 M9 16 h5 M17 16 h5"/><path d="M44 38 v5 M44 47 v5 M38 45 h5 M46 45 h5"/></g>` +
+  `<g fill="${color}"><circle cx="44" cy="16" r="1.3"/><circle cx="15" cy="45" r="1.3"/></g>` +
+  `</pattern></defs><rect width="${width}" height="${height}" fill="url(#vic)"/>`;
+
+export class TreeCanvas {
+  readonly viewport: HTMLElement;
+  private readonly surface: HTMLElement;
+  private readonly rulerLayer: HTMLElement;
+
+  private tree: ClanTree | null = null;
+  private layout: LayoutResult | null = null;
+  private size = { width: 1000, height: 1000 };
+  private view: View = { k: 1, x: 0, y: 0 };
+  private drag: { sx: number; sy: number; vx: number; vy: number; moved: number } | null = null;
+
+  selected: number | null = null;
+  marks: PersonMarks = NO_MARKS;
+  state: CanvasState = { style: "gobelen", ruler: false, rootAtBottom: false };
+
+  onViewChange: (view: View) => void = () => {};
+  onSelect: (id: number | null) => void = () => {};
+
+  constructor(host: HTMLElement) {
+    this.viewport = document.createElement("div");
+    this.viewport.className = "viewport";
+    this.surface = document.createElement("div");
+    this.surface.className = "canvas";
+    this.rulerLayer = document.createElement("div");
+    this.rulerLayer.className = "ruler";
+    this.rulerLayer.hidden = true;
+    this.viewport.append(this.surface, this.rulerLayer);
+    host.append(this.viewport);
+    this.bindEvents();
+  }
+
+  get zoom(): number {
+    return this.view.k;
+  }
+
+  setTree(tree: ClanTree, marks: PersonMarks = NO_MARKS): void {
+    this.tree = tree;
+    this.marks = marks;
+    this.selected = null;
+    this.render();
+    this.fit();
+  }
+
+  update(state: Partial<CanvasState>): void {
+    const rulerChanged = state.ruler !== undefined && state.ruler !== this.state.ruler;
+    this.state = { ...this.state, ...state };
+    // переключение линейки не меняет вид: масштаб остаётся, а точка взгляда — на том же месте экрана
+    if (rulerChanged) this.keepView(() => this.render());
+    else this.render();
+  }
+
+  select(id: number | null): void {
+    this.selected = id;
+    this.render();
+    this.onSelect(id);
+  }
+
+  fit(): void {
+    this.setView(fitAll(this.size, this.viewportSize()));
+  }
+
+  zoomBy(factor: number): void {
+    const { width, height } = this.viewportSize();
+    this.setView(zoomAt(this.view, width / 2, height / 2, factor));
+  }
+
+  resetZoom(): void {
+    this.zoomBy(1 / this.view.k);
+  }
+
+  goToSelected(): void {
+    const centre = this.selected != null ? this.cardCentre(this.selected) : null;
+    if (centre) this.setView(centreOn(this.view, centre, this.viewportSize()));
+  }
+
+  render(): void {
+    if (!this.tree) return;
+    const { style } = this.state;
+    const metrics = STYLE_METRICS[style];
+    this.layout = layoutTree(this.tree, metrics, { ruler: this.state.ruler, rootAtBottom: this.state.rootAtBottom });
+    const layout = this.layout;
+
+    const width = layout.width + 40;
+    const height = layout.height + 60;
+    this.size = { width, height };
+    this.surface.style.width = `${width}px`;
+    this.surface.style.height = `${height}px`;
+
+    const styles = getComputedStyle(document.body);
+    const color = (name: string, fallback: string) => (styles.getPropertyValue(name) || fallback).trim();
+    const links = drawLinks(this.tree, layout, style, color);
+    const defs = style === "viktorian" ? POLLEN(color("--orn", "transparent"), width, height) : "";
+
+    this.surface.innerHTML =
+      `<svg class="links" width="${width}" height="${height}">${defs}${links.paths}${links.marks}</svg>` +
+      drawCards(this.tree, layout, style, this.selected, this.marks);
+
+    // лампа «Ночного кабинета» ездит за выбранным
+    const lamp = this.selected != null ? this.cardCentre(this.selected) : null;
+    if (style === "kabinet" && lamp) {
+      this.surface.style.setProperty("--lampx", `${lamp.x}px`);
+      this.surface.style.setProperty("--lampy", `${lamp.y}px`);
+    }
+    this.apply();
+  }
+
+  private cardCentre(id: number): { x: number; y: number } | null {
+    const p = this.layout?.positions.get(id);
+    return p && this.layout ? { x: p.x + this.layout.cardWidth / 2, y: p.y + this.layout.cardHeight / 2 } : null;
+  }
+
+  private viewportSize() {
+    return { width: this.viewport.clientWidth, height: this.viewport.clientHeight };
+  }
+
+  private setView(view: View): void {
+    this.view = view;
+    this.apply();
+  }
+
+  private apply(): void {
+    const { k, x, y } = this.view;
+    this.surface.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${k.toFixed(3)})`;
+    this.drawRuler();
+    this.onViewChange(this.view);
+  }
+
+  private drawRuler(): void {
+    const layout = this.layout;
+    if (!layout?.ruler) {
+      this.rulerLayer.hidden = true;
+      return;
+    }
+    this.rulerLayer.hidden = false;
+    const generation = this.selected != null ? (layout.generation.get(this.selected) ?? null) : null;
+    this.rulerLayer.innerHTML = drawRuler(layout, this.view, this.viewport.clientHeight, generation);
+  }
+
+  // якорь — выбранный человек или ближайший к центру экрана
+  private keepView(rebuild: () => void): void {
+    const before = this.anchor();
+    rebuild();
+    if (!before) return;
+    const after = this.cardCentre(before.id);
+    if (after) this.setView(keepAnchor(this.view, before.point, after));
+  }
+
+  private anchor(): { id: number; point: { x: number; y: number } } | null {
+    if (!this.layout) return null;
+    if (this.selected != null) {
+      const point = this.cardCentre(this.selected);
+      if (point) return { id: this.selected, point };
+    }
+    const { width, height } = this.viewportSize();
+    const cx = (width / 2 - this.view.x) / this.view.k;
+    const cy = (height / 2 - this.view.y) / this.view.k;
+    let best: { id: number; point: { x: number; y: number } } | null = null;
+    let bestDistance = Infinity;
+    for (const id of this.layout.positions.keys()) {
+      const point = this.cardCentre(id)!;
+      const d = (point.x - cx) ** 2 + (point.y - cy) ** 2;
+      if (d < bestDistance) {
+        bestDistance = d;
+        best = { id, point };
+      }
+    }
+    return best;
+  }
+
+  private bindEvents(): void {
+    const vp = this.viewport;
+
+    // колесо — зум к курсору; с Shift — горизонтальная протяжка
+    vp.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        const r = vp.getBoundingClientRect();
+        if (e.ctrlKey || !e.shiftKey) {
+          this.setView(zoomAt(this.view, e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? 1.12 : 1 / 1.12));
+        } else {
+          this.setView({ ...this.view, x: this.view.x - e.deltaY });
+        }
+      },
+      { passive: false },
+    );
+
+    document.addEventListener("dragstart", (e) => e.preventDefault());
+
+    vp.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault(); // иначе браузер тянет выделение текста
+      window.getSelection()?.removeAllRanges();
+      this.drag = { sx: e.clientX, sy: e.clientY, vx: this.view.x, vy: this.view.y, moved: 0 };
+      vp.setPointerCapture(e.pointerId);
+      vp.classList.add("dragging");
+    });
+    vp.addEventListener("pointermove", (e) => {
+      if (!this.drag) return;
+      const dx = e.clientX - this.drag.sx;
+      const dy = e.clientY - this.drag.sy;
+      this.drag.moved = Math.max(this.drag.moved, Math.abs(dx) + Math.abs(dy));
+      this.setView({ ...this.view, x: this.drag.vx + dx, y: this.drag.vy + dy });
+    });
+    const endDrag = (e: PointerEvent) => {
+      vp.classList.remove("dragging");
+      const drag = this.drag;
+      this.drag = null;
+      // короткое касание без протяжки — выбор человека
+      if (drag && drag.moved <= 4 && e.type === "pointerup") {
+        const hit = document.elementsFromPoint(e.clientX, e.clientY).find((el) => el.closest(".node"));
+        const node = hit?.closest<HTMLElement>(".node");
+        if (node?.dataset.id) this.select(Number(node.dataset.id));
+      }
+    };
+    vp.addEventListener("pointerup", endDrag);
+    vp.addEventListener("pointercancel", endDrag);
+
+    window.addEventListener("resize", () => this.drawRuler());
+  }
+}

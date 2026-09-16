@@ -1,0 +1,22 @@
+/* ═══ Газета: полоса с чертами и сносками ═══ */
+[data-style=gazeta] { --bg: #f6f3ea; --fg: #14120e; --mut: #5d564a; --acc: #a81f1f; --edge: #cdc6b4;
+  --panelbg: #efeade; --link: #14120e; --font: 'PT Serif', Georgia, serif; }
+[data-style=gazeta][data-theme=dark] { --bg: #141311; --fg: #f2efe6; --mut: #948d80; --acc: #e05a4a;
+  --panelbg: #1a1917; --link: #f2efe6; --edge: #33302b; }
+
+[data-style=gazeta] .canvas { background: var(--bg); }
+[data-style=gazeta] .node { font-family: var(--font); }
+[data-style=gazeta] .node .box { border-top: 2px solid var(--fg); padding: 9px 10px 0; }
+[data-style=gazeta] .node .nm { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px;
+  line-height: 1; color: var(--fg); }
+[data-style=gazeta] .node .nm sup { font-size: 9px; color: var(--acc); font-weight: 400; margin-left: 3px; vertical-align: super; }
+[data-style=gazeta] .node .yr { font-size: 9.5px; letter-spacing: .07em; color: var(--mut); margin-top: 8px; }
+[data-style=gazeta] .node.sel .nm { color: var(--acc); }
+[data-style=gazeta] .node .badge { font-size: 8.5px; font-style: italic; color: var(--acc); left: 10px; top: 48px;
+  border-bottom: 1px solid var(--acc); }
+
+/* выжжен из рода — корректорская выкидка: имя приглушено и перечёркнуто красным наискось по ширине
+   набора, а метка говорит «сведения изъяты» */
+[data-style=gazeta] .node.burnt .nm { display: inline-block; position: relative; color: var(--mut); text-decoration: none; }
+[data-style=gazeta] .node.burnt .nm::after { content: ''; position: absolute; left: -3px; right: -3px; top: 58%;
+  height: 1.5px; background: var(--acc); transform: rotate(-2.2deg); transform-origin: left center; }
