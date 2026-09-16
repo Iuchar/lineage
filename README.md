@@ -32,10 +32,26 @@ uv run --project server rodoslovnye
 uv run --project server rodoslovnye import Gleann_Uruisg_tree.ged --name "Гленн Уриск"
 ```
 
-Тесты сервера:
+Тесты сервера и интерфейса:
 
 ```bash
 uv run --project server pytest
+```
+
+```bash
+cd web && npm test
+```
+
+Раскладка дерева (`web/src/layout/`) сверена со стендом по координатам: эталон снят в десяти режимах и лежит в `web/src/layout/fixtures/stand-golden.json`. Если раскладка меняется намеренно, эталон переснимается вместе с решением в `docs/decisions.md`.
+
+После изменения API на сервере — пересобрать типы интерфейса; после изменения разбора — тестовые роды:
+
+```bash
+cd web && npm run api
+```
+
+```bash
+cd web && npm run fixtures
 ```
 
 Разработка интерфейса с перезагрузкой на лету — сервер запущен командой выше, а во втором окне:

@@ -1,0 +1,485 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Родословные",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Api Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clans": {
+      "get": {
+        "summary": "Get Clans",
+        "operationId": "get_clans_api_clans_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ClanSummary"
+                  },
+                  "type": "array",
+                  "title": "Response Get Clans Api Clans Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clans/{clan_id}/tree": {
+      "get": {
+        "summary": "Get Clan Tree",
+        "operationId": "get_clan_tree_api_clans__clan_id__tree_get",
+        "parameters": [
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClanTree"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ClanSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "persons": {
+            "type": "integer",
+            "title": "Persons"
+          },
+          "families": {
+            "type": "integer",
+            "title": "Families"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "persons",
+          "families"
+        ],
+        "title": "ClanSummary"
+      },
+      "ClanTree": {
+        "properties": {
+          "clan": {
+            "$ref": "#/components/schemas/ClanSummary"
+          },
+          "persons": {
+            "items": {
+              "$ref": "#/components/schemas/TreePerson"
+            },
+            "type": "array",
+            "title": "Persons"
+          },
+          "families": {
+            "items": {
+              "$ref": "#/components/schemas/TreeFamily"
+            },
+            "type": "array",
+            "title": "Families"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clan",
+          "persons",
+          "families"
+        ],
+        "title": "ClanTree"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LifeDate": {
+        "properties": {
+          "raw": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          },
+          "month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Month"
+          },
+          "day": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day"
+          },
+          "end_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Year"
+          },
+          "end_month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Month"
+          },
+          "end_day": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Day"
+          },
+          "phrase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phrase"
+          }
+        },
+        "type": "object",
+        "required": [
+          "raw",
+          "kind",
+          "year",
+          "month",
+          "day",
+          "end_year",
+          "end_month",
+          "end_day",
+          "phrase"
+        ],
+        "title": "LifeDate"
+      },
+      "TreeFamily": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "xref": {
+            "type": "string",
+            "title": "Xref"
+          },
+          "husband": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Husband"
+          },
+          "wife": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wife"
+          },
+          "children": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Children"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "xref",
+          "husband",
+          "wife",
+          "children"
+        ],
+        "title": "TreeFamily"
+      },
+      "TreePerson": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "xref": {
+            "type": "string",
+            "title": "Xref"
+          },
+          "given": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Given"
+          },
+          "surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surname"
+          },
+          "married_surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Married Surname"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "M",
+                  "F",
+                  "U"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          },
+          "is_branch_stub": {
+            "type": "boolean",
+            "title": "Is Branch Stub"
+          },
+          "birth": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LifeDate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "death": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LifeDate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parent_families": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Parent Families"
+          },
+          "spouse_families": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Spouse Families"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "xref",
+          "given",
+          "surname",
+          "married_surname",
+          "sex",
+          "is_branch_stub",
+          "birth",
+          "death",
+          "parent_families",
+          "spouse_families"
+        ],
+        "title": "TreePerson"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

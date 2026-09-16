@@ -1,10 +1,16 @@
 """Один процесс отдаёт и API, и собранный интерфейс."""
 
-from fastapi import FastAPI, HTTPException
+import sqlite3
+from collections.abc import Iterator
+from typing import Annotated
+
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.config import DIST
+from app.config import DB_PATH, DIST
+from app.db.connection import connect
+from app.db.tree import ClanNotFoundError, ClanSummary, ClanTree, clan_tree, list_clans
 
 app = FastAPI(
     title="Родословные",
@@ -14,9 +20,33 @@ app = FastAPI(
 )
 
 
+def database() -> Iterator[sqlite3.Connection]:
+    conn = connect(DB_PATH)
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+
+Database = Annotated[sqlite3.Connection, Depends(database)]
+
+
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/api/clans")
+def get_clans(conn: Database) -> list[ClanSummary]:
+    return list_clans(conn)
+
+
+@app.get("/api/clans/{clan_id}/tree")
+def get_clan_tree(clan_id: int, conn: Database) -> ClanTree:
+    try:
+        return clan_tree(conn, clan_id)
+    except ClanNotFoundError:
+        raise HTTPException(status_code=404, detail="Такого рода нет") from None
 
 
 if (DIST / "assets").is_dir():

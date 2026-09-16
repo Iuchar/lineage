@@ -19,8 +19,8 @@ PERSON_EVENT_TAGS = {
 }
 FAMILY_EVENT_TAGS = {"MARR", "DIV", "DIVF", "ENGG", "MARB", "MARC", "MARL", "MARS", "ANUL", "CENS", "EVEN"}
 
-# заглушка «ветка уходит дальше» — не человек, а маркер продолжения
-BRANCH_STUB_GIVEN = "Ветвь"
+# заглушка «ветка уходит дальше» — не человек, а маркер продолжения: «Ветвь /Кинкейд/», «Потомки /Данбар/»
+BRANCH_STUB_GIVEN = {"Ветвь", "Потомки"}
 
 
 @dataclass
@@ -54,7 +54,7 @@ class Person:
 
     @property
     def is_branch_stub(self) -> bool:
-        return self.given == BRANCH_STUB_GIVEN
+        return self.given in BRANCH_STUB_GIVEN
 
     def event(self, tag: str) -> Event | None:
         return next((e for e in self.events if e.tag == tag), None)

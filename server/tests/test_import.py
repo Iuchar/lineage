@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from app.db.clans import ClanExistsError, import_clan
-from app.db.connection import connect, migrate
+from app.db.connection import MIGRATIONS, connect, migrate
 from app.gedcom.load import load_file, load_text
 from app.gedcom.records import Record, parse_records
 from conftest import CLANS, source
@@ -86,5 +86,18 @@ def test_events_keep_date_and_place(conn: sqlite3.Connection) -> None:
 
 
 def test_migrations_apply_once(conn: sqlite3.Connection) -> None:
+    applied = count(conn, "SELECT COUNT(*) FROM schema_migrations")
     assert migrate(conn) == []
-    assert count(conn, "SELECT COUNT(*) FROM schema_migrations") == 1
+    assert count(conn, "SELECT COUNT(*) FROM schema_migrations") == applied
+
+
+def test_potomki_marked_retroactively_in_old_databases(tmp_path: Path) -> None:
+    conn = sqlite3.connect(tmp_path / "old.sqlite3")
+    conn.row_factory = sqlite3.Row
+    conn.executescript((MIGRATIONS / "0001_init.sql").read_text("utf-8"))
+    conn.execute("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)")
+    conn.execute("INSERT INTO schema_migrations VALUES (1, 'раньше')")
+    conn.execute("INSERT INTO clans (name, imported_at) VALUES ('Старый', 'раньше')")
+    conn.execute("INSERT INTO persons (clan_id, xref, given, raw) VALUES (1, '@I1@', 'Потомки', '{}')")
+    assert migrate(conn) == [2]
+    assert count(conn, "SELECT is_branch_stub FROM persons") == 1
