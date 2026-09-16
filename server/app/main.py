@@ -1,13 +1,10 @@
 """Один процесс отдаёт и API, и собранный интерфейс."""
 
-from pathlib import Path
-
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
-ROOT = Path(__file__).resolve().parents[2]
-DIST = ROOT / "web" / "dist"
+from app.config import DIST
 
 app = FastAPI(
     title="Родословные",

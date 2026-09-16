@@ -26,6 +26,12 @@
 uv run --project server rodoslovnye
 ```
 
+Загрузить файл новым родом — база создаётся в `data/rodoslovnye.sqlite3` при первой загрузке:
+
+```bash
+uv run --project server rodoslovnye import Gleann_Uruisg_tree.ged --name "Гленн Уриск"
+```
+
 Тесты сервера:
 
 ```bash
