@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Линии браков: правка третья</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Playfair+Display:wght@400;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Literata:opsz,wght@7..72,400;7..72,600&family=Caveat:wght@400;600&family=Golos+Text:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 30px 80px;background:#101113;color:#e6e2d8;font-family:'Golos Text',system-ui,sans-serif}
+  h1{font-family:'Playfair Display',serif;font-size:26px;margin:0 0 6px;color:#f4f1ea}
+  .lede{color:#a49d8f;font-size:13.5px;max-width:82ch;line-height:1.55;margin:0 0 24px}
+  .var{border:1px solid #2b2e33;border-radius:9px;overflow:hidden;margin-bottom:18px;background:#17181b}
+  .head{display:flex;align-items:baseline;gap:10px;padding:11px 15px;border-bottom:1px solid #2b2e33}
+  .head b{font:500 10.5px/1 'IBM Plex Mono',monospace;color:#c08a4a;letter-spacing:.14em}
+  .head h3{margin:0;font-family:'Playfair Display',serif;font-size:16.5px;color:#f4f1ea}
+  .stage{position:relative;overflow:hidden}
+  .stage svg{position:absolute;left:0;top:0}
+  .n{position:absolute;z-index:2}
+  .note{padding:11px 15px 14px;font-size:12.5px;line-height:1.5;color:#a49d8f}
+  .note b{color:#e6e2d8;font-weight:500}
+
+  .s2{background:#262721}
+  .s2 .n{width:150px;height:88px;background:#2e2f27;border:1px solid #7c6a3c;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-family:'Playfair Display',serif}
+  .s2 .n::after{content:'';position:absolute;inset:3px;border:1px solid #7c6a3c;opacity:.42}
+  .s2 .nm{font-size:16px;font-weight:700;color:#f2e8d2}
+  .s2 .yr{font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;color:#a09578;margin-top:4px}
+
+  .s4{background:#161310;background-image:repeating-linear-gradient(93deg,rgba(0,0,0,.14) 0 7px,rgba(255,255,255,.02) 7px 14px)}
+  .s4 .n{width:150px;height:86px;background:#221d18;border:1px solid #2a231c;padding:12px;
+    box-shadow:0 3px 12px rgba(0,0,0,.4);font-family:'Literata',serif}
+  .s4 .n::before{content:'';position:absolute;left:10px;top:-5px;width:26px;height:5px;background:#6b5636;border-radius:2px 2px 0 0}
+  .s4 .nm{font-size:15px;font-weight:600;color:#e9e2d4}
+  .s4 .yr{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8d8171;margin-top:6px}
+
+  .s3{background:#f6f3ea}
+  .s3 .n{width:150px;font-family:'PT Serif',serif;border-top:2px solid #14120e;padding-top:7px}
+  .s3 .nm{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:#14120e}
+  .s3 .nm sup{font-size:9px;color:#a81f1f;font-weight:400;margin-left:2px}
+  .s3 .yr{font-size:9.5px;letter-spacing:.07em;color:#5d564a;margin-top:4px}
+  .s3 .fn{position:absolute;z-index:3;font-family:'PT Serif',serif;font-size:10px;font-style:italic;color:#5d564a}
+
+  .s1{background:#1c2420;background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px),
+      repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px)}
+  .s1 .n{width:150px;text-align:center;font-family:'Cormorant Garamond',serif}
+  .s1 .halo{width:56px;height:56px;margin:0 auto;border-radius:50%;border:1.5px solid #c8a44e;
+    background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.09),rgba(0,0,0,.35))}
+  .s1 .nm{font-size:18px;color:#ece0c2;margin-top:8px}
+  .s1 .yr{font-family:'Caveat',cursive;font-size:14px;color:#93a08f}
+
+  .s5{background:#0b0a09}
+  .s5 .n{width:150px}
+  .s5 .nm{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:26px;color:#f3ede3;line-height:1}
+  .s5 .yr{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;color:#7f7869;margin-top:7px}
+</style>
+</head><body>
+
+<h1>Линии браков: правка третья</h1>
+<p class="lede">Все уровни держатся внутри высоты карточки, поэтому ничего не свисает под неё. Шаг между уровнями двадцать четыре пикселя, метка занимает тринадцать и до соседней линии остаётся воздух. Каждая линия идёт до своего супруга и видна во всех зазорах по пути.</p>
+
+<!-- ВИКТОРИАНСКИЙ -->
+<div class="var">
+  <div class="head"><b>Викторианский</b><h3>Уровни внутри рамки</h3></div>
+  <div class="stage s2" style="height:210px">
+    <svg width="1000" height="210">
+      <g fill="none" stroke="#7c6a3c" stroke-width="1.2">
+        <path d="M170 84 H216 M366 84 H412 M562 84 H608" stroke-dasharray="6 5" opacity=".85"/>
+        <path d="M366 110 H412 M562 110 H608" stroke-dasharray="6 5" opacity=".85"/>
+        <path d="M562 136 H608"/>
+      </g>
+      <g fill="#b99a52">
+        <path d="M193 79 l5.5 5 -5.5 5 -5.5 -5z" opacity=".85"/>
+        <path d="M389 105 l5.5 5 -5.5 5 -5.5 -5z" opacity=".85"/>
+        <path d="M585 131 l5.5 5 -5.5 5 -5.5 -5z"/>
+      </g>
+      <g font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">
+        <rect x="185" y="62" width="16" height="13" rx="2" fill="#7c6a3c"/><text x="193" y="71.5" fill="#efe6cf">I</text>
+        <rect x="379" y="88" width="20" height="13" rx="2" fill="#7c6a3c"/><text x="389" y="97.5" fill="#efe6cf">II</text>
+        <rect x="573" y="114" width="24" height="13" rx="2" fill="#b99a52"/><text x="585" y="123.5" fill="#241f12">III</text>
+      </g>
+    </svg>
+    <div class="n" style="left:20px;top:64px"><div class="nm">Роберт</div><div class="yr">1815 — 1850</div></div>
+    <div class="n" style="left:216px;top:64px"><div class="nm">Артур</div><div class="yr">1837 — 1869</div></div>
+    <div class="n" style="left:412px;top:64px"><div class="nm">Ирвинг</div><div class="yr">1817 — 1861</div></div>
+    <div class="n" style="left:608px;top:64px"><div class="nm">Айли</div><div class="yr">1821 — 1903</div></div>
+  </div>
+  <div class="note"><b>Исправлено:</b> рамка занимает от 64 до 152, все три уровня легли на 84, 110 и 136, то есть внутри неё. Раньше третий уходил на 164 и свисал под карточками.</div>
+</div>
+
+<!-- КАБИНЕТ -->
+<div class="var">
+  <div class="head"><b>Ночной кабинет</b><h3>То же в латуни</h3></div>
+  <div class="stage s4" style="height:210px">
+    <svg width="1000" height="210">
+      <g fill="none" stroke="#57493a" stroke-width="1.4">
+        <path d="M170 84 H216 M366 84 H412 M562 84 H608" stroke-dasharray="1 5"/>
+        <path d="M366 110 H412 M562 110 H608" stroke-dasharray="1 5"/>
+      </g>
+      <g fill="none" stroke="#e0b96a" stroke-width="1.5"><path d="M562 136 H608"/></g>
+      <g fill="#6b5636"><circle cx="193" cy="84" r="3"/><circle cx="389" cy="110" r="3"/></g>
+      <g fill="#e0b96a"><circle cx="585" cy="136" r="3.4"/></g>
+      <g font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">
+        <rect x="185" y="62" width="16" height="13" rx="2" fill="#6b5636"/><text x="193" y="71.5" fill="#f0e5cf">I</text>
+        <rect x="379" y="88" width="20" height="13" rx="2" fill="#6b5636"/><text x="389" y="97.5" fill="#f0e5cf">II</text>
+        <rect x="573" y="114" width="24" height="13" rx="2" fill="#e0b96a"/><text x="585" y="123.5" fill="#171310">III</text>
+      </g>
+    </svg>
+    <div class="n" style="left:20px;top:64px"><div class="nm">Роберт</div><div class="yr">1815 › 1850</div></div>
+    <div class="n" style="left:216px;top:64px"><div class="nm">Артур</div><div class="yr">1837 › 1869</div></div>
+    <div class="n" style="left:412px;top:64px"><div class="nm">Ирвинг</div><div class="yr">1817 › 1861</div></div>
+    <div class="n" style="left:608px;top:64px"><div class="nm">Айли</div><div class="yr">1821 › 1903</div></div>
+  </div>
+  <div class="note"><b>Исправлено:</b> уровни те же, что у викторианского, ничего не свисает.</div>
+</div>
+
+<!-- ГАЗЕТА -->
+<div class="var">
+  <div class="head"><b>Газета</b><h3>Вернулась: сноски у имён, знак равенства в зазоре</h3></div>
+  <div class="stage s3" style="height:210px">
+    <svg width="1000" height="210">
+      <g fill="none" stroke="#14120e" stroke-width="1.1" opacity=".6">
+        <path d="M176 82 h12 M198 82 h12 M176 88 h12 M198 88 h12"/>
+        <path d="M372 82 h12 M394 82 h12 M372 88 h12 M394 88 h12"/>
+        <path d="M568 82 h12 M590 82 h12 M568 88 h12 M590 88 h12"/>
+      </g>
+      <g fill="none" stroke="#14120e" stroke-width="1.1" opacity=".6">
+        <path d="M372 108 h12 M394 108 h12 M372 114 h12 M394 114 h12"/>
+        <path d="M568 108 h12 M590 108 h12 M568 114 h12 M590 114 h12"/>
+      </g>
+      <g fill="none" stroke="#14120e" stroke-width="1.3">
+        <path d="M562 134 h46"/><path d="M562 140 h46"/>
+      </g>
+    </svg>
+    <div class="n" style="left:20px;top:64px"><div class="nm">Роберт<sup>I</sup></div><div class="yr">1815 — 1850</div></div>
+    <div class="n" style="left:216px;top:64px"><div class="nm">Артур<sup>II</sup></div><div class="yr">1837 — 1869</div></div>
+    <div class="n" style="left:412px;top:64px"><div class="nm">Ирвинг<sup>III</sup></div><div class="yr">1817 — 1861</div></div>
+    <div class="n" style="left:608px;top:64px"><div class="nm">Айли</div><div class="yr">1821 — 1903</div></div>
+    <div class="fn" style="left:20px;top:168px">I, II, III — очередь браков Айли; действующий союз набран сплошным знаком</div>
+  </div>
+  <div class="note"><b>Без изменений, как ты и просил.</b> Номер брака надстрочным знаком у имени мужа, в зазоре знак равенства: у прошлых разорванный, у действующего сплошной. Внизу строка-легенда.</div>
+</div>
+
+<!-- ПОЛОТНО -->
+<div class="var">
+  <div class="head"><b>Полотно</b><h3>Первый над именами, последний по строке, тусклый след на каждом уровне</h3></div>
+  <div class="stage s5" style="height:210px">
+    <svg width="1000" height="210">
+      <!-- тусклый след первого союза: идёт и под именами тоже -->
+      <g fill="none" stroke="#6f6a60" stroke-width="1" opacity=".28">
+        <path d="M20 52 H758"/>
+      </g>
+      <g fill="none" stroke="#a39a8e" stroke-width="1.2">
+        <path d="M170 52 H216 M366 52 H412 M562 52 H608"/>
+      </g>
+      <!-- тусклый след второго союза начинается от его супруга -->
+      <g fill="none" stroke="#6f6a60" stroke-width="1" opacity=".28">
+        <path d="M216 78 H758"/>
+      </g>
+      <g fill="none" stroke="#a39a8e" stroke-width="1.2" opacity=".95">
+        <path d="M366 78 H412 M562 78 H608"/>
+      </g>
+      <!-- действующий: по строке подчёркивания имён -->
+      <g fill="none" stroke="#e8563c" stroke-width="1" opacity=".3"><path d="M412 104 H758"/></g>
+      <g fill="none" stroke="#e8563c" stroke-width="1.5"><path d="M562 104 H608"/></g>
+      <g font-family="IBM Plex Mono,monospace" font-size="9" fill="#7f7869" text-anchor="middle">
+        <text x="193" y="44">01</text><text x="389" y="70">02</text><text x="585" y="96" fill="#e8563c">03</text>
+      </g>
+    </svg>
+    <div class="n" style="left:20px;top:62px"><div class="nm">Роберт</div><div class="yr">1815 — 1850</div></div>
+    <div class="n" style="left:216px;top:62px"><div class="nm">Артур</div><div class="yr">1837 — 1869</div></div>
+    <div class="n" style="left:412px;top:62px"><div class="nm">Ирвинг</div><div class="yr">1817 — 1861</div></div>
+    <div class="n" style="left:608px;top:62px"><div class="nm">Айли</div><div class="yr">1821 — 1903</div></div>
+  </div>
+  <div class="note"><b>Перестроено по твоему правилу:</b> первый союз идёт над именами, действующий лёг на строку подчёркивания, второй ровно посередине между ними. У каждого союза свой тусклый след, тянущийся через имена до самой Айли, а в зазорах он вспыхивает в полную силу. След второго начинается от Артура, след действующего от Ирвинга, поэтому видно, откуда каждая связь идёт.</div>
+</div>
+
+<!-- ГОБЕЛЕН -->
+<div class="var">
+  <div class="head"><b>Гобелен</b><h3>Шов, прошлые нити оборваны, действующая прошита насквозь</h3></div>
+  <div class="stage s1" style="height:230px">
+    <svg width="1000" height="230">
+      <g stroke="#7c8a76" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".75">
+        <path d="M176 96 l7 -9 M190 96 l7 -9 M204 96 l7 -9"/>
+        <path d="M372 96 l7 -9 M386 96 l7 -9 M400 96 l7 -9"/>
+        <path d="M568 96 l7 -9 M582 96 l7 -9 M596 96 l7 -9"/>
+        <path d="M170 92 c4 -2 5 -6 3 -9" stroke-width="1.2"/>
+        <path d="M608 92 c-4 -2 -5 -6 -3 -9" stroke-width="1.2"/>
+      </g>
+      <g stroke="#8d9b86" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".85">
+        <path d="M372 126 l7 -9 M386 126 l7 -9 M400 126 l7 -9"/>
+        <path d="M568 126 l7 -9 M582 126 l7 -9 M596 126 l7 -9"/>
+        <path d="M366 122 c4 -2 5 -6 3 -9" stroke-width="1.2"/>
+        <path d="M608 122 c-4 -2 -5 -6 -3 -9" stroke-width="1.2"/>
+      </g>
+      <g fill="none" stroke="#c8a44e">
+        <path d="M562 156 H608" stroke-width="1.6"/>
+        <g stroke-width="2.2" stroke-linecap="round">
+          <path d="M568 160 l6 -8 M580 160 l6 -8 M592 160 l6 -8"/>
+        </g>
+      </g>
+      <g fill="#e8dcb8"><circle cx="585" cy="156" r="3.2"/></g>
+      <g font-family="Caveat,cursive" font-size="15" fill="#9aa892" text-anchor="middle">
+        <text x="193" y="76">первый</text><text x="389" y="106">второй</text>
+      </g>
+      <g font-family="Caveat,cursive" font-size="17" fill="#e8dcb8" text-anchor="middle">
+        <text x="585" y="140">ныне</text>
+      </g>
+    </svg>
+    <div class="n" style="left:20px;top:56px"><div class="halo"></div><div class="nm">Роберт</div><div class="yr">1815 — 1850</div></div>
+    <div class="n" style="left:216px;top:56px"><div class="halo"></div><div class="nm">Артур</div><div class="yr">1837 — 1869</div></div>
+    <div class="n" style="left:412px;top:56px"><div class="halo"></div><div class="nm">Ирвинг</div><div class="yr">1817 — 1861</div></div>
+    <div class="n" style="left:608px;top:56px"><div class="halo"></div><div class="nm">Айли</div><div class="yr">1821 — 1903</div></div>
+  </div>
+  <div class="note"><b>Как в прошлый раз, только уровни подтянуты внутрь блока.</b> Действующий союз с золотой нитью, бусиной и подписью «ныне», у прошлых концы распущены завитком.</div>
+</div>
+
+<p style="color:#8f887b;font-size:12.5px">Проверь: ничего не свисает, газета на месте, у полотна следы тянутся до конца.</p>
+</body></html>

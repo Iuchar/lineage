@@ -1,0 +1,443 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700;900&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Literata:opsz,wght@7..72,300;7..72,400;7..72,600&family=Caveat:wght@400;600&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Spectral:wght@300;400;600&display=swap');
+
+.pg{color:#e6e2d8}
+.pg h2{color:#f4f1ea;margin:0 0 6px;font-size:26px}
+.pg .lede{color:#a49d8f;font-size:14px;line-height:1.5;margin:0 0 28px;max-width:70ch}
+.dd{margin:0 0 38px}
+.dd-h{display:flex;align-items:baseline;gap:11px;margin:0 0 10px;flex-wrap:wrap}
+.dd-h .num{font:600 12px/1 'IBM Plex Mono',monospace;color:#d98a4a;letter-spacing:.12em}
+.dd-h h3{margin:0;font-size:20px;color:#f4f1ea}
+.dd-h .why{font-size:12.5px;color:#8f887b}
+.frame{border-radius:8px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.5);cursor:pointer;
+  transition:transform .16s ease}
+.frame:hover{transform:translateY(-2px)}
+.dd-note{margin:11px 2px 0;font-size:12.5px;line-height:1.55;color:#a49d8f}
+.dd-note b{color:#e6e2d8;font-weight:600}
+.frame{width:max-content;max-width:100%}
+.bd{display:flex}
+.st{position:relative;width:460px;height:206px;flex:none;overflow:hidden}
+.st svg{position:absolute;left:0;top:0;width:460px;height:206px}
+.pnl{width:206px;flex:none;padding:13px 14px}
+
+/* ══════════ 1 · ГОБЕЛЕН (мир Гарри Поттера) ══════════ */
+.w1{background:#1c2420;font-family:'Cormorant Garamond',Georgia,serif;position:relative}
+.w1::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),
+             repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px)}
+.w1 .top{background:#141a17;border-bottom:2px solid #8d6b2f;padding:10px 16px;display:flex;
+  align-items:baseline;gap:16px;position:relative;z-index:1}
+.w1 .wm{font-size:15px;letter-spacing:.28em;text-transform:uppercase;color:#d8c99a}
+.w1 .rods{display:flex;gap:14px;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:#71806f}
+.w1 .rods .on{color:#e8dcb8;border-bottom:1px solid #8d6b2f}
+.w1 .bd{position:relative;z-index:1}
+.w1 .kn{position:absolute;width:120px;text-align:center}
+.w1 .kn .halo{width:46px;height:46px;margin:0 auto;border-radius:50%;border:1.5px solid #8d6b2f;
+  background:radial-gradient(circle at 40% 35%,#2f3a33,#1a211d);box-shadow:0 0 0 3px rgba(141,107,47,.13)}
+.w1 .kn .nm{font-size:17px;color:#ece0c2;margin-top:6px;line-height:1}
+.w1 .kn .yr{font-family:'Caveat',cursive;font-size:13px;color:#9aa48f;margin-top:1px}
+.w1 .kn.sel .halo{border:2px solid #cfa94a;box-shadow:0 0 22px rgba(207,169,74,.4)}
+.w1 .kn.sel .nm{color:#f5e9c6}
+.w1 .wax{display:inline-block;margin-top:5px;font-family:'Caveat',cursive;font-size:12.5px;color:#f0dfae;
+  background:#7a2230;border-radius:11px;padding:2px 10px;box-shadow:0 1px 5px rgba(0,0,0,.5)}
+.w1 .burn{position:absolute;width:74px;height:74px;border-radius:50%;
+  background:radial-gradient(circle,#0b0e0c 38%,#221a10 62%,rgba(28,36,32,0) 74%)}
+.w1 .burn span{position:absolute;left:0;right:0;top:82px;text-align:center;font-family:'Caveat',cursive;
+  font-size:12px;color:#6f6551}
+.w1 .pnl{background:#141a17;border-left:1px solid #2c3730}
+.w1 .pnl h4{margin:0 0 2px;font-size:21px;color:#ece0c2}
+.w1 .pnl .sub{font-family:'Caveat',cursive;font-size:14px;color:#8e9a86}
+.w1 .pnl .lbl{font-size:9px;letter-spacing:.19em;text-transform:uppercase;color:#8d6b2f;margin:14px 0 5px}
+.w1 .pnl .txt{font-size:15px;color:#cdd4c4;line-height:1.3}
+.w1 .pnl .xr{margin-top:6px;border:1px solid #8d6b2f;padding:6px 8px;font-size:15px;color:#f0e4c4}
+
+/* ══════════ 2 · ВИКТОРИАНСКАЯ БРИТАНИЯ ══════════ */
+.w2{background:#20211c;font-family:'Playfair Display',Georgia,serif}
+.w2 .top{background:#123028;padding:11px 16px;text-align:center;border-bottom:3px double #b99a52}
+.w2 .wm{font-size:17px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#f0e3c4}
+.w2 .rods{display:flex;justify-content:center;gap:15px;margin-top:7px;font-family:'PT Serif',serif;
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#7e9b8d}
+.w2 .rods .on{color:#f0e3c4}
+.w2 .st{background:
+  radial-gradient(circle at 12px 12px,rgba(185,154,82,.09) 2px,transparent 3px) 0 0/26px 26px,#262721}
+.w2 .cd{position:absolute;width:126px;background:#2e2f27;border:1px solid #7c6a3c;padding:9px 8px;text-align:center}
+.w2 .cd::before,.w2 .cd::after{content:'';position:absolute;left:5px;right:5px;height:1px;background:#7c6a3c;opacity:.55}
+.w2 .cd::before{top:3px}.w2 .cd::after{bottom:3px}
+.w2 .cd .nm{font-size:16px;font-weight:700;color:#f2e8d2;line-height:1.05}
+.w2 .cd .yr{font-family:'PT Serif',serif;font-size:10px;font-style:italic;color:#a09578;margin-top:3px}
+.w2 .cd.sel{border-color:#b99a52;background:#38372a;box-shadow:0 0 0 3px rgba(185,154,82,.16)}
+.w2 .rib{position:absolute;left:8px;top:calc(100% + 5px);font-family:'PT Serif',serif;font-size:9px;
+  letter-spacing:.09em;text-transform:uppercase;background:#7a2230;color:#f3e2c4;padding:2px 9px;white-space:nowrap}
+.w2 .pnl{background:#1b1c17;border-left:1px solid #7c6a3c}
+.w2 .pnl h4{margin:0;font-size:20px;font-weight:700;color:#f2e8d2}
+.w2 .pnl .sub{font-family:'PT Serif',serif;font-style:italic;font-size:11px;color:#9d9276;margin-top:3px}
+.w2 .pnl .lbl{font-family:'PT Serif',serif;font-size:9px;letter-spacing:.17em;text-transform:uppercase;
+  color:#b99a52;margin:13px 0 5px;border-bottom:1px solid #3b382c;padding-bottom:3px}
+.w2 .pnl .row{display:flex;justify-content:space-between;font-family:'PT Serif',serif;font-size:12px;
+  color:#ddd3bb;padding:2px 0}
+.w2 .pnl .row i{font-style:italic;color:#948a70}
+.w2 .pnl .xr{margin-top:5px;font-size:14px;color:#f2e8d2;border:1px solid #b99a52;padding:6px 8px}
+
+/* ══════════ 3 · БРИТАНСКАЯ ГАЗЕТА ══════════ */
+.w3{background:#f6f3ea;font-family:'PT Serif',Georgia,serif;color:#14120e}
+.w3 .mast{text-align:center;padding:12px 16px 8px;border-bottom:3px solid #14120e}
+.w3 .mast .t{font-family:'Playfair Display',serif;font-weight:900;font-size:27px;letter-spacing:.03em;
+  text-transform:uppercase;line-height:1}
+.w3 .mast .sub{display:flex;justify-content:space-between;font-size:8.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:#5d564a;margin-top:7px;border-top:1px solid #14120e;padding-top:5px}
+.w3 .rods{display:flex;gap:0;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  border-bottom:1px solid #14120e}
+.w3 .rods span{padding:5px 12px;border-right:1px solid #cdc6b4;color:#5d564a}
+.w3 .rods .on{background:#14120e;color:#f6f3ea;font-weight:700}
+.w3 .st{background:#f6f3ea}
+.w3 .art{position:absolute;width:124px;border-top:2px solid #14120e;padding-top:5px}
+.w3 .art .nm{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;line-height:1.05}
+.w3 .art .yr{font-size:9px;letter-spacing:.09em;color:#5d564a;margin-top:3px}
+.w3 .art.sel{border-top-color:#a81f1f}
+.w3 .art.sel .nm{color:#a81f1f}
+.w3 .ref{display:inline-block;margin-top:4px;font-size:8.5px;font-style:italic;color:#a81f1f;
+  border-bottom:1px solid #a81f1f}
+.w3 .pnl{background:#efeade;border-left:1px solid #14120e}
+.w3 .pnl .kick{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#a81f1f}
+.w3 .pnl h4{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;margin:4px 0 0;line-height:1}
+.w3 .pnl .lead{font-size:11px;line-height:1.35;color:#3b352b;margin-top:6px;
+  border-bottom:1px solid #cdc6b4;padding-bottom:8px}
+.w3 .pnl .row{display:flex;justify-content:space-between;font-size:10.5px;padding:3px 0;border-bottom:1px dotted #cdc6b4}
+.w3 .pnl .row i{font-style:normal;color:#5d564a}
+.w3 .pnl .xr{margin-top:8px;font-size:11px;font-style:italic}
+.w3 .pnl .xr b{font-style:normal;border-bottom:1px solid #a81f1f;color:#a81f1f;font-weight:400}
+
+/* ══════════ 4 · ГРАВЮРА (меццо-тинто) ══════════ */
+.w4{background:#0a0a0a;font-family:'Playfair Display',Georgia,serif;color:#efece5}
+.w4 .top{padding:12px 18px 9px;border-bottom:1px solid #efece5;position:relative}
+.w4 .top::after{content:'';position:absolute;left:0;right:0;bottom:-4px;height:3px;background:#efece5}
+.w4 .wm{font-size:16px;font-weight:700;letter-spacing:.34em;text-transform:uppercase;text-align:center}
+.w4 .rods{display:flex;justify-content:center;gap:0;margin-top:9px;font-family:'PT Serif',serif;font-size:10px;
+  letter-spacing:.16em;text-transform:uppercase;color:#8b8880}
+.w4 .rods span{padding:0 13px;border-right:1px solid #34322e}
+.w4 .rods span:last-child{border:none}
+.w4 .rods .on{color:#efece5}
+.w4 .st{margin-top:4px;background:#0a0a0a}
+.w4 .pl{position:absolute;width:126px;border:2px solid #efece5;padding:8px 9px 9px;background:#0a0a0a}
+.w4 .pl::after{content:'';position:absolute;inset:3px;border:1px solid #efece5;opacity:.45;pointer-events:none}
+.w4 .pl .nm{font-size:17px;font-weight:700;line-height:1;letter-spacing:.01em}
+.w4 .pl .yr{font-family:'PT Serif',serif;font-size:9px;letter-spacing:.15em;color:#9d9a92;margin-top:5px}
+.w4 .pl.sel{background:#efece5;color:#0a0a0a;border-color:#efece5}
+.w4 .pl.sel::after{border-color:#0a0a0a;opacity:.55}
+.w4 .pl.sel .yr{color:#3d3b36}
+.w4 .ast{position:absolute;left:0;top:calc(100% + 6px);font-family:'PT Serif',serif;font-size:9px;
+  letter-spacing:.13em;text-transform:uppercase;color:#efece5;white-space:nowrap}
+.w4 .ast b{font-weight:400;font-size:11px}
+.w4 .rn{position:absolute;left:7px;width:19px;height:19px;border:1px solid #55524c;color:#c9c6bd;
+  font-family:'PT Serif',serif;font-size:9.5px;display:flex;align-items:center;justify-content:center}
+.w4 .pnl{border-left:1px solid #34322e}
+.w4 .pnl .kick{font-family:'PT Serif',serif;font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:#8b8880}
+.w4 .pnl h4{margin:5px 0 0;font-size:23px;font-weight:700;line-height:1}
+.w4 .pnl .hr{height:0;border-top:3px solid #efece5;border-bottom:1px solid #efece5;margin:9px 0 9px;padding-top:2px}
+.w4 .pnl .row{display:flex;justify-content:space-between;font-family:'PT Serif',serif;font-size:11px;
+  padding:3px 0;color:#d7d4cc}
+.w4 .pnl .row i{font-style:normal;color:#8b8880;letter-spacing:.06em}
+.w4 .pnl .lbl{font-family:'PT Serif',serif;font-size:8px;letter-spacing:.2em;text-transform:uppercase;
+  color:#8b8880;margin:12px 0 5px}
+.w4 .pnl .xr{border:1px solid #efece5;padding:6px 8px;font-size:13px}
+
+/* ══════════ 5 · НОЧНОЙ КАБИНЕТ ══════════ */
+.w5{background:#161310;font-family:'Literata',Georgia,serif;color:#e9e2d4;position:relative}
+.w5 .top{display:flex;align-items:center;gap:16px;padding:11px 16px;background:#100e0c;
+  border-bottom:1px solid #4a3a22}
+.w5 .wm{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:#e0b96a}
+.w5 .rods{display:flex;gap:14px;font-size:11px;color:#7d7263}
+.w5 .rods .on{color:#f0e5cf;border-bottom:1px solid #e0b96a}
+.w5 .st{background:
+  radial-gradient(ellipse 300px 190px at 42% 30%,rgba(224,185,106,.16),rgba(224,185,106,0) 70%),
+  repeating-linear-gradient(93deg,#1a1613 0 7px,#181411 7px 14px)}
+.w5 .cd{position:absolute;width:124px;background:#221d18;border:1px solid #3b312a;
+  padding:8px 10px;box-shadow:0 3px 12px rgba(0,0,0,.5)}
+.w5 .cd::before{content:'';position:absolute;left:9px;top:-5px;width:26px;height:5px;background:#6b5636;
+  border-radius:2px 2px 0 0}
+.w5 .cd.sel::before{background:#e0b96a}
+.w5 .cd .nm{font-size:14px;font-weight:600;line-height:1.05}
+.w5 .cd .yr{font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:#8d8171;margin-top:4px}
+.w5 .cd.sel{border-color:#e0b96a;border-left-color:#e0b96a;background:#2a231a;
+  box-shadow:0 0 26px rgba(224,185,106,.22)}
+.w5 .tag{position:absolute;left:0;top:calc(100% + 5px);font-family:'IBM Plex Mono',monospace;font-size:8px;
+  letter-spacing:.07em;text-transform:uppercase;color:#171310;background:#e0b96a;padding:2px 7px;white-space:nowrap}
+.w5 .pnl{background:#100e0c;border-left:1px solid #2a231c}
+.w5 .pnl .por{width:44px;height:52px;border:1px solid #4a3a22;background:#1b1713}
+.w5 .pnl h4{margin:9px 0 0;font-size:18px;font-weight:600;color:#f0e5cf}
+.w5 .pnl .sub{font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:#8d8171;margin-top:4px}
+.w5 .pnl .lbl{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.16em;text-transform:uppercase;
+  color:#e0b96a;margin:13px 0 5px}
+.w5 .pnl .row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid #241e18}
+.w5 .pnl .row i{font-style:normal;color:#8d8171;font-family:'IBM Plex Mono',monospace;font-size:10px}
+.w5 .pnl .xr{margin-top:8px;border:1px solid #6b5636;padding:6px 8px;font-size:12.5px;color:#f0e5cf}
+
+/* ══════════ 6 · ПОЛОТНО II ══════════ */
+.w6{background:#0b0a09;font-family:'Golos Text','Segoe UI',sans-serif;color:#f3ede3}
+.w6 .top{display:flex;align-items:baseline;gap:20px;padding:14px 18px 11px}
+.w6 .wm{font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#7f7869}
+.w6 .rods{display:flex;gap:15px;font-size:10.5px;color:#7f7869}
+.w6 .rods .on{color:#f3ede3;box-shadow:inset 0 -2px 0 #d8452f}
+.w6 .top .sp{flex:1}
+.w6 .top .cnt{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5f5a51;letter-spacing:.08em}
+.w6 .bd{border-top:1px solid #211e1a}
+.w6 .st{background:#0b0a09}
+.w6 .axis{position:absolute;left:0;top:0;bottom:0;width:52px;border-right:1px solid #1d1a17}
+.w6 .axis b{position:absolute;left:9px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:400;
+  color:#5f5a51;letter-spacing:.05em}
+.w6 .pr{position:absolute;width:132px}
+.w6 .pr .nm{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:26px;line-height:.98;letter-spacing:-.01em}
+.w6 .pr .yr{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.06em;color:#6f6a60;margin-top:4px}
+.w6 .pr.sel .nm{color:#e8563c}
+.w6 .pr.sel .yr{color:#b3543f}
+.w6 .pr .go{display:inline-block;margin-top:6px;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:#e8563c;border-bottom:1px solid #e8563c;padding-bottom:2px}
+.w6 .dot{position:absolute;width:7px;height:7px;border-radius:50%;background:#0b0a09;border:1.5px solid #4d4740}
+.w6 .dot.on{border-color:#e8563c;background:#e8563c}
+.w6 .pnl{border-left:1px solid #211e1a}
+.w6 .pnl .por{width:52px;height:52px;border-radius:50%;background:#191713}
+.w6 .pnl h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:25px;margin:12px 0 0;line-height:1}
+.w6 .pnl .sub{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.09em;color:#6f6a60;margin-top:6px}
+.w6 .pnl .lbl{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#6f6a60;margin:16px 0 6px}
+.w6 .pnl .row{display:flex;justify-content:space-between;font-size:11.5px;padding:4px 0;border-bottom:1px solid #1a1714}
+.w6 .pnl .row i{font-style:normal;color:#6f6a60}
+.w6 .pnl .xr{font-size:12.5px;margin-top:5px}
+.w6 .pnl .xr b{font-weight:400;color:#e8563c;border-bottom:1px solid #e8563c}
+</style>
+
+<div class="pg">
+<h2>Шесть направлений</h2>
+<p class="lede">Раскладка везде утверждённая: шапка с родами, дерево, панель человека справа. Данные настоящие — Гленн Уриск, выбран Эоган, у него связка с родом Уинтерхоуп. Парную светлую тему получит то, что выберешь.</p>
+
+<!-- ═══════ 1 ═══════ -->
+<div class="dd">
+  <div class="dd-h"><span class="num">01</span><h3>Гобелен</h3><span class="why">мир Гарри Поттера: тканое родовое полотно</span></div>
+  <div class="frame w1" data-choice="gobelen" onclick="toggleSelect(this)">
+    <div class="top"><div class="wm">Родословныя</div>
+      <div class="rods"><span class="on">Гленн Уриск</span><span>Уинтерхоуп</span><span>О'Дувейн</span><span>Монад Кройве</span></div></div>
+    <div class="bd">
+      <div class="st">
+        <svg viewBox="0 0 460 206" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#6d7a68" stroke-width="1.2" stroke-dasharray="1 3" stroke-linecap="round">
+            <path d="M170 46 H290"/><path d="M230 46 V96 M92 96 H368 M92 96 V112 M368 96 V112"/>
+          </g>
+          <g fill="#8d6b2f"><circle cx="230" cy="46" r="3"/><circle cx="92" cy="96" r="2.5"/><circle cx="368" cy="96" r="2.5"/></g>
+        </svg>
+        <div class="kn" style="left:110px;top:10px"><div class="halo"></div><div class="nm">Ниалл</div><div class="yr">1683 — 1791</div></div>
+        <div class="kn" style="left:230px;top:10px"><div class="halo"></div><div class="nm">Мор</div><div class="yr">1691 — 1779</div></div>
+        <div class="kn" style="left:32px;top:112px"><div class="halo"></div><div class="nm">Тормод</div><div class="yr">1712 — 1818</div></div>
+        <div class="kn sel" style="left:308px;top:112px"><div class="halo"></div><div class="nm">Эоган</div>
+          <div class="yr">1719 — 1830</div><span class="wax">также в Уинтерхоуп</span></div>
+        <div class="burn" style="left:180px;top:118px"><span>скрыт</span></div>
+      </div>
+      <div class="pnl">
+        <h4>Эоган</h4><div class="sub">1719 — 1830, 111 лет</div>
+        <div class="lbl">Заметка</div>
+        <div class="txt">Ушёл в Приграничье, основал род Уинтерхоуп.</div>
+        <div class="lbl">В других родах</div>
+        <div class="xr">Эоган Уинтерхоуп →</div>
+      </div>
+    </div>
+  </div>
+  <p class="dd-note"><b>Идея:</b> дерево не нарисовано, а выткано: фон в переплетение нитей, ветви — пунктирный стежок, узлы — медальоны в золотой нити, связка между родами — сургучная печать. <b>Главная находка:</b> скрытый человек показан прожжённой дырой в полотне — та самая механика «скрытого» из твоего проекта получает форму вместо серого прямоугольника. <b>Риск:</b> узнаваемая отсылка; если делать буквальнее, упрётся в чужие права, поэтому взяты только приёмы — ткань, медальоны, сургуч, ожог.</p>
+</div>
+
+<!-- ═══════ 2 ═══════ -->
+<div class="dd">
+  <div class="dd-h"><span class="num">02</span><h3>Викторианский салон</h3><span class="why">Британия XIX века: обои, латунь, визитные карточки</span></div>
+  <div class="frame w2" data-choice="viktorian" onclick="toggleSelect(this)">
+    <div class="top"><div class="wm">Родословныя книги</div>
+      <div class="rods"><span class="on">Гленн Уриск</span><span>Уинтерхоуп</span><span>О'Дувейн</span><span>Монад Кройве</span></div></div>
+    <div class="bd">
+      <div class="st">
+        <svg viewBox="0 0 460 206" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#7c6a3c" stroke-width="1">
+            <path d="M176 48 H284"/><path d="M230 48 V98 M92 98 H368 M92 98 V114 M368 98 V114"/>
+          </g>
+          <g fill="#b99a52"><path d="M230 43 l4 5 -4 5 -4 -5z"/><circle cx="92" cy="98" r="2.5"/><circle cx="368" cy="98" r="2.5"/></g>
+        </svg>
+        <div class="cd" style="left:104px;top:16px"><div class="nm">Ниалл</div><div class="yr">1683 — 1791</div></div>
+        <div class="cd" style="left:230px;top:16px"><div class="nm">Мор</div><div class="yr">1691 — 1779</div></div>
+        <div class="cd" style="left:29px;top:114px"><div class="nm">Тормод</div><div class="yr">1712 — 1818</div></div>
+        <div class="cd sel" style="left:305px;top:114px"><div class="nm">Эоган</div><div class="yr">1719 — 1830</div>
+          <span class="rib">также в Уинтерхоуп</span></div>
+      </div>
+      <div class="pnl">
+        <h4>Эоган</h4><div class="sub">Гленн Уриск, эсквайр</div>
+        <div class="lbl">Сведения</div>
+        <div class="row"><span>Отец</span><i>Ниалл</i></div>
+        <div class="row"><span>Мать</span><i>Мор</i></div>
+        <div class="row"><span>Дети</span><i>1</i></div>
+        <div class="lbl">В других родах</div>
+        <div class="xr">Эоган Уинтерхоуп</div>
+      </div>
+    </div>
+  </div>
+  <p class="dd-note"><b>Идея:</b> человек — гравированная визитная карточка: двойные линейки сверху и снизу, имя жирной антиквой, годы курсивом. Фон — обойный узор в тон, шапка бутылочно-зелёная с двойной золотой линейкой, связка — бордовая лента. <b>Риск:</b> самый «нарядный» из шести; на сотне карточек орнамент начинает шуметь, придётся глушить узор на дальних поколениях.</p>
+</div>
+
+<!-- ═══════ 3 ═══════ -->
+<div class="dd">
+  <div class="dd-h"><span class="num">03</span><h3>Газета</h3><span class="why">британская пресса: шапка, колонки, отсылки</span></div>
+  <div class="frame w3" data-choice="gazeta" onclick="toggleSelect(this)">
+    <div class="mast"><div class="t">Родословные</div>
+      <div class="sub"><span>Гленн Уриск</span><span>38 человек · 14 семей</span><span>связок 3</span></div></div>
+    <div class="rods"><span class="on">Гленн Уриск</span><span>Уинтерхоуп</span><span>О'Дувейн</span><span>Монад Кройве</span><span>+ Загрузить</span></div>
+    <div class="bd">
+      <div class="st">
+        <svg viewBox="0 0 460 206" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#14120e" stroke-width="1">
+            <path d="M172 48 H288"/><path d="M230 48 V96 M92 96 H368 M92 96 V112 M368 96 V112"/>
+          </g>
+          <g fill="#a81f1f"><rect x="227" y="45" width="6" height="6"/></g>
+        </svg>
+        <div class="art" style="left:106px;top:14px"><div class="nm">Ниалл</div><div class="yr">1683 — 1791</div></div>
+        <div class="art" style="left:230px;top:14px"><div class="nm">Мор</div><div class="yr">1691 — 1779</div></div>
+        <div class="art" style="left:30px;top:112px"><div class="nm">Тормод</div><div class="yr">1712 — 1818</div></div>
+        <div class="art sel" style="left:306px;top:112px"><div class="nm">Эоган</div><div class="yr">1719 — 1830</div>
+          <span class="ref">см. Уинтерхоуп →</span></div>
+      </div>
+      <div class="pnl">
+        <div class="kick">Гленн Уриск · поколение II</div>
+        <h4>Эоган</h4>
+        <div class="lead">Ушёл в Приграничье и основал род Уинтерхоуп, приняв имя долины.</div>
+        <div class="row"><span>Годы</span><i>1719 — 1830</i></div>
+        <div class="row"><span>Отец</span><i>Ниалл</i></div>
+        <div class="row"><span>Дети</span><i>1</i></div>
+        <div class="xr">В других родах: <b>Эоган Уинтерхоуп</b></div>
+      </div>
+    </div>
+  </div>
+  <p class="dd-note"><b>Идея:</b> экран свёрстан как полоса газеты: тяжёлая шапка с линейками, служебная строка с цифрами, роды — вкладки-рубрики, человек — заметка под жирной чертой. Связка между родами подана как редакционная отсылка «см. Уинтерхоуп». <b>Плюс:</b> плотность бесплатная — газета умеет держать много данных на единице площади. <b>Риск:</b> это самая светлая из шести; тёмная тема потребует не инверсии, а второй вёрстки — газета на чёрном читается как афиша, а не как газета.</p>
+</div>
+
+<!-- ═══════ 4 ═══════ -->
+<div class="dd">
+  <div class="dd-h"><span class="num">04</span><h3>Гравюра</h3><span class="why">меццо-тинто: белый штрих по чёрному, выбранный — в оттиск</span></div>
+  <div class="frame w4" data-choice="gravura" onclick="toggleSelect(this)">
+    <div class="top"><div class="wm">Родословные</div>
+      <div class="rods"><span class="on">Гленн Уриск</span><span>Уинтерхоуп</span><span>О'Дувейн</span><span>Монад Кройве</span></div></div>
+    <div class="bd">
+      <div class="st">
+        <svg viewBox="0 0 460 206" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#efece5" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width="460" height="206" fill="url(#hatch)" opacity=".05"/>
+          <g fill="none" stroke="#efece5" stroke-width="2" shape-rendering="crispEdges">
+            <path d="M230 48 V98 M92 98 H368 M92 98 V114 M368 98 V114"/>
+          </g>
+          <g fill="none" stroke="#efece5" stroke-width="1"><path d="M176 48 H284"/></g>
+          <g fill="#efece5"><rect x="227" y="45" width="6" height="6"/></g>
+        </svg>
+        <div class="rn" style="top:26px">I</div>
+        <div class="rn" style="top:124px">II</div>
+        <div class="pl" style="left:104px;top:16px"><div class="nm">Ниалл</div><div class="yr">1683 — 1791</div></div>
+        <div class="pl" style="left:230px;top:16px"><div class="nm">Мор</div><div class="yr">1691 — 1779</div></div>
+        <div class="pl" style="left:29px;top:114px"><div class="nm">Тормод</div><div class="yr">1712 — 1818</div></div>
+        <div class="pl sel" style="left:305px;top:114px"><div class="nm">Эоган</div><div class="yr">1719 — 1830</div>
+          <span class="ast"><b>⁂</b> также в Уинтерхоуп</span></div>
+      </div>
+      <div class="pnl">
+        <div class="kick">Гленн Уриск · лист II</div>
+        <h4>Эоган</h4>
+        <div class="hr"></div>
+        <div class="row"><span>Годы</span><i>1719 — 1830</i></div>
+        <div class="row"><span>Отец</span><i>Ниалл</i></div>
+        <div class="row"><span>Мать</span><i>Мор</i></div>
+        <div class="row"><span>Дети</span><i>1</i></div>
+        <div class="lbl">В других родах</div>
+        <div class="xr">⁂ Эоган Уинтерхоуп</div>
+      </div>
+    </div>
+  </div>
+  <p class="dd-note"><b>Идея:</b> печатная доска, а не бумага. Ни одного цвета: чёрное поле, белый штрих, вся выразительность вынесена в толщину линий — линия брака тонкая, линия наследования вдвое толще, поэтому родство читается на скорости, без легенды. Выбранный человек <b>печатается в оттиск</b>: карточка становится белой, текст чёрным — приём сильнее любой подсветки и работает даже на плохом мониторе. Связка между родами помечена астеризмом ⁂ — типографским знаком отсылки. Поколения пронумерованы в квадратных клеймах на полях, фон чуть тронут штриховкой под 45°. <b>Плюс для тебя:</b> монохром без исключений — значит, тема переворачивается математически, светлая версия получается сменой двух значений и остаётся той же гравюрой, только оттиснутой на бумаге. <b>Риск:</b> цвета нет вовсе, поэтому метки и статусы придётся различать штриховкой, толщиной рамки и засечками — цветных ярлыков тут не будет.</p>
+</div>
+
+<!-- ═══════ 5 ═══════ -->
+<div class="dd">
+  <div class="dd-h"><span class="num">05</span><h3>Ночной кабинет</h3><span class="why">лампа, картотека, латунь</span></div>
+  <div class="frame w5" data-choice="kabinet" onclick="toggleSelect(this)">
+    <div class="top"><div class="wm">Родословные</div>
+      <div class="rods"><span class="on">Гленн Уриск</span><span>Уинтерхоуп</span><span>О'Дувейн</span><span>Монад Кройве</span></div></div>
+    <div class="bd">
+      <div class="st">
+        <svg viewBox="0 0 460 206" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#57493a" stroke-width="1.2">
+            <path d="M176 48 H284"/><path d="M230 48 V98 M92 98 H368 M92 98 V114 M368 98 V114"/>
+          </g>
+          <g fill="#e0b96a"><circle cx="230" cy="48" r="2.6"/><circle cx="92" cy="98" r="2.2"/><circle cx="368" cy="98" r="2.2"/></g>
+        </svg>
+        <div class="cd" style="left:106px;top:16px"><div class="nm">Ниалл</div><div class="yr">1683 › 1791</div></div>
+        <div class="cd" style="left:230px;top:16px"><div class="nm">Мор</div><div class="yr">1691 › 1779</div></div>
+        <div class="cd" style="left:30px;top:114px"><div class="nm">Тормод</div><div class="yr">1712 › 1818</div></div>
+        <div class="cd sel" style="left:306px;top:114px"><div class="nm">Эоган</div><div class="yr">1719 › 1830</div>
+          <span class="tag">также в Уинтерхоуп</span></div>
+      </div>
+      <div class="pnl">
+        <div class="por"></div>
+        <h4>Эоган</h4><div class="sub">1719 › 1830 · 111</div>
+        <div class="lbl">Сведения</div>
+        <div class="row"><span>Отец</span><i>Ниалл</i></div>
+        <div class="row"><span>Мать</span><i>Мор</i></div>
+        <div class="row"><span>Дети</span><i>1</i></div>
+        <div class="lbl">В других родах</div>
+        <div class="xr">Эоган Уинтерхоуп →</div>
+      </div>
+    </div>
+  </div>
+  <p class="dd-note"><b>Идея:</b> тёплый свет лампы падает пятном на середину стола — выбранная ветка буквально освещена, дальние поколения уходят в полумрак. Узлы — карточки картотеки с латунным корешком слева, фон в тонкую полосу мореного дуба. <b>Плюс:</b> внимание ведётся светом, а не цветом рамки, поэтому дерево остаётся спокойным при любой плотности. <b>Риск:</b> световое пятно должно ездить за выбором, иначе превратится в декорацию; в светлой теме приём исчезает и потребует замены.</p>
+</div>
+
+<!-- ═══════ 6 ═══════ -->
+<div class="dd">
+  <div class="dd-h"><span class="num">06</span><h3>Полотно II</h3><span class="why">то же, но с осью времени и ритмом</span></div>
+  <div class="frame w6" data-choice="polotno2" onclick="toggleSelect(this)">
+    <div class="top"><div class="wm">Родословные</div>
+      <div class="rods"><span class="on">Гленн&nbsp;Уриск</span><span>Уинтерхоуп</span><span>О'Дувейн</span><span>Монад&nbsp;Кройве</span></div>
+      <span class="sp"></span><div class="cnt">38 ЧЕЛ · 14 СЕМЕЙ · 3 СВЯЗКИ</div></div>
+    <div class="bd">
+      <div class="st">
+        <svg viewBox="0 0 460 206" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="#1d1a17"><path d="M52 40 H460"/><path d="M52 104 H460"/><path d="M52 168 H460"/></g>
+          <g fill="none" stroke="#4d4740" stroke-width="1">
+            <path d="M196 52 H286"/><path d="M241 52 V96 M112 96 H370 M112 96 V116"/><path d="M370 96 V116"/>
+          </g>
+        </svg>
+        <div class="axis">
+          <b style="top:34px">1680</b><b style="top:98px">1710</b><b style="top:162px">1740</b>
+        </div>
+        <div class="dot" style="left:238px;top:49px"></div>
+        <div class="pr" style="left:64px;top:50px"><div class="nm">Ниалл</div><div class="yr">1683 — 1791</div></div>
+        <div class="pr" style="left:290px;top:50px"><div class="nm">Мор</div><div class="yr">1691 — 1779</div></div>
+        <div class="pr" style="left:64px;top:114px"><div class="nm">Тормод</div><div class="yr">1712 — 1818</div></div>
+        <div class="pr sel" style="left:290px;top:114px"><div class="nm">Эоган</div><div class="yr">1719 — 1830</div>
+          <span class="go">также в Уинтерхоуп →</span></div>
+      </div>
+      <div class="pnl">
+        <div class="por"></div>
+        <h4>Эоган</h4><div class="sub">ГЛЕНН УРИСК · 111 ЛЕТ</div>
+        <div class="lbl">Сведения</div>
+        <div class="row"><span>Отец</span><i>Ниалл</i></div>
+        <div class="row"><span>Мать</span><i>Мор</i></div>
+        <div class="row"><span>Дети</span><i>1</i></div>
+        <div class="lbl">В других родах</div>
+        <div class="xr"><b>Эоган Уинтерхоуп</b></div>
+      </div>
+    </div>
+  </div>
+  <p class="dd-note"><b>Что добавлено к прежнему «Полотну»:</b> слева появилась ось времени — поколения встают не абстрактными ярусами, а по годам рождения, и сразу видно, что Ниалл и Мор разошлись на восемь лет, а между поколениями тридцать. Брак отмечен точкой на линии, служебные цифры в шапке набраны моноширинным — теперь в вещи два голоса: крупная антиква для людей и мелкий моношрифт для служебного. <b>Риск:</b> ось честна только пока даты известны; для людей без дат нужен отдельный ярус «год неизвестен».</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="mix" onclick="toggleSelect(this)">
+    <div class="letter">✂</div><div class="content"><h3>Скрестить два</h3>
+      <p>Назови пару — соберу гибрид. Например, щиты из четвёртого на полотне шестого.</p></div>
+  </div>
+  <div class="option" data-choice="none" onclick="toggleSelect(this)">
+    <div class="letter">✕</div><div class="content"><h3>Всё мимо</h3><p>Скажи, чего не хватает — зайду с другой стороны.</p></div>
+  </div>
+</div>
+</div>

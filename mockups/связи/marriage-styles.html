@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Многобрачие: приём для каждого стиля</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Playfair+Display:wght@400;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Literata:opsz,wght@7..72,400;7..72,600&family=Caveat:wght@400;600&family=Golos+Text:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 30px 80px;background:#101113;color:#e6e2d8;font-family:'Golos Text',system-ui,sans-serif}
+  h1{font-family:'Playfair Display',serif;font-size:26px;margin:0 0 6px;color:#f4f1ea}
+  .lede{color:#a49d8f;font-size:13.5px;max-width:80ch;line-height:1.55;margin:0 0 26px}
+  .var{border:1px solid #2b2e33;border-radius:9px;overflow:hidden;margin-bottom:20px;background:#17181b}
+  .head{display:flex;align-items:baseline;gap:10px;padding:11px 15px;border-bottom:1px solid #2b2e33}
+  .head b{font:500 10.5px/1 'IBM Plex Mono',monospace;color:#c08a4a;letter-spacing:.14em}
+  .head h3{margin:0;font-family:'Playfair Display',serif;font-size:17px;color:#f4f1ea}
+  .stage{position:relative;height:210px;overflow:hidden}
+  .stage svg{position:absolute;left:0;top:0}
+  .n{position:absolute;z-index:2}
+  .note{padding:12px 15px 15px;font-size:12.5px;line-height:1.5;color:#a49d8f}
+  .note b{color:#e6e2d8;font-weight:500}
+
+  /* ГОБЕЛЕН */
+  .s1{background:#1c2420;background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px),
+      repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px)}
+  .s1 .n{width:150px;text-align:center;font-family:'Cormorant Garamond',serif}
+  .s1 .halo{width:52px;height:52px;margin:0 auto;border-radius:50%;border:1.5px solid #c8a44e;
+    background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.09),rgba(0,0,0,.35))}
+  .s1 .nm{font-size:18px;color:#ece0c2;margin-top:7px}
+  .s1 .yr{font-family:'Caveat',cursive;font-size:14px;color:#93a08f}
+  .s1 .rn{position:absolute;z-index:3;font-family:'Caveat',cursive;font-size:15px;color:#e8dcb8}
+
+  /* ВИКТОРИАНСКИЙ */
+  .s2{background:#262721}
+  .s2 .n{width:150px;height:60px;background:#2e2f27;border:1px solid #7c6a3c;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-family:'Playfair Display',serif}
+  .s2 .n::after{content:'';position:absolute;inset:3px;border:1px solid #7c6a3c;opacity:.42}
+  .s2 .nm{font-size:16px;font-weight:700;color:#f2e8d2}
+  .s2 .yr{font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;color:#a09578;margin-top:3px}
+  .s2 .rn{position:absolute;z-index:3;font:500 9px/1 'IBM Plex Mono',monospace;color:#241f12;background:#b99a52;
+    padding:3px 5px;border-radius:2px}
+  .s2 .rn.past{background:#7c6a3c;color:#efe6cf}
+
+  /* ГАЗЕТА */
+  .s3{background:#f6f3ea}
+  .s3 .n{width:150px;font-family:'PT Serif',serif;border-top:2px solid #14120e;padding-top:6px}
+  .s3 .nm{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:#14120e}
+  .s3 .nm sup{font-size:9px;color:#a81f1f;font-weight:400;margin-left:2px}
+  .s3 .yr{font-size:9.5px;letter-spacing:.07em;color:#5d564a;margin-top:3px}
+  .s3 .fn{position:absolute;z-index:3;font-family:'PT Serif',serif;font-size:10px;font-style:italic;color:#5d564a}
+
+  /* НОЧНОЙ КАБИНЕТ */
+  .s4{background:#161310;background-image:repeating-linear-gradient(93deg,rgba(0,0,0,.14) 0 7px,rgba(255,255,255,.02) 7px 14px)}
+  .s4 .n{width:150px;height:58px;background:#221d18;border:1px solid #2a231c;padding:9px 11px;
+    box-shadow:0 3px 12px rgba(0,0,0,.4);font-family:'Literata',serif}
+  .s4 .n::before{content:'';position:absolute;left:10px;top:-5px;width:26px;height:5px;background:#6b5636;border-radius:2px 2px 0 0}
+  .s4 .nm{font-size:15px;font-weight:600;color:#e9e2d4}
+  .s4 .yr{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8d8171;margin-top:5px}
+  .s4 .rn{position:absolute;z-index:3;font:500 8.5px/1 'IBM Plex Mono',monospace;color:#171310;background:#e0b96a;
+    padding:3px 5px;border-radius:2px}
+  .s4 .rn.past{background:#6b5636;color:#f0e5cf}
+
+  /* ПОЛОТНО */
+  .s5{background:#0b0a09}
+  .s5 .n{width:150px}
+  .s5 .nm{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:26px;color:#f3ede3;line-height:1}
+  .s5 .yr{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;color:#7f7869;margin-top:5px}
+  .s5 .rn{position:absolute;z-index:3;font:400 9px/1 'IBM Plex Mono',monospace;color:#7f7869;letter-spacing:.08em}
+</style>
+</head><body>
+
+<h1>Многобрачие: приём для каждого стиля</h1>
+<p class="lede">Один случай во всех пяти почерках: Айли и трое мужей, супруги по очереди браков. Зазор между людьми увеличен до сорока пикселей, уровни союзов разведены на восемнадцать, подписи очереди подняты над линией и нигде её не касаются. Смотри, какой приём читается в каждом стиле.</p>
+
+<!-- ГОБЕЛЕН -->
+<div class="var">
+  <div class="head"><b>Гобелен</b><h3>Нить с узелками, очередь рукописью</h3></div>
+  <div class="stage s1">
+    <svg width="1000" height="210">
+      <g fill="none" stroke="#6d7a68" stroke-width="1.3" stroke-linecap="round">
+        <path d="M116 60 H190" stroke-dasharray="1 6" opacity=".8"/>
+        <path d="M306 60 H380" stroke-dasharray="1 6" opacity=".8"/>
+        <path d="M496 60 H570" stroke-dasharray="1 6" opacity=".8"/>
+        <path d="M116 78 H380" stroke-dasharray="1 6" opacity=".55"/>
+        <path d="M116 96 H570" stroke-dasharray="1 6" opacity=".4"/>
+      </g>
+      <g fill="#c8a44e">
+        <path d="M153 56 l4 4 -4 4 -4 -4z"/><path d="M343 74 l4 4 -4 4 -4 -4z"/><path d="M533 92 l4 4 -4 4 -4 -4z"/>
+      </g>
+    </svg>
+    <div class="n s1" style="left:20px;top:34px"><div class="halo"></div><div class="nm">Роберт</div><div class="yr">1815 — 1850</div></div>
+    <div class="n s1" style="left:210px;top:34px"><div class="halo"></div><div class="nm">Артур</div><div class="yr">1837 — 1869</div></div>
+    <div class="n s1" style="left:400px;top:34px"><div class="halo"></div><div class="nm">Ирвинг</div><div class="yr">1817 — 1861</div></div>
+    <div class="n s1" style="left:590px;top:34px"><div class="halo"></div><div class="nm">Айли</div><div class="yr">1821 — 1903</div></div>
+    <div class="rn" style="left:140px;top:36px">первый</div>
+    <div class="rn" style="left:330px;top:54px">второй</div>
+    <div class="rn" style="left:518px;top:72px">третий</div>
+  </div>
+  <div class="note"><b>Приём:</b> союз это нить, идущая на своей высоте, с золотым узелком у супруга. Очередь подписана рукой, а не цифрой, потому что весь стиль держится на рукописных пометках. Нить самого свежего брака идёт выше и гуще, старые ниже и разрежённее.</div>
+</div>
+
+<!-- ВИКТОРИАНСКИЙ -->
+<div class="var">
+  <div class="head"><b>Викторианский</b><h3>Контурный ромб и римская цифра над линией</h3></div>
+  <div class="stage s2">
+    <svg width="1000" height="210">
+      <g fill="none" stroke="#7c6a3c" stroke-width="1.2">
+        <path d="M170 78 H210" stroke-dasharray="5 4" opacity=".8"/>
+        <path d="M360 96 H400" stroke-dasharray="5 4" opacity=".8"/>
+        <path d="M550 114 H590"/>
+      </g>
+      <g fill="none" stroke="#b99a52" stroke-width="1.1">
+        <path d="M190 73 l5 5 -5 5 -5 -5z"/><path d="M380 91 l5 5 -5 5 -5 -5z"/><path d="M570 109 l5 5 -5 5 -5 -5z"/>
+      </g>
+    </svg>
+    <div class="n s2" style="left:20px;top:64px"><div class="nm">Роберт</div><div class="yr">1815 — 1850</div></div>
+    <div class="n s2" style="left:210px;top:64px"><div class="nm">Артур</div><div class="yr">1837 — 1869</div></div>
+    <div class="n s2" style="left:400px;top:64px"><div class="nm">Ирвинг</div><div class="yr">1817 — 1861</div></div>
+    <div class="n s2" style="left:590px;top:64px"><div class="nm">Айли</div><div class="yr">1821 — 1903</div></div>
+    <div class="rn past" style="left:184px;top:44px">I</div>
+    <div class="rn past" style="left:372px;top:62px">II</div>
+    <div class="rn" style="left:561px;top:80px">III</div>
+  </div>
+  <div class="note"><b>Приём:</b> тот самый контурный ромб, что выбрали для этого стиля, ровно по центру зазора. Цифра очереди поднята на двадцать пикселей выше линии и не касается ни рамки, ни ромба. Прошлые браки штриховой линией и тусклой плашкой, действующий сплошной и золотой.</div>
+</div>
+
+<!-- ГАЗЕТА -->
+<div class="var">
+  <div class="head"><b>Газета</b><h3>Сноска у имени, знак равенства в зазоре</h3></div>
+  <div class="stage s3">
+    <svg width="1000" height="210">
+      <g fill="none" stroke="#14120e" stroke-width="1.1">
+        <path d="M170 82 h11 M189 82 h11" stroke-dasharray="0" opacity=".55"/>
+        <path d="M170 88 h11 M189 88 h11" opacity=".55"/>
+        <path d="M360 100 h11 M379 100 h11" opacity=".55"/>
+        <path d="M360 106 h11 M379 106 h11" opacity=".55"/>
+        <path d="M550 118 h40"/><path d="M550 124 h40"/>
+      </g>
+    </svg>
+    <div class="n s3" style="left:20px;top:70px"><div class="nm">Роберт<sup>I</sup></div><div class="yr">1815 — 1850</div></div>
+    <div class="n s3" style="left:210px;top:70px"><div class="nm">Артур<sup>II</sup></div><div class="yr">1837 — 1869</div></div>
+    <div class="n s3" style="left:400px;top:70px"><div class="nm">Ирвинг<sup>III</sup></div><div class="yr">1817 — 1861</div></div>
+    <div class="n s3" style="left:590px;top:70px"><div class="nm">Айли</div><div class="yr">1821 — 1903</div></div>
+    <div class="fn" style="left:20px;top:150px">I, II, III — очередь браков Айли; действующий союз набран сплошным знаком</div>
+  </div>
+  <div class="note"><b>Приём:</b> газета не рисует схемы, она ставит сноски. Номер брака идёт надстрочным знаком прямо у имени мужа, а в зазоре стоит типографский знак равенства: у прошлых браков он разорванный, у действующего сплошной. Внизу полосы короткая строка-легенда, как настоящая сноска.</div>
+</div>
+
+<!-- НОЧНОЙ КАБИНЕТ -->
+<div class="var">
+  <div class="head"><b>Ночной кабинет</b><h3>Латунная нить и клеймо с номером</h3></div>
+  <div class="stage s4">
+    <svg width="1000" height="210">
+      <g fill="none" stroke="#57493a" stroke-width="1.4">
+        <path d="M170 76 H210" stroke-dasharray="1 5"/>
+        <path d="M360 94 H400" stroke-dasharray="1 5"/>
+        <path d="M550 112 H590" stroke="#e0b96a"/>
+      </g>
+      <g fill="#6b5636"><circle cx="190" cy="76" r="2.6"/><circle cx="380" cy="94" r="2.6"/></g>
+      <g fill="#e0b96a"><circle cx="570" cy="112" r="2.8"/></g>
+    </svg>
+    <div class="n s4" style="left:20px;top:64px"><div class="nm">Роберт</div><div class="yr">1815 › 1850</div></div>
+    <div class="n s4" style="left:210px;top:64px"><div class="nm">Артур</div><div class="yr">1837 › 1869</div></div>
+    <div class="n s4" style="left:400px;top:64px"><div class="nm">Ирвинг</div><div class="yr">1817 › 1861</div></div>
+    <div class="n s4" style="left:590px;top:64px"><div class="nm">Айли</div><div class="yr">1821 › 1903</div></div>
+    <div class="rn past" style="left:184px;top:42px">I</div>
+    <div class="rn past" style="left:374px;top:60px">II</div>
+    <div class="rn" style="left:564px;top:78px">III</div>
+  </div>
+  <div class="note"><b>Приём:</b> союз это латунная нить с заклёпкой, номер выбит на маленьком клейме над ней. Действующий брак горит янтарём, прошлые уходят в тёмную бронзу. Клейма стоят на той же высоте, что и ярлычки картотеки сверху карточек, поэтому ряд читается ровно.</div>
+</div>
+
+<!-- ПОЛОТНО -->
+<div class="var">
+  <div class="head"><b>Полотно</b><h3>Точка на своей высоте, номер моношрифтом</h3></div>
+  <div class="stage s5">
+    <svg width="1000" height="210">
+      <g fill="none" stroke="#4d4740" stroke-width="1">
+        <path d="M172 84 H208" stroke-dasharray="2 5"/>
+        <path d="M362 102 H398" stroke-dasharray="2 5"/>
+        <path d="M552 120 H588"/>
+      </g>
+      <g fill="#4d4740"><circle cx="190" cy="84" r="2.6"/><circle cx="380" cy="102" r="2.6"/></g>
+      <g fill="#e8563c"><circle cx="570" cy="120" r="3"/></g>
+    </svg>
+    <div class="n s5" style="left:20px;top:72px"><div class="nm">Роберт</div><div class="yr">1815 — 1850</div></div>
+    <div class="n s5" style="left:210px;top:72px"><div class="nm">Артур</div><div class="yr">1837 — 1869</div></div>
+    <div class="n s5" style="left:400px;top:72px"><div class="nm">Ирвинг</div><div class="yr">1817 — 1861</div></div>
+    <div class="n s5" style="left:590px;top:72px"><div class="nm">Айли</div><div class="yr">1821 — 1903</div></div>
+    <div class="rn" style="left:186px;top:64px">01</div>
+    <div class="rn" style="left:376px;top:82px">02</div>
+    <div class="rn" style="left:565px;top:100px;color:#e8563c">03</div>
+  </div>
+  <div class="note"><b>Приём:</b> здесь нет рамок, поэтому и связь почти отсутствует: волосяной пунктир и точка. Номер набран моношрифтом, как все служебные цифры этого стиля, и стоит над своей точкой. Действующий брак единственный получает алую точку и алый номер.</div>
+</div>
+
+<p style="color:#8f887b;font-size:12.5px">Скажи по каждому: годится или переделать. После этого перенесу в стенд вместе с увеличенными зазорами.</p>
+</body></html>

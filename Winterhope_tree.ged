@@ -1,0 +1,835 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+1 SOUR FAMYTALE
+2 NAME FamyTale
+2 VERS 5.5.1
+0 @I2001@ INDI
+1 NAME Ниалл /Гленн Уриск/
+2 GIVN Ниалл
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1683
+1 DEAT
+2 DATE 1791
+1 EVEN Общий предок с родом Гленн Уриск
+2 TYPE Comment
+1 FAMS @F2001@
+0 @I2002@ INDI
+1 NAME Мор /Гленн Уриск/
+2 GIVN Мор
+2 SURN Кинкейд
+2 _MARNM Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1691
+1 DEAT
+2 DATE 1779
+1 EVEN Жена Ниалла
+2 TYPE Comment
+1 FAMS @F2001@
+0 @I2003@ INDI
+1 NAME Ветвь /Гленн Уриск/
+2 GIVN Ветвь
+2 SURN Гленн Уриск
+1 SEX M
+1 EVEN Ветвь через Тормода
+2 TYPE Comment
+1 FAMC @F2001@
+0 @I2004@ INDI
+1 NAME Эоган /Уинтерхоуп/
+2 GIVN Эоган
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1719
+1 DEAT
+2 DATE 1830
+1 EVEN Урождённый Гленн Уриск, принял имя долины
+2 TYPE Comment
+1 FAMS @F2002@
+1 FAMC @F2001@
+0 @I2005@ INDI
+1 NAME Хэрриет /Уинтерхоуп/
+2 GIVN Хэрриет
+2 SURN Ноублс
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1726
+1 DEAT
+2 DATE 1818
+1 EVEN Жена Эогана
+2 TYPE Comment
+1 FAMS @F2002@
+0 @I2006@ INDI
+1 NAME Уилфред /Уинтерхоуп/
+2 GIVN Уилфред
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1752
+1 DEAT
+2 DATE 1855
+1 FAMS @F2003@
+1 FAMS @F2004@
+1 FAMC @F2002@
+0 @I2007@ INDI
+1 NAME Сесилия /Уинтерхоуп/
+2 GIVN Сесилия
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1756
+1 DEAT
+2 DATE 1849
+1 FAMS @F2005@
+1 FAMC @F2002@
+0 @I2008@ INDI
+1 NAME Персиваль /Уинтерхоуп/
+2 GIVN Персиваль
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1759
+1 DEAT
+2 DATE 1861
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F2002@
+0 @I2009@ INDI
+1 NAME Констанс /Уинтерхоуп/
+2 GIVN Констанс
+2 SURN Эрмитейдж
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1758
+1 DEAT
+2 DATE 1801
+1 EVEN 1-я жена Уилфреда
+2 TYPE Comment
+1 FAMS @F2003@
+0 @I2010@ INDI
+1 NAME Розамунд /Уинтерхоуп/
+2 GIVN Розамунд
+2 SURN Хэлдейн
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1770
+1 DEAT
+2 DATE 1866
+1 EVEN 2-я жена Уилфреда
+2 TYPE Comment
+1 EVEN Приданое — земли в Эттрике
+2 TYPE Comment
+1 FAMS @F2004@
+0 @I2011@ INDI
+1 NAME Гилберт /Ноллис/
+2 GIVN Гилберт
+2 SURN Ноллис
+1 SEX M
+1 BIRT
+2 DATE 1750
+1 DEAT
+2 DATE 1846
+1 EVEN Муж Сесилии
+2 TYPE Comment
+1 FAMS @F2005@
+0 @I2012@ INDI
+1 NAME Ветвь /Ноллис/
+2 GIVN Ветвь
+2 SURN Ноллис
+1 SEX M
+1 EVEN Ветвь через Сесилию
+2 TYPE Comment
+1 FAMC @F2005@
+0 @I2013@ INDI
+1 NAME Мэрион /Уинтерхоуп/
+2 GIVN Мэрион
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1788
+1 DEAT
+2 DATE 1884
+1 FAMS @F2006@
+1 FAMC @F2003@
+0 @I2014@ INDI
+1 NAME Освин /Уинтерхоуп/
+2 GIVN Освин
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1792
+1 DEAT
+2 DATE 1897
+1 FAMS @F2007@
+1 FAMS @F2008@
+1 FAMC @F2004@
+0 @I2015@ INDI
+1 NAME Верити /Уинтерхоуп/
+2 GIVN Верити
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1796
+1 DEAT
+2 DATE 1891
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F2004@
+0 @I2016@ INDI
+1 NAME Эмброуз /Кэрью/
+2 GIVN Эмброуз
+2 SURN Кэрью
+1 SEX M
+1 BIRT
+2 DATE 1785
+1 DEAT
+2 DATE 1880
+1 EVEN Муж Мэрион
+2 TYPE Comment
+1 FAMS @F2006@
+0 @I2017@ INDI
+1 NAME Ветвь /Кэрью/
+2 GIVN Ветвь
+2 SURN Кэрью
+1 SEX M
+1 EVEN Ветвь через Мэрион
+2 TYPE Comment
+1 FAMC @F2006@
+0 @I2018@ INDI
+1 NAME Джулиана /Уинтерхоуп/
+2 GIVN Джулиана
+2 SURN Уэйкфилд
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1798
+1 DEAT
+2 DATE 1846
+1 EVEN 1-я жена Освина
+2 TYPE Comment
+1 FAMS @F2007@
+0 @I2019@ INDI
+1 NAME Пруденс /Уинтерхоуп/
+2 GIVN Пруденс
+2 SURN Марчбэнкс
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1806
+1 DEAT
+2 DATE 1901
+1 EVEN 2-я жена Освина
+2 TYPE Comment
+1 EVEN Брак по расчёту
+2 TYPE Comment
+1 FAMS @F2008@
+0 @I2020@ INDI
+1 NAME Лайонел /Уинтерхоуп/
+2 GIVN Лайонел
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1824
+1 DEAT
+2 DATE 1929
+1 FAMS @F2009@
+1 FAMS @F2010@
+1 FAMS @F2011@
+1 FAMC @F2007@
+0 @I2021@ INDI
+1 NAME Хонория /Уинтерхоуп/
+2 GIVN Хонория
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1828
+1 DEAT
+2 DATE 1923
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F2008@
+0 @I2022@ INDI
+1 NAME Сибил /Уинтерхоуп/
+2 GIVN Сибил
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1836
+1 DEAT
+2 DATE 1931
+1 FAMS @F2012@
+1 FAMC @F2008@
+0 @I2023@ INDI
+1 NAME Арабелла /Уинтерхоуп/
+2 GIVN Арабелла
+2 SURN Финдлейтер
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1830
+1 DEAT
+2 DATE 1868
+1 EVEN 1-я жена Лайонела
+2 TYPE Comment
+1 FAMS @F2009@
+0 @I2024@ INDI
+1 NAME Джорджиана /Уинтерхоуп/
+2 GIVN Джорджиана
+2 SURN Пембрук
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1842
+1 DEAT
+2 DATE 1901
+1 EVEN 2-я жена Лайонела
+2 TYPE Comment
+1 EVEN Приданое — мельница на Тивиоте
+2 TYPE Comment
+1 FAMS @F2010@
+0 @I2025@ INDI
+1 NAME Клариса /Уинтерхоуп/
+2 GIVN Клариса
+2 SURN Ленокс
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1850
+1 DEAT
+2 DATE 1945
+1 EVEN 3-я жена Лайонела
+2 TYPE Comment
+1 FAMS @F2011@
+0 @I2026@ INDI
+1 NAME Тобиас /Хепберн/
+2 GIVN Тобиас
+2 SURN Хепберн
+1 SEX M
+1 BIRT
+2 DATE 1832
+1 DEAT
+2 DATE 1928
+1 EVEN Муж Сибил
+2 TYPE Comment
+1 FAMS @F2012@
+0 @I2027@ INDI
+1 NAME Ветвь /Хепберн/
+2 GIVN Ветвь
+2 SURN Хепберн
+1 SEX M
+1 EVEN Ветвь через Сибил
+2 TYPE Comment
+1 FAMC @F2012@
+0 @I2028@ INDI
+1 NAME Обри /Уинтерхоуп/
+2 GIVN Обри
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1860
+1 DEAT
+2 DATE 1962
+1 FAMS @F2013@
+1 FAMC @F2009@
+0 @I2029@ INDI
+1 NAME Летиция /Уинтерхоуп/
+2 GIVN Летиция
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1864
+1 DEAT
+2 DATE 1959
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F2010@
+0 @I2030@ INDI
+1 NAME Хамфри /Уинтерхоуп/
+2 GIVN Хамфри
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1868
+1 DEAT
+2 DATE 1970
+1 FAMS @F2014@
+1 FAMS @F2015@
+1 FAMC @F2010@
+0 @I2031@ INDI
+1 NAME Дороти /Уинтерхоуп/
+2 GIVN Дороти
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1876
+1 DEAT
+2 DATE 1971
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F2011@
+0 @I2032@ INDI
+1 NAME Юфимия /Уинтерхоуп/
+2 GIVN Юфимия
+2 SURN Крайтон
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1866
+1 DEAT
+2 DATE 1961
+1 EVEN Жена Обри
+2 TYPE Comment
+1 FAMS @F2013@
+0 @I2033@ INDI
+1 NAME Бланш /Уинтерхоуп/
+2 GIVN Бланш
+2 SURN Дэлримпл
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1872
+1 DEAT
+2 DATE 1899
+1 EVEN 1-я жена Хамфри
+2 TYPE Comment
+1 FAMS @F2014@
+0 @I2034@ INDI
+1 NAME Оливия /Уинтерхоуп/
+2 GIVN Оливия
+2 SURN Стеннис
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1880
+1 DEAT
+2 DATE 1975
+1 EVEN 2-я жена Хамфри
+2 TYPE Comment
+1 EVEN Земли отошли младшей ветви
+2 TYPE Comment
+1 FAMS @F2015@
+0 @I2035@ INDI
+1 NAME Родерик /Уинтерхоуп/
+2 GIVN Родерик
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1901
+1 DEAT
+2 DATE 1993
+1 FAMS @F2016@
+1 FAMS @F2017@
+1 FAMC @F2013@
+0 @I2036@ INDI
+1 NAME Мерси /Уинтерхоуп/
+2 GIVN Мерси
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1905
+1 DEAT
+2 DATE 2000
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F2013@
+0 @I2037@ INDI
+1 NAME Годфри /Уинтерхоуп/
+2 GIVN Годфри
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1909
+1 DEAT
+2 DATE 2011
+1 FAMS @F2018@
+1 FAMC @F2013@
+0 @I2038@ INDI
+1 NAME Сесил /Уинтерхоуп/
+2 GIVN Сесил
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1896
+1 DEAT
+2 DATE 1998
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F2014@
+0 @I2039@ INDI
+1 NAME Изабо /Уинтерхоуп/
+2 GIVN Изабо
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1903
+1 DEAT
+2 DATE 1999
+1 FAMS @F2019@
+1 FAMC @F2015@
+0 @I2040@ INDI
+1 NAME Хелена /Уинтерхоуп/
+2 GIVN Хелена
+2 SURN Тарбет
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1906
+1 DEAT
+2 DATE 2002
+1 EVEN Жена Родерика
+2 TYPE Comment
+1 FAMS @F2016@
+0 @I2041@ INDI
+1 NAME Ниав /О'Дувейн/
+2 GIVN Ниав
+2 SURN О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 1908
+1 DEAT
+2 DATE 2001
+1 EVEN Не была женой; ирландка из рода О'Дувейн
+2 TYPE Comment
+1 FAMS @F2017@
+0 @I2042@ INDI
+1 NAME Кормак /Уинтерхоуп/
+2 GIVN Кормак
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1934
+1 DEAT
+2 DATE 2018
+1 EVEN Внебрачный сын, воспитан в Ирландии под фамилией матери
+2 TYPE Comment
+1 FAMS @F2020@
+1 FAMC @F2017@
+0 @I2043@ INDI
+1 NAME Ветвь /О'Дувейн/
+2 GIVN Ветвь
+2 SURN О'Дувейн
+1 SEX M
+1 EVEN Ветвь через Кормака
+2 TYPE Comment
+1 FAMC @F2020@
+0 @I2044@ INDI
+1 NAME Эстер /Уинтерхоуп/
+2 GIVN Эстер
+2 SURN Мьюр
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1912
+1 DEAT
+2 DATE 2008
+1 EVEN Жена Годфри
+2 TYPE Comment
+1 FAMS @F2018@
+0 @I2045@ INDI
+1 NAME Найджел /Уэддерберн/
+2 GIVN Найджел
+2 SURN Уэддерберн
+1 SEX M
+1 BIRT
+2 DATE 1900
+1 DEAT
+2 DATE 1996
+1 EVEN Муж Изабо
+2 TYPE Comment
+1 FAMS @F2019@
+0 @I2046@ INDI
+1 NAME Ветвь /Уэддерберн/
+2 GIVN Ветвь
+2 SURN Уэддерберн
+1 SEX M
+1 EVEN Ветвь через Изабо
+2 TYPE Comment
+1 FAMC @F2019@
+0 @I2047@ INDI
+1 NAME Джаспер /Уинтерхоуп/
+2 GIVN Джаспер
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1930
+1 FAMS @F2021@
+1 FAMS @F2022@
+1 FAMC @F2016@
+0 @I2048@ INDI
+1 NAME Пенелопа /Уинтерхоуп/
+2 GIVN Пенелопа
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1934
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F2016@
+0 @I2049@ INDI
+1 NAME Уиннифред /Уинтерхоуп/
+2 GIVN Уиннифред
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1938
+1 FAMS @F2023@
+1 FAMC @F2016@
+0 @I2050@ INDI
+1 NAME Селвин /Уинтерхоуп/
+2 GIVN Селвин
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1940
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F2018@
+0 @I2051@ INDI
+1 NAME Марджери /Уинтерхоуп/
+2 GIVN Марджери
+2 SURN Кокбёрн
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1932
+1 DEAT
+2 DATE 1998
+1 EVEN 1-я жена Джаспера
+2 TYPE Comment
+1 EVEN Брак расторгнут
+2 TYPE Comment
+1 FAMS @F2021@
+0 @I2052@ INDI
+1 NAME Аннабел /Уинтерхоуп/
+2 GIVN Аннабел
+2 SURN Форсайт
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1936
+1 EVEN 2-я жена Джаспера
+2 TYPE Comment
+1 FAMS @F2022@
+0 @I2053@ INDI
+1 NAME Лоренс /Гатри/
+2 GIVN Лоренс
+2 SURN Гатри
+1 SEX M
+1 BIRT
+2 DATE 1934
+1 DEAT
+2 DATE 2020
+1 EVEN Муж Уиннифред
+2 TYPE Comment
+1 FAMS @F2023@
+0 @I2054@ INDI
+1 NAME Ветвь /Гатри/
+2 GIVN Ветвь
+2 SURN Гатри
+1 SEX M
+1 EVEN Ветвь через Уиннифред
+2 TYPE Comment
+1 FAMC @F2023@
+0 @I2055@ INDI
+1 NAME Эдвин /Уинтерхоуп/
+2 GIVN Эдвин
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1958
+1 EVEN Женился на Сорхе Гленн Уриск
+2 TYPE Comment
+1 FAMS @F2024@
+1 FAMC @F2021@
+0 @I2056@ INDI
+1 NAME Тристрам /Уинтерхоуп/
+2 GIVN Тристрам
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1970
+1 FAMS @F2025@
+1 FAMS @F2026@
+1 FAMC @F2022@
+0 @I2057@ INDI
+1 NAME Сорха /Уинтерхоуп/
+2 GIVN Сорха
+2 SURN Гленн Уриск
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1962
+1 EVEN Урождённая Гленн Уриск
+2 TYPE Comment
+1 FAMS @F2024@
+0 @I2058@ INDI
+1 NAME Имоджен /Уинтерхоуп/
+2 GIVN Имоджен
+2 SURN Пейтон
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1968
+1 EVEN 1-я жена Тристрама
+2 TYPE Comment
+1 FAMS @F2025@
+0 @I2059@ INDI
+1 NAME Флоренс /Уинтерхоуп/
+2 GIVN Флоренс
+2 SURN Рэйберн
+2 _MARNM Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1974
+1 EVEN 2-я жена Тристрама
+2 TYPE Comment
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMS @F2026@
+0 @I2060@ INDI
+1 NAME Каллум /Уинтерхоуп/
+2 GIVN Каллум
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1992
+1 FAMC @F2024@
+0 @I2061@ INDI
+1 NAME Айла /Уинтерхоуп/
+2 GIVN Айла
+2 SURN Уинтерхоуп
+1 SEX F
+1 BIRT
+2 DATE 1996
+1 FAMC @F2024@
+0 @I2062@ INDI
+1 NAME Хьюго /Уинтерхоуп/
+2 GIVN Хьюго
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1998
+1 FAMC @F2025@
+0 @F2001@ FAM
+1 HUSB @I2001@
+1 WIFE @I2002@
+1 CHIL @I2003@
+1 CHIL @I2004@
+0 @F2002@ FAM
+1 HUSB @I2004@
+1 WIFE @I2005@
+1 CHIL @I2006@
+1 CHIL @I2007@
+1 CHIL @I2008@
+0 @F2003@ FAM
+1 HUSB @I2006@
+1 WIFE @I2009@
+1 CHIL @I2013@
+0 @F2004@ FAM
+1 HUSB @I2006@
+1 WIFE @I2010@
+1 CHIL @I2014@
+1 CHIL @I2015@
+0 @F2005@ FAM
+1 HUSB @I2011@
+1 WIFE @I2007@
+1 CHIL @I2012@
+0 @F2006@ FAM
+1 HUSB @I2016@
+1 WIFE @I2013@
+1 CHIL @I2017@
+0 @F2007@ FAM
+1 HUSB @I2014@
+1 WIFE @I2018@
+1 CHIL @I2020@
+0 @F2008@ FAM
+1 HUSB @I2014@
+1 WIFE @I2019@
+1 CHIL @I2021@
+1 CHIL @I2022@
+0 @F2009@ FAM
+1 HUSB @I2020@
+1 WIFE @I2023@
+1 CHIL @I2028@
+0 @F2010@ FAM
+1 HUSB @I2020@
+1 WIFE @I2024@
+1 CHIL @I2029@
+1 CHIL @I2030@
+0 @F2011@ FAM
+1 HUSB @I2020@
+1 WIFE @I2025@
+1 CHIL @I2031@
+0 @F2012@ FAM
+1 HUSB @I2026@
+1 WIFE @I2022@
+1 CHIL @I2027@
+0 @F2013@ FAM
+1 HUSB @I2028@
+1 WIFE @I2032@
+1 CHIL @I2035@
+1 CHIL @I2036@
+1 CHIL @I2037@
+0 @F2014@ FAM
+1 HUSB @I2030@
+1 WIFE @I2033@
+1 CHIL @I2038@
+0 @F2015@ FAM
+1 HUSB @I2030@
+1 WIFE @I2034@
+1 CHIL @I2039@
+0 @F2016@ FAM
+1 HUSB @I2035@
+1 WIFE @I2040@
+1 CHIL @I2047@
+1 CHIL @I2048@
+1 CHIL @I2049@
+0 @F2017@ FAM
+1 HUSB @I2035@
+1 WIFE @I2041@
+1 CHIL @I2042@
+0 @F2018@ FAM
+1 HUSB @I2037@
+1 WIFE @I2044@
+1 CHIL @I2050@
+0 @F2019@ FAM
+1 HUSB @I2045@
+1 WIFE @I2039@
+1 CHIL @I2046@
+0 @F2020@ FAM
+1 HUSB @I2042@
+1 CHIL @I2043@
+0 @F2021@ FAM
+1 HUSB @I2047@
+1 WIFE @I2051@
+1 CHIL @I2055@
+0 @F2022@ FAM
+1 HUSB @I2047@
+1 WIFE @I2052@
+1 CHIL @I2056@
+0 @F2023@ FAM
+1 HUSB @I2053@
+1 WIFE @I2049@
+1 CHIL @I2054@
+0 @F2024@ FAM
+1 HUSB @I2055@
+1 WIFE @I2057@
+1 CHIL @I2060@
+1 CHIL @I2061@
+0 @F2025@ FAM
+1 HUSB @I2056@
+1 WIFE @I2058@
+1 CHIL @I2062@
+0 @F2026@ FAM
+1 HUSB @I2056@
+1 WIFE @I2059@
+0 TRLR

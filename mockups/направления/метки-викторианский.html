@@ -1,0 +1,148 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Викторианский — метки состояний</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#0c0d0e; --ink:#ece5d6; --dim:#8a8375; --rule:#222325; --gold:#b99a52;
+  --bg:#262721; --card:#2e2f27; --line:#7c6a3c; --fg:#f2e8d2; --mut:#a09578;
+  --ink-red:#a8503d; --ink-red-fg:#f2e0c4; --ink-red-deep:#63202a;
+}
+body.light{--bg:#efe9dc; --card:#fbf8ef; --line:#a9986a; --fg:#231f16; --mut:#7d7358;
+           --ink-red:#8d2a33; --ink-red-fg:#f6ead4; --ink-red-deep:#7a2230}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.6 'PT Serif',Georgia,serif;padding:36px 42px 90px}
+.kicker{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.26em;text-transform:uppercase;
+        color:var(--gold);margin-bottom:12px}
+h1{font-family:'Playfair Display',serif;font-size:35px;font-weight:400;margin:0 0 10px}
+h1 em{font-style:italic}
+.lede{color:var(--dim);max-width:80ch;margin:0 0 22px;font-size:14.5px}
+.bar{position:sticky;top:0;z-index:9;background:linear-gradient(var(--page) 76%,rgba(12,13,14,0));
+     padding:11px 0 13px;margin-bottom:22px;border-bottom:1px solid var(--rule);display:flex;gap:24px}
+.bar label{font:400 12px/1 'IBM Plex Mono',monospace;color:var(--dim);
+           display:flex;gap:8px;align-items:center;letter-spacing:.05em;cursor:pointer}
+.bar input{accent-color:var(--gold)}
+
+.take{border:1px solid var(--rule);border-radius:2px;margin-bottom:18px;overflow:hidden}
+.strip{display:flex;gap:44px;padding:30px 32px 44px;background:var(--bg);
+  background-image:radial-gradient(circle at 14px 14px,rgba(185,154,82,.11) 1.1px,transparent 1.4px);
+  background-size:58px 58px}
+body.light .strip{background-image:radial-gradient(circle at 14px 14px,rgba(122,95,32,.12) 1.1px,transparent 1.4px)}
+.cap{padding:12px 18px 15px;background:#15161a;display:flex;gap:20px;align-items:baseline}
+.cap b{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;white-space:nowrap}
+.cap .key{font:500 9.5px/1 'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
+.cap p{margin:0;color:var(--dim);font-size:13.5px;line-height:1.5}
+
+/* карточка */
+.node{position:relative;width:150px;height:60px;font-family:'Playfair Display',Georgia,serif;text-align:center}
+.box{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);
+     display:flex;flex-direction:column;align-items:center;justify-content:center}
+.box::after{content:'';position:absolute;inset:3px;border:1px solid var(--line);opacity:.42}
+.nm{position:relative;z-index:3;font-size:16px;font-weight:700;color:var(--fg);line-height:1.1}
+.yr{position:relative;z-index:3;font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;
+    color:var(--mut);margin-top:3px}
+.badge{position:absolute;left:0;top:100%;margin-top:5px;white-space:nowrap;z-index:6}
+
+/* ─── 1. Наборная подпись ─── */
+.b-rule .badge{left:6px;margin-top:6px;font-family:'PT Serif',serif;font-size:8.5px;
+  letter-spacing:.19em;text-transform:uppercase;color:var(--ink-red);padding-top:4px;
+  border-top:2px solid var(--ink-red)}
+.b-rule .badge::after{content:'';position:absolute;left:0;right:0;top:3px;height:1px;background:var(--ink-red);
+  opacity:.55}
+.b-rule .badge.calm{color:var(--line);border-top-color:var(--line)}
+.b-rule .badge.calm::after{background:var(--line)}
+
+/* ─── 2. Лента-баньероль: ширина по тексту, концы ласточкиным хвостом ─── */
+.b-ribbon .badge{left:4px;padding:3px 16px;background:var(--ink-red-deep);color:var(--ink-red-fg);
+  font-family:'PT Serif',serif;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+  clip-path:polygon(0 0,100% 0,calc(100% - 7px) 50%,100% 100%,0 100%,7px 50%)}
+.b-ribbon .badge::before{content:'';position:absolute;left:9px;right:9px;top:1.5px;height:1px;
+  background:rgba(255,255,255,.2)}
+.b-ribbon .badge::after{content:'';position:absolute;left:9px;right:9px;bottom:1.5px;height:1px;
+  background:rgba(0,0,0,.32)}
+.b-ribbon .badge.calm{background:var(--line);color:var(--card)}
+
+/* ─── 3. Картуш ─── */
+.b-cartouche .badge{left:6px;padding:3px 12px;font-family:'PT Serif',serif;font-size:8.5px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-red-fg);background:var(--ink-red-deep);
+  clip-path:polygon(5px 0,calc(100% - 5px) 0,100% 50%,calc(100% - 5px) 100%,5px 100%,0 50%);
+  box-shadow:none}
+.b-cartouche .badge::before{content:'';position:absolute;inset:1.5px;border:1px solid rgba(232,207,174,.5);
+  clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 50%,calc(100% - 4px) 100%,4px 100%,0 50%)}
+.b-cartouche .badge.calm{background:var(--line);color:var(--card)}
+.b-cartouche .badge.calm::before{border-color:rgba(46,47,39,.45)}
+
+/* ─── 4. Штемпель ─── */
+.b-stamp .badge{left:8px;padding:3px 13px;font-family:'PT Serif',serif;font-size:8px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-red);
+  border:1.2px solid var(--ink-red);border-radius:999px;background:none}
+.b-stamp .badge::before{content:'';position:absolute;inset:2px;border:.6px solid var(--ink-red);
+  border-radius:999px;opacity:.55}
+.b-stamp .badge.calm{color:var(--line);border-color:var(--line)}
+.b-stamp .badge.calm::before{border-color:var(--line)}
+
+/* ─── 5. Сноска с флёроном ─── */
+.b-note .badge{left:7px;margin-top:7px;font-family:'PT Serif',serif;font-style:italic;
+  font-size:10px;letter-spacing:.02em;text-transform:none;color:var(--ink-red);background:none}
+.b-note .badge::before{content:'✤';margin-right:6px;font-style:normal;font-size:8px;vertical-align:1px;
+  opacity:.85}
+.b-note .badge.calm{color:var(--mut)}
+</style>
+
+<div class="kicker">Викторианский · метки состояний</div>
+<h1>Метки, <em>не наклейки</em></h1>
+<p class="lede">Нынешние плашки — язык современных тегов: плоская заливка, скруглённый угол, кричащий бордо.
+Здесь пять способов сказать то же самое языком гравюры. В каждом ряду три состояния:
+выжжен из рода, скрыт от зрителей, также в другом роду.</p>
+
+<div class="bar">
+  <label><input type="checkbox" id="light"> светлая тема</label>
+  <label><input type="checkbox" id="veil" checked> вуаль на выжженном</label>
+</div>
+
+<div id="out"></div>
+
+<script>
+const STATES = [
+  {t:'выжжен из рода', cls:''},
+  {t:'скрыт от зрителей', cls:'calm'},
+  {t:'также в другом роду', cls:'calm'}
+];
+
+const TAKES = [
+  {k:'b-rule', n:'Наборная подпись', key:'rule',
+   t:'Плашки нет вовсе: текст в разрядку под наборной линейкой — толстая и тонкая вместе. Так подписывали гравюры, и карточка ничем не утяжеляется.'},
+  {k:'b-ribbon', n:'Лента-баньероль', key:'ribbon',
+   t:'Геральдическая лента с ласточкиным хвостом на концах, по краям две тихие линейки, будто ткань сложена. Самый нарядный вариант.'},
+  {k:'b-cartouche', n:'Картуш', key:'cartouche',
+   t:'Табличка со срезанными углами и внутренним кантом. Держит форму даже мелко, а срез углов убирает всякое сходство с кнопкой.'},
+  {k:'b-stamp', n:'Штемпель', key:'stamp',
+   t:'Двойная овальная обводка без заливки: только контур и буквы в разрядку. Ничего не закрашивает, читается как оттиск на полях.'},
+  {k:'b-note', n:'Сноска с флёроном', key:'note',
+   t:'Курсивная строка со звёздочкой-флёроном, без рамок и фона. Тише всех: годится, если меток на дереве много и они не должны кричать.'}
+];
+
+function draw(){
+  const veil = document.getElementById('veil').checked;
+  document.getElementById('out').innerHTML = TAKES.map(t => `
+    <div class="take">
+      <div class="strip ${t.k}">
+        ${STATES.map((s, i) => `
+          <div class="node">
+            <div class="box">
+              <div class="nm">${i === 0 ? 'Мэтью' : (i === 1 ? 'Иннис' : 'Айли')}</div>
+              <div class="yr">${i === 0 ? '1893 — 1971' : (i === 1 ? '1885 — 1962' : '1821 — 1903')}</div>
+            </div>
+            <div class="badge ${s.cls}">${s.t}</div>
+          </div>`).join('')}
+      </div>
+      <div class="cap"><b>${t.n}</b><span class="key">${t.key}</span><p>${t.t}</p></div>
+    </div>`).join('');
+}
+document.getElementById('light').onchange = e => document.body.classList.toggle('light', e.target.checked);
+document.getElementById('veil').onchange = draw;
+draw();
+</script>

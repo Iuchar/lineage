@@ -1,0 +1,152 @@
+<h2>Шаблон рабочего экрана</h2>
+<p class="subtitle">Раскладка A + панель человека + бейдж перехода. Данные настоящие — род Гленн Уриск, выбран Эоган (тот, что ушёл в Приграничье и основал Уинтерхоуп).</p>
+
+<style>
+  .app{border:1px solid #ddd6c8;border-radius:8px;overflow:hidden;background:#fdfcfa;
+       font-family:system-ui,-apple-system,sans-serif;color:#2c2620;box-shadow:0 2px 14px rgba(0,0,0,.06)}
+  .app-top{display:flex;align-items:center;gap:14px;padding:9px 14px;background:#2f2a24;color:#efe9dd}
+  .app-brand{font-size:13px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+  .app-tabs{display:flex;gap:4px;flex:1;overflow:hidden}
+  .tab{padding:5px 11px;border-radius:5px 5px 0 0;font-size:11.5px;white-space:nowrap;
+       background:rgba(255,255,255,.07);color:#cfc6b6;cursor:default}
+  .tab .cnt{opacity:.55;margin-left:5px;font-size:10px}
+  .tab.on{background:#fdfcfa;color:#2c2620;font-weight:600}
+  .tab.add{background:none;border:1px dashed rgba(255,255,255,.3);color:#cfc6b6}
+  .app-bar{display:flex;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid #e6e0d3;background:#f7f4ee}
+  .fld{flex:1;max-width:240px;padding:4px 9px;border:1px solid #ddd6c8;border-radius:5px;background:#fff;
+       font-size:11px;color:#9a9184}
+  .btn{padding:4px 10px;border:1px solid #ddd6c8;border-radius:5px;background:#fff;font-size:11px}
+  .btn.pri{background:#b4512b;border-color:#b4512b;color:#fff}
+  .seg{display:flex;border:1px solid #ddd6c8;border-radius:5px;overflow:hidden;font-size:11px}
+  .seg span{padding:4px 10px;background:#fff}
+  .seg span.on{background:#2f2a24;color:#efe9dd}
+  .app-main{display:flex;min-height:360px}
+  .canvas{flex:1;position:relative;background:
+      radial-gradient(circle at 1px 1px,#e4ddcf 1px,transparent 0) 0 0/22px 22px,#fbf9f4;overflow:hidden}
+  .stage{position:relative;width:720px;height:330px;margin:8px auto}
+  .stage svg{position:absolute;inset:0;width:720px;height:330px}
+  .nd{position:absolute;width:120px;height:54px;border:1px solid #b9ae99;border-radius:6px;background:#fff;
+      box-sizing:border-box;padding:7px 8px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+  .nd.m{background:#f4f7fc;border-color:#a9b7cc}
+  .nd.f{background:#fdf4f7;border-color:#d3b0bd}
+  .nd .nm{font-size:12px;font-weight:600;line-height:1.15}
+  .nd .yr{font-size:10px;color:#8a7f6d;margin-top:3px}
+  .nd.sel{border:2px solid #b4512b;box-shadow:0 0 0 4px rgba(180,81,43,.13)}
+  .xbadge{position:absolute;left:0;top:56px;display:inline-flex;align-items:center;gap:4px;
+      padding:2px 8px;border-radius:9px;background:#b4512b;color:#fff;font-size:9.5px;white-space:nowrap}
+  .zoom{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;
+      border:1px solid #ddd6c8;border-radius:5px;overflow:hidden;background:#fff;font-size:12px;color:#5b5346}
+  .zoom span{padding:3px 8px;text-align:center;border-bottom:1px solid #e6e0d3}
+  .zoom span:last-child{border:none}
+  .side{width:290px;border-left:1px solid #e6e0d3;background:#f7f4ee;padding:14px;box-sizing:border-box}
+  .por{width:56px;height:56px;border-radius:6px;background:#e8e2d6;border:1px solid #ddd6c8;
+       display:flex;align-items:center;justify-content:center;font-size:9px;color:#9a9184;flex:none}
+  .side h4{margin:0;font-size:15px}
+  .side .sub{font-size:10.5px;color:#8a7f6d;margin-top:2px}
+  .lab{font-size:9px;letter-spacing:.7px;color:#9a9184;margin:15px 0 6px}
+  .row{display:flex;justify-content:space-between;font-size:11.5px;padding:3px 0;border-bottom:1px dotted #e0d9ca}
+  .row b{font-weight:500;color:#8a7f6d}
+  .note{font-size:11px;line-height:1.45;background:#fff;border:1px solid #e6e0d3;border-radius:5px;padding:7px 8px}
+  .xrow{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;background:#fff;
+        border:1px solid #c9bfae;border-radius:5px;padding:7px 9px;margin-bottom:6px}
+  .xrow .cl{font-size:9.5px;color:#8a7f6d;display:block}
+  .side-acts{display:flex;gap:6px;margin-top:14px}
+  .pend{margin-top:10px;font-size:10.5px;background:#fff8e8;border:1px solid #e6cf9a;border-radius:5px;padding:7px 8px}
+</style>
+
+<div class="app">
+  <div class="app-top">
+    <div class="app-brand">Родословные</div>
+    <div class="app-tabs">
+      <div class="tab on">Гленн Уриск<span class="cnt">38</span></div>
+      <div class="tab">Уинтерхоуп<span class="cnt">62</span></div>
+      <div class="tab">О'Дувейн<span class="cnt">17</span></div>
+      <div class="tab">Монад Кройве<span class="cnt">84</span></div>
+      <div class="tab add">+ Загрузить .ged</div>
+    </div>
+  </div>
+
+  <div class="app-bar">
+    <div class="fld">Поиск по имени…</div>
+    <div class="seg"><span class="on">Просмотр</span><span>Правка</span></div>
+    <div class="btn">Связи между родами <b style="color:#b4512b">3</b></div>
+    <div style="flex:1"></div>
+    <div class="btn">Экспорт .ged</div>
+    <div class="btn pri">+ Человек</div>
+  </div>
+
+  <div class="app-main">
+    <div class="canvas">
+      <div class="stage">
+        <svg viewBox="0 0 720 330" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#a89c88" stroke-width="1.4">
+            <path d="M370 47 H380"/>
+            <path d="M375 47 V110 M150 110 H530 M150 110 V130 M530 110 V130"/>
+            <path d="M270 157 H275"/>
+            <path d="M272 157 V230 M90 230 H350 M90 230 V250 M220 230 V250 M350 230 V250"/>
+          </g>
+        </svg>
+
+        <div class="nd m" style="left:250px;top:20px"><div class="nm">Ниалл</div><div class="yr">1683 – 1791</div></div>
+        <div class="nd f" style="left:380px;top:20px"><div class="nm">Мор</div><div class="yr">1691 – 1779</div></div>
+
+        <div class="nd m" style="left:90px;top:130px"><div class="nm">Тормод</div><div class="yr">1712 – 1818</div></div>
+        <div class="nd f" style="left:215px;top:130px"><div class="nm">Аилса</div><div class="yr">1720 – 1812</div></div>
+
+        <div class="nd m sel" style="left:470px;top:130px"><div class="nm">Эоган</div><div class="yr">1719 – 1830</div>
+          <div class="xbadge">⇄ также в Уинтерхоуп</div>
+        </div>
+
+        <div class="nd m" style="left:30px;top:250px"><div class="nm">Мурдо</div><div class="yr">1748 – 1851</div></div>
+        <div class="nd f" style="left:160px;top:250px"><div class="nm">Юна</div><div class="yr">1752 – 1848</div></div>
+        <div class="nd m" style="left:290px;top:250px"><div class="nm">Кеннах</div><div class="yr">1755 – 1779</div></div>
+      </div>
+      <div class="zoom"><span>+</span><span>−</span><span>⤢</span></div>
+    </div>
+
+    <div class="side">
+      <div style="display:flex;gap:11px;align-items:flex-start">
+        <div class="por">портрет</div>
+        <div>
+          <h4>Эоган Гленн Уриск</h4>
+          <div class="sub">1719 – 1830 · 111 лет</div>
+        </div>
+      </div>
+
+      <div class="lab">СВЕДЕНИЯ</div>
+      <div class="row"><b>Пол</b><span>мужской</span></div>
+      <div class="row"><b>Отец</b><span>Ниалл</span></div>
+      <div class="row"><b>Мать</b><span>Мор</span></div>
+      <div class="row"><b>Брак</b><span>1 · дети: 1</span></div>
+
+      <div class="lab">ЗАМЕТКА</div>
+      <div class="note">Ушёл в Приграничье, основал род Уинтерхоуп. Принял имя долины.</div>
+
+      <div class="lab">ЭТОТ ЖЕ ЧЕЛОВЕК В ДРУГИХ РОДАХ</div>
+      <div class="xrow">
+        <span>Эоган Уинтерхоуп<span class="cl">Winterhope · 1719 – 1830</span></span>
+        <span style="color:#b4512b">›</span>
+      </div>
+      <div class="pend">Найдено ещё <b>2</b> вероятных совпадения между родами — проверить</div>
+
+      <div class="side-acts">
+        <div class="btn">Править</div>
+        <div class="btn">Связать с…</div>
+        <div class="btn">В центр</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:18px">
+  <div class="options">
+    <div class="option" data-choice="ok" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content"><h3>Так и делаем</h3><p>Раскладка, вкладки родов, панель справа, бейдж перехода — годится.</p></div>
+    </div>
+    <div class="option" data-choice="fix" onclick="toggleSelect(this)">
+      <div class="letter">✎</div>
+      <div class="content"><h3>Есть замечания</h3><p>Напиши в терминале, что поменять — перерисую.</p></div>
+    </div>
+  </div>
+</div>

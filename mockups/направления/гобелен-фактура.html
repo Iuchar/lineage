@@ -1,0 +1,220 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Гобелен — фактура полотна</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Caveat:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#12100d; --ink:#e9e0cc; --dim:#8a7f6c; --rule:#302619; --gold:#c8a44e;
+  --oak:#241a12; --wool:#ded2b6;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.65 'Cormorant Garamond',Georgia,serif;padding:36px 40px 90px}
+
+header{max-width:80ch;margin-bottom:30px}
+h1{font-size:31px;font-weight:400;margin:0 0 6px;letter-spacing:.02em}
+h1 em{font-style:italic;color:var(--gold)}
+.lede{color:var(--dim);margin:0}
+.lede code{font:400 12.5px/1 'IBM Plex Mono',monospace;color:var(--ink)}
+
+.bar{position:sticky;top:0;z-index:20;background:linear-gradient(var(--page) 76%,rgba(18,16,13,0));
+     padding:12px 0 15px;margin-bottom:22px;border-bottom:1px solid var(--rule);
+     display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.bar label{font:400 12px/1 'IBM Plex Mono',monospace;color:var(--dim);
+           display:flex;gap:9px;align-items:center;letter-spacing:.04em;cursor:pointer}
+.bar input[type=range]{width:190px;accent-color:var(--gold)}
+.bar input[type=checkbox]{accent-color:var(--gold)}
+.bar .val{color:var(--gold);min-width:120px}
+.bar button{font:400 12px/1 'IBM Plex Mono',monospace;color:var(--ink);background:none;
+            border:1px solid var(--rule);border-radius:2px;padding:6px 12px;cursor:pointer;letter-spacing:.05em}
+.bar button:hover{border-color:var(--gold);color:var(--gold)}
+.bar button.on{border-color:var(--gold);color:var(--gold)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:24px}
+figure{margin:0}
+.port{position:relative;height:230px;overflow:hidden;border:1px solid var(--rule);border-radius:2px;
+      background:var(--oak)}
+body.light .port{background:var(--wool)}
+.plate{position:absolute;left:0;top:0;width:1400px;height:1000px;transform-origin:0 0}
+.tex{position:absolute;inset:0}
+.screen .tex{position:absolute;inset:-2000px}   /* экранная фактура живёт вне масштабируемого слоя */
+
+.node{position:absolute;text-align:center;width:130px}
+.node .med{width:56px;height:56px;margin:0 auto;border-radius:50%;border:1.5px solid var(--gold);
+           background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.09),rgba(0,0,0,.35))}
+body.light .node .med{border-color:#8a6a24;
+           background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.75),rgba(0,0,0,.14))}
+.node .nm{font-size:18px;color:#eadfc4;margin-top:8px}
+.node .yr{font-family:'Caveat',cursive;font-size:14px;color:#a08d70}
+body.light .node .nm{color:#2c2a20} body.light .node .yr{color:#6f6851}
+.link{position:absolute;background:#7d6b52}
+body.light .link{background:#8d8163}
+
+figcaption{margin-top:9px}
+figcaption b{font-weight:600;font-size:19px}
+figcaption .tag{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;
+                margin-left:9px;padding:2px 7px;border-radius:2px;border:1px solid}
+.tag.stable{color:#8fae7e;border-color:#3f5137}
+.tag.jumpy{color:#c07a63;border-color:#5a3529}
+figcaption p{margin:4px 0 0;color:var(--dim);font-size:14px;line-height:1.5}
+figure.now figcaption b:after{content:' — сейчас';color:var(--dim);font-size:13px;font-weight:400}
+</style>
+
+<header>
+  <h1>Гобелен — <em>фактура полотна</em></h1>
+  <p class="lede">Нынешнее переплетение — решётка с шагом <code>3px</code> в координатах полотна.
+  При зуме 68 % шаг становится <code>2,04px</code>, и нить то попадает в пиксель, то делится между двумя.
+  Отсюда скачки. Тяни зум и смотри, какие фактуры стоят спокойно.
+  Помечены: <span style="color:#8fae7e">стабильна</span> — рисунок не пляшет,
+  <span style="color:#c07a63">пляшет</span> — тот же порок, что сейчас.</p>
+</header>
+
+<div class="bar">
+  <label>зум <input type="range" id="z" min="20" max="250" value="100"><span class="val" id="zv"></span></label>
+  <label>сдвиг <input type="range" id="pan" min="0" max="200" value="0"></label>
+  <button id="anim">качать зум</button>
+  <label><input type="checkbox" id="light"> светлая тема</label>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+/* фактуры: css — фон масштабируемого слоя, svg — узор внутри него,
+   screen — слой поверх, в экранных пикселях (зум его не трогает) */
+const T = [
+  {n:'Полотняное 3 px', kind:'css', mode:'полотно', jumpy:true, now:true,
+   css:d=>`repeating-linear-gradient(90deg,${d?'rgba(0,0,0,.2)':'rgba(84,70,40,.14)'} 0 1px,transparent 1px 3px),
+           repeating-linear-gradient(0deg,${d?'rgba(255,236,196,.035)':'rgba(255,255,255,.3)'} 0 1px,transparent 1px 3px)`,
+   note:'Нынешнее. Шаг меньше четырёх пикселей, поэтому на любом дробном зуме нить рвётся и мерцает.'},
+
+  {n:'Полотняное 8 px', kind:'css', mode:'полотно', jumpy:true,
+   css:d=>`repeating-linear-gradient(90deg,${d?'rgba(0,0,0,.16)':'rgba(84,70,40,.12)'} 0 1px,transparent 1px 8px),
+           repeating-linear-gradient(0deg,${d?'rgba(255,236,196,.03)':'rgba(255,255,255,.26)'} 0 1px,transparent 1px 8px)`,
+   note:'Тот же приём, но нити реже. Пляшет заметно меньше, хотя на мелком зуме всё равно рябит.'},
+
+  {n:'Репс — только основа', kind:'css', mode:'полотно', jumpy:true,
+   css:d=>`repeating-linear-gradient(90deg,${d?'rgba(0,0,0,.18)':'rgba(84,70,40,.13)'} 0 1px,transparent 1px 6px)`,
+   note:'Убран уток, остались вертикальные нити. Вдвое меньше поводов для муара, ткань ещё читается.'},
+
+  {n:'Саржа', kind:'css', mode:'полотно', jumpy:true,
+   css:d=>`repeating-linear-gradient(45deg,${d?'rgba(0,0,0,.15)':'rgba(84,70,40,.1)'} 0 1px,transparent 1px 7px)`,
+   note:'Диагональный рубчик, как на твиде. Косая линия сглаживается и мерцает мягче прямой.'},
+
+  {n:'Рогожка', kind:'svg', mode:'полотно', jumpy:true, cell:16,
+   svg:d=>`<g fill="${d?'rgba(255,236,196,.05)':'rgba(255,255,255,.34)'}">
+     <rect x="0" y="0" width="8" height="8"/><rect x="8" y="8" width="8" height="8"/></g>
+   <g fill="${d?'rgba(0,0,0,.16)':'rgba(84,70,40,.1)'}">
+     <rect x="8" y="0" width="8" height="8"/><rect x="0" y="8" width="8" height="8"/></g>`,
+   note:'Крупный шахматный переплёт корзинкой. Клетки большие, поэтому дробный зум их почти не портит.'},
+
+  {n:'Узелки', kind:'svg', mode:'полотно', jumpy:false, cell:14,
+   svg:d=>`<g fill="${d?'rgba(255,236,196,.07)':'rgba(255,255,255,.4)'}">
+     <circle cx="3.5" cy="3.5" r="1"/><circle cx="10.5" cy="10.5" r="1"/></g>
+   <g fill="${d?'rgba(0,0,0,.16)':'rgba(84,70,40,.12)'}">
+     <circle cx="10.5" cy="3.5" r="1"/><circle cx="3.5" cy="10.5" r="1"/></g>`,
+   note:'Точки на пересечениях нитей вместо самих нитей. Круг не выстраивается в линию, и муару нечего усиливать.'},
+
+  {n:'Крупа', kind:'noise', mode:'полотно', jumpy:false, freq:.9, oct:2, op:d=>d?.055:.09,
+   note:'Шум вместо решётки: тканое зерно без регулярности. Совсем не мерцает, но и на ткань не похоже.'},
+
+  {n:'Волокно', kind:'noise', mode:'полотно', jumpy:false, freq:'.011 .82', oct:2, op:d=>d?.08:.13,
+   note:'Тот же шум, растянутый по горизонтали: получаются волокна утка. Ткань угадывается, ряби нет.'},
+
+  {n:'Ворс', kind:'css', mode:'полотно', jumpy:false,
+   css:d=>`radial-gradient(120px 90px at 22% 28%,${d?'rgba(255,236,196,.05)':'rgba(255,255,255,.3)'},transparent 70%),
+           radial-gradient(160px 120px at 74% 68%,${d?'rgba(0,0,0,.2)':'rgba(84,70,40,.09)'},transparent 72%),
+           radial-gradient(90px 70px at 52% 88%,${d?'rgba(255,236,196,.04)':'rgba(255,255,255,.24)'},transparent 70%)`,
+   size:'380px 300px',
+   note:'Не нити, а мягкие пятна ворса и света. Фактура есть, решётки нет, плясать нечему.'},
+
+  {n:'Экранное полотно', kind:'css', mode:'экран', jumpy:false,
+   css:d=>`repeating-linear-gradient(90deg,${d?'rgba(0,0,0,.2)':'rgba(84,70,40,.14)'} 0 1px,transparent 1px 3px),
+           repeating-linear-gradient(0deg,${d?'rgba(255,236,196,.035)':'rgba(255,255,255,.3)'} 0 1px,transparent 1px 3px)`,
+   note:'Та же решётка, но живёт в пикселях экрана и при зуме не растягивается. Ткань остаётся тканью, а не увеличенной сеткой.'},
+
+  {n:'Голое полотно', kind:'none', mode:'—', jumpy:false,
+   note:'Фактуры нет вовсе. Цвет дуба ровный, всё внимание на медальоны и нити.'}
+];
+
+const G = document.getElementById('grid');
+
+function texture(t, i, dark){
+  if(t.kind === 'none') return '';
+  if(t.kind === 'css')
+    return `<div class="tex" style="background-image:${t.css(dark)}${t.size?`;background-size:${t.size}`:''}"></div>`;
+  if(t.kind === 'svg'){
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${t.cell}' height='${t.cell}'>${t.svg(dark)}</svg>`;
+    return `<div class="tex" style="background-image:url(&quot;data:image/svg+xml;utf8,${encodeURIComponent(svg)}&quot;);
+            background-size:${t.cell}px ${t.cell}px"></div>`;
+  }
+  const f = typeof t.freq === 'string' ? t.freq : t.freq;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'>
+    <filter id='n'><feTurbulence type='fractalNoise' baseFrequency='${f}' numOctaves='${t.oct}'/></filter>
+    <rect width='240' height='240' filter='url(#n)' opacity='${t.op(dark)}'/></svg>`;
+  return `<div class="tex" style="background-image:url(&quot;data:image/svg+xml;utf8,${encodeURIComponent(svg)}&quot;);
+          background-size:240px 240px"></div>`;
+}
+
+function scene(){
+  return `
+    <div class="link" style="left:120px;top:96px;width:150px;height:1.2px"></div>
+    <div class="link" style="left:194px;top:96px;width:1.2px;height:96px"></div>
+    <div class="link" style="left:80px;top:192px;width:230px;height:1.2px"></div>
+    <div class="link" style="left:80px;top:192px;width:1.2px;height:44px"></div>
+    <div class="link" style="left:310px;top:192px;width:1.2px;height:44px"></div>
+    <div class="node" style="left:56px;top:68px"><div class="med"></div>
+      <div class="nm">Иона</div><div class="yr">1937</div></div>
+    <div class="node" style="left:206px;top:68px"><div class="med"></div>
+      <div class="nm">Малькольм</div><div class="yr">1941</div></div>
+    <div class="node" style="left:16px;top:236px"><div class="med"></div>
+      <div class="nm">Финлэй</div><div class="yr">1982</div></div>
+    <div class="node" style="left:246px;top:236px"><div class="med"></div>
+      <div class="nm">Диан</div><div class="yr">1991</div></div>`;
+}
+
+function build(){
+  const dark = !document.body.classList.contains('light');
+  G.innerHTML = T.map((t, i) => `
+    <figure${t.now ? ' class="now"' : ''}>
+      <div class="port${t.mode === 'экран' ? ' screen' : ''}" data-i="${i}">
+        ${t.mode === 'экран' ? texture(t, i, dark) : ''}
+        <div class="plate">${t.mode === 'экран' ? '' : texture(t, i, dark)}${scene()}</div>
+      </div>
+      <figcaption>
+        <b>${t.n}</b><span class="tag ${t.jumpy ? 'jumpy' : 'stable'}">${t.jumpy ? 'пляшет' : 'стабильна'}</span>
+        <p>${t.note}</p>
+      </figcaption>
+    </figure>`).join('');
+  apply();
+}
+
+function apply(){
+  const k = +document.getElementById('z').value / 100;
+  const p = +document.getElementById('pan').value;
+  document.getElementById('zv').textContent = Math.round(k*100) + ' % · нить ' + (3*k).toFixed(2) + ' px';
+  document.querySelectorAll('.port').forEach(port => {
+    port.querySelector('.plate').style.transform = `translate(${-p*k}px,${-p*.5*k}px) scale(${k})`;
+    const scr = port.querySelector('.screen > .tex');
+    if(scr) scr.style.backgroundPosition = `${-p*k}px ${-p*.5*k}px`;   /* экранная фактура едет, но не растёт */
+  });
+}
+
+['z','pan'].forEach(id => document.getElementById(id).oninput = apply);
+document.getElementById('light').onchange = e => {
+  document.body.classList.toggle('light', e.target.checked); build();
+};
+let raf = null, t0 = 0;
+document.getElementById('anim').onclick = e => {
+  e.target.classList.toggle('on');
+  if(raf){ cancelAnimationFrame(raf); raf = null; return; }
+  t0 = performance.now();
+  (function tick(now){
+    const z = document.getElementById('z');
+    z.value = 100 + 78*Math.sin((now - t0)/1400);
+    apply(); raf = requestAnimationFrame(tick);
+  })(t0);
+};
+build();
+</script>

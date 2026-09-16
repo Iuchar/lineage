@@ -1,0 +1,113 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Викторианский — лента без заливки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=PT+Serif:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--page:#0c0d0e;--ink:#ece5d6;--dim:#8a8375;--rule:#222325;--gold:#b99a52;
+      --bg:#262721;--card:#2e2f27;--line:#7c6a3c;--fg:#f2e8d2;--mut:#a09578;
+      --mark:#a8503d;--mark-deep:#63202a;--mark-fg:#f2e0c4}
+body.light{--bg:#efe9dc;--card:#fbf8ef;--line:#a9986a;--fg:#231f16;--mut:#7d7358;
+      --mark:#8d2a33;--mark-deep:#7a2230;--mark-fg:#f6ead4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:400 15px/1.6 'PT Serif',Georgia,serif;
+     padding:34px 42px 80px}
+h1{font-family:'Playfair Display',serif;font-size:32px;font-weight:400;margin:0 0 8px}
+h1 em{font-style:italic}
+.lede{color:var(--dim);max-width:76ch;margin:0 0 20px;font-size:14.5px}
+.bar{position:sticky;top:0;z-index:9;background:linear-gradient(var(--page) 76%,rgba(12,13,14,0));
+     padding:10px 0 12px;margin-bottom:20px;border-bottom:1px solid var(--rule);display:flex;gap:22px}
+.bar label{font:400 12px/1 'IBM Plex Mono',monospace;color:var(--dim);display:flex;gap:8px;
+           align-items:center;cursor:pointer;letter-spacing:.05em}
+.bar input{accent-color:var(--gold)}
+.take{border:1px solid var(--rule);border-radius:2px;margin-bottom:16px;overflow:hidden}
+.strip{display:flex;gap:40px;padding:26px 30px 40px;background:var(--bg);
+  background-image:radial-gradient(circle at 14px 14px,rgba(185,154,82,.11) 1.1px,transparent 1.4px);
+  background-size:58px 58px}
+body.light .strip{background-image:radial-gradient(circle at 14px 14px,rgba(122,95,32,.12) 1.1px,transparent 1.4px)}
+.cap{padding:11px 16px 14px;background:#15161a;display:flex;gap:18px;align-items:baseline}
+.cap b{font-family:'Playfair Display',serif;font-size:17px;font-weight:400;white-space:nowrap}
+.cap .key{font:500 9.5px/1 'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
+.cap p{margin:0;color:var(--dim);font-size:13.5px;line-height:1.5}
+
+.node{position:relative;width:150px;height:60px;font-family:'Playfair Display',Georgia,serif;text-align:center}
+.box{position:absolute;inset:0;background:var(--card);border:1px solid var(--line)}
+.box::after{content:'';position:absolute;inset:3px;border:1px solid var(--line);opacity:.42}
+.inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.nm{position:relative;z-index:3;font-size:16px;font-weight:700;color:var(--fg);line-height:1.1}
+.yr{position:relative;z-index:3;font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;
+    color:var(--mut);margin-top:3px}
+.badge{position:absolute;top:100%;white-space:nowrap;font-family:'PT Serif',serif;
+       text-transform:uppercase}
+.badge i{font-style:normal}
+
+/* 0 — нынешняя лента с заливкой (для сверки) */
+.r-solid .badge{left:11px;margin-top:6px;font-size:8px;letter-spacing:.2em;color:var(--mark-fg)}
+.r-solid .badge i{display:block;padding:2px 13px;background:var(--mark-deep);
+  clip-path:polygon(0 0,100% 0,calc(100% - 6px) 50%,100% 100%,0 100%,6px 50%)}
+
+/* 1 — контурная лента: только обводка и буквы */
+.r-outline .badge{left:8px;margin-top:6px;font-size:8px;letter-spacing:.2em;color:var(--mark)}
+.r-outline .badge i{display:block;padding:2px 12px;border:1px solid currentColor;
+  clip-path:polygon(0 0,100% 0,calc(100% - 6px) 50%,100% 100%,0 100%,6px 50%)}
+.r-outline .badge.calm{color:var(--line)}
+
+/* 2 — нить с подписью: линия через карточку, текст в разрыве */
+.r-thread .badge{left:0;right:0;margin-top:9px;text-align:center;font-size:8px;letter-spacing:.2em;
+  color:var(--mark)}
+.r-thread .badge::before,.r-thread .badge::after{content:'';position:absolute;top:50%;height:1px;
+  background:currentColor;opacity:.75}
+.r-thread .badge::before{left:2px;right:calc(50% + 46px)}
+.r-thread .badge::after{right:2px;left:calc(50% + 46px)}
+.r-thread .badge.calm{color:var(--line)}
+
+/* 3 — две линейки с загнутыми концами */
+.r-hem .badge{left:9px;margin-top:7px;font-size:8px;letter-spacing:.2em;color:var(--mark)}
+.r-hem .badge i{display:block;padding:2.5px 10px;border-top:1px solid currentColor;
+  border-bottom:1px solid currentColor}
+.r-hem .badge::before,.r-hem .badge::after{content:'';position:absolute;top:0;bottom:0;width:1px;
+  background:currentColor;opacity:.55}
+.r-hem .badge::before{left:0} .r-hem .badge::after{right:0}
+.r-hem .badge.calm{color:var(--line)}
+</style>
+
+<h1>Лента <em>без заливки</em></h1>
+<p class="lede">Плотная заливка с бликом и тенью читается как кнопка при любых пропорциях.
+Гравюра говорит линиями, поэтому здесь ленты нарисованы контуром. Первый ряд — нынешний вариант для сверки.</p>
+
+<div class="bar"><label><input type="checkbox" id="light"> светлая тема</label></div>
+<div id="out"></div>
+
+<script>
+const STATES = [
+  {t:'выжжен из рода', c:''},
+  {t:'скрыт от зрителей', c:'calm'},
+  {t:'также в другом роду', c:'calm'}
+];
+const TAKES = [
+  {k:'r-solid', n:'Заливка', key:'сейчас',
+   t:'Полотнище закрашено, сверху блик, снизу тень. Именно объём и делает её кнопкой.'},
+  {k:'r-outline', n:'Контурная лента', key:'outline',
+   t:'Та же форма с ласточкиным хвостом, но только обводка в один волосок и буквы того же цвета. Ничего не закрашено — знак остаётся гравюрой.'},
+  {k:'r-thread', n:'Нить с подписью', key:'thread',
+   t:'Тонкая линия идёт под карточкой во всю ширину и расступается в середине, пропуская слова. Самый лёгкий вариант из трёх.'},
+  {k:'r-hem', n:'Две линейки', key:'hem',
+   t:'Текст зажат между двумя волосяными линейками, по краям короткие вертикальные засечки — концы подшивки. Формы кнопки нет вовсе.'}
+];
+const person = (t,i,s) => `
+  <div class="node">
+    <div class="box"></div>
+    <div class="inner">
+      <div class="nm">${['Мэтью','Иннис','Айли'][i]}</div>
+      <div class="yr">${['1893 — 1971','1885 — 1962','1821 — 1903'][i]}</div>
+    </div>
+    <div class="badge ${s.c}"><i>${s.t}</i></div>
+  </div>`;
+document.getElementById('out').innerHTML = TAKES.map(t => `
+  <div class="take">
+    <div class="strip ${t.k}">${STATES.map((s,i)=>person(t,i,s)).join('')}</div>
+    <div class="cap"><b>${t.n}</b><span class="key">${t.key}</span><p>${t.t}</p></div>
+  </div>`).join('');
+document.getElementById('light').onchange = e => document.body.classList.toggle('light', e.target.checked);
+</script>

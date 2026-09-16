@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "rodoslovnye",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "--project", "server", "rodoslovnye"],
+      "port": 8710
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Спуск к детям: варианты</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Playfair+Display:wght@400;700&family=Caveat:wght@400;600&family=Golos+Text:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 30px 80px;background:#101113;color:#e6e2d8;font-family:'Golos Text',system-ui,sans-serif}
+  h1{font-family:'Playfair Display',serif;font-size:25px;margin:0 0 6px;color:#f4f1ea}
+  h2{font-family:'Playfair Display',serif;font-size:18px;margin:28px 0 12px;color:#f4f1ea}
+  .lede{color:#a49d8f;font-size:13.5px;max-width:84ch;line-height:1.55;margin:0 0 20px}
+  .var{border:1px solid #2b2e33;border-radius:9px;overflow:hidden;margin-bottom:16px;background:#17181b}
+  .head{display:flex;align-items:baseline;gap:10px;padding:10px 14px;border-bottom:1px solid #2b2e33}
+  .head b{font:500 10.5px/1 'IBM Plex Mono',monospace;color:#c08a4a;letter-spacing:.14em}
+  .head h3{margin:0;font-family:'Playfair Display',serif;font-size:16px;color:#f4f1ea}
+  .st{position:relative;background:#1c2420;
+      background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px),
+                       repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px)}
+  .st svg{position:absolute;left:0;top:0}
+  .n{position:absolute;width:104px;text-align:center;font-family:'Cormorant Garamond',serif;z-index:2}
+  .halo{width:56px;height:56px;margin:0 auto;border-radius:50%;border:1.5px solid #c8a44e;
+    background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.09),rgba(0,0,0,.35))}
+  .halo.ghost{border-style:dashed;border-color:#5d6a58;background:none}
+  .nm{font-size:17px;color:#ece0c2;margin-top:8px}
+  .nm.faint{color:#6f7c69}
+  .yr{font-family:'Caveat',cursive;font-size:13px;color:#93a08f}
+  .ord{font-family:'Caveat',cursive;font-size:14px;color:#a9b5a0;height:18px;line-height:18px}
+  .note{padding:10px 14px 13px;font-size:12.5px;line-height:1.5;color:#a49d8f}
+  .note b{color:#e6e2d8;font-weight:500}
+</style>
+</head><body>
+
+<h1>Спуск к детям: варианты оформления</h1>
+<p class="lede">Слева направо всё то же дерево гобелена. Первый блок про случай, когда известен только один родитель. Второй про многобрачного отца, у которого выводки от разных жён.</p>
+
+<h2>Один известный родитель</h2>
+
+<div class="var">
+  <div class="head"><b>А</b><h3>Как сейчас: линия из-под середины медальона</h3></div>
+  <div class="st" style="height:230px">
+    <svg width="800" height="230">
+      <g fill="none" stroke="#6d7a68" stroke-width="1.3">
+        <path d="M112 116 V168 H112 V184"/>
+      </g>
+    </svg>
+    <div class="n" style="left:60px;top:30px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Беатрис</div><div class="yr">1881 — 1944</div></div>
+    <div class="n" style="left:60px;top:150px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Джеральд</div><div class="yr">1903 — 1944</div></div>
+  </div>
+  <div class="note"><b>Что не так:</b> линия выходит ровно из-под центра круга и выглядит как черта, проткнувшая человека. Непонятно, почему у одних связь идёт из промежутка между супругами, а у других из самого лица.</div>
+</div>
+
+<div class="var">
+  <div class="head"><b>Б</b><h3>Полупара: место второго родителя обозначено пунктиром</h3></div>
+  <div class="st" style="height:230px">
+    <svg width="800" height="230">
+      <g fill="none" stroke="#6d7a68" stroke-width="1.3">
+        <path d="M180 116 V168 H112 V184"/>
+      </g>
+      <g stroke="#7c8a76" stroke-width="1.5" stroke-linecap="round" opacity=".7" fill="none">
+        <path d="M156 92 l6 -8 M168 92 l6 -8 M180 92 l6 -8"/>
+      </g>
+    </svg>
+    <div class="n" style="left:60px;top:30px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Беатрис</div><div class="yr">1881 — 1944</div></div>
+    <div class="n" style="left:196px;top:30px"><div class="ord">&nbsp;</div><div class="halo ghost"></div>
+      <div class="nm faint">не записан</div><div class="yr">&nbsp;</div></div>
+    <div class="n" style="left:60px;top:150px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Джеральд</div><div class="yr">1903 — 1944</div></div>
+  </div>
+  <div class="note"><b>Идея:</b> место супруга не пустует, а занято пунктирным кругом с подписью «не записан». Связь идёт из середины пары, как у всех остальных, поэтому единое правило сохраняется. <b>Цена:</b> дерево становится шире, а на больших родах таких призраков может набраться много.</div>
+</div>
+
+<div class="var">
+  <div class="head"><b>В</b><h3>Крючок: спуск от края медальона, а не из центра</h3></div>
+  <div class="st" style="height:230px">
+    <svg width="800" height="230">
+      <g fill="none" stroke="#6d7a68" stroke-width="1.3">
+        <path d="M140 88 C152 88 152 104 140 104 C128 104 128 120 140 120 V168 H112 V184"/>
+      </g>
+    </svg>
+    <div class="n" style="left:60px;top:30px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Беатрис</div><div class="yr">1881 — 1944</div></div>
+    <div class="n" style="left:60px;top:150px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Джеральд</div><div class="yr">1903 — 1944</div></div>
+  </div>
+  <div class="note"><b>Идея:</b> связь выходит сбоку от медальона витым завитком, как оборванная нить, и уже потом уходит вниз. Ничего не протыкает, дерево не расширяется. <b>Цена:</b> новый графический приём, которого больше нигде нет; на плотном дереве завитки могут спорить со стежками браков.</div>
+</div>
+
+<h2>Многобрачный отец: три выводка</h2>
+
+<div class="var">
+  <div class="head"><b>Г</b><h3>Как сейчас: три шины на разной высоте</h3></div>
+  <div class="st" style="height:260px">
+    <svg width="800" height="260">
+      <g fill="none" stroke="#6d7a68" stroke-width="1.3">
+        <path d="M256 116 V150 H80 V186"/>
+        <path d="M392 116 V184 H240 V196"/>
+        <path d="M528 116 V218 H470 V226"/>
+      </g>
+    </svg>
+    <div class="n" style="left:204px;top:30px"><div class="ord">первая</div><div class="halo"></div>
+      <div class="nm">Иона</div><div class="yr">1937</div></div>
+    <div class="n" style="left:340px;top:30px"><div class="ord">вторая</div><div class="halo"></div>
+      <div class="nm">Финнула</div><div class="yr">1942</div></div>
+    <div class="n" style="left:476px;top:30px"><div class="ord">третья</div><div class="halo"></div>
+      <div class="nm">Элспет</div><div class="yr">1934</div></div>
+    <div class="n" style="left:28px;top:186px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Финлэй</div><div class="yr">1982</div></div>
+    <div class="n" style="left:188px;top:196px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Диан</div><div class="yr">1991</div></div>
+    <div class="n" style="left:418px;top:226px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Кеннет</div><div class="yr">1976</div></div>
+  </div>
+  <div class="note"><b>Что не так:</b> шины тянутся через весь ярус и пересекают друг друга. Высота помогает мало: три длинные горизонтали всё равно читаются как решётка.</div>
+</div>
+
+<div class="var">
+  <div class="head"><b>Д</b><h3>Ёлочка: у каждого ребёнка своя наклонная ветвь</h3></div>
+  <div class="st" style="height:260px">
+    <svg width="800" height="260">
+      <g fill="none" stroke="#6d7a68" stroke-width="1.3" stroke-linejoin="round">
+        <path d="M256 116 V140 L80 178 V186"/>
+        <path d="M392 116 V140 L240 188 V196"/>
+        <path d="M528 116 V140 L470 218 V226"/>
+      </g>
+    </svg>
+    <div class="n" style="left:204px;top:30px"><div class="ord">первая</div><div class="halo"></div>
+      <div class="nm">Иона</div><div class="yr">1937</div></div>
+    <div class="n" style="left:340px;top:30px"><div class="ord">вторая</div><div class="halo"></div>
+      <div class="nm">Финнула</div><div class="yr">1942</div></div>
+    <div class="n" style="left:476px;top:30px"><div class="ord">третья</div><div class="halo"></div>
+      <div class="nm">Элспет</div><div class="yr">1934</div></div>
+    <div class="n" style="left:28px;top:186px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Финлэй</div><div class="yr">1982</div></div>
+    <div class="n" style="left:188px;top:196px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Диан</div><div class="yr">1991</div></div>
+    <div class="n" style="left:418px;top:226px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Кеннет</div><div class="yr">1976</div></div>
+  </div>
+  <div class="note"><b>Идея:</b> горизонтальных шин нет вовсе. От каждого союза идёт короткий стебель, а дальше к ребёнку тянется одна наклонная ветвь. Пересечений почти не бывает, потому что наклоны разные. <b>Цена:</b> ломается прямоугольная геометрия, дерево становится похоже на схему связей, а не на роспись.</div>
+</div>
+
+<div class="var">
+  <div class="head"><b>Е</b><h3>Коромысло: шина только над своим выводком</h3></div>
+  <div class="st" style="height:260px">
+    <svg width="800" height="260">
+      <g fill="none" stroke="#6d7a68" stroke-width="1.3">
+        <path d="M256 116 V150 H80 V186"/>
+        <path d="M392 116 V150 H240 V196"/>
+        <path d="M528 116 V150 H470 V226"/>
+        <path d="M80 150 h0"/>
+      </g>
+      <g fill="#c8a44e"><circle cx="256" cy="150" r="2.4"/><circle cx="392" cy="150" r="2.4"/><circle cx="528" cy="150" r="2.4"/></g>
+    </svg>
+    <div class="n" style="left:204px;top:30px"><div class="ord">первая</div><div class="halo"></div>
+      <div class="nm">Иона</div><div class="yr">1937</div></div>
+    <div class="n" style="left:340px;top:30px"><div class="ord">вторая</div><div class="halo"></div>
+      <div class="nm">Финнула</div><div class="yr">1942</div></div>
+    <div class="n" style="left:476px;top:30px"><div class="ord">третья</div><div class="halo"></div>
+      <div class="nm">Элспет</div><div class="yr">1934</div></div>
+    <div class="n" style="left:28px;top:186px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Финлэй</div><div class="yr">1982</div></div>
+    <div class="n" style="left:188px;top:196px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Диан</div><div class="yr">1991</div></div>
+    <div class="n" style="left:418px;top:226px"><div class="ord">&nbsp;</div><div class="halo"></div>
+      <div class="nm">Кеннет</div><div class="yr">1976</div></div>
+  </div>
+  <div class="note"><b>Идея:</b> шины остаются прямоугольными и на одной высоте, но каждая начинается точкой у своего союза и идёт только до своих детей, не пересекая чужие. Разной длины вертикали к детям разводят линии. <b>Цена:</b> при сильном разбросе детей шина всё равно длинная, зато их не три штуки друг под другом.</div>
+</div>
+
+<p style="color:#8f887b;font-size:12.5px;margin-top:22px">Выбери букву для одиночного родителя (А, Б или В) и для многобрачия (Г, Д или Е).</p>
+</body></html>

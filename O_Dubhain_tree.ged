@@ -1,0 +1,237 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+1 SOUR FAMYTALE
+2 NAME FamyTale
+2 VERS 5.5.1
+0 @I3001@ INDI
+1 NAME Дара /О'Дувейн/
+2 GIVN Дара
+2 SURN О'Дувейн
+1 SEX M
+1 BIRT
+2 DATE 1878
+1 DEAT
+2 DATE 1974
+1 EVEN Основатель рода
+2 TYPE Comment
+1 FAMS @F3001@
+0 @I3002@ INDI
+1 NAME Бриджид /О'Дувейн/
+2 GIVN Бриджид
+2 SURN Куинн
+2 _MARNM О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 1882
+1 DEAT
+2 DATE 1975
+1 EVEN Со стороны
+2 TYPE Comment
+1 FAMS @F3001@
+0 @I3003@ INDI
+1 NAME Фергус /О'Дувейн/
+2 GIVN Фергус
+2 SURN О'Дувейн
+1 SEX M
+1 BIRT
+2 DATE 1904
+1 DEAT
+2 DATE 1996
+1 EVEN Приёмный отец Кормака
+2 TYPE Comment
+1 FAMS @F3002@
+1 FAMC @F3001@
+0 @I3004@ INDI
+1 NAME Ниав /О'Дувейн/
+2 GIVN Ниав
+2 SURN О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 1908
+1 DEAT
+2 DATE 2001
+1 EVEN Мать Кормака; сын усыновлён её братом Фергусом
+2 TYPE Comment
+1 FAMC @F3001@
+0 @I3005@ INDI
+1 NAME Ронан /О'Дувейн/
+2 GIVN Ронан
+2 SURN О'Дувейн
+1 SEX M
+1 BIRT
+2 DATE 1912
+1 DEAT
+2 DATE 2009
+1 FAMS @F3003@
+1 FAMC @F3001@
+0 @I3006@ INDI
+1 NAME Эйнер /О'Дувейн/
+2 GIVN Эйнер
+2 SURN Кэссиди
+2 _MARNM О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 1910
+1 DEAT
+2 DATE 2003
+1 EVEN Со стороны
+2 TYPE Comment
+1 EVEN Жена Фергуса
+2 TYPE Comment
+1 FAMS @F3002@
+0 @I3007@ INDI
+1 NAME Эйлиш /О'Дувейн/
+2 GIVN Эйлиш
+2 SURN О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 1916
+1 DEAT
+2 DATE 2009
+1 EVEN Жена Ронана
+2 TYPE Comment
+1 EVEN Родители не записаны
+2 TYPE Comment
+1 FAMS @F3003@
+0 @I3008@ INDI
+1 NAME Кормак /О'Дувейн/
+2 GIVN Кормак
+2 SURN О'Дувейн
+1 SEX M
+1 BIRT
+2 DATE 1934
+1 DEAT
+2 DATE 2018
+1 EVEN Внебрачный сын Родерика Уинтерхоупа, усыновлён дядей Фергусом
+2 TYPE Comment
+1 EVEN Женат не был
+2 TYPE Comment
+1 FAMS @F3004@
+1 FAMC @F3002@
+0 @I3009@ INDI
+1 NAME Тадг /О'Дувейн/
+2 GIVN Тадг
+2 SURN О'Дувейн
+1 SEX M
+1 BIRT
+2 DATE 1938
+1 EVEN Двоюродные
+2 TYPE Comment
+1 FAMS @F3005@
+1 FAMC @F3002@
+0 @I3010@ INDI
+1 NAME Мэйв /О'Дувейн/
+2 GIVN Мэйв
+2 SURN О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 1942
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F3002@
+0 @I3011@ INDI
+1 NAME Ойфе /О'Дувейн/
+2 GIVN Ойфе
+2 SURN О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 1940
+1 DEAT
+2 DATE 2019
+1 EVEN Двоюродные
+2 TYPE Comment
+1 FAMS @F3005@
+1 FAMC @F3003@
+0 @I3012@ INDI
+1 NAME Гранья /О'Дувейн/
+2 GIVN Гранья
+2 SURN О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 1964
+1 EVEN Троюродные
+2 TYPE Comment
+1 EVEN Дочь Кормака
+2 TYPE Comment
+1 FAMS @F3006@
+1 FAMC @F3004@
+0 @I3013@ INDI
+1 NAME Киран /О'Дувейн/
+2 GIVN Киран
+2 SURN О'Дувейн
+1 SEX M
+1 BIRT
+2 DATE 1968
+1 EVEN Троюродные
+2 TYPE Comment
+1 FAMS @F3006@
+1 FAMC @F3005@
+0 @I3014@ INDI
+1 NAME Бриджид /О'Дувейн/
+2 GIVN Бриджид
+2 SURN О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 1972
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F3005@
+0 @I3015@ INDI
+1 NAME Аоибе /О'Дувейн/
+2 GIVN Аоибе
+2 SURN О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 2001
+1 FAMC @F3006@
+0 @I3016@ INDI
+1 NAME Дара /О'Дувейн/
+2 GIVN Дара
+2 SURN О'Дувейн
+1 SEX M
+1 BIRT
+2 DATE 2005
+1 FAMC @F3006@
+0 @I3017@ INDI
+1 NAME Ниав /О'Дувейн/
+2 GIVN Ниав
+2 SURN О'Дувейн
+1 SEX F
+1 BIRT
+2 DATE 2010
+1 FAMC @F3006@
+0 @F3001@ FAM
+1 HUSB @I3001@
+1 WIFE @I3002@
+1 CHIL @I3003@
+1 CHIL @I3004@
+1 CHIL @I3005@
+0 @F3002@ FAM
+1 HUSB @I3003@
+1 WIFE @I3006@
+1 CHIL @I3008@
+1 CHIL @I3009@
+1 CHIL @I3010@
+0 @F3003@ FAM
+1 HUSB @I3005@
+1 WIFE @I3007@
+1 CHIL @I3011@
+0 @F3004@ FAM
+1 HUSB @I3008@
+1 CHIL @I3012@
+0 @F3005@ FAM
+1 HUSB @I3009@
+1 WIFE @I3011@
+1 CHIL @I3013@
+1 CHIL @I3014@
+0 @F3006@ FAM
+1 HUSB @I3013@
+1 WIFE @I3012@
+1 CHIL @I3015@
+1 CHIL @I3016@
+1 CHIL @I3017@
+0 TRLR

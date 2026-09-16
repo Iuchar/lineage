@@ -1,0 +1,251 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Выжжен из рода — приём для каждого стиля</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&family=PT+Serif:ital,wght@0,400;1,400&family=Literata:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--page:#0d0e10;--ink:#e8e3d8;--dim:#7d7a72;--rule:#26282c;--gold:#c8a44e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.6 'Cormorant Garamond',Georgia,serif;padding:36px 40px 90px}
+
+h1{font-size:31px;font-weight:400;margin:0 0 6px;letter-spacing:.02em}
+h1 em{font-style:italic;color:var(--gold)}
+.lede{color:var(--dim);max-width:82ch;margin:0 0 8px}
+.ref{display:flex;gap:16px;align-items:center;margin:18px 0 30px;padding:14px 18px;
+     border:1px solid var(--rule);border-radius:2px;background:#241a12;max-width:82ch}
+.ref .t{font-size:14px;color:#a08d70}
+.ref .t b{display:block;color:#eadfc4;font-size:17px;font-weight:600;margin-bottom:2px}
+
+section{margin:0 0 14px;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+section > h2{margin:0;padding:13px 20px;font-size:19px;font-weight:400;letter-spacing:.03em;
+             background:#15171a;border-bottom:1px solid var(--rule)}
+section > h2 span{color:var(--dim);font-size:13px;margin-left:10px}
+.stage{padding:26px 20px 22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:22px}
+.case{position:relative}
+.pair{display:flex;gap:28px;align-items:flex-start;justify-content:center;min-height:150px;padding:10px 0}
+.cap{margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.07)}
+.cap b{font-size:17px;font-weight:600}
+.cap .key{font:500 10px/1 'IBM Plex Mono',monospace;color:var(--gold);letter-spacing:.12em;
+          text-transform:uppercase;margin-left:8px}
+.cap p{margin:3px 0 0;font-size:13.5px;line-height:1.5}
+
+/* ── общий каркас узла ── */
+.node{position:relative;width:150px}
+.node .box{position:relative;min-height:60px;padding:10px;display:flex;flex-direction:column;
+           align-items:center;justify-content:center}
+.node .nm{position:relative}
+.node .yr{position:relative}
+
+/* ═══ викторианский ═══ */
+.st-vik{background:#262721;color:#f2e8d2}
+.st-vik .stage{background-image:radial-gradient(circle at 14px 14px,rgba(185,154,82,.11) 1.1px,transparent 1.4px);
+               background-size:58px 58px}
+.st-vik .node{font-family:'Playfair Display',Georgia,serif;text-align:center}
+.st-vik .box{background:#2e2f27;border:1px solid #7c6a3c}
+.st-vik .box::after{content:'';position:absolute;inset:3px;border:1px solid #7c6a3c;opacity:.42}
+.st-vik .nm{font-size:16px;font-weight:700;color:#f2e8d2}
+.st-vik .yr{font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;color:#a09578;margin-top:4px}
+
+/* ═══ газета ═══ */
+.st-gaz{background:#f6f3ea;color:#14120e}
+.st-gaz > h2{background:#eae5d8;color:#14120e;border-color:#cdc6b4}
+.st-gaz .node{font-family:'PT Serif',Georgia,serif}
+.st-gaz .box{border-top:2px solid #14120e;padding:9px 10px 0;align-items:flex-start}
+.st-gaz .nm{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;line-height:1;color:#14120e}
+.st-gaz .yr{font-size:9.5px;letter-spacing:.07em;color:#5d564a;margin-top:8px}
+.st-gaz .cap{border-top-color:rgba(0,0,0,.12)}
+.st-gaz .cap .key{color:#a81f1f}
+
+/* ═══ ночной кабинет ═══ */
+.st-kab{background:#161310;color:#e9e2d4}
+.st-kab .stage{background-image:repeating-linear-gradient(93deg,rgba(0,0,0,.14) 0 7px,rgba(255,255,255,.02) 7px 14px)}
+.st-kab .node{font-family:'Literata',Georgia,serif}
+.st-kab .box{background:#221d18;border:1px solid #2a231c;padding:12px;box-shadow:0 3px 12px rgba(0,0,0,.4)}
+.st-kab .box::before{content:'';position:absolute;left:10px;top:-5px;width:26px;height:5px;
+                     background:#6b5636;border-radius:2px 2px 0 0}
+.st-kab .nm{font-size:15px;font-weight:600;color:#e9e2d4}
+.st-kab .yr{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8d8171;margin-top:6px}
+
+/* ═══ полотно ═══ */
+.st-pol{background:#0b0a09;color:#f3ede3}
+.st-pol .node{width:170px;text-align:left}
+.st-pol .box{padding:0;align-items:flex-start;min-height:auto}
+.st-pol .nm{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:26px;line-height:1;color:#f3ede3}
+.st-pol .yr{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;color:#7f7869;margin-top:8px}
+
+/* ═════════ ПРИЁМЫ ═════════ */
+
+/* викторианский 1 — вымарка чернилами */
+.v-ink .nm{color:transparent}
+.v-ink .nm::after{content:'';position:absolute;left:-6px;right:-6px;top:-1px;height:17px;
+  background:#15130f;border-radius:1px;
+  box-shadow:2px 1px 0 -1px #15130f,-3px 2px 0 -1px #15130f,5px -1px 0 -2px #15130f}
+/* викторианский 2 — соскоблено ножом */
+.v-scrape .nm{color:rgba(242,232,210,.13)}
+.v-scrape .nm::after{content:'';position:absolute;left:-4px;right:-4px;top:2px;height:12px;
+  background:repeating-linear-gradient(97deg,rgba(242,232,210,.16) 0 1px,transparent 1px 4px);
+  filter:blur(.2px)}
+/* викторианский 3 — штемпель наискось */
+.v-stamp .box::before{content:'изъятъ';position:absolute;left:50%;top:50%;z-index:3;
+  transform:translate(-50%,-50%) rotate(-13deg);
+  font-family:'PT Serif',serif;font-size:13px;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(122,34,48,.86);border:2px solid rgba(122,34,48,.7);border-radius:3px;padding:3px 12px;
+  mix-blend-mode:normal}
+.v-stamp .nm,.v-stamp .yr{opacity:.55}
+/* викторианский 4 — траурная кайма */
+.v-mourn .box{border:1px solid #7c6a3c;outline:4px solid #15130f;outline-offset:-1px}
+.v-mourn .box::after{inset:6px;opacity:.3}
+.v-mourn .nm{text-decoration:line-through;text-decoration-thickness:1px;opacity:.6}
+.v-mourn .yr{opacity:.6}
+
+/* газета 1 — вымарка цензора */
+.g-censor .nm{color:transparent}
+.g-censor .nm::after{content:'';position:absolute;left:-2px;right:-2px;top:0;height:16px;background:#14120e}
+/* газета 2 — строка изъята */
+.g-pulled .nm{color:transparent;position:relative}
+.g-pulled .nm::after{content:'';position:absolute;left:0;right:8px;top:7px;height:2px;background:#14120e}
+.g-pulled .box::after{content:'сведения изъяты';position:absolute;left:10px;top:34px;
+  font-family:'PT Serif',serif;font-style:italic;font-size:9px;color:#a81f1f;letter-spacing:.04em}
+.g-pulled .yr{margin-top:22px}
+/* газета 3 — корректорская выкидка */
+.g-deleatur .nm{color:#5d564a}
+.g-deleatur .nm::after{content:'';position:absolute;left:-3px;right:-3px;top:8px;height:1.5px;background:#a81f1f;
+  transform:rotate(-2.5deg)}
+.g-deleatur .box::after{content:'⸏';position:absolute;right:6px;top:4px;color:#a81f1f;font-size:15px;
+  font-family:'PT Serif',serif}
+/* газета 4 — вырезано ножницами */
+.g-cut .nm{color:transparent}
+.g-cut .nm::after{content:'';position:absolute;left:-4px;right:-4px;top:-3px;height:21px;
+  background:#e6e1d4;
+  clip-path:polygon(0 8%,4% 0,9% 9%,14% 1%,19% 10%,25% 2%,30% 11%,36% 2%,41% 10%,47% 1%,52% 9%,58% 1%,
+                    64% 10%,70% 2%,75% 10%,81% 2%,87% 10%,93% 2%,98% 9%,100% 4%,100% 96%,95% 100%,
+                    89% 92%,83% 99%,77% 91%,71% 99%,65% 90%,59% 99%,53% 91%,47% 99%,41% 90%,35% 98%,
+                    29% 90%,23% 99%,17% 91%,11% 99%,5% 91%,0 98%);
+  box-shadow:inset 0 0 6px rgba(0,0,0,.22)}
+
+/* кабинет 1 — штамп «изъято» */
+.k-stamp .box::after{content:'изъято';position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%) rotate(-11deg);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.24em;text-transform:uppercase;
+  color:rgba(126,96,168,.85);border:2px solid rgba(126,96,168,.62);border-radius:2px;padding:3px 10px}
+.k-stamp .nm,.k-stamp .yr{opacity:.5}
+/* кабинет 2 — карточка вынута */
+.k-pulled .box{background:transparent;border:1px dashed #3b3128;box-shadow:none}
+.k-pulled .box::before{background:#2a231c}
+.k-pulled .nm{color:transparent}
+.k-pulled .nm::after{content:'ячейка пуста';position:absolute;left:50%;top:0;transform:translateX(-50%);
+  font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:#5b5044;white-space:nowrap}
+.k-pulled .yr{color:#4b423a}
+/* кабинет 3 — дырокол */
+.k-punch .nm{color:rgba(233,226,212,.22);text-decoration:line-through;
+  text-decoration-color:rgba(233,226,212,.3)}
+.k-punch .box::after{content:'';position:absolute;left:50%;top:22px;width:15px;height:15px;
+  transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(circle,#0d0b09 55%,#231c14 78%,rgba(0,0,0,0) 82%);
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.9)}
+/* кабинет 4 — лицом вниз */
+.k-face .box{background:repeating-linear-gradient(101deg,#1d1813 0 6px,#211b16 6px 12px);border-color:#241d16}
+.k-face .nm,.k-face .yr{visibility:hidden}
+.k-face .box::after{content:'';position:absolute;left:14px;right:14px;top:16px;height:1px;
+  background:#2f271e;box-shadow:0 9px 0 #2f271e,0 18px 0 #2f271e}
+
+/* полотно 1 — призрак */
+.p-ghost .nm{color:#2a2724}
+.p-ghost .yr{color:#221f1c}
+/* полотно 2 — марашка */
+.p-slug .nm{color:transparent}
+.p-slug .nm::after{content:'';position:absolute;left:0;right:22px;top:3px;height:20px;background:#2f2b26}
+/* полотно 3 — в скобках, со знаком выкидки */
+.p-bracket .nm{color:#5d564d;font-style:italic}
+.p-bracket .nm::before{content:'[';margin-right:2px;color:#e8563c}
+.p-bracket .nm::after{content:']';margin-left:2px;color:#e8563c}
+/* полотно 4 — имя исчезло, черта осталась */
+.p-void .nm{color:transparent}
+.p-void .nm::after{content:'';position:absolute;left:0;width:118px;top:13px;height:1px;background:#4d4740}
+</style>
+
+<h1>Выжжен из рода — <em>приём для каждого стиля</em></h1>
+<p class="lede">У гобелена знак нашёлся сам: в ткани прожжена дыра. Остальным четырём нужен свой,
+из их собственного ремесла, а не общая пунктирная рамка с зачёркнутым именем.
+Слева в каждой паре — выжженный, справа живой сосед для сверки.</p>
+
+<div class="ref">
+  <svg width="76" height="76" viewBox="0 0 76 76">
+    <circle cx="38" cy="38" r="28" fill="url(#b)"/>
+    <defs><radialGradient id="b">
+      <stop offset="42%" stop-color="#0b0e0c"/><stop offset="64%" stop-color="#2a1e10"/>
+      <stop offset="76%" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+  </svg>
+  <div class="t"><b>Гобелен — прожжённая дыра</b>Эталон: ткань повреждена, медальона больше нет,
+  имя тлеет вычеркнутым. Ищем такой же честный жест для остальных.</div>
+</div>
+
+<div id="out"></div>
+
+<script>
+const STYLES = [
+  {id:'vik', cls:'st-vik', ttl:'Викторианский', sub:'гравированные карточки, флёроны', cases:[
+    {k:'v-ink',    n:'Вымарка чернилами', key:'ink',
+     t:'Имя закрашено чернилами прямо поверх оттиска, кляксы вылезают за строку. Так вымарывали в семейных книгах: страницу не рвали, но читать было нечего.'},
+    {k:'v-scrape', n:'Соскоблено', key:'scrape',
+     t:'Имя выскоблено ножом до основы, остались борозды и тень букв. Гравюрное ремесло: доску правили резцом, а не пером.'},
+    {k:'v-stamp',  n:'Штемпель', key:'stamp',
+     t:'Оттиск поверх карточки наискось. Решение принято кем-то со стороны и заверено, а сама запись цела.'},
+    {k:'v-mourn',  n:'Траурная кайма', key:'mourn',
+     t:'Толстая чёрная рамка, как на извещении о смерти, и одна черта по имени. Человека объявили умершим для рода.'}
+  ]},
+  {id:'gaz', cls:'st-gaz', ttl:'Газета', sub:'полоса, черты, сноски', cases:[
+    {k:'g-censor',   n:'Вымарка цензора', key:'censor',
+     t:'Чёрный прямоугольник ровно по кегелю строки. Полоса вышла с дырой в наборе — самый узнаваемый газетный жест.'},
+    {k:'g-pulled',   n:'Строка изъята', key:'pulled',
+     t:'Имя снято, на его месте наборная линейка и сноска мелким. Читатель видит, что материал сняли, а не то, что его не было.'},
+    {k:'g-deleatur', n:'Корректорская выкидка', key:'deleatur',
+     t:'Знак выкидки на полях и красная черта поверх имени. Правка редактора, ещё не ушедшая в тираж.'},
+    {k:'g-cut',      n:'Вырезано ножницами', key:'cut',
+     t:'В полосе дыра с зубчатым краем: кто-то вырезал имя из подшивки. Соседние строки сдвинуться не могут, дыра остаётся навсегда.'}
+  ]},
+  {id:'kab', cls:'st-kab', ttl:'Ночной кабинет', sub:'картотека, латунь, лампа', cases:[
+    {k:'k-stamp',  n:'Штамп «изъято»', key:'stamp',
+     t:'Лиловые чернила поверх карточки. Карточка на месте, но по ней вынесено решение — так метили дела в архивах.'},
+    {k:'k-pulled', n:'Карточка вынута', key:'pulled',
+     t:'От записи остался пустой контур в ящике и латунный язычок. Место сохранено, содержимого нет.'},
+    {k:'k-punch',  n:'Дырокол', key:'punch',
+     t:'Сквозное отверстие пробито через имя. Карточку нельзя вернуть в оборот: пробитая не подшивается.'},
+    {k:'k-face',   n:'Лицом вниз', key:'face',
+     t:'Карточка перевёрнута, видна изнанка с линовкой. Она в ящике, но её больше не читают.'}
+  ]},
+  {id:'pol', cls:'st-pol', ttl:'Полотно II', sub:'только типографика, без рамок', cases:[
+    {k:'p-ghost',   n:'Призрак', key:'ghost',
+     t:'Имя приглушено почти до фона. Видно, только если знаешь, куда смотреть — тише всех остальных приёмов.'},
+    {k:'p-slug',    n:'Марашка', key:'slug',
+     t:'Плотная типографская полоса на месте имени. Набор остался, буквы залиты.'},
+    {k:'p-bracket', n:'В скобках', key:'bracket',
+     t:'Имя обесцвечено и взято в красные скобки. Стиль без рамок, поэтому знак идёт самой типографикой.'},
+    {k:'p-void',    n:'Пустота с чертой', key:'void',
+     t:'Имя исчезло совсем, осталась тонкая черта в его ширину. Место в роду занято, занимать его некому.'}
+  ]}
+];
+
+const person = (cls, nm, yr) => `
+  <div class="node ${cls}"><div class="box">
+    <div class="nm">${nm}</div><div class="yr">${yr}</div>
+  </div></div>`;
+
+document.getElementById('out').innerHTML = STYLES.map(s => `
+  <section class="${s.cls}">
+    <h2>${s.ttl}<span>${s.sub}</span></h2>
+    <div class="stage">
+      ${s.cases.map(c => `
+        <div class="case">
+          <div class="pair">
+            ${person(c.k, 'Мэтью', '1893 — 1971')}
+            ${person('', 'Иннис', '1885 — 1962')}
+          </div>
+          <div class="cap"><b>${c.n}</b><span class="key">${c.key}</span><p>${c.t}</p></div>
+        </div>`).join('')}
+    </div>
+  </section>`).join('');
+</script>

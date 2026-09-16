@@ -1,0 +1,158 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Викторианский траур — гравюрная геометрия</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=PT+Serif:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#0c0d0e; --ink:#ece5d6; --dim:#8a8375; --rule:#222325; --gold:#b99a52;
+  --bg:#262721; --card:#2e2f27; --line:#7c6a3c; --fg:#f2e8d2; --mut:#a09578; --crape:#0a0908;
+}
+body.light{--bg:#efe9dc; --card:#fbf8ef; --line:#a9986a; --fg:#231f16; --mut:#7d7358; --crape:#100f0d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.6 'PT Serif',Georgia,serif;padding:38px 42px 90px}
+
+.kicker{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.26em;text-transform:uppercase;
+        color:var(--gold);margin-bottom:12px}
+h1{font-family:'Playfair Display',serif;font-size:36px;font-weight:400;margin:0 0 10px;letter-spacing:-.01em}
+h1 em{font-style:italic}
+.lede{color:var(--dim);max-width:76ch;margin:0 0 24px;font-size:14.5px}
+
+.bar{position:sticky;top:0;z-index:9;background:linear-gradient(var(--page) 76%,rgba(12,13,14,0));
+     padding:11px 0 13px;margin-bottom:24px;border-bottom:1px solid var(--rule);
+     display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.bar label{font:400 12px/1 'IBM Plex Mono',monospace;color:var(--dim);
+           display:flex;gap:8px;align-items:center;letter-spacing:.05em;cursor:pointer}
+.bar input{accent-color:var(--gold)}
+
+.take{border:1px solid var(--rule);border-radius:2px;margin-bottom:20px;overflow:hidden}
+.strip{display:flex;align-items:center;gap:52px;padding:30px 34px;background:var(--bg);
+  background-image:radial-gradient(circle at 14px 14px,rgba(185,154,82,.11) 1.1px,transparent 1.4px);
+  background-size:58px 58px}
+body.light .strip{background-image:radial-gradient(circle at 14px 14px,rgba(122,95,32,.12) 1.1px,transparent 1.4px)}
+.big{transform:scale(2.4);transform-origin:left center;margin-right:180px}
+.row{display:flex;gap:26px}
+.cap{padding:13px 18px 16px;background:#15161a;display:flex;gap:22px;align-items:baseline}
+.cap b{font-family:'Playfair Display',serif;font-size:19px;font-weight:400;white-space:nowrap}
+.cap .key{font:500 9.5px/1 'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;
+          color:var(--gold)}
+.cap p{margin:0;color:var(--dim);font-size:13.5px;line-height:1.5}
+
+/* ═══ карточка ═══ */
+.node{position:relative;width:150px;height:60px;font-family:'Playfair Display',Georgia,serif;
+      text-align:center}
+.box{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);
+     display:flex;flex-direction:column;align-items:center;justify-content:center}
+.box::after{content:'';position:absolute;inset:3px;border:1px solid var(--line);opacity:.42}
+.nm{position:relative;z-index:3;font-size:16px;font-weight:700;color:var(--fg);line-height:1.1}
+.yr{position:relative;z-index:3;font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;
+    color:var(--mut);margin-top:3px}
+
+/* ── 1. Траурная кайма ── */
+.m-border .box{border:7px solid var(--crape);background:var(--card)}
+.m-border .box::after{inset:0;border:1px solid var(--line);opacity:.85}
+.m-border .nm{color:var(--fg);opacity:.7}
+.m-border .yr{opacity:.7}
+
+/* ── 2. Кайма и англичанка ── */
+.m-rule .box{border:4px solid var(--crape)}
+.m-rule .box::after{inset:0;border:1px solid var(--line);opacity:.8}
+.m-rule .nm{opacity:.62}
+.m-rule .yr{opacity:.62}
+.m-rule .strike{position:absolute;left:24px;right:24px;top:22px;z-index:4}
+.m-rule .strike i{display:block;background:var(--crape)}
+.m-rule .strike i:first-child{height:2px}
+.m-rule .strike i:last-child{height:1px;margin-top:2px}
+
+/* ── 3. Обломанная колонна ── */
+.m-column .box{border-width:2px;border-color:var(--crape)}
+.m-column .box::after{inset:1px;opacity:.55}
+.m-column .col{position:absolute;left:9px;top:9px;z-index:4;color:var(--fg);opacity:.78}
+.m-column .txt{padding-left:32px}
+.m-column .nm{font-size:15px;opacity:.72}
+.m-column .yr{opacity:.72}
+
+/* ── 4. Угол крепа ── */
+.m-corner .box{border-color:var(--crape);border-width:2px}
+.m-corner .box::after{inset:1px;opacity:.5}
+.m-corner .corner{position:absolute;left:0;top:0;z-index:4}
+.m-corner .nm{opacity:.72;padding-left:16px}
+.m-corner .yr{opacity:.72;padding-left:16px}
+
+/* ── 5. Кайма и колонна вместе ── */
+.m-both .box{border:6px solid var(--crape)}
+.m-both .box::after{inset:0;border:1px solid var(--line);opacity:.85}
+.m-both .col{position:absolute;left:11px;top:11px;z-index:4;color:var(--fg);opacity:.72;
+             width:17px;height:36px}
+.m-both .txt{padding-left:26px}
+.m-both .nm{font-size:15px;opacity:.66} .m-both .yr{opacity:.66}
+</style>
+
+<div class="kicker">Выжжен из рода · викторианский · третий заход</div>
+<h1>Траурная кайма, <em>без текстур</em></h1>
+<p class="lede">Карточка живёт в 150 на 60 пикселей: жатая ткань и растушёвки на ней превращаются в грязь.
+Здесь только то, что переживает такой размер, — чёткая кайма, наборные линейки и гравированный символ.
+Слева знак крупно, справа он же в строю с живыми соседями.</p>
+
+<div class="bar">
+  <label><input type="checkbox" id="light"> светлая тема</label>
+</div>
+
+<div id="out"></div>
+
+<script>
+const COLUMN = `<svg class="col" width="20" height="42" viewBox="0 0 20 42" fill="none"
+  stroke="currentColor" stroke-width="1.1" stroke-linejoin="miter" stroke-linecap="butt">
+  <path d="M1 41h18"/>
+  <path d="M3 41v-3.4h14V41"/>
+  <path d="M4.6 37.6V13.4M15.4 37.6V17.6"/>
+  <path d="M4.6 13.4 15.4 17.6"/>
+  <path d="M7.9 37.6V14.5M11.3 37.6V15.6" stroke-width=".8" opacity=".6"/>
+</svg>`;
+
+const CORNER = `<svg class="corner" width="46" height="46" viewBox="0 0 46 46">
+  <path d="M0 0h46L0 46Z" fill="var(--crape)"/>
+  <path d="M46 0L0 46" stroke="var(--line)" stroke-width="1" opacity=".55" fill="none"/>
+  <path d="M38 0L0 38" stroke="var(--card)" stroke-width="1" opacity=".22" fill="none"/></svg>`;
+
+const TAKES = [
+  {k:'m-border', n:'Траурная кайма', key:'border',
+   t:'Чёрная кайма ровно семь пикселей с чётким краем, под ней золотая линейка стиля. Имя и годы приглушены на треть. Больше ничего: так печатали траурные извещения и почтовую бумагу.'},
+  {k:'m-rule', n:'Кайма и англичанка', key:'rule', strike:true,
+   t:'Кайма уже, а имя перечёркнуто наборной линейкой «англичанкой» — толстая и тонкая вместе. Типографский приём той же эпохи, и рука не дрогнет: линии строго горизонтальны.'},
+  {k:'m-column', n:'Обломанная колонна', key:'column', column:true,
+   t:'Гравюра слева: ствол с каннелюрами, косой скол поверху, ступенчатое основание. Капители нет — колонна не достроена. Кайма тонкая, знак несёт сам рисунок.'},
+  {k:'m-corner', n:'Угол крепа', key:'corner', corner:true,
+   t:'Треугольник крепа заложен за верхний левый угол, по гипотенузе идёт золотая нить. Имя сдвинуто вправо и целиком читается.'},
+  {k:'m-both', n:'Кайма и колонна', key:'both', column:true,
+   t:'Оба знака сразу: широкая кайма извещения и обломанная колонна внутри неё. Читается издалека по чёрному краю, а вблизи объясняет, за что именно вычеркнут.'}
+];
+
+const person = (t, nm, yr) => `
+  <div class="node ${t ? t.k : ''}">
+    <div class="box">
+      ${t && t.column ? COLUMN : ''}${t && t.corner ? CORNER : ''}
+      ${t && t.strike ? '<div class="strike"><i></i><i></i></div>' : ''}
+      <div class="txt">
+        <div class="nm">${nm}</div><div class="yr">${yr}</div>
+      </div>
+    </div>
+  </div>`;
+
+document.getElementById('out').innerHTML = TAKES.map(t => `
+  <div class="take">
+    <div class="strip">
+      <div class="big">${person(t, 'Мэтью', '1893 — 1971')}</div>
+      <div class="row">
+        ${person(t, 'Мэтью', '1893 — 1971')}
+        ${person(null, 'Иннис', '1885 — 1962')}
+        ${person(null, 'Роберт', '1881 — 1944')}
+      </div>
+    </div>
+    <div class="cap"><b>${t.n}</b><span class="key">${t.key}</span><p>${t.t}</p></div>
+  </div>`).join('');
+
+document.getElementById('light').onchange = e => document.body.classList.toggle('light', e.target.checked);
+</script>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Викторианский фон — пять рисунков</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Serif:ital@0;1&family=Golos+Text:wght@400;500&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px 30px 70px;background:#101113;color:#e6e2d8;
+       font-family:'Golos Text',system-ui,sans-serif}
+  h1{font-family:'Playfair Display',serif;font-weight:700;font-size:27px;margin:0 0 6px;color:#f4f1ea}
+  .lede{color:#a49d8f;font-size:13.5px;max-width:74ch;margin:0 0 26px;line-height:1.55}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:20px}
+  .var{border:1px solid #2b2e33;border-radius:9px;overflow:hidden;background:#17181b}
+  .head{display:flex;align-items:baseline;gap:9px;padding:11px 14px 9px;border-bottom:1px solid #2b2e33}
+  .head b{font:500 11px/1 'IBM Plex Mono',monospace;color:#c08a4a;letter-spacing:.14em}
+  .head h3{margin:0;font-family:'Playfair Display',serif;font-size:17px;color:#f4f1ea;font-weight:700}
+  .swatch{position:relative;height:212px;background:#262721}
+  .swatch svg{position:absolute;inset:0;width:100%;height:100%}
+  .card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:150px;
+        background:#2e2f27;border:1px solid #7c6a3c;padding:11px 10px;text-align:center;
+        font-family:'Playfair Display',serif}
+  .card::after{content:'';position:absolute;inset:3px;border:1px solid #7c6a3c;opacity:.45}
+  .card .nm{font-size:17px;font-weight:700;color:#f2e8d2;line-height:1}
+  .card .yr{font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;color:#a09578;margin-top:4px}
+  .note{padding:11px 14px 14px;font-size:12.5px;line-height:1.5;color:#a49d8f}
+  .note b{color:#e6e2d8;font-weight:500}
+  .pick{display:block;width:100%;border:0;border-top:1px solid #2b2e33;background:#1d2126;color:#c9c2b4;
+        font:500 12px/1 'Golos Text',sans-serif;padding:10px;cursor:pointer;text-align:center}
+  .pick:hover{background:#252a30;color:#fff}
+  .foot{margin-top:26px;font-size:12.5px;color:#8f887b}
+</style>
+</head><body>
+
+<h1>Викторианский фон — пять рисунков</h1>
+<p class="lede">Все пятеро — настоящие приёмы обойного дела XIX века, а не абстрактные значки. Мотив показан в натуральную величину, поверх лежит карточка человека — чтобы сразу видеть, не мешает ли узор читать имена. Цвет и приглушённость у всех одинаковые, сравнивается только рисунок.</p>
+
+<div class="grid">
+
+  <!-- 1 ДАМАСК -->
+  <div class="var">
+    <div class="head"><b>01</b><h3>Дамаск</h3></div>
+    <div class="swatch">
+      <svg xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="p1" width="86" height="120" patternUnits="userSpaceOnUse">
+          <g fill="none" stroke="rgba(185,154,82,.30)" stroke-width="1.1" stroke-linecap="round">
+            <path d="M43 12 C60 30 62 52 43 70 C24 52 26 30 43 12 Z"/>
+            <path d="M43 24 C51 34 52 46 43 56 C34 46 35 34 43 24 Z"/>
+            <path d="M43 70 C43 82 38 88 30 92 M43 70 C43 82 48 88 56 92"/>
+            <path d="M26 40 c-7 -3 -12 -9 -13 -17 M60 40 c7 -3 12 -9 13 -17"/>
+            <path d="M0 100 C14 92 22 82 22 72 M86 100 C72 92 64 82 64 72"/>
+          </g>
+          <g fill="rgba(185,154,82,.30)"><circle cx="43" cy="8" r="2"/><circle cx="43" cy="96" r="1.6"/></g>
+        </pattern></defs>
+        <rect width="100%" height="100%" fill="url(#p1)"/>
+      </svg>
+      <div class="card"><div class="nm">Мурдо</div><div class="yr">1748 — 1851</div></div>
+    </div>
+    <div class="note"><b>Медальон с акантом.</b> Самый узнаваемый обойный узор эпохи: вытянутая капля с завитками, повторяется вертикальными рядами. Богатый, «гостиная с портретами». Плотный — на большом дереве будет заметен.</div>
+    <button class="pick">взять этот</button>
+  </div>
+
+  <!-- 2 ВЬЮН МОРРИСА -->
+  <div class="var">
+    <div class="head"><b>02</b><h3>Вьюн Морриса</h3></div>
+    <div class="swatch">
+      <svg xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="p2" width="96" height="96" patternUnits="userSpaceOnUse">
+          <g fill="none" stroke="rgba(185,154,82,.30)" stroke-width="1.1" stroke-linecap="round">
+            <path d="M0 96 C22 74 26 50 48 32 C70 14 74 -6 96 -24"/>
+            <path d="M0 24 C22 2 26 -22 48 -40"/>
+            <path d="M48 96 C70 74 74 50 96 32"/>
+            <path d="M20 66 c-9 -2 -14 -8 -15 -16 c9 -1 15 4 15 16 Z"/>
+            <path d="M62 30 c9 2 14 8 15 16 c-9 1 -15 -4 -15 -16 Z"/>
+            <path d="M36 46 c8 -3 12 -9 12 -17 c-8 1 -12 7 -12 17 Z"/>
+          </g>
+          <g fill="rgba(185,154,82,.26)">
+            <circle cx="30" cy="54" r="2.2"/><circle cx="70" cy="20" r="2.2"/><circle cx="82" cy="60" r="1.6"/>
+          </g>
+        </pattern></defs>
+        <rect width="100%" height="100%" fill="url(#p2)"/>
+      </svg>
+      <div class="card"><div class="nm">Мурдо</div><div class="yr">1748 — 1851</div></div>
+    </div>
+    <div class="note"><b>Растительный вьюн.</b> Диагональные стебли с листьями и бутонами — стиль Уильяма Морриса, живой и рукотворный. Мягче дамаска, но диагональ спорит с прямыми линиями связей.</div>
+    <button class="pick">взять этот</button>
+  </div>
+
+  <!-- 3 ФЛЁРОН -->
+  <div class="var">
+    <div class="head"><b>03</b><h3>Флёрон</h3></div>
+    <div class="swatch">
+      <svg xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="p3" width="78" height="78" patternUnits="userSpaceOnUse">
+          <g fill="none" stroke="rgba(185,154,82,.32)" stroke-width="1.1" stroke-linecap="round">
+            <g transform="translate(20,20)">
+              <path d="M0 -9 C5 -4 5 3 0 8 C-5 3 -5 -4 0 -9 Z"/>
+              <path d="M0 8 C-4 12 -9 13 -13 11 M0 8 C4 12 9 13 13 11"/>
+            </g>
+            <g transform="translate(59,59) rotate(180)">
+              <path d="M0 -9 C5 -4 5 3 0 8 C-5 3 -5 -4 0 -9 Z"/>
+              <path d="M0 8 C-4 12 -9 13 -13 11 M0 8 C4 12 9 13 13 11"/>
+            </g>
+          </g>
+          <g fill="rgba(185,154,82,.28)"><circle cx="59" cy="20" r="1.6"/><circle cx="20" cy="59" r="1.6"/></g>
+        </pattern></defs>
+        <rect width="100%" height="100%" fill="url(#p3)"/>
+      </svg>
+      <div class="card"><div class="nm">Мурдо</div><div class="yr">1748 — 1851</div></div>
+    </div>
+    <div class="note"><b>Типографский цветок.</b> Тот самый значок ❧ из книг эпохи: листок с усиками, вразбежку и в развороте. Родственен шрифтам карточек — узор и текст явно одной семьи. Самый тихий из первых трёх.</div>
+    <button class="pick">взять этот</button>
+  </div>
+
+  <!-- 4 ГЕРАЛЬДИЧЕСКАЯ ЛИЛИЯ -->
+  <div class="var">
+    <div class="head"><b>04</b><h3>Лилия</h3></div>
+    <div class="swatch">
+      <svg xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="p4" width="72" height="72" patternUnits="userSpaceOnUse">
+          <g fill="none" stroke="rgba(185,154,82,.30)" stroke-width="1.05" stroke-linejoin="round">
+            <g transform="translate(18,18)">
+              <path d="M0 -11 C3 -6 4 -2 4 2 L-4 2 C-4 -2 -3 -6 0 -11 Z"/>
+              <path d="M-4 2 C-10 0 -13 -4 -12 -9 C-8 -8 -5 -5 -4 2 Z"/>
+              <path d="M4 2 C10 0 13 -4 12 -9 C8 -8 5 -5 4 2 Z"/>
+              <path d="M-6 4 h12 M0 4 v7"/>
+            </g>
+            <g transform="translate(54,54)">
+              <path d="M0 -11 C3 -6 4 -2 4 2 L-4 2 C-4 -2 -3 -6 0 -11 Z"/>
+              <path d="M-4 2 C-10 0 -13 -4 -12 -9 C-8 -8 -5 -5 -4 2 Z"/>
+              <path d="M4 2 C10 0 13 -4 12 -9 C8 -8 5 -5 4 2 Z"/>
+              <path d="M-6 4 h12 M0 4 v7"/>
+            </g>
+          </g>
+          <g fill="rgba(185,154,82,.24)"><circle cx="54" cy="18" r="1.5"/><circle cx="18" cy="54" r="1.5"/></g>
+        </pattern></defs>
+        <rect width="100%" height="100%" fill="url(#p4)"/>
+      </svg>
+      <div class="card"><div class="nm">Мурдо</div><div class="yr">1748 — 1851</div></div>
+    </div>
+    <div class="note"><b>Геральдическая лилия.</b> Мелкая россыпь по всему полю — приём диапера с гербовых тканей. Прямая перекличка с темой родов и гербов, читается строго и по-мужски. Риск — узор слишком «замковый», может увести стиль в средневековье.</div>
+    <button class="pick">взять этот</button>
+  </div>
+
+  <!-- 5 ПЫЛЬ -->
+  <div class="var">
+    <div class="head"><b>05</b><h3>Пыльца</h3></div>
+    <div class="swatch">
+      <svg xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="p5" width="44" height="44" patternUnits="userSpaceOnUse">
+          <g fill="none" stroke="rgba(185,154,82,.34)" stroke-width=".9" stroke-linecap="round">
+            <path d="M11 5 v5 M11 16 v5 M5.5 13 h5 M13 13 h5"/>
+            <path d="M33 27 v5 M33 38 v5 M27.5 35 h5 M35 35 h5"/>
+          </g>
+          <g fill="rgba(185,154,82,.30)">
+            <circle cx="33" cy="13" r="1.3"/><circle cx="11" cy="35" r="1.3"/>
+          </g>
+        </pattern></defs>
+        <rect width="100%" height="100%" fill="url(#p5)"/>
+      </svg>
+      <div class="card"><div class="nm">Мурдо</div><div class="yr">1748 — 1851</div></div>
+    </div>
+    <div class="note"><b>Мелкая пыльца.</b> Крошечные крестики-искры и точки, почти на пороге видимости. Не узор, а фактура бумаги: даёт тепло, не спорит ни с чем и не устаёт на большом дереве. Самый скромный вариант.</div>
+    <button class="pick">взять этот</button>
+  </div>
+
+</div>
+
+<p class="foot">Назови номер — вставлю в стенд. Можно сказать «крупнее», «тише», «реже» — плотность и приглушённость настраиваются отдельно от рисунка.</p>
+</body></html>

@@ -1,0 +1,151 @@
+<h2>Переход из одного рода в другой</h2>
+<p class="subtitle">Кормак есть в двух файлах: в O'Dubhain он «О'Дувейн», в Winterhope — «Уинтерхоуп» (внебрачный сын Родерика). Как должен выглядеть переход? Кликни вариант.</p>
+
+<style>
+  .xl { display:grid; grid-template-columns:1fr; gap:16px; }
+  .xl .card-image { padding:12px; background:#fbfaf7; }
+  .xl svg { width:100%; height:auto; display:block; }
+  .n rect { fill:#fff; stroke:#8a7f6d; stroke-width:1; }
+  .n.f rect { fill:#fdf3f6; }
+  .n.m rect { fill:#f1f5fb; }
+  .n text { font:9px system-ui,sans-serif; fill:#2c2620; }
+  .n text.yr { font-size:7.5px; fill:#8a7f6d; }
+  .lnk { stroke:#a89c88; stroke-width:1; fill:none; }
+  .hot rect { stroke:#b4512b; stroke-width:2; fill:#fff4ee; }
+  .ghost rect { fill:#faf7f2; stroke:#c9bfae; stroke-dasharray:3 2; }
+  .tag { font:8px system-ui,sans-serif; fill:#b4512b; }
+  .lbl { font:8.5px system-ui,sans-serif; fill:#8a7f6d; }
+  .panel { fill:#f6f2ea; stroke:#ddd6c8; }
+</style>
+
+<div class="cards xl">
+
+  <!-- ============ 1. Бейдж на карточке ============ -->
+  <div class="card" data-choice="badge" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 620 190" xmlns="http://www.w3.org/2000/svg">
+        <!-- левое дерево -->
+        <text class="lbl" x="10" y="14">Открыт род: О'Дувейн</text>
+        <path class="lnk" d="M75 45 H85 M80 45 V70 M80 70 H150 M80 70 V85 M150 70 V85"/>
+        <g class="n m"><rect x="15" y="30" width="60" height="26" rx="3"/>
+          <text x="45" y="44" text-anchor="middle">Фергус</text>
+          <text class="yr" x="45" y="52" text-anchor="middle">1904</text></g>
+        <g class="n f"><rect x="85" y="30" width="60" height="26" rx="3"/>
+          <text x="115" y="44" text-anchor="middle">Ниав</text>
+          <text class="yr" x="115" y="52" text-anchor="middle">1908</text></g>
+        <g class="n hot"><rect x="50" y="85" width="80" height="34" rx="4"/>
+          <text x="90" y="100" text-anchor="middle" style="font-weight:600">Кормак</text>
+          <text class="yr" x="90" y="111" text-anchor="middle">1931–2009</text></g>
+        <!-- бейдж -->
+        <g>
+          <rect x="52" y="124" width="94" height="16" rx="8" fill="#b4512b"/>
+          <text x="99" y="135" text-anchor="middle" style="font:8px system-ui,sans-serif;fill:#fff">⇄ также в Уинтерхоуп</text>
+        </g>
+        <text class="lbl" x="30" y="158">курсор на бейдже → клик</text>
+        <path d="M200 85 h60 m0 0 l-8 -5 m8 5 l-8 5" stroke="#b4512b" stroke-width="1.5" fill="none"/>
+        <text class="tag" x="230" y="78" text-anchor="middle">переход</text>
+        <!-- правое дерево -->
+        <text class="lbl" x="300" y="14">Открыт род: Уинтерхоуп</text>
+        <path class="lnk" d="M365 45 H375 M370 45 V70 M370 70 H440 M370 70 V85 M440 70 V85"/>
+        <g class="n m"><rect x="305" y="30" width="60" height="26" rx="3"/>
+          <text x="335" y="44" text-anchor="middle">Родерик</text>
+          <text class="yr" x="335" y="52" text-anchor="middle">1899</text></g>
+        <g class="n f ghost"><rect x="375" y="30" width="60" height="26" rx="3"/>
+          <text x="405" y="44" text-anchor="middle">Ниав</text>
+          <text class="yr" x="405" y="52" text-anchor="middle">не жена</text></g>
+        <g class="n hot"><rect x="340" y="85" width="80" height="34" rx="4"/>
+          <text x="380" y="100" text-anchor="middle" style="font-weight:600">Кормак</text>
+          <text class="yr" x="380" y="111" text-anchor="middle">1931–2009</text></g>
+        <g class="n m"><rect x="440" y="85" width="60" height="26" rx="3"/>
+          <text x="470" y="99" text-anchor="middle">Джаспер</text>
+          <text class="yr" x="470" y="107" text-anchor="middle">1928</text></g>
+        <text class="lbl" x="380" y="152" text-anchor="middle">тот же человек подсвечен, дерево доехало до него</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>1. Бейдж на карточке</h3>
+      <p>У человека с двойником — кнопка «⇄ также в Уинтерхоуп». Клик — открывается второе дерево, прокрученное прямо к нему, он подсвечен. Кнопка «назад» возвращает. Одно дерево на экране, ничего не мельтешит.</p>
+    </div>
+  </div>
+
+  <!-- ============ 2. Сплит: два дерева рядом ============ -->
+  <div class="card" data-choice="split" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 620 190" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="5" width="295" height="175" rx="4" fill="none" stroke="#ddd6c8"/>
+        <rect x="320" y="5" width="295" height="175" rx="4" fill="none" stroke="#ddd6c8"/>
+        <text class="lbl" x="15" y="20">О'Дувейн</text>
+        <text class="lbl" x="330" y="20">Уинтерхоуп</text>
+        <path class="lnk" d="M85 55 H95 M90 55 V78 M90 78 H160 M90 78 V92 M160 78 V92"/>
+        <g class="n m"><rect x="25" y="40" width="60" height="26" rx="3"/>
+          <text x="55" y="54" text-anchor="middle">Фергус</text></g>
+        <g class="n f"><rect x="95" y="40" width="60" height="26" rx="3"/>
+          <text x="125" y="54" text-anchor="middle">Ниав</text></g>
+        <g class="n hot"><rect x="60" y="92" width="76" height="30" rx="4"/>
+          <text x="98" y="106" text-anchor="middle" style="font-weight:600">Кормак</text>
+          <text class="yr" x="98" y="116" text-anchor="middle">1931</text></g>
+        <g class="n f"><rect x="30" y="140" width="60" height="24" rx="3"/>
+          <text x="60" y="154" text-anchor="middle">Айна</text></g>
+        <path class="lnk" d="M98 122 V131 M60 131 H98 M60 131 V140"/>
+
+        <path class="lnk" d="M410 55 H420 M415 55 V78 M415 78 H485 M415 78 V92 M485 78 V92"/>
+        <g class="n m"><rect x="350" y="40" width="60" height="26" rx="3"/>
+          <text x="380" y="54" text-anchor="middle">Родерик</text></g>
+        <g class="n f ghost"><rect x="420" y="40" width="60" height="26" rx="3"/>
+          <text x="450" y="54" text-anchor="middle">Ниав</text></g>
+        <g class="n hot"><rect x="385" y="92" width="76" height="30" rx="4"/>
+          <text x="423" y="106" text-anchor="middle" style="font-weight:600">Кормак</text>
+          <text class="yr" x="423" y="116" text-anchor="middle">1931</text></g>
+        <g class="n m"><rect x="480" y="92" width="60" height="26" rx="3"/>
+          <text x="510" y="106" text-anchor="middle">Джаспер</text></g>
+        <!-- связующая дуга -->
+        <path d="M136 107 C 220 60, 300 60, 385 107" stroke="#b4512b" stroke-width="2"
+              stroke-dasharray="5 3" fill="none"/>
+        <circle cx="260" cy="76" r="9" fill="#b4512b"/>
+        <text x="260" y="80" text-anchor="middle" style="font:9px system-ui,sans-serif;fill:#fff">=</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>2. Два дерева рядом</h3>
+      <p>Экран делится пополам, оба рода видны одновременно, связка нарисована дугой. Отлично видно «как роды сцеплены», но каждому дереву достаётся половина ширины — на 84 персонах тесно.</p>
+    </div>
+  </div>
+
+  <!-- ============ 3. Боковая панель человека ============ -->
+  <div class="card" data-choice="panel" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 620 190" xmlns="http://www.w3.org/2000/svg">
+        <path class="lnk" d="M115 50 H125 M120 50 V74 M120 74 H200 M120 74 V88 M200 74 V88"/>
+        <g class="n m"><rect x="55" y="35" width="60" height="26" rx="3"/>
+          <text x="85" y="49" text-anchor="middle">Фергус</text></g>
+        <g class="n f"><rect x="125" y="35" width="60" height="26" rx="3"/>
+          <text x="155" y="49" text-anchor="middle">Ниав</text></g>
+        <g class="n hot"><rect x="82" y="88" width="76" height="30" rx="4"/>
+          <text x="120" y="102" text-anchor="middle" style="font-weight:600">Кормак</text>
+          <text class="yr" x="120" y="112" text-anchor="middle">1931</text></g>
+        <g class="n f"><rect x="170" y="88" width="60" height="26" rx="3"/>
+          <text x="200" y="102" text-anchor="middle">Айна</text></g>
+        <text class="lbl" x="55" y="150">дерево О'Дувейн остаётся на месте</text>
+
+        <!-- панель -->
+        <rect class="panel" x="330" y="10" width="280" height="170" rx="6"/>
+        <text x="348" y="34" style="font:13px system-ui,sans-serif;font-weight:600;fill:#2c2620">Кормак</text>
+        <text x="348" y="49" style="font:9px system-ui,sans-serif;fill:#8a7f6d">1931–2009 · О'Дувейн</text>
+        <path d="M348 58 H592" stroke="#ddd6c8"/>
+        <text x="348" y="74" style="font:8px system-ui,sans-serif;fill:#8a7f6d;letter-spacing:.5px">ЭТОТ ЖЕ ЧЕЛОВЕК В ДРУГИХ РОДАХ</text>
+        <rect x="348" y="82" width="244" height="26" rx="4" fill="#fff" stroke="#c9bfae"/>
+        <text x="358" y="99" style="font:9px system-ui,sans-serif;fill:#2c2620">Уинтерхоуп — Кормак Уинтерхоуп ›</text>
+        <text x="348" y="126" style="font:8px system-ui,sans-serif;fill:#8a7f6d;letter-spacing:.5px">ЗАМЕТКА</text>
+        <text x="348" y="142" style="font:8.5px system-ui,sans-serif;fill:#2c2620">Внебрачный сын Родерика, воспитан</text>
+        <text x="348" y="154" style="font:8.5px system-ui,sans-serif;fill:#2c2620">в Ирландии под фамилией матери.</text>
+        <rect x="348" y="162" width="70" height="14" rx="7" fill="#e8e2d6"/>
+        <text x="383" y="172" text-anchor="middle" style="font:7.5px system-ui,sans-serif;fill:#5b5346">портрет, даты…</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>3. Панель человека сбоку</h3>
+      <p>Клик по человеку — справа выезжает его карточка: даты, заметка, портрет и список «этот же человек в других родах». Клик по строке — переход. Панель всё равно нужна для редактора, так что переход достаётся почти даром.</p>
+    </div>
+  </div>
+
+</div>

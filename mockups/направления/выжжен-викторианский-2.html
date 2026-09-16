@@ -1,0 +1,229 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Викторианский траур — второй заход</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#0c0d0e; --ink:#ece5d6; --dim:#867f71; --rule:#232426; --gold:#b99a52;
+  --vik-bg:#262721; --vik-card:#2e2f27; --vik-line:#7c6a3c; --vik-fg:#f2e8d2; --vik-mut:#a09578;
+  --vik-bg-l:#efe9dc; --vik-card-l:#fbf8ef; --vik-line-l:#a9986a; --vik-fg-l:#231f16; --vik-mut-l:#7d7358;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.62 'PT Serif',Georgia,serif;padding:40px 44px 100px}
+
+/* ── шапка ── */
+header{max-width:74ch;margin-bottom:34px}
+.kicker{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.28em;text-transform:uppercase;
+        color:var(--gold);margin-bottom:14px}
+h1{font-family:'Playfair Display',serif;font-size:40px;font-weight:400;line-height:1.08;margin:0 0 12px;
+   letter-spacing:-.01em}
+h1 em{font-style:italic}
+.lede{color:var(--dim);font-size:15px;margin:0}
+.lede b{color:var(--ink);font-weight:400;font-style:italic}
+
+.bar{position:sticky;top:0;z-index:30;margin:26px 0 30px;padding:12px 0 14px;
+     background:linear-gradient(var(--page) 74%,rgba(12,13,14,0));
+     border-bottom:1px solid var(--rule);display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.bar label{font:400 12px/1 'IBM Plex Mono',monospace;color:var(--dim);
+           display:flex;gap:8px;align-items:center;letter-spacing:.05em;cursor:pointer}
+.bar input{accent-color:var(--gold)}
+
+/* ── строй вариантов ── */
+.take{display:grid;grid-template-columns:300px 1fr;gap:0;margin-bottom:2px;
+      border-top:1px solid var(--rule)}
+.take:last-child{border-bottom:1px solid var(--rule)}
+.zoom,.real{background:var(--vik-bg);
+  background-image:radial-gradient(circle at 14px 14px,rgba(185,154,82,.11) 1.1px,transparent 1.4px);
+  background-size:58px 58px;display:flex;align-items:center;justify-content:center;padding:34px 20px}
+body.light .zoom,body.light .real{background-color:var(--vik-bg-l);
+  background-image:radial-gradient(circle at 14px 14px,rgba(122,95,32,.12) 1.1px,transparent 1.4px)}
+.zoom{border-right:1px solid var(--rule)}
+.zoom .node{transform:scale(2.35);transform-origin:center}
+.real{gap:30px;justify-content:flex-start;padding-left:34px}
+.note{grid-column:1/-1;padding:16px 22px 22px;display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.note h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:400;margin:0 0 4px;letter-spacing:.01em}
+.note h2 span{font:500 9.5px/1 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;
+              color:var(--gold);margin-left:10px;vertical-align:2px}
+.note p{margin:0;color:var(--dim);font-size:14px}
+.note .hist{border-left:1px solid var(--rule);padding-left:22px;font-style:italic;font-size:13.5px}
+
+/* ═══════════ карточка викторианского ═══════════ */
+.node{position:relative;width:150px;font-family:'Playfair Display',Georgia,serif;text-align:center}
+.box{position:relative;min-height:60px;padding:10px;display:flex;flex-direction:column;
+     align-items:center;justify-content:center;background:var(--vik-card);border:1px solid var(--vik-line)}
+.box::after{content:'';position:absolute;inset:3px;border:1px solid var(--vik-line);opacity:.42;
+            pointer-events:none}
+.nm{position:relative;z-index:3;font-size:16px;font-weight:700;color:var(--vik-fg)}
+.yr{position:relative;z-index:3;font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;
+    color:var(--vik-mut);margin-top:4px}
+body.light .box{background:var(--vik-card-l);border-color:var(--vik-line-l)}
+body.light .box::after{border-color:var(--vik-line-l)}
+body.light .nm{color:var(--vik-fg-l)}
+body.light .yr{color:var(--vik-mut-l)}
+
+/* ─── 1. Извещение: кайма с растушёванным краем ─── */
+.t-card .box{
+  border:none;
+  padding:14px 12px;
+  background:
+    linear-gradient(var(--vik-card),var(--vik-card)) padding-box,
+    linear-gradient(#0b0a09,#0b0a09) border-box;
+  border:7px solid transparent;
+  box-shadow:
+    inset 0 0 0 1px rgba(124,106,60,.55),          /* золотая линейка стиля уцелела */
+    inset 0 0 7px 2px rgba(11,10,9,.55),           /* краска каймы растекается внутрь */
+    inset 0 0 14px 6px rgba(11,10,9,.22),
+    0 1px 0 rgba(0,0,0,.5)}
+.t-card .box::after{inset:1px;opacity:.28}
+.t-card .nm{color:#cfc5ab;letter-spacing:.01em}
+body.light .t-card .box{
+  background:
+    linear-gradient(var(--vik-card-l),var(--vik-card-l)) padding-box,
+    linear-gradient(#100f0d,#100f0d) border-box;
+  box-shadow:
+    inset 0 0 0 1px rgba(169,152,106,.6),
+    inset 0 0 7px 2px rgba(16,15,13,.4),
+    inset 0 0 14px 6px rgba(16,15,13,.16)}
+body.light .t-card .nm{color:#3c372c}
+
+/* ─── 2. Креп-вуаль: жатый газ поверх карточки ─── */
+.t-veil .box{overflow:hidden}
+.t-veil .veil{position:absolute;left:-4px;right:-4px;top:-2px;height:46px;z-index:4;pointer-events:none;
+  background:
+    repeating-linear-gradient(96deg,rgba(6,6,5,.5) 0 1px,rgba(28,26,22,.2) 1px 3px),
+    repeating-linear-gradient(174deg,rgba(4,4,3,.42) 0 1px,rgba(24,22,19,.14) 1px 4px),
+    linear-gradient(rgba(8,8,7,.86),rgba(10,10,9,.7) 62%,rgba(12,11,10,.4));
+  filter:url(#crimp);
+  box-shadow:0 3px 9px rgba(0,0,0,.55)}
+.t-veil .veil::after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:7px;
+  background:repeating-linear-gradient(90deg,rgba(10,10,9,.55) 0 3px,transparent 3px 7px);
+  filter:blur(1px)}
+.t-veil .nm{color:#b9b09a}
+body.light .t-veil .nm{color:#cdc4ad}
+body.light .t-veil .veil{background:
+    repeating-linear-gradient(96deg,rgba(6,6,5,.42) 0 1px,rgba(40,37,32,.16) 1px 3px),
+    repeating-linear-gradient(174deg,rgba(4,4,3,.34) 0 1px,rgba(34,32,28,.1) 1px 4px),
+    linear-gradient(rgba(10,10,9,.8),rgba(14,13,12,.62) 62%,rgba(18,17,15,.3))}
+
+/* ─── 3. Обломанная колонна ─── */
+.t-column .box{padding-left:34px}
+.t-column .col{position:absolute;left:7px;top:50%;transform:translateY(-50%);z-index:3;
+               width:22px;height:40px;opacity:.9}
+.t-column .nm{font-size:15px}
+.t-column .nm,.t-column .yr{opacity:.72}
+
+/* ─── 4. Лента с узлом через угол ─── */
+.t-knot .box{overflow:visible}
+.t-knot .ribbon{position:absolute;left:-9px;top:-9px;width:74px;height:74px;z-index:5;pointer-events:none}
+.t-knot .nm,.t-knot .yr{opacity:.8}
+.t-knot .box{box-shadow:inset 0 0 0 2px #0d0c0a}
+body.light .t-knot .box{box-shadow:inset 0 0 0 2px #17150f}
+</style>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="crimp" x="-10%" y="-10%" width="120%" height="130%">
+    <feTurbulence type="fractalNoise" baseFrequency=".9 .18" numOctaves="3" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<header>
+  <div class="kicker">Выжжен из рода · направление четвёртое</div>
+  <h1>Кайма и креп, <em>заново</em></h1>
+  <p class="lede">Прошлый заход был плоским: креп сводился к чёрным плашкам, кайма к толстой рамке.
+  Здесь взяты настоящие вещи викторианского траура — <b>жатый газ</b>, который поглощает свет и мнётся,
+  <b>кайма извещения</b> с растекающейся вглубь краской и <b>обломанная колонна</b>,
+  которой на камнях обозначали прервавшуюся линию. Слева деталь крупно, справа тот же знак в строю рода.</p>
+</header>
+
+<div class="bar">
+  <label><input type="checkbox" id="light"> светлая тема</label>
+  <label><input type="checkbox" id="veilhide"> снять креп (сверка с целой карточкой)</label>
+</div>
+
+<div id="out"></div>
+
+<script>
+const COLUMN = `
+  <svg class="col" viewBox="0 0 22 40" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="currentColor" fill="none" stroke-width="1">
+      <path d="M3 39h16" stroke-width="1.4"/>
+      <path d="M4.5 39v-3.5h13V39" />
+      <path d="M6 35.5V14.5M9.2 35.5V13.2M12.6 35.5V12.4M15.8 35.5V13.8" stroke-width=".85" opacity=".72"/>
+      <path d="M5.4 15.2c1.6 1.1 2.6-1.4 4.1-.4 1.4 1 2-1.8 3.6-.9 1.5.8 2.2-1.6 3.5-.6"
+            stroke-width="1.2"/>
+      <path d="M5.2 35.5h11.6" stroke-width=".8" opacity=".6"/>
+    </g>
+  </svg>`;
+
+const RIBBON = `
+  <svg class="ribbon" viewBox="0 0 74 74" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="crape" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#1c1a17"/><stop offset=".45" stop-color="#070706"/>
+        <stop offset="1" stop-color="#151310"/>
+      </linearGradient>
+      <pattern id="weft" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(24)">
+        <rect width="3" height="3" fill="url(#crape)"/>
+        <rect width="3" height="1" fill="rgba(255,255,255,.045)"/>
+        <rect width="1" height="3" fill="rgba(0,0,0,.45)"/>
+      </pattern>
+    </defs>
+    <g filter="url(#crimp)">
+      <path d="M0 30 L30 0 L46 0 L0 46 Z" fill="url(#weft)"/>
+      <path d="M30 26 C36 22 44 24 47 30 C50 36 46 42 40 42 C34 42 30 37 30 30 Z" fill="url(#weft)"/>
+      <path d="M44 34 L70 62 L62 70 L38 42 Z" fill="url(#weft)" opacity=".96"/>
+      <path d="M47 28 L72 40 L69 50 L45 38 Z" fill="url(#weft)" opacity=".9"/>
+    </g>
+    <path d="M0 30 L30 0" stroke="rgba(255,255,255,.05)" stroke-width="1" fill="none"/>
+  </svg>`;
+
+const TAKES = [
+  {k:'t-card', n:'Извещение', key:'card',
+   t:'Карточка становится траурным извещением: широкая чёрная кайма, краска которой растекается вглубь бумаги двумя ступенями. Золотая линейка стиля уцелела под ней и видна как тонкая полоска.',
+   h:'Ширина каймы на викторианской почтовой бумаге означала свежесть утраты: в первые месяцы брали самую широкую и постепенно сужали. Здесь она максимальная и сужаться уже не будет.'},
+
+  {k:'t-veil', n:'Креп-вуаль', key:'veil', veil:true,
+   t:'Полотнище жатого газа лежит на верхней части карточки: две встречные нити фактуры, неровный подол и живая помятость, заданная искажением по шуму. Имя читается сквозь ткань.',
+   h:'Мourning crape ткали из шёлка и намеренно мяли горячими валами. Он не блестел — блеск считался неприличным в трауре, — а свет глушил, за что его и выбрали для этой роли.'},
+
+  {k:'t-column', n:'Обломанная колонна', key:'column', column:true,
+   t:'Слева от имени гравирована обломанная колонна: ствол с каннелюрами, скол поверху, никакой капители. Имя и годы приглушены, но целы. Кайма не нужна — знак несёт сам рисунок.',
+   h:'На викторианских кладбищах обломанная колонна ставилась над тем, чья линия оборвалась: род не продолжен, дом не достроен. Точнее символа для «выжжен из рода» эпоха не оставила.'},
+
+  {k:'t-knot', n:'Лента с узлом', key:'knot', ribbon:true,
+   t:'Креповая лента повязана через верхний угол и стянута узлом, концы свисают за пределы карточки. Внутри тонкая чёрная обводка вместо широкой каймы, чтобы не спорить с лентой.',
+   h:'Такой лентой затягивали угол рамы с портретом покойного и дверной молоток на входе. Знак был виден с улицы, не открывая, кто именно в доме умер.'}
+];
+
+const person = (t, nm, yr) => `
+  <div class="node ${t ? t.k : ''}">
+    <div class="box">
+      ${t && t.column ? COLUMN : ''}
+      ${t && t.ribbon ? RIBBON : ''}
+      ${t && t.veil ? '<div class="veil"></div>' : ''}
+      <div class="nm">${nm}</div><div class="yr">${yr}</div>
+    </div>
+  </div>`;
+
+document.getElementById('out').innerHTML = TAKES.map(t => `
+  <div class="take">
+    <div class="zoom">${person(t, 'Мэтью', '1893 — 1971')}</div>
+    <div class="real">
+      ${person(t, 'Мэтью', '1893 — 1971')}
+      ${person(null, 'Иннис', '1885 — 1962')}
+      ${person(null, 'Роберт', '1881 — 1944')}
+    </div>
+    <div class="note">
+      <div><h2>${t.n}<span>${t.key}</span></h2><p>${t.t}</p></div>
+      <p class="hist">${t.h}</p>
+    </div>
+  </div>`).join('');
+
+document.getElementById('light').onchange = e => document.body.classList.toggle('light', e.target.checked);
+document.getElementById('veilhide').onchange = e =>
+  document.querySelectorAll('.veil,.ribbon,.col').forEach(v => v.style.visibility = e.target.checked ? 'hidden' : '');
+</script>

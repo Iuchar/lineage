@@ -1,0 +1,18 @@
+# зависимости и сборки
+server/.venv/
+web/node_modules/
+web/dist/
+prototype/build/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# данные приложения: база и портреты живут вне git
+data/*
+!data/.gitkeep
+
+# рабочие и служебные папки
+.work/
+.superpowers/
+.impeccable/
+.claude/settings.local.json

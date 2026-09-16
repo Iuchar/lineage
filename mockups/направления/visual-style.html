@@ -1,0 +1,173 @@
+<h2>Оформление</h2>
+<p class="subtitle">Раскладка везде одна и та же — меняются шрифты, цвет, плотность и форма карточек. Один и тот же кусок экрана: род Гленн Уриск, выбран Эоган. Кликни то, что нравится.</p>
+
+<style>
+  .styles{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  @media (max-width:1000px){.styles{grid-template-columns:1fr}}
+  .styles .card-image{padding:0;background:none}
+
+  .demo{--r:6px;--sh:0 1px 3px rgba(0,0,0,.08);overflow:hidden;font-family:var(--ff)}
+  .demo *{box-sizing:border-box}
+  .demo .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bar);color:var(--barfg);font-size:11px}
+  .demo .bar .t{padding:3px 9px;border-radius:var(--r) var(--r) 0 0;opacity:.6}
+  .demo .bar .t.on{background:var(--bg);color:var(--fg);opacity:1;font-weight:600}
+  .demo .body{display:flex;background:var(--bg);min-height:212px}
+  .demo .cv{flex:1;position:relative;background:var(--canvas)}
+  .demo .stage{position:relative;width:100%;height:212px}
+  .demo .stage svg{position:absolute;inset:0;width:100%;height:100%}
+  .demo .nd{position:absolute;width:104px;padding:7px 9px;background:var(--card);border:var(--bw) solid var(--line);
+            border-radius:var(--r);box-shadow:var(--sh)}
+  .demo .nd .nm{font-size:12px;font-weight:var(--nmw);color:var(--fg);line-height:1.2;letter-spacing:var(--ls)}
+  .demo .nd .yr{font-size:9.5px;color:var(--mut);margin-top:2px}
+  .demo .nd.sel{border-color:var(--acc);border-width:2px;box-shadow:0 0 0 3px var(--accSoft)}
+  .demo .bdg{position:absolute;left:0;top:calc(100% + 4px);white-space:nowrap;font-size:8.5px;
+             padding:2px 7px;border-radius:9px;background:var(--acc);color:var(--accFg)}
+  .demo .pn{width:150px;flex:none;border-left:var(--bw) solid var(--line);background:var(--panel);padding:11px 11px}
+  .demo .pn .por{width:38px;height:38px;border-radius:var(--r);background:var(--soft);border:var(--bw) solid var(--line)}
+  .demo .pn h5{margin:7px 0 0;font-size:12.5px;color:var(--fg);font-weight:var(--nmw);letter-spacing:var(--ls)}
+  .demo .pn .d{font-size:9.5px;color:var(--mut);margin-top:2px}
+  .demo .pn .lab{font-size:8px;letter-spacing:.8px;color:var(--mut);margin:11px 0 4px}
+  .demo .pn .lnkrow{font-size:9.5px;color:var(--fg);background:var(--card);border:var(--bw) solid var(--line);
+                    border-radius:var(--r);padding:5px 6px}
+  .demo .pn .lnkrow .c{color:var(--mut);font-size:8.5px;display:block}
+  .demo .pn .btn{display:inline-block;margin-top:9px;font-size:9.5px;padding:4px 9px;border-radius:var(--r);
+                 background:var(--acc);color:var(--accFg)}
+  .demo .tag{font-size:8.5px;fill:var(--mut)}
+
+  /* 1. Архив */
+  .st1{--ff:Georgia,'Times New Roman',serif;--bg:#fdfbf6;--canvas:#f8f4ea;--card:#fffdf8;--panel:#f3eee1;
+       --soft:#e9e1cf;--line:#cabfa5;--bw:1px;--fg:#33291c;--mut:#8d7f63;--acc:#8a4b2a;--accFg:#fff;
+       --accSoft:rgba(138,75,42,.16);--bar:#3d3123;--barfg:#efe6d4;--nmw:600;--ls:.2px;--r:4px}
+  /* 2. Ясный день */
+  .st2{--ff:system-ui,-apple-system,'Segoe UI',sans-serif;--bg:#fff;--canvas:#f7f8fa;--card:#fff;--panel:#fafbfc;
+       --soft:#eef1f5;--line:#e2e6ec;--bw:1px;--fg:#1a1f2b;--mut:#8892a4;--acc:#2f6df0;--accFg:#fff;
+       --accSoft:rgba(47,109,240,.15);--bar:#fff;--barfg:#1a1f2b;--nmw:600;--ls:0;--r:8px;
+       --sh:0 1px 2px rgba(16,24,40,.06),0 4px 10px rgba(16,24,40,.04)}
+  .st2 .bar{border-bottom:1px solid var(--line)}
+  .st2 .bar .t.on{background:#eef3ff;color:#2f6df0;border-radius:6px}
+  /* 3. Ночной кабинет */
+  .st3{--ff:system-ui,-apple-system,'Segoe UI',sans-serif;--bg:#171a1f;--canvas:#14161a;--card:#21252c;--panel:#1c2027;
+       --soft:#2b313a;--line:#333a44;--bw:1px;--fg:#e7e9ee;--mut:#8b93a1;--acc:#d9a441;--accFg:#1b1d21;
+       --accSoft:rgba(217,164,65,.22);--bar:#0f1114;--barfg:#cfd4dd;--nmw:600;--ls:0;--r:7px;
+       --sh:0 2px 8px rgba(0,0,0,.4)}
+  /* 4. Гравюра */
+  .st4{--ff:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;--bg:#fcfcfa;--canvas:#fcfcfa;--card:#fff;
+       --panel:#f4f4f0;--soft:#e8e8e2;--line:#1c1c1a;--bw:1.5px;--fg:#111;--mut:#6b6b64;--acc:#111;--accFg:#fff;
+       --accSoft:rgba(0,0,0,.12);--bar:#111;--barfg:#f4f4f0;--nmw:700;--ls:.4px;--r:0;--sh:none}
+</style>
+
+<div class="cards styles">
+
+  <div class="card" data-choice="arhiv" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="demo st1">
+        <div class="bar"><b style="font-size:11px">Родословные</b>
+          <span class="t on">Гленн Уриск</span><span class="t">Уинтерхоуп</span><span class="t">О'Дувейн</span></div>
+        <div class="body">
+          <div class="cv"><div class="stage">
+            <svg viewBox="0 0 300 212"><g fill="none" stroke="#bfae8d" stroke-width="1">
+              <path d="M112 42 H120"/><path d="M116 42 V88 M60 88 H210 M60 88 V104 M210 88 V104"/></g></svg>
+            <div class="nd" style="left:8px;top:22px"><div class="nm">Ниалл</div><div class="yr">1683 – 1791</div></div>
+            <div class="nd" style="left:120px;top:22px"><div class="nm">Мор</div><div class="yr">1691 – 1779</div></div>
+            <div class="nd" style="left:8px;top:104px"><div class="nm">Тормод</div><div class="yr">1712 – 1818</div></div>
+            <div class="nd sel" style="left:158px;top:104px"><div class="nm">Эоган</div><div class="yr">1719 – 1830</div>
+              <span class="bdg">⇄ также в Уинтерхоуп</span></div>
+          </div></div>
+          <div class="pn">
+            <div class="por"></div><h5>Эоган</h5><div class="d">1719 – 1830 · 111 лет</div>
+            <div class="lab">В ДРУГИХ РОДАХ</div>
+            <div class="lnkrow">Эоган Уинтерхоуп<span class="c">Winterhope</span></div>
+            <span class="btn">Править</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body"><h3>1. Архив</h3>
+      <p>Тёплая бумага, шрифт с засечками, терракотовый акцент. Читается как документ, а не как программа. Хорошо печатается, легко смотреть долго. Риск — выглядит старомодно.</p></div>
+  </div>
+
+  <div class="card" data-choice="den" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="demo st2">
+        <div class="bar"><b style="font-size:11px">Родословные</b>
+          <span class="t on">Гленн Уриск</span><span class="t">Уинтерхоуп</span><span class="t">О'Дувейн</span></div>
+        <div class="body">
+          <div class="cv"><div class="stage">
+            <svg viewBox="0 0 300 212"><g fill="none" stroke="#cfd6e0" stroke-width="1.4">
+              <path d="M112 42 H120"/><path d="M116 42 V88 M60 88 H210 M60 88 V104 M210 88 V104"/></g></svg>
+            <div class="nd" style="left:8px;top:22px"><div class="nm">Ниалл</div><div class="yr">1683 – 1791</div></div>
+            <div class="nd" style="left:120px;top:22px"><div class="nm">Мор</div><div class="yr">1691 – 1779</div></div>
+            <div class="nd" style="left:8px;top:104px"><div class="nm">Тормод</div><div class="yr">1712 – 1818</div></div>
+            <div class="nd sel" style="left:158px;top:104px"><div class="nm">Эоган</div><div class="yr">1719 – 1830</div>
+              <span class="bdg">⇄ также в Уинтерхоуп</span></div>
+          </div></div>
+          <div class="pn">
+            <div class="por"></div><h5>Эоган</h5><div class="d">1719 – 1830 · 111 лет</div>
+            <div class="lab">В ДРУГИХ РОДАХ</div>
+            <div class="lnkrow">Эоган Уинтерхоуп<span class="c">Winterhope</span></div>
+            <span class="btn">Править</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body"><h3>2. Ясный день</h3>
+      <p>Белое, гротеск, мягкие тени, синий акцент. Ощущение рабочего инструмента: ничего не отвлекает от данных. Риск — узнаваемо-безликое, как любая современная панель управления.</p></div>
+  </div>
+
+  <div class="card" data-choice="noch" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="demo st3">
+        <div class="bar"><b style="font-size:11px">Родословные</b>
+          <span class="t on">Гленн Уриск</span><span class="t">Уинтерхоуп</span><span class="t">О'Дувейн</span></div>
+        <div class="body">
+          <div class="cv"><div class="stage">
+            <svg viewBox="0 0 300 212"><g fill="none" stroke="#3c434e" stroke-width="1.4">
+              <path d="M112 42 H120"/><path d="M116 42 V88 M60 88 H210 M60 88 V104 M210 88 V104"/></g></svg>
+            <div class="nd" style="left:8px;top:22px"><div class="nm">Ниалл</div><div class="yr">1683 – 1791</div></div>
+            <div class="nd" style="left:120px;top:22px"><div class="nm">Мор</div><div class="yr">1691 – 1779</div></div>
+            <div class="nd" style="left:8px;top:104px"><div class="nm">Тормод</div><div class="yr">1712 – 1818</div></div>
+            <div class="nd sel" style="left:158px;top:104px"><div class="nm">Эоган</div><div class="yr">1719 – 1830</div>
+              <span class="bdg">⇄ также в Уинтерхоуп</span></div>
+          </div></div>
+          <div class="pn">
+            <div class="por"></div><h5>Эоган</h5><div class="d">1719 – 1830 · 111 лет</div>
+            <div class="lab">В ДРУГИХ РОДАХ</div>
+            <div class="lnkrow">Эоган Уинтерхоуп<span class="c">Winterhope</span></div>
+            <span class="btn">Править</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body"><h3>3. Ночной кабинет</h3>
+      <p>Тёмный графит, янтарный акцент. Портреты и линии выступают вперёд, глаза не устают вечером. Риск — печать на бумагу требует отдельного светлого режима.</p></div>
+  </div>
+
+  <div class="card" data-choice="gravura" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="demo st4">
+        <div class="bar"><b style="font-size:11px">РОДОСЛОВНЫЕ</b>
+          <span class="t on">Гленн Уриск</span><span class="t">Уинтерхоуп</span><span class="t">О'Дувейн</span></div>
+        <div class="body">
+          <div class="cv"><div class="stage">
+            <svg viewBox="0 0 300 212"><g fill="none" stroke="#1c1c1a" stroke-width="1.2">
+              <path d="M112 42 H120"/><path d="M116 42 V88 M60 88 H210 M60 88 V104 M210 88 V104"/></g></svg>
+            <div class="nd" style="left:8px;top:22px"><div class="nm">Ниалл</div><div class="yr">1683 – 1791</div></div>
+            <div class="nd" style="left:120px;top:22px"><div class="nm">Мор</div><div class="yr">1691 – 1779</div></div>
+            <div class="nd" style="left:8px;top:104px"><div class="nm">Тормод</div><div class="yr">1712 – 1818</div></div>
+            <div class="nd sel" style="left:158px;top:104px"><div class="nm">Эоган</div><div class="yr">1719 – 1830</div>
+              <span class="bdg">⇄ также в Уинтерхоуп</span></div>
+          </div></div>
+          <div class="pn">
+            <div class="por"></div><h5>Эоган</h5><div class="d">1719 – 1830 · 111 лет</div>
+            <div class="lab">В ДРУГИХ РОДАХ</div>
+            <div class="lnkrow">Эоган Уинтерхоуп<span class="c">Winterhope</span></div>
+            <span class="btn">Править</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body"><h3>4. Гравюра</h3>
+      <p>Почти монохром, острые углы, жирные линии, крупная антиква. Дерево выглядит как оттиск на бумаге. Строго и запоминается. Риск — мало цвета для меток и статусов, придётся выкручиваться штриховкой.</p></div>
+  </div>
+
+</div>

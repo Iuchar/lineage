@@ -1,0 +1,239 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Линейка дат — варианты</title>
+<style>
+:root{
+  --bg:#14161a; --pan:#191c21; --ink:#e8e2d6; --dim:#8d8778; --edge:#3a3f47;
+  --acc:#c9a227; --line:#6d7480; --warn:#b4553f;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:14px/1.6 "Georgia","Times New Roman",serif;padding:28px 32px 64px}
+h1{font-size:20px;letter-spacing:.04em;font-weight:400;margin:0 0 4px}
+.sub{color:var(--dim);font-size:12px;margin-bottom:22px;max-width:76ch}
+.tools{position:sticky;top:0;z-index:9;background:var(--bg);padding:10px 0 14px;
+       border-bottom:1px solid var(--edge);margin-bottom:22px;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.tools label{font-size:12px;color:var(--dim);display:flex;gap:8px;align-items:center}
+input[type=range]{width:180px;accent-color:var(--acc)}
+.var{margin:0 0 40px}
+.hd{display:flex;gap:12px;align-items:baseline;margin-bottom:2px}
+.hd b{font-weight:400;font-size:16px;letter-spacing:.03em}
+.hd .tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);
+         border:1px solid var(--acc);border-radius:2px;padding:1px 6px}
+.note{color:var(--dim);font-size:12px;margin:0 0 10px;max-width:88ch}
+.note em{color:var(--ink);font-style:normal}
+.frame{background:var(--pan);border:1px solid var(--edge);border-radius:3px;overflow:auto}
+svg{display:block}
+.mx{font:11px/1.4 "Consolas",monospace;color:var(--dim);margin-top:6px}
+.mx b{color:var(--ink);font-weight:400}
+</style>
+
+<h1>Линейка дат — четыре варианта</h1>
+<div class="sub">Одна и та же ветка Монад Кройве: поколения 6–8, настоящие годы.
+Меняется только вертикаль и сама линейка. Годы смерти не показываются.
+Ползунок — зум: видно, как прореживаются деления.</div>
+
+<div class="tools">
+  <label>зум <input type="range" id="z" min="40" max="150" value="100"></label>
+  <label><input type="checkbox" id="cbGen" checked> полосы поколений</label>
+  <label><input type="checkbox" id="cbCard"> имена целиком</label>
+  <label>что если — Ивар родился
+    <select id="selIvar"><option value="1960">1960 (как в файле)</option><option value="1994">1994 (поздний ребёнок Чарльза)</option></select></label>
+  <label>Калех
+    <select id="selKal"><option value="1994">1994 (как в файле)</option><option value="2022">2022</option></select></label>
+  <span class="mx" id="zv"></span>
+</div>
+
+<div id="out"></div>
+
+<script>
+/* ветка: поколения 6–8, годы настоящие */
+var TREE = [
+ {id:'rob', n:'Роберт',    b:1905, g:6, k:[
+   {id:'agn', n:'Агнес',    b:1934, g:7, k:[ {id:'vet', n:'Ветвь через Агнес', b:null, g:8, k:[]} ]},
+   {id:'gre', n:'Грегор',   b:1937, g:7, k:[ {id:'kam', n:'Кэмерон', b:1964, g:8, k:[]} ]},
+   {id:'mal', n:'Малькольм',b:1941, g:7, k:[ {id:'ken', n:'Кеннет', b:1976, g:8, k:[]},
+                                             {id:'fin', n:'Финлэй', b:1982, g:8, k:[]} ]},
+   {id:'uil', n:'Уильям',   b:1954, g:7, k:[]} ]},
+ {id:'cha', n:'Чарльз',    b:1912, g:6, k:[
+   {id:'ror', n:'Рори',     b:1938, g:7, k:[]},
+   {id:'iva', n:'Ивар',     b:1960, g:7, k:[ {id:'kal', n:'Калех', b:1994, g:8, k:[]} ]} ]},
+ {id:'hju', n:'Хью',       b:1919, g:6, k:[
+   {id:'mor', n:'Мор',      b:1942, g:7, k:[]},
+   {id:'dal', n:'Даллас',   b:1944, g:7, k:[]} ]}
+];
+
+var CW = 92, CH = 44, GAPX = 30, LEFT = 132;      /* карточка, зазор, ширина линейки */
+var YMIN = 1903, YMAX = 1994;                     /* границы шкалы, пересчитываются */
+var MED  = {6:1912, 7:1942, 8:1979};              /* медиана года поколения, пересчитывается */
+var RNG  = {6:[1903,1932], 7:[1934,1963], 8:[1964,1994]};  /* диапазон поколения по всему роду */
+var BASE = {6:[1903,1932], 7:[1934,1963], 8:[1964,1994]};  /* исходные диапазоны из файла */
+
+var flat = [];
+(function walk(ns, par){ ns.forEach(function(n){ flat.push(Object.assign({par:par?par.id:null}, n)); walk(n.k, n); }); })(TREE, null);
+var byId = {}; flat.forEach(function(p){ byId[p.id] = p; });
+
+/* горизонталь одна на все варианты, чтобы сравнение было честным */
+var X = {};
+(function(){
+  var cur = 0;
+  (function rec(n){
+    if(!n.k.length){ X[n.id] = cur; cur += CW + GAPX; return X[n.id]; }
+    var xs = n.k.map(rec);
+    X[n.id] = (xs[0] + xs[xs.length-1]) / 2;
+    return X[n.id];
+  })({k:TREE, id:'__root'});
+})();
+var WIDE = Math.max.apply(null, Object.keys(X).map(function(k){ return X[k]; })) + CW + 40;
+
+/* «что если»: меняем годы и пересчитываем медианы, диапазоны и границы шкалы */
+function whatIf(){
+  byId.iva.b = +document.getElementById('selIvar').value;
+  byId.kal.b = +document.getElementById('selKal').value;
+  [6,7,8].forEach(function(g){
+    var ys = flat.filter(function(p){ return p.g === g && p.b != null; })
+                 .map(function(p){ return p.b; }).sort(function(a,b){ return a-b; });
+    MED[g] = ys[Math.floor(ys.length/2)];
+    RNG[g] = [Math.min(BASE[g][0], ys[0]), Math.max(BASE[g][1], ys[ys.length-1])];
+  });
+  YMIN = Math.min.apply(null, [6,7,8].map(function(g){ return RNG[g][0]; }));
+  YMAX = Math.max.apply(null, [6,7,8].map(function(g){ return RNG[g][1]; }));
+}
+
+/* вертикаль: четыре правила */
+var K = 4.5, TOP = 34, MINSTEP = CH + 34;
+
+function rowsMedian(){                              /* ярусы по медиане, честный масштаб */
+  var r = {}, prev = null;
+  [6,7,8].forEach(function(g){
+    var want = TOP + (MED[g] - YMIN) * K;
+    r[g] = prev == null ? want : Math.max(want, prev + MINSTEP);
+    prev = r[g];
+  });
+  return r;
+}
+
+var RULES = {
+  a:{
+    ttl:'А. Как сейчас', tag:'работает',
+    note:'Ярусы равные, линейка подписывает поколение и его диапазон. Позиция человека о годе не говорит ничего: <em>Агнес 1934 и Ивар 1960 стоят на одной высоте</em>, подписано «1942».',
+    ruler:'gen',
+    y:function(p){ return ({6:TOP, 7:TOP+98, 8:TOP+196})[p.g]; }
+  },
+  b:{
+    ttl:'Б. Двойная линейка', tag:'твоя идея',
+    note:'Слева деления по годам, рядом полосы поколений. Ярус встаёт на медиану своего поколения по настоящему масштабу — <em>расстояния между ярусами наконец разные</em> вместо двух одинаковых 98. Внутри яруса все по-прежнему на одной высоте, поэтому карточки не совпадают с полосой поколения: расхождение показано пунктиром.',
+    ruler:'both',
+    y:function(p){ return rowsMedian()[p.g]; }
+  },
+  c:{
+    ttl:'В. Двойная линейка со сдвигом внутри яруса', tag:'мой выбор',
+    note:'То же, но человек отъезжает от медианы к своему году — не дальше <em>±42% шага до соседнего яруса</em> и не выше своего родителя. Ярус читается как ярус, ранние и поздние видно. Плата: шины к детям становятся лесенкой.',
+    ruler:'both',
+    y:function(p){
+      var R = rowsMedian(), base = R[p.g];
+      if(p.b == null) return base;
+      var step = Math.min(R[7]-R[6], R[8]-R[7]), lim = step * 0.42;
+      var dy = Math.max(-lim, Math.min(lim, (p.b - MED[p.g]) * K));
+      var par = p.par ? byId[p.par] : null;
+      if(par){ var py = RULES.c.y(par); if(base + dy < py + 26) dy = py + 26 - base; }
+      return base + dy;
+    }
+  },
+  d:{
+    ttl:'Г. Строго по человеку', tag:'ярусов нет',
+    note:'Каждый на своём году. Полоса поколения и карточки совпадают идеально, но <em>Ивар 1960 и Кэмерон 1964 оказываются почти на одной высоте, хотя между ними поколение</em>. Без года — по медиане поколения.',
+    ruler:'both',
+    y:function(p){ return TOP + ((p.b == null ? MED[p.g] : p.b) - YMIN) * K; }
+  }
+};
+
+function draw(key, zoom){
+  var R = RULES[key],
+      full = document.getElementById('cbCard').checked,
+      showGen = document.getElementById('cbGen').checked;
+  var Y = {}; flat.forEach(function(p){ Y[p.id] = R.y(p); });
+  var H = Math.max.apply(null, flat.map(function(p){ return Y[p.id]; })) + CH + 34;
+
+  var s = '';
+  flat.filter(function(p){ return p.k.length; }).forEach(function(p){
+    var px = LEFT + X[p.id] + CW/2, py = Y[p.id] + CH;
+    var kx = p.k.map(function(c){ return LEFT + X[c.id] + CW/2; });
+    var bus = Math.min.apply(null, p.k.map(function(c){ return Y[c.id]; })) - 16;
+    s += '<path d="M'+px+' '+py+'V'+bus+'" stroke="var(--line)" fill="none"/>';
+    s += '<path d="M'+Math.min.apply(null,[px].concat(kx))+' '+bus+'H'+Math.max.apply(null,[px].concat(kx))+'" stroke="var(--line)" fill="none"/>';
+    p.k.forEach(function(c){
+      var bad = Y[c.id] <= Y[p.id] + 8;      /* ребёнок не ниже родителя — связь идёт вверх */
+      s += '<path d="M'+(LEFT+X[c.id]+CW/2)+' '+bus+'V'+Y[c.id]+'" stroke="'+(bad?'var(--warn)':'var(--line)')+'" stroke-width="'+(bad?2:1.1)+'" fill="none"/>';
+    });
+  });
+  flat.forEach(function(p){
+    var x = LEFT + X[p.id], y = Y[p.id];
+    var nm = full ? p.n + ' Монад Кройве' : p.n;
+    s += '<g><text x="'+(x+CW/2)+'" y="'+(y+18)+'" text-anchor="middle" fill="var(--ink)" font-size="13">'+nm+'</text>'+
+         '<text x="'+(x+CW/2)+'" y="'+(y+34)+'" text-anchor="middle" fill="'+(p.b==null?'var(--warn)':'var(--dim)')+'" font-size="11" font-family="Consolas,monospace">'+(p.b==null?'год ?':p.b)+'</text>'+
+         '<path d="M'+(x+10)+' '+(y+24)+'H'+(x+CW-10)+'" stroke="var(--edge)"/></g>';
+  });
+
+  var rul = '', sc = function(yr){ return TOP + (yr - YMIN) * K; };
+  if(R.ruler === 'gen'){
+    [6,7,8].forEach(function(g){
+      var yy = R.y({g:g, b:MED[g], par:null}) + CH/2;
+      rul += '<path d="M96 '+yy+'H120" stroke="var(--edge)"/>'+
+             '<text x="88" y="'+(yy-2)+'" text-anchor="end" fill="var(--ink)" font-size="12" font-family="Consolas,monospace">'+RNG[g][0]+' – '+RNG[g][1]+'</text>'+
+             '<text x="88" y="'+(yy+11)+'" text-anchor="end" fill="var(--dim)" font-size="8" letter-spacing="1.4">ПОКОЛЕНИЕ '+g+'</text>';
+    });
+  } else {
+    var step = [5,10,20,50].filter(function(st){ return st * K * zoom >= 26; })[0] || 50;
+    for(var yr = Math.ceil(YMIN/step)*step; yr <= YMAX; yr += step){
+      var yy = sc(yr), big = yr % 50 === 0;
+      rul += '<path d="M'+(big?46:56)+' '+yy+'H68" stroke="var(--edge)" stroke-width="'+(big?1.4:1)+'"/>'+
+             '<text x="42" y="'+(yy+4)+'" text-anchor="end" fill="'+(big?'var(--ink)':'var(--dim)')+'" font-size="10" font-family="Consolas,monospace">'+yr+'</text>';
+    }
+    rul += '<path d="M68 '+(sc(YMIN)-10)+'V'+(sc(YMAX)+10)+'" stroke="var(--edge)"/>';
+    if(showGen) [6,7,8].forEach(function(g){
+      var a = sc(RNG[g][0]), b = sc(RNG[g][1]), col = g % 2 ? 80 : 98;
+      rul += '<path d="M'+col+' '+a+'V'+b+'" stroke="var(--acc)" stroke-width="2" opacity=".7"/>'+
+             '<path d="M'+(col-3)+' '+a+'h6M'+(col-3)+' '+b+'h6" stroke="var(--acc)" stroke-width="1.4" opacity=".7"/>'+
+             '<text x="'+(col+7)+'" y="'+((a+b)/2-3)+'" fill="var(--acc)" font-size="9" letter-spacing="1.2">ПОК. '+g+'</text>'+
+             '<text x="'+(col+7)+'" y="'+((a+b)/2+8)+'" fill="var(--dim)" font-size="9" font-family="Consolas,monospace">'+RNG[g][0]+'–'+RNG[g][1]+'</text>';
+      var yy = R.y({g:g, b:MED[g], par:null}) + CH/2;
+      if(Math.abs(yy - sc(MED[g])) > 2)
+        rul += '<path d="M'+col+' '+yy+'H'+(LEFT-6)+'" stroke="var(--acc)" stroke-dasharray="2 4" opacity=".45"/>';
+    });
+  }
+
+  var w = (WIDE + LEFT) * zoom, h = H * zoom;
+  return '<svg width="'+w.toFixed(0)+'" height="'+h.toFixed(0)+'" viewBox="0 0 '+(WIDE+LEFT)+' '+H+'">'+
+         '<g stroke-width="1.1">'+rul+s+'</g></svg>';
+}
+
+function render(){
+  whatIf();
+  var zoom = +document.getElementById('z').value / 100;
+  var stp = [5,10,20,50].filter(function(st){ return st*4.5*zoom >= 26; })[0] || 50;
+  document.getElementById('zv').textContent = 'масштаб ' + zoom.toFixed(2) + ' · шаг делений ' + stp + ' лет';
+  document.getElementById('out').innerHTML = ['a','b','c','d'].map(function(k){
+    var R = RULES[k], Y = {}; flat.forEach(function(p){ Y[p.id] = R.y(p); });
+    var H = Math.round(Math.max.apply(null, flat.map(function(p){ return Y[p.id]; })) + CH + 34);
+    var g7 = flat.filter(function(p){ return p.g === 7; }).map(function(p){ return Math.round(Y[p.id]); });
+    var spread = Math.max.apply(null, g7) - Math.min.apply(null, g7);
+    var iva = Math.round(Y.iva), kam = Math.round(Y.kam);
+    var up = 0;
+    flat.filter(function(p){ return p.k.length; }).forEach(function(p){
+      p.k.forEach(function(c){ if(Y[c.id] <= Y[p.id] + 8) up++; });
+    });
+    return '<div class="var"><div class="hd"><b>'+R.ttl+'</b><span class="tag">'+R.tag+'</span></div>'+
+           '<p class="note">'+R.note+'</p>'+
+           '<div class="frame">'+draw(k, zoom)+'</div>'+
+           '<div class="mx">высота полотна <b>'+H+'</b> px · разброс внутри поколения 7 <b>'+spread+'</b> px · '+
+           'Ивар (пок. 7) <b>'+iva+'</b>, Кэмерон (пок. 8) <b>'+kam+'</b>, зазор <b>'+(kam-iva)+'</b> px · '+
+           'связей вверх <b'+(up?' style="color:var(--warn)"':'')+'>'+up+'</b></div></div>';
+  }).join('');
+}
+['z','cbGen','cbCard','selIvar','selKal'].forEach(function(id){
+  var el = document.getElementById(id);
+  el.oninput = render; el.onchange = render;
+});
+render();
+</script>

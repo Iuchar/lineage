@@ -1,0 +1,148 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Викторианский — кайма и креп</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=PT+Serif:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--page:#0d0e10;--ink:#e8e3d8;--dim:#7d7a72;--rule:#26282c;--gold:#c8a44e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.6 'PT Serif',Georgia,serif;padding:34px 40px 90px}
+h1{font-family:'Playfair Display',serif;font-size:29px;font-weight:700;margin:0 0 6px}
+h1 em{font-style:italic;color:var(--gold);font-weight:400}
+.lede{color:var(--dim);max-width:84ch;margin:0 0 22px;font-size:14.5px}
+
+.bar{position:sticky;top:0;z-index:20;background:linear-gradient(var(--page) 76%,rgba(13,14,16,0));
+     padding:11px 0 14px;margin-bottom:20px;border-bottom:1px solid var(--rule);
+     display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.bar label{font:400 12px/1 'IBM Plex Mono',monospace;color:var(--dim);
+           display:flex;gap:8px;align-items:center;letter-spacing:.04em;cursor:pointer}
+.bar input{accent-color:var(--gold)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px}
+.case{border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.stage{padding:30px 18px;display:flex;gap:30px;align-items:flex-start;justify-content:center;
+       background:#262721;
+       background-image:radial-gradient(circle at 14px 14px,rgba(185,154,82,.11) 1.1px,transparent 1.4px);
+       background-size:58px 58px}
+body.light .stage{background-color:#efe9dc;
+       background-image:radial-gradient(circle at 14px 14px,rgba(122,95,32,.12) 1.1px,transparent 1.4px)}
+.cap{padding:11px 15px 14px;background:#15171a}
+.cap b{font-family:'Playfair Display',serif;font-size:16px}
+.cap .key{font:500 10px/1 'IBM Plex Mono',monospace;color:var(--gold);letter-spacing:.12em;
+          text-transform:uppercase;margin-left:8px}
+.cap p{margin:4px 0 0;font-size:13.5px;line-height:1.5;color:var(--dim)}
+
+/* ── карточка викторианского ── */
+.node{position:relative;width:150px;font-family:'Playfair Display',Georgia,serif;text-align:center}
+.box{position:relative;min-height:60px;padding:10px;display:flex;flex-direction:column;
+     align-items:center;justify-content:center;background:#2e2f27;border:1px solid #7c6a3c}
+.box::after{content:'';position:absolute;inset:3px;border:1px solid #7c6a3c;opacity:.42;pointer-events:none}
+.nm{position:relative;z-index:2;font-size:16px;font-weight:700;color:#f2e8d2}
+.yr{position:relative;z-index:2;font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;
+    color:#a09578;margin-top:4px}
+.badge{position:absolute;left:6px;top:100%;margin-top:5px;white-space:nowrap;
+       font-family:'PT Serif',serif;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+       background:#7a2230;color:#f3e2c4;padding:2px 8px}
+body.light .box{background:#fbf8ef;border-color:#a9986a}
+body.light .box::after{border-color:#a9986a}
+body.light .nm{color:#231f16}
+body.light .yr{color:#7d7358}
+
+/* ═════ комбинации каймы и крепа ═════ */
+
+/* общая кайма: чёрная траурная полоса по краю карточки */
+.mourn .box{border-color:#0e0d0b;border-width:3px;box-shadow:inset 0 0 0 1px #7c6a3c}
+body.light .mourn .box{border-color:#100f0d;box-shadow:inset 0 0 0 1px #a9986a}
+.mourn .nm{color:#c9bfa6}
+body.light .mourn .nm{color:#4a4437}
+
+/* 1 — лента через угол */
+.c-corner .box{overflow:hidden}
+.c-corner .box::before{content:'';position:absolute;left:-34px;top:14px;width:120px;height:19px;z-index:3;
+  transform:rotate(-42deg);
+  background:linear-gradient(#1b1916,#0b0a09 52%,#141210);
+  box-shadow:0 1px 4px rgba(0,0,0,.65)}
+
+/* 2 — креп поперёк, имя просвечивает */
+.c-sheer .box{overflow:hidden}
+.c-sheer .box::before{content:'';position:absolute;left:-20%;right:-20%;top:20px;height:26px;z-index:3;
+  transform:rotate(-6deg);
+  background:repeating-linear-gradient(101deg,rgba(9,8,7,.78) 0 5px,rgba(22,20,17,.72) 5px 10px);
+  box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.c-sheer .nm{z-index:4;color:#d9cfb6;mix-blend-mode:screen}
+body.light .c-sheer .nm{color:#cfc6ae;mix-blend-mode:normal}
+
+/* 3 — лента подвязана снизу */
+.c-hem .box{overflow:hidden}
+.c-hem .box::before{content:'';position:absolute;left:-10%;right:-10%;bottom:6px;height:13px;z-index:3;
+  transform:rotate(-2deg);
+  background:linear-gradient(#17150f,#0a0908 60%,#100f0d);
+  box-shadow:0 -1px 4px rgba(0,0,0,.55)}
+.c-hem .yr{margin-bottom:9px}
+
+/* 4 — драпировка сверху со складками */
+.c-drape .box{overflow:hidden;padding-top:20px}
+.c-drape .box::before{content:'';position:absolute;left:0;right:0;top:0;height:22px;z-index:3;
+  background:repeating-linear-gradient(97deg,#0a0908 0 6px,#191712 6px 11px,#0f0e0c 11px 16px);
+  clip-path:polygon(0 0,100% 0,100% 62%,88% 100%,76% 60%,64% 100%,52% 58%,40% 100%,28% 60%,16% 100%,4% 62%,0 92%);
+  box-shadow:0 2px 7px rgba(0,0,0,.5)}
+
+/* 5 — узкая лента поверх имени, имя зачёркнуто */
+.c-band .box{overflow:hidden}
+.c-band .box::before{content:'';position:absolute;left:-16%;right:-16%;top:24px;height:9px;z-index:3;
+  transform:rotate(-4deg);
+  background:linear-gradient(#141210,#070606 55%,#121110)}
+.c-band .nm{text-decoration:line-through;text-decoration-thickness:1px;
+  text-decoration-color:rgba(201,191,166,.55)}
+body.light .c-band .nm{text-decoration-color:rgba(74,68,55,.6)}
+</style>
+
+<h1>Викторианский — <em>кайма и креп</em></h1>
+<p class="lede">Комбинации двух траурных приёмов Британии XIX века: чёрная кайма извещения о смерти
+по краю карточки и креп, которым затягивали портреты в доме покойного. Имя всюду остаётся читаемым.
+Слева выжженный, справа живой сосед.</p>
+
+<div class="bar">
+  <label><input type="checkbox" id="light"> светлая тема</label>
+  <label><input type="checkbox" id="badge" checked> метка «выжжен из рода»</label>
+</div>
+
+<div class="grid" id="out"></div>
+
+<script>
+const CASES = [
+  {k:'c-corner', n:'Кайма и лента через угол', key:'corner',
+   t:'Креп повязан наискось через верхний угол, как траурная лента на раме портрета. Имя и годы не задеты вовсе, знак читается по краю.'},
+  {k:'c-sheer', n:'Кайма и креп поверх имени', key:'sheer',
+   t:'Полотнище крепа лежит поперёк карточки, имя просвечивает сквозь ткань. Самый мрачный из пяти: человек за занавесью, но ещё узнаваем.'},
+  {k:'c-hem', n:'Кайма и лента по низу', key:'hem',
+   t:'Креп подвязан по нижнему краю, под годами. Тихий вариант: карточка целая, траур обозначен подолом.'},
+  {k:'c-drape', n:'Кайма и драпировка сверху', key:'drape',
+   t:'Ткань свисает сверху складками, как с зеркала в доме покойного. Занимает верхнее поле, поэтому имя пришлось опустить.'},
+  {k:'c-band', n:'Кайма, узкая лента и черта', key:'band',
+   t:'Тонкая лента идёт над именем, само имя перечёркнуто. Ближе всего к нынешнему знаку, но траур читается по-викториански.'}
+];
+
+const person = (cls, nm, yr, badge) => `
+  <div class="node ${cls}"><div class="box">
+    <div class="nm">${nm}</div><div class="yr">${yr}</div>
+    ${badge ? '<span class="badge">выжжен из рода</span>' : ''}
+  </div></div>`;
+
+function draw(){
+  const b = document.getElementById('badge').checked;
+  document.getElementById('out').innerHTML = CASES.map(c => `
+    <div class="case">
+      <div class="stage">
+        ${person('mourn ' + c.k, 'Мэтью', '1893 — 1971', b)}
+        ${person('', 'Иннис', '1885 — 1962', false)}
+      </div>
+      <div class="cap"><b>${c.n}</b><span class="key">${c.key}</span><p>${c.t}</p></div>
+    </div>`).join('');
+}
+document.getElementById('light').onchange = e => document.body.classList.toggle('light', e.target.checked);
+document.getElementById('badge').onchange = draw;
+draw();
+</script>

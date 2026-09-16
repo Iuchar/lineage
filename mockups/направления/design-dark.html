@@ -1,0 +1,280 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Oranienbaum&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500;700&family=Golos+Text:wght@400;500;600&display=swap');
+
+/* --- страница: явные светлые цвета, чтобы читалось в тёмной теме --- */
+.pg{color:#e6e2d8}
+.pg h2{color:#f4f1ea;margin:0 0 6px;font-size:26px;letter-spacing:-.01em}
+.pg .lede{color:#a49d8f;font-size:14px;line-height:1.5;margin:0 0 26px}
+.dd{margin:0 0 36px}
+.dd-h{display:flex;align-items:baseline;gap:12px;margin:0 0 11px;flex-wrap:wrap}
+.dd-h .num{font:600 12px/1 'IBM Plex Mono',monospace;color:#d98a4a;letter-spacing:.12em}
+.dd-h h3{margin:0;font-size:20px;color:#f4f1ea;letter-spacing:-.01em}
+.dd-h .why{font-size:12.5px;color:#8f887b}
+.frame{border-radius:10px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);cursor:pointer;
+       transition:transform .18s ease, box-shadow .18s ease}
+.frame:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(0,0,0,.6)}
+.dd-note{margin:11px 2px 0;font-size:12.5px;line-height:1.55;color:#a49d8f}
+.dd-note b{color:#e6e2d8;font-weight:600}
+
+/* ============================================================
+   1 · ГЕРБОВНИК — том при свече: тиснёная кожа, золочёный обрез
+   ============================================================ */
+.p1{--ink:#0e1119;--field:#141926;--plate:#1b2131;--rule:#3a4358;--gold:#c39b4e;--fg:#ece5d4;--mut:#8b8570;
+    background:var(--field);font-family:'Cormorant Garamond',Constantia,Georgia,serif;position:relative}
+.p1::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E")}
+.p1 .top{background:var(--ink);padding:14px 22px 12px;position:relative}
+.p1 .top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold) 18%,var(--gold) 82%,transparent)}
+.p1 .wordmark{font-family:Oranienbaum,'Cormorant Garamond',serif;font-size:21px;letter-spacing:.18em;
+  text-transform:uppercase;text-align:center;line-height:1;color:#f0e7d2}
+.p1 .rods{display:flex;justify-content:center;margin-top:10px;font-size:13px;letter-spacing:.1em;
+  text-transform:uppercase;color:#7d8598}
+.p1 .rods span{padding:0 15px;position:relative}
+.p1 .rods span+span::before{content:'◆';position:absolute;left:-4px;top:1px;font-size:6px;color:var(--gold)}
+.p1 .rods .on{color:#f0e7d2;border-bottom:1px solid var(--gold);padding-bottom:3px}
+.p1 .body{display:flex;position:relative;z-index:1}
+.p1 .stage{flex:1;position:relative;height:276px;overflow:hidden;min-width:0}
+.p1 .stage svg{position:absolute;left:0;top:0;width:500px;height:276px}
+.p1 .gen{position:absolute;left:17px;font-family:Oranienbaum,serif;font-size:16px;color:var(--gold);letter-spacing:.1em}
+.p1 .plate{position:absolute;width:154px;background:var(--plate);border:1px solid var(--rule);
+  padding:9px 13px 10px;box-shadow:0 2px 10px rgba(0,0,0,.45)}
+.p1 .plate::after{content:'';position:absolute;inset:3px;border:1px solid rgba(195,155,78,.22);pointer-events:none}
+.p1 .nm{font-size:22px;font-weight:500;color:var(--fg);line-height:1.05}
+.p1 .yr{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--mut);margin-top:5px}
+.p1 .plate.sel{border-color:var(--gold);box-shadow:0 0 0 1px rgba(195,155,78,.5),0 4px 20px rgba(195,155,78,.18)}
+.p1 .plate.sel::after{border-color:rgba(195,155,78,.5)}
+.p1 .plate.sel .nm{color:#f7e9c9}
+.p1 .seal{position:absolute;left:13px;top:calc(100% + 7px);font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:.09em;text-transform:uppercase;color:#1a1508;background:var(--gold);padding:3px 9px}
+.p1 .panel{width:224px;flex:none;background:var(--ink);border-left:1px solid var(--rule);padding:17px}
+.p1 .panel .por{width:64px;height:78px;border:1px solid var(--rule);background:
+  repeating-linear-gradient(135deg,#1e2433 0 6px,#232a3b 6px 12px)}
+.p1 .panel h4{margin:13px 0 0;font-family:Oranienbaum,serif;font-size:24px;color:#f0e7d2;line-height:1}
+.p1 .panel .sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut);margin-top:6px;letter-spacing:.04em}
+.p1 .hr{height:1px;background:var(--rule);margin:15px 0 10px}
+.p1 .lbl{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--gold)}
+.p1 .row{display:flex;justify-content:space-between;font-size:16px;color:var(--fg);padding:3px 0}
+.p1 .row i{font-style:normal;color:var(--mut);font-size:13px;font-family:'IBM Plex Mono',monospace}
+.p1 .xr{margin-top:8px;border:1px solid var(--gold);padding:8px 9px;font-size:16px;color:#f7e9c9}
+.p1 .xr em{display:block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-style:normal;color:var(--mut);
+  letter-spacing:.09em;text-transform:uppercase;margin-top:4px}
+
+/* ============================================================
+   2 · СХЕМА — инженерный чертёж
+   ============================================================ */
+.p2{--bg:#0d0f12;--grid:#171b21;--line:#37414e;--fg:#dfe5ec;--mut:#68737f;--sig:#e8a33d;--cy:#59c2c9;
+    background:var(--bg);font-family:'JetBrains Mono',Consolas,monospace;color:var(--fg)}
+.p2 .top{display:flex;align-items:center;padding:9px 16px;border-bottom:1px solid var(--line);
+  font-size:10.5px;letter-spacing:.06em;color:var(--mut);background:#090b0d}
+.p2 .top b{color:var(--fg);font-weight:500}
+.p2 .top .sp{flex:1}
+.p2 .tabs{display:flex;gap:14px;padding:7px 16px;border-bottom:1px solid var(--line);font-size:10.5px;color:var(--mut)}
+.p2 .tabs .on{color:var(--sig)}
+.p2 .body{display:flex}
+.p2 .stage{flex:1;position:relative;height:254px;overflow:hidden;min-width:0;
+  background-image:radial-gradient(circle at 1px 1px,var(--grid) 1px,transparent 0);background-size:16px 16px}
+.p2 .stage svg{position:absolute;left:0;top:0;width:500px;height:254px}
+.p2 .cell{position:absolute;width:152px;background:#12161b;border:1px solid var(--line);padding:8px 10px 9px}
+.p2 .cell .id{position:absolute;top:-1px;right:-1px;font-size:8px;color:var(--mut);background:#090b0d;
+  border-left:1px solid var(--line);border-bottom:1px solid var(--line);padding:1px 5px;letter-spacing:.05em}
+.p2 .cell .nm{font-size:12.5px;font-weight:500;letter-spacing:.03em;text-transform:uppercase}
+.p2 .cell .yr{font-size:10px;color:var(--mut);margin-top:4px}
+.p2 .cell.sel{border-color:var(--sig);box-shadow:0 0 0 1px rgba(232,163,61,.35),0 0 24px rgba(232,163,61,.15)}
+.p2 .cell.sel .nm{color:var(--sig)}
+.p2 .lnkflag{position:absolute;left:-1px;top:calc(100% + 5px);font-size:8.5px;letter-spacing:.06em;
+  color:var(--bg);background:var(--cy);padding:2px 7px}
+.p2 .panel{width:222px;flex:none;border-left:1px solid var(--line);padding:13px 14px;background:#0b0d10}
+.p2 .panel .por{width:100%;height:56px;border:1px dashed var(--line);color:var(--mut);font-size:9px;
+  display:flex;align-items:center;justify-content:center;letter-spacing:.1em}
+.p2 .panel h4{margin:13px 0 3px;font-size:14px;font-weight:500;letter-spacing:.05em;color:var(--sig);text-transform:uppercase}
+.p2 .rd{display:flex;font-size:10px;color:var(--mut);margin-top:5px;white-space:nowrap;overflow:hidden}
+.p2 .rd .dots{flex:1;overflow:hidden;color:var(--line)}
+.p2 .rd .v{flex:none;color:var(--fg)}
+.p2 .sec{margin-top:14px;font-size:9px;letter-spacing:.15em;color:var(--cy);border-top:1px solid var(--line);padding-top:9px}
+.p2 .xr{margin-top:7px;border:1px solid var(--cy);padding:6px 8px;font-size:10px;color:var(--fg)}
+.p2 .xr em{display:block;font-style:normal;color:var(--mut);font-size:8.5px;margin-top:3px}
+
+/* ============================================================
+   3 · ПОЛОТНО — ночная афиша: рамок нет, только свет и буквы
+   ============================================================ */
+.p3{--bg:#0c0b0a;--fg:#f2ece2;--mut:#7e776c;--red:#e0503f;--hair:#26231f;
+    background:var(--bg);font-family:'Golos Text','Segoe UI',sans-serif;color:var(--fg)}
+.p3 .top{display:flex;align-items:flex-end;gap:26px;padding:21px 26px 15px}
+.p3 .top .wm{font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--mut)}
+.p3 .rods{display:flex;gap:20px;font-size:12px;color:var(--mut)}
+.p3 .rods .on{color:var(--fg);box-shadow:inset 0 -2px 0 var(--red)}
+.p3 .top .sp{flex:1}
+.p3 .top .cnt{font-size:11px;color:var(--mut);letter-spacing:.06em}
+.p3 .body{display:flex;border-top:1px solid var(--hair)}
+.p3 .stage{flex:1;position:relative;height:272px;overflow:hidden;min-width:0}
+.p3 .stage svg{position:absolute;left:0;top:0;width:500px;height:272px}
+.p3 .per{position:absolute;width:172px}
+.p3 .per .nm{font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:33px;line-height:.98;
+  letter-spacing:-.015em;color:var(--fg)}
+.p3 .per .yr{font-size:9.5px;letter-spacing:.16em;color:var(--mut);margin-top:5px;text-transform:uppercase}
+.p3 .per.sel .nm{color:var(--red)}
+.p3 .per.sel .yr{color:var(--red);opacity:.8}
+.p3 .per .go{display:inline-block;margin-top:8px;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--red);border-bottom:1px solid var(--red);padding-bottom:2px}
+.p3 .gen{position:absolute;right:9px;font-size:9px;letter-spacing:.2em;color:var(--mut);text-transform:uppercase}
+.p3 .panel{width:236px;flex:none;border-left:1px solid var(--hair);padding:22px}
+.p3 .panel .por{width:76px;height:76px;border-radius:50%;background:conic-gradient(from 210deg,#1c1a17,#272320,#1c1a17)}
+.p3 .panel h4{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:31px;margin:16px 0 0;line-height:1}
+.p3 .panel .sub{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-top:7px}
+.p3 .lbl{font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin:20px 0 7px}
+.p3 .row{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--hair)}
+.p3 .row i{font-style:normal;color:var(--mut)}
+.p3 .xr{font-size:13.5px;margin-top:4px}
+.p3 .xr b{border-bottom:1px solid var(--red);color:var(--red);font-weight:400}
+.p3 .xr em{display:block;font-style:normal;font-size:9px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--mut);margin-top:5px}
+</style>
+
+<div class="pg">
+<h2>Три направления — тёмные</h2>
+<p class="lede">Те же три идеи, собранные под тёмную тему: приложение будет жить в ней, значит и выбирать надо в ней. Раскладка везде утверждённая. Кликни направление.</p>
+
+<!-- =================== 1 =================== -->
+<div class="dd">
+  <div class="dd-h"><span class="num">01</span><h3>Гербовник</h3><span class="why">том при свече: тиснение и золото</span></div>
+  <div class="frame p1" data-choice="gerbovnik" onclick="toggleSelect(this)">
+    <div class="top">
+      <div class="wordmark">Родословныя</div>
+      <div class="rods"><span class="on">Гленн Уриск</span><span>Уинтерхоуп</span><span>О'Дувейн</span><span>Монад Кройве</span></div>
+    </div>
+    <div class="body">
+      <div class="stage">
+        <svg viewBox="0 0 500 276" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#4a5468" stroke-width="1">
+            <path d="M304 54 H310"/><path d="M307 54 V114 M97 114 H407 M97 114 V142 M407 114 V142"/>
+          </g>
+          <g fill="#c39b4e"><path d="M307 49 l5 5 -5 5 -5 -5z"/><path d="M97 109 l4.5 5 -4.5 5 -4.5 -5z"/>
+            <path d="M407 109 l4.5 5 -4.5 5 -4.5 -5z"/></g>
+          <path d="M46 22 V256" stroke="#c39b4e" stroke-opacity=".25"/>
+        </svg>
+        <div class="gen" style="top:40px">I</div>
+        <div class="gen" style="top:154px">II</div>
+        <div class="plate" style="left:150px;top:28px"><div class="nm">Ниалл</div><div class="yr">1683 — 1791</div></div>
+        <div class="plate" style="left:310px;top:28px"><div class="nm">Мор</div><div class="yr">1691 — 1779</div></div>
+        <div class="plate" style="left:20px;top:142px"><div class="nm">Тормод</div><div class="yr">1712 — 1818</div></div>
+        <div class="plate" style="left:180px;top:142px"><div class="nm">Аилса</div><div class="yr">1720 — 1812</div></div>
+        <div class="plate sel" style="left:330px;top:142px"><div class="nm">Эоган</div><div class="yr">1719 — 1830</div>
+          <span class="seal">Также в Уинтерхоуп</span></div>
+      </div>
+      <div class="panel">
+        <div class="por"></div>
+        <h4>Эоганъ</h4>
+        <div class="sub">1719 — 1830 · 111 ЛѢТЪ</div>
+        <div class="hr"></div>
+        <div class="lbl">Родители</div>
+        <div class="row"><span>Ниалл</span><i>1683</i></div>
+        <div class="row"><span>Мор</span><i>1691</i></div>
+        <div class="hr"></div>
+        <div class="lbl">В других родах</div>
+        <div class="xr">Эоган Уинтерхоуп<em>Winterhope · перейти</em></div>
+      </div>
+    </div>
+  </div>
+  <p class="dd-note"><b>Что изменилось против светлой версии:</b> бумага ушла, осталась тиснёная кожа переплёта. Золото теперь единственный источник света — линия под шапкой, ромбы на развилках, обводка выбранной карточки. Тонкие штрихи антиквы на тёмном читаются лучше, чем на бежевом. <b>Риск:</b> портреты придётся подавать в рамке с тёплой подложкой, иначе лица провалятся в фон.</p>
+</div>
+
+<!-- =================== 2 =================== -->
+<div class="dd">
+  <div class="dd-h"><span class="num">02</span><h3>Схема</h3><span class="why">чертёж: узлы, шины, идентификаторы</span></div>
+  <div class="frame p2" data-choice="shema" onclick="toggleSelect(this)">
+    <div class="top"><b>РОДОСЛОВНЫЕ</b>&nbsp;/&nbsp;GLEANN_URUISG&nbsp;&nbsp;·&nbsp;&nbsp;IND 38&nbsp;&nbsp;FAM 14
+      <span class="sp"></span>СВЯЗОК 3 · НЕПРОВЕРЕНО 2</div>
+    <div class="tabs"><span class="on">[1] ГЛЕНН УРИСК</span><span>[2] УИНТЕРХОУП</span><span>[3] О'ДУВЕЙН</span><span>[4] МОНАД КРОЙВЕ</span><span>[+] ЗАГРУЗИТЬ</span></div>
+    <div class="body">
+      <div class="stage">
+        <svg viewBox="0 0 500 254" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#37414e" stroke-width="1" shape-rendering="crispEdges">
+            <path d="M302 46 H310"/><path d="M306 46 V104 M96 104 H406 M96 104 V132 M406 104 V132"/>
+          </g>
+          <g fill="#59c2c9"><rect x="303" y="43" width="6" height="6"/><rect x="93" y="101" width="6" height="6"/>
+            <rect x="403" y="101" width="6" height="6"/></g>
+        </svg>
+        <div class="cell" style="left:150px;top:22px"><span class="id">I1001</span>
+          <div class="nm">Ниалл</div><div class="yr">1683 › 1791 · 108</div></div>
+        <div class="cell" style="left:310px;top:22px"><span class="id">I1002</span>
+          <div class="nm">Мор</div><div class="yr">1691 › 1779 · 88</div></div>
+        <div class="cell" style="left:20px;top:132px"><span class="id">I1003</span>
+          <div class="nm">Тормод</div><div class="yr">1712 › 1818 · 106</div></div>
+        <div class="cell" style="left:180px;top:132px"><span class="id">I1005</span>
+          <div class="nm">Аилса</div><div class="yr">1720 › 1812 · 92</div></div>
+        <div class="cell sel" style="left:330px;top:132px"><span class="id">I1004</span>
+          <div class="nm">Эоган</div><div class="yr">1719 › 1830 · 111</div>
+          <span class="lnkflag">⇄ WINTERHOPE / I2003</span></div>
+      </div>
+      <div class="panel">
+        <div class="por">ПОРТРЕТ НЕ ЗАДАН</div>
+        <h4>Эоган</h4>
+        <div class="rd"><span>SEX</span><span class="dots">·····································</span><span class="v">M</span></div>
+        <div class="rd"><span>BIRT</span><span class="dots">·····································</span><span class="v">1719</span></div>
+        <div class="rd"><span>DEAT</span><span class="dots">·····································</span><span class="v">1830</span></div>
+        <div class="rd"><span>FAMC</span><span class="dots">·····································</span><span class="v">F1001</span></div>
+        <div class="rd"><span>FAMS</span><span class="dots">·····································</span><span class="v">F1003</span></div>
+        <div class="sec">СВЯЗКИ МЕЖДУ РОДАМИ</div>
+        <div class="xr">WINTERHOPE / I2003<em>подтверждено · 19.08.2026</em></div>
+      </div>
+    </div>
+  </div>
+  <p class="dd-note"><b>Что запоминается:</b> идентификаторы GEDCOM видны прямо на узлах, панель читается как приборная выкладка, шины строго прямоугольные с квадратами на стыках. Два цвета на всё: янтарь — выбранное, бирюза — межродовое. <b>Риск:</b> тебе и коллегам удобно, а родственнику по ссылке может показаться холодным и техническим.</p>
+</div>
+
+<!-- =================== 3 =================== -->
+<div class="dd">
+  <div class="dd-h"><span class="num">03</span><h3>Полотно</h3><span class="why">ночная афиша: рамок нет, есть свет</span></div>
+  <div class="frame p3" data-choice="polotno" onclick="toggleSelect(this)">
+    <div class="top">
+      <div class="wm">Родословные</div>
+      <div class="rods"><span class="on">Гленн&nbsp;Уриск</span><span>Уинтерхоуп</span><span>О'Дувейн</span><span>Монад&nbsp;Кройве</span></div>
+      <span class="sp"></span><div class="cnt">38 человек · 14 семей</div>
+    </div>
+    <div class="body">
+      <div class="stage">
+        <svg viewBox="0 0 500 272" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#3a3630" stroke-width="1">
+            <path d="M120 54 H300"/><path d="M210 54 V128 M78 128 H388 M78 128 V160 M388 128 V160"/>
+          </g>
+          <circle cx="210" cy="54" r="2.8" fill="#e0503f"/>
+          <path d="M20 42 H480" stroke="#1d1b18"/><path d="M20 150 H480" stroke="#1d1b18"/>
+        </svg>
+        <div class="gen" style="top:24px">поколение I</div>
+        <div class="gen" style="top:132px">поколение II</div>
+        <div class="per" style="left:20px;top:58px"><div class="nm">Ниалл</div><div class="yr">1683 — 1791</div></div>
+        <div class="per" style="left:306px;top:58px"><div class="nm">Мор</div><div class="yr">1691 — 1779</div></div>
+        <div class="per" style="left:20px;top:164px"><div class="nm">Тормод</div><div class="yr">1712 — 1818</div></div>
+        <div class="per" style="left:180px;top:164px"><div class="nm">Аилса</div><div class="yr">1720 — 1812</div></div>
+        <div class="per sel" style="left:330px;top:164px"><div class="nm">Эоган</div><div class="yr">1719 — 1830</div>
+          <span class="go">также в Уинтерхоуп →</span></div>
+      </div>
+      <div class="panel">
+        <div class="por"></div>
+        <h4>Эоган</h4>
+        <div class="sub">Гленн Уриск · 111 лет</div>
+        <div class="lbl">Сведения</div>
+        <div class="row"><span>Отец</span><i>Ниалл</i></div>
+        <div class="row"><span>Мать</span><i>Мор</i></div>
+        <div class="row"><span>Дети</span><i>1</i></div>
+        <div class="lbl">В других родах</div>
+        <div class="xr"><b>Эоган Уинтерхоуп</b><em>основал род · перейти</em></div>
+      </div>
+    </div>
+  </div>
+  <p class="dd-note"><b>Что запоминается:</b> карточек нет — человек это крупное имя, висящее в темноте, поколения отбиты волосяными линейками во всю ширину. Единственная точка цвета стоит на браке и на выбранном. <b>Риск:</b> на 84 персонах воздух придётся ужимать, нужен отдельный плотный режим.</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="mix" onclick="toggleSelect(this)">
+    <div class="letter">✂</div>
+    <div class="content"><h3>Смешать</h3><p>Скажи, что откуда взять — например, воздух третьего с идентификаторами второго.</p></div>
+  </div>
+  <div class="option" data-choice="none" onclick="toggleSelect(this)">
+    <div class="letter">✕</div>
+    <div class="content"><h3>Всё мимо</h3><p>Скажи, что не так — сменю направление целиком.</p></div>
+  </div>
+</div>
+</div>

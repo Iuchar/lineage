@@ -1,0 +1,263 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Выжжен из рода — второй заход</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&family=PT+Serif:ital,wght@0,400;1,400&family=Literata:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--page:#0d0e10;--ink:#e8e3d8;--dim:#7d7a72;--rule:#26282c;--gold:#c8a44e;--ember:#b4553f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.6 'Cormorant Garamond',Georgia,serif;padding:36px 40px 90px}
+h1{font-size:31px;font-weight:400;margin:0 0 6px;letter-spacing:.02em}
+h1 em{font-style:italic;color:var(--gold)}
+.lede{color:var(--dim);max-width:84ch;margin:0 0 26px}
+.lede b{color:var(--ink);font-weight:600}
+
+section{margin:0 0 14px;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+section > h2{margin:0;padding:13px 20px;font-size:19px;font-weight:400;letter-spacing:.03em;
+             background:#15171a;border-bottom:1px solid var(--rule)}
+section > h2 span{color:var(--dim);font-size:13px;margin-left:10px}
+section > h2 .done{float:right;font:500 10px/1.6 'IBM Plex Mono',monospace;letter-spacing:.14em;
+                   text-transform:uppercase;color:#8fae7e}
+.stage{padding:26px 20px 22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:22px}
+.case{position:relative}
+.pair{display:flex;gap:28px;align-items:flex-start;justify-content:center;min-height:150px;padding:10px 0}
+.cap{margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.07)}
+.cap b{font-size:17px;font-weight:600}
+.cap .key{font:500 10px/1 'IBM Plex Mono',monospace;color:var(--gold);letter-spacing:.12em;
+          text-transform:uppercase;margin-left:8px}
+.cap p{margin:3px 0 0;font-size:13.5px;line-height:1.5}
+
+.node{position:relative;width:150px}
+.node .box{position:relative;min-height:60px;padding:10px;display:flex;flex-direction:column;
+           align-items:center;justify-content:center}
+
+/* ═══ викторианский ═══ */
+.st-vik{background:#262721;color:#f2e8d2}
+.st-vik .stage{background-image:radial-gradient(circle at 14px 14px,rgba(185,154,82,.11) 1.1px,transparent 1.4px);
+               background-size:58px 58px}
+.st-vik .node{font-family:'Playfair Display',Georgia,serif;text-align:center}
+.st-vik .box{background:#2e2f27;border:1px solid #7c6a3c}
+.st-vik .box::after{content:'';position:absolute;inset:3px;border:1px solid #7c6a3c;opacity:.42}
+.st-vik .nm{position:relative;font-size:16px;font-weight:700;color:#f2e8d2}
+.st-vik .yr{position:relative;font-family:'PT Serif',serif;font-style:italic;font-size:10.5px;
+            color:#a09578;margin-top:4px}
+
+/* ═══ газета ═══ */
+.st-gaz{background:#f6f3ea;color:#14120e}
+.st-gaz > h2{background:#eae5d8;color:#14120e;border-color:#cdc6b4}
+.st-gaz .node{font-family:'PT Serif',Georgia,serif}
+.st-gaz .box{border-top:2px solid #14120e;padding:9px 10px 0;align-items:flex-start}
+.st-gaz .nm{position:relative;font-family:'Playfair Display',serif;font-weight:700;font-size:16px;
+            line-height:1;color:#14120e}
+.st-gaz .yr{position:relative;font-size:9.5px;letter-spacing:.07em;color:#5d564a;margin-top:8px}
+.st-gaz .cap{border-top-color:rgba(0,0,0,.12)}
+.st-gaz .cap .key{color:#a81f1f}
+.st-gaz.dark{background:#141311;color:#f2efe6}
+.st-gaz.dark > h2{background:#1a1917;color:#f2efe6;border-color:#33302b}
+.st-gaz.dark .box{border-top-color:#f2efe6}
+.st-gaz.dark .nm{color:#f2efe6}
+.st-gaz.dark .yr{color:#948d80}
+.st-gaz.dark .cap{border-top-color:rgba(255,255,255,.09)}
+.st-gaz.dark .cap .key{color:#e05a4a}
+
+/* ═══ кабинет ═══ */
+.st-kab{background:#161310;color:#e9e2d4}
+.st-kab .stage{background-image:repeating-linear-gradient(93deg,rgba(0,0,0,.14) 0 7px,rgba(255,255,255,.02) 7px 14px)}
+.st-kab .node{font-family:'Literata',Georgia,serif}
+.st-kab .box{background:#221d18;border:1px solid #2a231c;padding:12px;box-shadow:0 3px 12px rgba(0,0,0,.4)}
+.st-kab .box::before{content:'';position:absolute;left:10px;top:-5px;width:26px;height:5px;
+                     background:#6b5636;border-radius:2px 2px 0 0}
+.st-kab .nm{position:relative;font-size:15px;font-weight:600;color:#e9e2d4}
+.st-kab .yr{position:relative;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#8d8171;margin-top:6px}
+
+/* ═══ полотно ═══ */
+.st-pol{background:#0b0a09;color:#f3ede3}
+.st-pol .node{width:180px;text-align:left}
+.st-pol .box{padding:0;align-items:flex-start;min-height:auto}
+.st-pol .nm{position:relative;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:26px;
+            line-height:1;color:#f3ede3}
+.st-pol .yr{position:relative;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;
+            color:#7f7869;margin-top:8px}
+
+/* ═════════ ВИКТОРИАНСКИЙ — Британия XIX века ═════════ */
+
+/* железистые чернила проели бумагу */
+.v-gall .nm{color:transparent}
+.v-gall .nm::before{content:'';position:absolute;left:-10px;right:-10px;top:-4px;height:24px;
+  background:radial-gradient(ellipse 54% 60% at 46% 50%,#0d0a06 40%,#3a2410 62%,rgba(58,36,16,.45) 78%,transparent 88%),
+             radial-gradient(ellipse 40% 46% at 68% 44%,#120c06 45%,rgba(58,36,16,.4) 72%,transparent 86%)}
+.v-gall .nm::after{content:'';position:absolute;left:34px;top:2px;width:15px;height:12px;border-radius:50%;
+  background:#262721;box-shadow:0 0 0 2px #4a2f14,0 0 7px 3px rgba(74,47,20,.6)}
+/* траурный креп поперёк карточки */
+.v-crape .box{overflow:hidden}
+.v-crape .box::before{content:'';position:absolute;left:-30%;right:-30%;top:26px;height:22px;z-index:2;
+  transform:rotate(-9deg);
+  background:linear-gradient(#191713,#0e0d0b 55%,#131110);
+  box-shadow:0 1px 5px rgba(0,0,0,.7);
+  opacity:.94}
+.v-crape .nm,.v-crape .yr{opacity:.65}
+/* чёрный сургуч поверх имени */
+.v-wax .nm{color:rgba(242,232,210,.28)}
+.v-wax .box::after{content:'';position:absolute;left:50%;top:46%;width:38px;height:36px;z-index:2;
+  transform:translate(-50%,-50%) rotate(7deg);border:none;
+  background:radial-gradient(circle at 38% 32%,#3b3630 12%,#191612 55%,#0b0908 78%),
+             conic-gradient(from 0deg,#131110,#221e19,#131110,#221e19,#131110);
+  border-radius:47% 53% 51% 49%/49% 47% 53% 51%;
+  box-shadow:0 2px 5px rgba(0,0,0,.6),inset 0 0 8px rgba(0,0,0,.7)}
+/* вырезано из семейной Библии */
+.v-bible .nm{color:transparent}
+.v-bible .nm::after{content:'';position:absolute;left:-8px;right:-8px;top:-3px;height:23px;
+  background:#1c1d18;
+  clip-path:polygon(0 12%,6% 2%,13% 11%,21% 1%,29% 10%,38% 2%,46% 11%,55% 2%,63% 10%,72% 1%,80% 10%,
+                    89% 2%,96% 11%,100% 5%,100% 94%,94% 100%,86% 91%,78% 99%,69% 90%,60% 99%,52% 90%,
+                    43% 99%,35% 90%,26% 98%,18% 90%,10% 99%,3% 91%,0 97%);
+  box-shadow:inset 0 0 8px rgba(0,0,0,.8)}
+/* выжжено каминным клеймом */
+.v-brand .nm{color:rgba(242,232,210,.2)}
+.v-brand .box::after{content:'';position:absolute;left:50%;top:47%;width:96px;height:26px;z-index:2;
+  transform:translate(-50%,-50%);border:none;border-radius:3px;
+  background:radial-gradient(ellipse 50% 60% at 50% 50%,#0a0806 42%,#432a12 66%,rgba(67,42,18,.5) 80%,transparent 92%);
+  box-shadow:0 0 12px rgba(120,64,22,.35)}
+
+/* ═════════ ГАЗЕТА — принято ═════════ */
+.g-final .nm{color:transparent}
+.g-final .nm::after{content:'';position:absolute;left:-2px;right:-2px;top:0;height:16px;background:#14120e}
+.st-gaz.dark .g-final .nm::after{background:#f2efe6}
+.g-final .box::after{content:'сведения изъяты';position:absolute;left:10px;top:31px;
+  font-family:'PT Serif',serif;font-style:italic;font-size:9px;color:#a81f1f;letter-spacing:.04em}
+.st-gaz.dark .g-final .box::after{color:#e05a4a}
+.g-final .yr{margin-top:20px}
+
+/* ═════════ КАБИНЕТ — огонь в ночном кабинете ═════════ */
+
+/* прожог от лампы */
+.k-lamp .nm{color:rgba(233,226,212,.3)}
+.k-lamp .box::after{content:'';position:absolute;left:50%;top:38%;width:64px;height:34px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse 44% 48% at 50% 50%,#0a0806 38%,#4a2c10 58%,#8a4a18 66%,
+             rgba(138,74,24,.35) 74%,rgba(60,36,14,.18) 86%,transparent 94%);
+  box-shadow:0 0 18px rgba(190,96,30,.22)}
+/* обугленный угол */
+.k-char .box{overflow:hidden}
+.k-char .box::after{content:'';position:absolute;right:-14px;top:-14px;width:82px;height:70px;
+  background:radial-gradient(ellipse 62% 62% at 78% 22%,#0c0a08 44%,#20150c 58%,#5a3313 68%,
+             rgba(90,51,19,.4) 78%,transparent 90%)}
+.k-char .nm{color:rgba(233,226,212,.42)}
+.k-char .yr{opacity:.6}
+/* клеймо через имя */
+.k-brand .nm{color:transparent}
+.k-brand .nm::after{content:'';position:absolute;left:-8px;right:-8px;top:0;height:18px;
+  background:linear-gradient(#3d2410,#0b0806 42%,#0b0806 58%,#40250f);
+  box-shadow:0 0 10px rgba(196,102,34,.35),inset 0 0 6px rgba(0,0,0,.9);border-radius:2px}
+/* остался пепел */
+.k-ash .box{background:linear-gradient(#1d1915,#191512);border-color:#241d16}
+.k-ash .nm{color:transparent}
+.k-ash .nm::after{content:'';position:absolute;left:-6px;right:-6px;top:1px;height:16px;
+  background:radial-gradient(ellipse 30% 60% at 18% 50%,#4a453e,transparent 70%),
+             radial-gradient(ellipse 26% 55% at 46% 46%,#3e3931,transparent 72%),
+             radial-gradient(ellipse 30% 58% at 76% 54%,#524c43,transparent 70%);
+  filter:blur(.6px);opacity:.72}
+.k-ash .yr{color:#4b433a}
+
+/* ═════════ ПОЛОТНО — типографика в огне ═════════ */
+
+/* обугленные буквы */
+.p-char .nm{background:linear-gradient(#4a2f14 8%,#1d1512 46%,#120e0c 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 12px rgba(150,74,24,.22)}
+/* прожог сквозь строку */
+.p-hole .nm{color:transparent}
+.p-hole .nm::after{content:'';position:absolute;left:-6px;right:14px;top:-4px;height:34px;
+  background:radial-gradient(ellipse 46% 50% at 42% 50%,#000 36%,#301b0a 54%,#7d4315 63%,
+             rgba(125,67,21,.3) 74%,transparent 88%),
+             radial-gradient(ellipse 30% 40% at 76% 46%,#000 40%,#2a1808 60%,transparent 84%);
+  filter:blur(.3px)}
+/* буквы осыпались пеплом */
+.p-ash .nm{color:#6b6157;
+  -webkit-mask-image:linear-gradient(#000 26%,rgba(0,0,0,.5) 58%,transparent 86%);
+  mask-image:linear-gradient(#000 26%,rgba(0,0,0,.5) 58%,transparent 86%)}
+.p-ash .box::after{content:'';position:absolute;left:2px;right:34px;top:24px;height:8px;
+  background:radial-gradient(ellipse 22% 60% at 14% 40%,#3a352e,transparent 72%),
+             radial-gradient(ellipse 18% 50% at 44% 60%,#2f2b25,transparent 74%),
+             radial-gradient(ellipse 24% 55% at 78% 42%,#443e36,transparent 72%);
+  filter:blur(.7px)}
+/* тлеющая строка */
+.p-ember .nm{color:#2b2521}
+.p-ember .nm::after{content:'';position:absolute;left:0;right:24px;bottom:-3px;height:2px;
+  background:linear-gradient(90deg,transparent,#c0561f 18%,#f0873a 42%,#c0561f 68%,transparent);
+  box-shadow:0 0 9px rgba(224,110,40,.55)}
+</style>
+
+<h1>Выжжен из рода — <em>второй заход</em></h1>
+<p class="lede">Викторианский переделан: прошлый штемпель был русским дореформенным, а стиль — британский XIX век.
+Кабинету и полотну дана <b>природа выжигания</b>: огонь, уголь, прожог, пепел, как в гобелене.
+Газета показана в принятом виде, в обеих темах.</p>
+
+<div id="out"></div>
+
+<script>
+const STYLES = [
+  {cls:'st-vik', ttl:'Викторианский', sub:'Британия XIX века', cases:[
+    {k:'v-gall', n:'Железистые чернила', key:'gall',
+     t:'Iron-gall ink, которыми вели приходские книги и семейные Библии, со временем проедают бумагу насквозь: сначала бурый ореол, потом дыра. Имя вымарали, и запись сама себя уничтожила — тот же ожог, что в гобелене, только без огня.'},
+    {k:'v-crape', n:'Траурный креп', key:'crape',
+     t:'Чёрный креп поперёк карточки. Викторианцы затягивали им зеркала и портреты в доме покойного; здесь его повесили на живого.'},
+    {k:'v-wax', n:'Чёрный сургуч', key:'wax',
+     t:'Печать чёрного воска поверх имени. Так запечатывали решение о лишении наследства: запись цела, но открыть её больше нельзя.'},
+    {k:'v-bible', n:'Вырезано из Библии', key:'bible',
+     t:'В семейной Библии на форзаце вели список рождений и браков. Провинившегося вырезали ножом — оставалась дыра с надорванным краем, и её видели все поколения после.'},
+    {k:'v-brand', n:'Каминное клеймо', key:'brand',
+     t:'По имени прошлись раскалённым железом от камина. Самый грубый и самый буквальный жест из четырёх.'}
+  ]},
+  {cls:'st-gaz', ttl:'Газета', sub:'принято: вымарка цензора и подпись', done:'принято', cases:[
+    {k:'g-final', n:'Вымарка цензора', key:'censor',
+     t:'Чёрный прямоугольник ровно по кегелю строки, ниже курсивом «сведения изъяты». Полоса вышла с дырой в наборе, и читателю сказано, что дыра сделана нарочно.'}
+  ]},
+  {cls:'st-gaz dark', ttl:'Газета — тёмная тема', sub:'плашка светлеет, иначе исчезнет', cases:[
+    {k:'g-final', n:'Та же вымарка', key:'censor · dark',
+     t:'В тёмной теме краска не может быть чёрной: плашка становится цветом текста, подпись — красной акцентной.'}
+  ]},
+  {cls:'st-kab', ttl:'Ночной кабинет', sub:'огонь настольной лампы', cases:[
+    {k:'k-lamp', n:'Прожог от лампы', key:'lamp',
+     t:'Карточку поднесли к стеклу керосиновой лампы, и она прогорела. У стиля уже есть лампа как источник света; теперь она же становится источником уничтожения.'},
+    {k:'k-char', n:'Обугленный угол', key:'char',
+     t:'Карточку жгли, но выхватили из огня. Угол чёрный с рыжей каймой, имя ещё читается — уничтожение начато и не доведено до конца.'},
+    {k:'k-brand', n:'Клеймо через имя', key:'brand',
+     t:'Раскалённая полоса прошла ровно по строке имени. Картотека жива, запись прожжена насквозь.'},
+    {k:'k-ash', n:'Остался пепел', key:'ash',
+     t:'Имя сгорело целиком, на карточке лежит серая полоса пепла. Тише прочих: пепел не кричит, но и вернуть уже нечего.'}
+  ]},
+  {cls:'st-pol', ttl:'Полотно II', sub:'типографика в огне', cases:[
+    {k:'p-char', n:'Обугленные буквы', key:'char',
+     t:'Буквы сами становятся углём: сверху бурый жар, книзу чёрная зола. Без рамок и плашек, только шрифт — как и весь стиль.'},
+    {k:'p-hole', n:'Прожог сквозь строку', key:'hole',
+     t:'На месте имени дыра с рыжим ободком, сквозь неё видно фон. Ближе всего к гобелену, где прожжена ткань.'},
+    {k:'p-ash', n:'Осыпалось пеплом', key:'ash',
+     t:'Буквы истлевают сверху вниз и осыпаются на строку годов серой крошкой. Имя ещё угадывается, но держится последним.'},
+    {k:'p-ember', n:'Тлеющая строка', key:'ember',
+     t:'Имя ушло в темноту, под ним тлеет оранжевая полоса. Огонь ещё не погас — годится, если состояние считается недавним.'}
+  ]}
+];
+
+const person = (cls, nm, yr) => `
+  <div class="node ${cls}"><div class="box">
+    <div class="nm">${nm}</div><div class="yr">${yr}</div>
+  </div></div>`;
+
+document.getElementById('out').innerHTML = STYLES.map(s => `
+  <section class="${s.cls}">
+    <h2>${s.ttl}<span>${s.sub}</span>${s.done ? `<i class="done">${s.done}</i>` : ''}</h2>
+    <div class="stage">
+      ${s.cases.map(c => `
+        <div class="case">
+          <div class="pair">
+            ${person(c.k, 'Мэтью', '1893 — 1971')}
+            ${person('', 'Иннис', '1885 — 1962')}
+          </div>
+          <div class="cap"><b>${c.n}</b><span class="key">${c.key}</span><p>${c.t}</p></div>
+        </div>`).join('')}
+    </div>
+  </section>`).join('');
+</script>

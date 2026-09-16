@@ -1,0 +1,198 @@
+<h2>Как раскладывать древо на экране</h2>
+<p class="subtitle">Все четыре наброска — на твоих настоящих данных (Гленн Уриск, ~1683–1851). Ты уже выбрал вариант A; B и C — то, что просил увидеть. Кликни тот, что нравится (можно несколько).</p>
+
+<style>
+  .lay { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+  @media (max-width:900px){ .lay{grid-template-columns:1fr;} }
+  .lay .card-image { padding:10px; background:#fbfaf7; }
+  .lay svg { width:100%; height:auto; display:block; }
+  .n rect { fill:#fff; stroke:#8a7f6d; stroke-width:1; }
+  .n.f rect { fill:#fdf3f6; }
+  .n.m rect { fill:#f1f5fb; }
+  .n text { font:9px system-ui,sans-serif; fill:#2c2620; }
+  .n text.yr { font-size:7.5px; fill:#8a7f6d; }
+  .lnk { stroke:#a89c88; stroke-width:1; fill:none; }
+  .dim { opacity:.35; }
+  .hot rect { stroke:#b4512b; stroke-width:2; fill:#fff4ee; }
+  .tag { font:7.5px system-ui,sans-serif; fill:#b4512b; }
+</style>
+
+<div class="cards lay">
+
+  <!-- ================= A: классическое сверху вниз ================= -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 300 215" xmlns="http://www.w3.org/2000/svg">
+        <!-- links -->
+        <path class="lnk" d="M170 30 H180"/>
+        <path class="lnk" d="M175 30 V70 M65 70 H265 M65 70 V90 M265 70 V90"/>
+        <path class="lnk" d="M100 105 H105"/>
+        <path class="lnk" d="M102 105 V145 M36 145 H170 M36 145 V165 M103 145 V165 M170 145 V165"/>
+        <!-- gen 1 -->
+        <g class="n m"><rect x="100" y="15" width="70" height="30" rx="3"/>
+          <text x="135" y="30" text-anchor="middle">Ниалл</text>
+          <text class="yr" x="135" y="40" text-anchor="middle">1683–1791</text></g>
+        <g class="n f"><rect x="180" y="15" width="70" height="30" rx="3"/>
+          <text x="215" y="30" text-anchor="middle">Мор</text>
+          <text class="yr" x="215" y="40" text-anchor="middle">1691–1779</text></g>
+        <!-- gen 2 -->
+        <g class="n m"><rect x="30" y="90" width="70" height="30" rx="3"/>
+          <text x="65" y="105" text-anchor="middle">Тормод</text>
+          <text class="yr" x="65" y="115" text-anchor="middle">1712–1818</text></g>
+        <g class="n f"><rect x="105" y="90" width="70" height="30" rx="3"/>
+          <text x="140" y="105" text-anchor="middle">Аилса</text>
+          <text class="yr" x="140" y="115" text-anchor="middle">1720–1812</text></g>
+        <g class="n m"><rect x="230" y="90" width="70" height="30" rx="3"/>
+          <text x="265" y="105" text-anchor="middle">Эоган</text>
+          <text class="yr" x="265" y="115" text-anchor="middle">1719–1830</text></g>
+        <text class="tag" x="265" y="132" text-anchor="middle">→ Уинтерхоуп</text>
+        <!-- gen 3 -->
+        <g class="n m"><rect x="5" y="165" width="62" height="28" rx="3"/>
+          <text x="36" y="179" text-anchor="middle">Мурдо</text>
+          <text class="yr" x="36" y="188" text-anchor="middle">1748</text></g>
+        <g class="n f"><rect x="72" y="165" width="62" height="28" rx="3"/>
+          <text x="103" y="179" text-anchor="middle">Юна</text>
+          <text class="yr" x="103" y="188" text-anchor="middle">1752</text></g>
+        <g class="n m"><rect x="139" y="165" width="62" height="28" rx="3"/>
+          <text x="170" y="179" text-anchor="middle">Кеннах</text>
+          <text class="yr" x="170" y="188" text-anchor="middle">1755</text></g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A. Классическое сверху вниз <span style="color:#b4512b">— твой выбор</span></h3>
+      <p>Поколения — ярусами. Виден весь род сразу, легко печатать. На 84 людях (Монад Кройве) полотно будет широким — нужна прокрутка и сворачивание веток.</p>
+    </div>
+  </div>
+
+  <!-- ================= B: фокус на одном человеке ================= -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 300 215" xmlns="http://www.w3.org/2000/svg">
+        <path class="lnk dim" d="M60 32 H70 M65 32 V52 M40 52 H150 M40 52 V62 M150 52 V62"/>
+        <path class="lnk dim" d="M210 32 H220 M215 32 V52 M215 52 V62"/>
+        <path class="lnk" d="M70 77 H80 M75 77 V95 M150 95 H75 M150 95 V103"/>
+        <path class="lnk" d="M225 77 V95 M225 95 H150"/>
+        <path class="lnk" d="M150 137 V155 M80 155 H220 M80 155 V168 M150 155 V168 M220 155 V168"/>
+
+        <!-- бабки/деды -->
+        <g class="n m dim"><rect x="10" y="18" width="50" height="24" rx="3"><title>дед</title></rect>
+          <text x="35" y="33" text-anchor="middle">Ниалл</text></g>
+        <g class="n f dim"><rect x="70" y="18" width="50" height="24" rx="3"/>
+          <text x="95" y="33" text-anchor="middle">Мор</text></g>
+        <g class="n m dim"><rect x="170" y="18" width="50" height="24" rx="3"/>
+          <text x="195" y="33" text-anchor="middle">Дугал</text></g>
+        <g class="n f dim"><rect x="230" y="18" width="50" height="24" rx="3"/>
+          <text x="255" y="33" text-anchor="middle">Эйли</text></g>
+        <!-- родители -->
+        <g class="n m"><rect x="20" y="62" width="50" height="28" rx="3"/>
+          <text x="45" y="76" text-anchor="middle">Тормод</text>
+          <text class="yr" x="45" y="85" text-anchor="middle">1712</text></g>
+        <g class="n f"><rect x="80" y="62" width="50" height="28" rx="3"/>
+          <text x="105" y="76" text-anchor="middle">Аилса</text>
+          <text class="yr" x="105" y="85" text-anchor="middle">1720</text></g>
+        <g class="n f"><rect x="200" y="62" width="50" height="28" rx="3"/>
+          <text x="225" y="76" text-anchor="middle">жена</text>
+          <text class="yr" x="225" y="85" text-anchor="middle">1751</text></g>
+        <!-- центр -->
+        <g class="n hot"><rect x="105" y="103" width="90" height="34" rx="4"/>
+          <text x="150" y="119" text-anchor="middle" style="font-size:11px;font-weight:600">Мурдо</text>
+          <text class="yr" x="150" y="130" text-anchor="middle">1748–1851</text></g>
+        <!-- дети -->
+        <g class="n m"><rect x="55" y="168" width="50" height="26" rx="3"/>
+          <text x="80" y="182" text-anchor="middle">Дэрмид</text>
+          <text class="yr" x="80" y="191" text-anchor="middle">1779</text></g>
+        <g class="n f"><rect x="125" y="168" width="50" height="26" rx="3"/>
+          <text x="150" y="182" text-anchor="middle">Мойра</text>
+          <text class="yr" x="150" y="191" text-anchor="middle">1783</text></g>
+        <g class="n m"><rect x="195" y="168" width="50" height="26" rx="3"/>
+          <text x="220" y="182" text-anchor="middle">Тэвиш</text>
+          <text class="yr" x="220" y="191" text-anchor="middle">1786</text></g>
+        <text class="tag" x="150" y="209" text-anchor="middle">клик по любому — он становится центром</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B. Фокус на одном человеке</h3>
+      <p>На экране всегда один герой: над ним 2 поколения предков (бледные), под ним дети. Кликнул родственника — он переехал в центр. Экран никогда не забит, но целого рода одним взглядом не увидеть.</p>
+    </div>
+  </div>
+
+  <!-- ================= C: граф с физикой ================= -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 300 215" xmlns="http://www.w3.org/2000/svg">
+        <g class="lnk">
+          <path d="M60 60 L100 45 M100 45 L150 70 M60 60 L45 110 M45 110 L85 130 M85 130 L150 70"/>
+          <path d="M150 70 L210 50 M210 50 L250 85 M250 85 L215 125 M215 125 L150 70"/>
+          <path d="M85 130 L120 175 M120 175 L180 165 M180 165 L215 125 M120 175 L60 60"/>
+          <path d="M250 85 L265 145 M265 145 L180 165"/>
+        </g>
+        <g fill="#7c9cc4" stroke="#fff" stroke-width="1.5">
+          <circle cx="60" cy="60" r="9"/><circle cx="100" cy="45" r="7"/>
+          <circle cx="45" cy="110" r="7"/><circle cx="85" cy="130" r="8"/>
+          <circle cx="120" cy="175" r="7"/>
+        </g>
+        <g fill="#c58b6a" stroke="#fff" stroke-width="1.5">
+          <circle cx="210" cy="50" r="8"/><circle cx="250" cy="85" r="7"/>
+          <circle cx="215" cy="125" r="8"/><circle cx="265" cy="145" r="6"/>
+          <circle cx="180" cy="165" r="7"/>
+        </g>
+        <circle cx="150" cy="70" r="11" fill="#b4512b" stroke="#fff" stroke-width="2"/>
+        <g style="font:8px system-ui,sans-serif;fill:#2c2620">
+          <text x="150" y="52" text-anchor="middle">Ниалл</text>
+          <text x="52" y="45" text-anchor="middle">Тормод</text>
+          <text x="228" y="38" text-anchor="middle">Эоган</text>
+        </g>
+        <g style="font:8px system-ui,sans-serif">
+          <rect x="8" y="192" width="9" height="9" fill="#7c9cc4"/>
+          <text x="22" y="200" fill="#2c2620">Гленн Уриск</text>
+          <rect x="110" y="192" width="9" height="9" fill="#c58b6a"/>
+          <text x="124" y="200" fill="#2c2620">Уинтерхоуп</text>
+          <circle cx="218" cy="197" r="5" fill="#b4512b"/>
+          <text x="228" y="200" fill="#2c2620">общий предок</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C. Граф с физикой</h3>
+      <p>Узлы плавают и расталкиваются, цвет = род. Красиво показывает, как роды сцеплены через общих людей. Но кто чей предок — на глаз не понять, картинка каждый раз другая и слегка дёргается.</p>
+    </div>
+  </div>
+
+  <!-- ================= D: слева направо ================= -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 300 215" xmlns="http://www.w3.org/2000/svg">
+        <path class="lnk" d="M85 60 H105 M105 30 V115 M105 30 H125 M105 115 H125"/>
+        <path class="lnk" d="M185 30 H205 M205 12 V70 M205 12 H225 M205 70 H225"/>
+        <g class="n m"><rect x="15" y="46" width="70" height="28" rx="3"/>
+          <text x="50" y="60" text-anchor="middle">Ниалл</text>
+          <text class="yr" x="50" y="69" text-anchor="middle">1683</text></g>
+        <g class="n m"><rect x="125" y="16" width="70" height="28" rx="3"/>
+          <text x="160" y="30" text-anchor="middle">Тормод</text>
+          <text class="yr" x="160" y="39" text-anchor="middle">1712</text></g>
+        <g class="n m"><rect x="125" y="101" width="70" height="28" rx="3"/>
+          <text x="160" y="115" text-anchor="middle">Эоган</text>
+          <text class="yr" x="160" y="124" text-anchor="middle">1719</text></g>
+        <g class="n m"><rect x="225" y="-1" width="65" height="26" rx="3"/>
+          <text x="257" y="12" text-anchor="middle">Мурдо</text>
+          <text class="yr" x="257" y="21" text-anchor="middle">1748</text></g>
+        <g class="n f"><rect x="225" y="57" width="65" height="26" rx="3"/>
+          <text x="257" y="70" text-anchor="middle">Юна</text>
+          <text class="yr" x="257" y="79" text-anchor="middle">1752</text></g>
+        <text class="tag" x="257" y="120">→ Уинтерхоуп</text>
+        <g style="font:8px system-ui,sans-serif;fill:#8a7f6d">
+          <text x="50" y="150" text-anchor="middle">поколение 1</text>
+          <text x="160" y="150" text-anchor="middle">2</text>
+          <text x="257" y="150" text-anchor="middle">3</text>
+        </g>
+        <path d="M10 160 H290" stroke="#ddd6c8"/>
+        <text x="150" y="180" text-anchor="middle" style="font:9px system-ui,sans-serif;fill:#8a7f6d">растёт вправо, прокрутка по горизонтали</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>D. Слева направо</h3>
+      <p>То же дерево, повёрнутое на бок. Имена читаются лучше (текст горизонтальный, коробки узкие), длинные линии на широком мониторе смотрятся аккуратнее. Печать хуже.</p>
+    </div>
+  </div>
+
+</div>

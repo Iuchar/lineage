@@ -1,0 +1,224 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Гобелен — основной цвет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Caveat:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#0e100f; --ink:#e6e0d0; --dim:#7e8578; --rule:#2a302b; --gold:#c8a44e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font:400 15px/1.65 'Cormorant Garamond',Georgia,serif;padding:38px 40px 80px}
+
+header{max-width:78ch;margin-bottom:34px}
+h1{font-size:31px;font-weight:400;letter-spacing:.02em;margin:0 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+.lede{color:var(--dim);font-size:15px;margin:0}
+.lede code{font:400 12.5px/1 'IBM Plex Mono',monospace;color:var(--ink)}
+
+.bar{position:sticky;top:0;z-index:9;background:linear-gradient(var(--page) 78%,rgba(14,16,15,0));
+     padding:12px 0 16px;margin-bottom:20px;display:flex;gap:26px;align-items:center;flex-wrap:wrap;
+     border-bottom:1px solid var(--rule)}
+.bar label{font:400 12px/1 'IBM Plex Mono',monospace;color:var(--dim);
+           display:flex;gap:8px;align-items:center;cursor:pointer;letter-spacing:.04em}
+.bar input{accent-color:var(--gold)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:26px}
+figure{margin:0}
+.swatch{position:relative;border:1px solid var(--rule);border-radius:2px;overflow:hidden;
+        cursor:pointer;transition:border-color .25s}
+.swatch:hover{border-color:var(--gold)}
+.swatch svg{display:block;width:100%;height:auto}
+figcaption{display:flex;align-items:baseline;gap:10px;margin-top:9px;flex-wrap:wrap}
+figcaption b{font-weight:600;font-size:19px;letter-spacing:.01em}
+figcaption .hex{font:500 11.5px/1 'IBM Plex Mono',monospace;color:var(--gold);letter-spacing:.06em}
+figcaption .no{font:400 11px/1 'IBM Plex Mono',monospace;color:var(--dim);margin-left:auto}
+figcaption p{width:100%;margin:3px 0 0;color:var(--dim);font-size:14px;line-height:1.5}
+
+figure.now .swatch{border-color:#4a4436}
+figure.now figcaption b:after{content:' — сейчас';color:var(--dim);font-size:13px;font-weight:400}
+
+/* раскрытый образец занимает всю ширину */
+figure.wide{grid-column:1/-1}
+figure.wide .swatch{border-color:var(--gold)}
+</style>
+
+<header>
+  <h1>Гобелен — <em>основной цвет</em></h1>
+  <p class="lede">Десять альтернатив нынешнему <code>#1c2420</code>. Всюду один фрагмент рода: пара, повторный брак,
+  спуск к детям, выжженный из рода и выбранный. Меняется только полотно и то, что от него зависит — нить,
+  засечки, приглушённый текст. Щёлкни образец, чтобы развернуть во всю ширину.</p>
+</header>
+
+<div class="bar">
+  <label><input type="checkbox" id="weave" checked> переплетение нитей</label>
+  <label><input type="checkbox" id="names" checked> имена и даты</label>
+  <label><input type="checkbox" id="marks" checked> выжженный и выбранный</label>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+/* палитры: bg — полотно, fg — имена, mut — даты, acc — медальон и выбранный,
+   link — нить связей, warp/weft — нити переплетения */
+const P = [
+  {n:'Нынешний',        hex:'#1c2420', fg:'#ece0c2', mut:'#93a08f', acc:'#c8a44e', link:'#6d7a68',
+   warp:'rgba(0,0,0,.16)', weft:'rgba(255,255,255,.03)', now:true,
+   note:'Сине-зелёный сумрак. Читается как школьная доска: холодный, ровный, без родословного тепла.'},
+
+  {n:'Мореный дуб',     hex:'#241a12', fg:'#eadfc4', mut:'#a08d70', acc:'#c8a44e', link:'#7d6b52',
+   warp:'rgba(0,0,0,.2)', weft:'rgba(255,236,196,.035)',
+   note:'Тёплое дерево старого сундука. Золото медальонов ложится на него как родное, зелень уходит.'},
+
+  {n:'Торфяная топь',   hex:'#17190f', fg:'#e4dcbe', mut:'#8d8b6b', acc:'#c2a24b', link:'#6e6d4f',
+   warp:'rgba(0,0,0,.22)', weft:'rgba(255,246,200,.03)',
+   note:'Почти чёрный с болотной желтизной. Самый тёмный из десяти: карточки висят в пустоте.'},
+
+  {n:'Вайда',           hex:'#141e2c', fg:'#dfe3e6', mut:'#7f909f', acc:'#c2a34b', link:'#5c7182',
+   warp:'rgba(0,0,0,.2)', weft:'rgba(206,226,255,.035)',
+   note:'Синь, которой красили шерсть до индиго. Холодная, но благородная, а не казённая.'},
+
+  {n:'Марена',          hex:'#251317', fg:'#ecdac6', mut:'#a5807e', acc:'#c8a44e', link:'#7d5854',
+   warp:'rgba(0,0,0,.24)', weft:'rgba(255,224,214,.032)',
+   note:'Корень марены, вино и запёкшаяся кровь. Родовая память, но выжженный знак теряется.'},
+
+  {n:'Пепел очага',     hex:'#22201d', fg:'#e8e1d2', mut:'#98918a', acc:'#c8a44e', link:'#77716a',
+   warp:'rgba(0,0,0,.18)', weft:'rgba(255,250,240,.035)',
+   note:'Нейтральный тёплый серый. Ничего не спорит с золотом и красным — самый покладистый.'},
+
+  {n:'Медный купорос',  hex:'#0f2220', fg:'#dfe8dd', mut:'#7d9a92', acc:'#cfae55', link:'#5d8079',
+   warp:'rgba(0,0,0,.22)', weft:'rgba(210,255,244,.03)',
+   note:'Тёмная бирюза окисленной меди. Тот же холод, что сейчас, но насыщеннее и осмысленнее.'},
+
+  {n:'Шафранный сумрак',hex:'#1f1c10', fg:'#efe3bd', mut:'#9d9366', acc:'#d3b158', link:'#7a7148',
+   warp:'rgba(0,0,0,.2)', weft:'rgba(255,240,180,.04)',
+   note:'Оливково-жёлтая тень, будто лампа за тканью. Тёплый, но золото начинает сливаться.'},
+
+  {n:'Сажа и уголь',    hex:'#141414', fg:'#e9e4d8', mut:'#8b8781', acc:'#caa64f', link:'#6f6b65',
+   warp:'rgba(0,0,0,.3)', weft:'rgba(255,255,255,.035)',
+   note:'Честный чёрный. Максимальный контраст, полотно исчезает — остаются только имена и нити.'},
+
+  {n:'Небелёная шерсть',hex:'#ded2b6', fg:'#2c2a20', mut:'#6f6851', acc:'#8a6a24', link:'#8d8163',
+   warp:'rgba(84,70,40,.14)', weft:'rgba(255,255,255,.3)', light:true,
+   note:'Светлый гобелен: сукно как есть, до крашения. Дневной свет вместо вечернего.'},
+
+  {n:'Пергамент',       hex:'#e9dfc6', fg:'#332f24', mut:'#77705a', acc:'#8f6a1e', link:'#9a8f70',
+   warp:'rgba(96,80,44,.12)', weft:'rgba(255,255,255,.34)', light:true,
+   note:'Светлее и желтее — сторона документа, а не ткани. Для тех, кто читает при лампе.'}
+];
+
+/* фрагмент рода: Малькольм с двумя браками, дети, выжженный, выбранный */
+function tile(p, opt){
+  const W = 860, H = 430;
+  const weave = opt.weave ? `
+    <defs><pattern id="w${opt.i}" width="3" height="3" patternUnits="userSpaceOnUse">
+      <rect width="1" height="3" fill="${p.warp}"/>
+      <rect width="3" height="1" fill="${p.weft}"/>
+    </pattern></defs>
+    <rect width="${W}" height="${H}" fill="url(#w${opt.i})"/>` : '';
+
+  const med = (x, y, o={}) => {
+    const r = 28;
+    if(o.burnt) return `
+      <circle cx="${x}" cy="${y}" r="${r}" fill="url(#burn${opt.i})"/>`;
+    return `
+      <circle cx="${x}" cy="${y}" r="${r}" fill="url(#dish${opt.i})"
+              stroke="${p.acc}" stroke-width="${o.sel?2:1.5}"${o.sel?` filter="url(#glow${opt.i})"`:''}/>`;
+  };
+  const name = (x, y, nm, yr, o={}) => opt.names ? `
+      <text x="${x}" y="${y+50}" text-anchor="middle" font-family="Cormorant Garamond,serif"
+            font-size="19" fill="${o.burnt ? mix(p.fg,p.hex,.55) : (o.sel ? p.acc : p.fg)}"
+            ${o.burnt?`text-decoration="line-through"`:''}>${nm}</text>
+      <text x="${x}" y="${y+70}" text-anchor="middle" font-family="Caveat,cursive"
+            font-size="15" fill="${p.mut}">${yr}</text>` : '';
+  const ord = (x, y, t) => opt.names ? `
+      <text x="${x}" y="${y-40}" text-anchor="middle" font-family="Caveat,cursive"
+            font-size="14" fill="${p.mut}">${t}</text>` : '';
+  const stitch = (x, y, n) => {                    /* засечки-стежки поверх нити союза */
+    let s = '';
+    for(let k = 0; k < n; k++) s += `<path d="M${x+k*7-7} ${y-5} l5 10" stroke="${p.acc}" stroke-width="1.4"/>`;
+    return s;
+  };
+
+  const L = (d, w=1.2, dash='') => `<path d="${d}" fill="none" stroke="${p.link}" stroke-width="${w}"${dash?` stroke-dasharray="${dash}"`:''}/>`;
+
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="dish${opt.i}" cx="40%" cy="35%">
+        <stop offset="0" stop-color="${p.light?'rgba(255,255,255,.75)':'rgba(255,255,255,.09)'}"/>
+        <stop offset="1" stop-color="${p.light?'rgba(0,0,0,.14)':'rgba(0,0,0,.35)'}"/>
+      </radialGradient>
+      <radialGradient id="burn${opt.i}">
+        <stop offset="42%" stop-color="${p.light?'#2b2318':'#0b0e0c'}"/>
+        <stop offset="64%" stop-color="#2a1e10"/>
+        <stop offset="76%" stop-color="rgba(0,0,0,0)"/>
+      </radialGradient>
+      <filter id="glow${opt.i}" x="-60%" y="-60%" width="220%" height="220%">
+        <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="${p.acc}" flood-opacity=".55"/>
+      </filter>
+    </defs>
+    <rect width="${W}" height="${H}" fill="${p.hex}"/>
+    ${weave}
+
+    <!-- верхний ярус: первая жена, вторая жена, глава линии -->
+    ${L(`M188 96 H262`)}${stitch(225, 96, 3)}
+    ${L(`M356 112 H430`, 1.2, '1 3')}${stitch(393, 112, 3)}
+
+    ${med(160, 96)}${ord(160, 96, 'первая')}${name(160, 96, 'Иона', '1937')}
+    ${med(300, 96)}${ord(300, 96, 'вторая')}${name(300, 96, 'Финнула', '1942 – 2019')}
+    ${med(462, 96)}${name(462, 96, 'Малькольм', '1941')}
+
+    <!-- спуски: у каждого выводка своя шина -->
+    ${L(`M225 124 V236 H150 V282`)}
+    ${L(`M393 140 V270 H330 V282`)}
+
+    <!-- нижний ярус -->
+    ${med(150, 310, opt.marks ? {burnt:true} : {})}
+    ${name(150, 310, 'Финлэй', '1982 – 1999', opt.marks ? {burnt:true} : {})}
+    ${opt.marks ? `<g><rect x="112" y="386" width="76" height="17" rx="8" fill="#7a2230"/>
+      <text x="150" y="399" text-anchor="middle" font-family="Caveat,cursive" font-size="13"
+            fill="#f0dfae">выжжен из рода</text></g>` : ''}
+
+    ${med(330, 310, opt.marks ? {sel:true} : {})}
+    ${name(330, 310, 'Диан', '1991', opt.marks ? {sel:true} : {})}
+
+    ${L(`M560 96 V236 H620 V282`)}
+    ${med(620, 310)}${name(620, 310, 'Кеннет', '1976')}
+    ${L(`M648 310 H716`)}${stitch(682, 310, 3)}
+    ${med(744, 310)}${name(744, 310, 'Элизабет', '1980')}
+    ${L(`M560 96 H532`, 1.2)}
+  </svg>`;
+}
+
+/* смешивание для приглушённого имени выжженного */
+function mix(a, b, t){
+  const p = h => [1,3,5].map(i => parseInt(h.slice(i,i+2),16));
+  const [r1,g1,b1] = p(a), [r2,g2,b2] = p(b);
+  const c = (x,y) => Math.round(x + (y-x)*t).toString(16).padStart(2,'0');
+  return '#'+c(r1,r2)+c(g1,g2)+c(b1,b2);
+}
+
+function draw(){
+  const opt = {
+    weave: document.getElementById('weave').checked,
+    names: document.getElementById('names').checked,
+    marks: document.getElementById('marks').checked
+  };
+  document.getElementById('grid').innerHTML = P.map((p, i) => `
+    <figure${p.now ? ' class="now"' : ''} data-i="${i}">
+      <div class="swatch">${tile(p, Object.assign({i}, opt))}</div>
+      <figcaption>
+        <b>${p.n}</b><span class="hex">${p.hex}</span>
+        <span class="no">${String(i).padStart(2,'0')}</span>
+        <p>${p.note}</p>
+      </figcaption>
+    </figure>`).join('');
+}
+document.getElementById('grid').addEventListener('click', e => {
+  const f = e.target.closest('figure'); if(f) f.classList.toggle('wide');
+});
+['weave','names','marks'].forEach(id => document.getElementById(id).onchange = draw);
+draw();
+</script>
