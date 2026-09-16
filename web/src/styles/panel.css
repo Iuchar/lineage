@@ -1,0 +1,38 @@
+/* ═══ Панель выбранного человека: цвета и шрифт берёт у стиля ═══ */
+.side { width: 262px; flex: none; overflow: auto; border-left: 1px solid var(--edge, #2a2d32);
+  background: var(--panelbg, #16181b); color: var(--fg); }
+.sideIn { padding: 16px 16px 30px; }
+.side .por { width: 58px; height: 70px; border: 1px solid var(--edge); background: rgba(127,127,127,.1); }
+.side h3 { margin: 12px 0 0; font-size: 21px; font-family: var(--font); font-weight: 600; line-height: 1.15; }
+.side .maiden { font-size: 12px; color: var(--mut); margin-top: 3px; }
+.side .sub { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: var(--mut); margin-top: 6px; }
+.side .lbl { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--acc); margin: 16px 0 6px; }
+.side .row { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; padding: 4px 0;
+  border-bottom: 1px solid var(--edge); }
+.side .row > span { flex: none; }
+.side .row i { font-style: normal; color: var(--mut); text-align: right; }
+.side .kin { border: 0; padding: 0; background: none; color: var(--fg); font: inherit; cursor: pointer;
+  border-bottom: 1px dotted var(--mut); }
+.side .kin:hover { color: var(--acc); border-bottom-color: var(--acc); }
+.side .note { font-size: 12.5px; line-height: 1.45; color: var(--fg); opacity: .9; margin: 4px 0 8px; }
+.side .empty { padding: 40px 16px; color: var(--mut); font-size: 12.5px; text-align: center; }
+.nudge { display: flex; align-items: center; gap: 8px; }
+.nudge button, .side .actions button { flex: 1; border: 1px solid var(--edge); background: transparent; color: var(--fg);
+  cursor: pointer; font: 500 11px/1 'Golos Text', sans-serif; padding: 6px 4px; border-radius: 4px; }
+.nudge button:hover, .side .actions button:hover { border-color: var(--acc); color: var(--acc); }
+.nudge span { font: 400 9.5px/1 'IBM Plex Mono', monospace; color: var(--mut); min-width: 48px; text-align: center; }
+.side .actions { display: flex; margin-top: 18px; }
+
+/* ═══ Поиск в верхней панели ═══ */
+.search { position: relative; }
+.search input { width: 190px; border: 1px solid #333941; border-radius: 6px; background: #1d2126; color: #e6e2d8;
+  font: 500 11.5px/1 'Golos Text', sans-serif; padding: 6px 9px; outline: none; }
+.search input:focus { border-color: #7c8492; }
+.search .results { position: absolute; left: 50px; top: calc(100% + 4px); width: 260px; max-height: 360px; overflow: auto;
+  background: #1d2126; border: 1px solid #333941; border-radius: 6px; padding: 4px 0; z-index: 30;
+  box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+.search .hit { padding: 6px 11px; font-size: 12px; color: #d9d4c8; cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
+.search .hit small { font: 400 10px/1.6 'IBM Plex Mono', monospace; color: #7c8492; white-space: nowrap; }
+.search .hit.on, .search .hit:hover { background: #2a2f36; color: #fff; }
+.search .miss { padding: 8px 11px; font-size: 12px; color: #7c8492; }

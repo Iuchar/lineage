@@ -87,6 +87,45 @@
           }
         }
       }
+    },
+    "/api/persons/{person_id}": {
+      "get": {
+        "summary": "Get Person",
+        "operationId": "get_person_api_persons__person_id__get",
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -275,6 +314,138 @@
           "phrase"
         ],
         "title": "LifeDate"
+      },
+      "MarriageDetails": {
+        "properties": {
+          "family_id": {
+            "type": "integer",
+            "title": "Family Id"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/PersonEvent"
+            },
+            "type": "array",
+            "title": "Events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "family_id",
+          "events"
+        ],
+        "title": "MarriageDetails"
+      },
+      "PersonDetails": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "clan_id": {
+            "type": "integer",
+            "title": "Clan Id"
+          },
+          "xref": {
+            "type": "string",
+            "title": "Xref"
+          },
+          "name_raw": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Raw"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/PersonEvent"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "marriages": {
+            "items": {
+              "$ref": "#/components/schemas/MarriageDetails"
+            },
+            "type": "array",
+            "title": "Marriages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "clan_id",
+          "xref",
+          "name_raw",
+          "events",
+          "marriages"
+        ],
+        "title": "PersonDetails"
+      },
+      "PersonEvent": {
+        "properties": {
+          "tag": {
+            "type": "string",
+            "title": "Tag"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LifeDate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "place": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Place"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tag",
+          "type",
+          "value",
+          "date",
+          "place"
+        ],
+        "title": "PersonEvent"
       },
       "TreeFamily": {
         "properties": {

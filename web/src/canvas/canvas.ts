@@ -35,6 +35,8 @@ export class TreeCanvas {
 
   selected: number | null = null;
   marks: PersonMarks = NO_MARKS;
+  // ручной сдвиг среди братьев: id → на сколько мест; живёт до смены рода, в базу не пишется
+  readonly manual = new Map<number, number>();
   state: CanvasState = { style: "gobelen", ruler: false, rootAtBottom: false };
 
   onViewChange: (view: View) => void = () => {};
@@ -61,8 +63,16 @@ export class TreeCanvas {
     this.tree = tree;
     this.marks = marks;
     this.selected = null;
+    this.manual.clear();
     this.render();
     this.fit();
+    this.onSelect(null);
+  }
+
+  // сдвинуть человека среди братьев; вид остаётся на месте
+  nudge(id: number, direction: -1 | 1): void {
+    this.manual.set(id, (this.manual.get(id) ?? 0) + direction);
+    this.keepView(() => this.render());
   }
 
   update(state: Partial<CanvasState>): void {
@@ -101,7 +111,11 @@ export class TreeCanvas {
     if (!this.tree) return;
     const { style } = this.state;
     const metrics = STYLE_METRICS[style];
-    this.layout = layoutTree(this.tree, metrics, { ruler: this.state.ruler, rootAtBottom: this.state.rootAtBottom });
+    this.layout = layoutTree(this.tree, metrics, {
+      ruler: this.state.ruler,
+      rootAtBottom: this.state.rootAtBottom,
+      manual: this.manual,
+    });
     const layout = this.layout;
 
     const width = layout.width + 40;

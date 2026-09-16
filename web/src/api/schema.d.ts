@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/persons/{person_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Person */
+        get: operations["get_person_api_persons__person_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -103,6 +120,40 @@ export interface components {
             end_day: number | null;
             /** Phrase */
             phrase: string | null;
+        };
+        /** MarriageDetails */
+        MarriageDetails: {
+            /** Family Id */
+            family_id: number;
+            /** Events */
+            events: components["schemas"]["PersonEvent"][];
+        };
+        /** PersonDetails */
+        PersonDetails: {
+            /** Id */
+            id: number;
+            /** Clan Id */
+            clan_id: number;
+            /** Xref */
+            xref: string;
+            /** Name Raw */
+            name_raw: string | null;
+            /** Events */
+            events: components["schemas"]["PersonEvent"][];
+            /** Marriages */
+            marriages: components["schemas"]["MarriageDetails"][];
+        };
+        /** PersonEvent */
+        PersonEvent: {
+            /** Tag */
+            tag: string;
+            /** Type */
+            type: string | null;
+            /** Value */
+            value: string | null;
+            date: components["schemas"]["LifeDate"] | null;
+            /** Place */
+            place: string | null;
         };
         /** TreeFamily */
         TreeFamily: {
@@ -222,6 +273,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClanTree"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_person_api_persons__person_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonDetails"];
                 };
             };
             /** @description Validation Error */

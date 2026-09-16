@@ -8,3 +8,5 @@ export type ClanTree = Schemas["ClanTree"];
 export type TreePerson = Schemas["TreePerson"];
 export type TreeFamily = Schemas["TreeFamily"];
 export type LifeDate = Schemas["LifeDate"];
+export type PersonDetails = Schemas["PersonDetails"];
+export type PersonEvent = Schemas["PersonEvent"];

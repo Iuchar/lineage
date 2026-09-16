@@ -69,3 +69,21 @@ def test_links_never_point_outside_the_clan(client: TestClient) -> None:
 
 def test_unknown_clan_is_404(client: TestClient) -> None:
     assert client.get("/api/clans/9999/tree").status_code == 404
+
+
+def test_person_details_carry_notes_and_marriages(client: TestClient) -> None:
+    monadh = next(c for c in client.get("/api/clans").json() if c["name"] == "Монад Кройве")
+    tree = client.get(f"/api/clans/{monadh['id']}/tree").json()
+    hamish = next(p for p in tree["persons"] if p["xref"] == "@I51@")
+    details = client.get(f"/api/persons/{hamish['id']}").json()
+    assert details["clan_id"] == monadh["id"]
+    assert [e["tag"] for e in details["events"]] == ["BIRT", "DEAT", "EVEN"]
+    assert details["events"][2]["value"] == "Основатель рода"
+    assert [m["family_id"] for m in details["marriages"]] == hamish["spouse_families"]
+
+    malcolm = next(p for p in tree["persons"] if p["xref"] == "@I538@")
+    assert len(client.get(f"/api/persons/{malcolm['id']}").json()["marriages"]) == 3
+
+
+def test_unknown_person_is_404(client: TestClient) -> None:
+    assert client.get("/api/persons/999999").status_code == 404

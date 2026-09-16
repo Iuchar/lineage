@@ -6,10 +6,13 @@ import "./styles/gazeta.css";
 import "./styles/kabinet.css";
 import "./styles/polotno.css";
 import "./styles/ruler.css";
+import "./styles/panel.css";
 
 import type { ClanSummary, ClanTree } from "./api/types";
 import { TreeCanvas } from "./canvas/canvas";
 import { demoMarks } from "./demo";
+import { PersonPanel } from "./panel/panel";
+import { SearchBox } from "./panel/search";
 import type { StyleName } from "./layout/metrics";
 
 const STYLES: [StyleName, string][] = [
@@ -69,9 +72,30 @@ async function start(root: HTMLElement): Promise<void> {
   }
 
   const canvas = new TreeCanvas(stage);
+  let tree: ClanTree | null = null;
+
+  const focus = (id: number) => {
+    canvas.select(id);
+    canvas.goToSelected();
+  };
+  const panel = new PersonPanel(stage, {
+    select: focus,
+    centre: () => canvas.goToSelected(),
+    nudge: (id, direction) => {
+      canvas.nudge(id, direction);
+      if (tree) void panel.show(tree, id);
+    },
+    manualOffset: (id) => canvas.manual.get(id) ?? 0,
+  });
+  canvas.onSelect = (id) => {
+    if (tree && id != null) void panel.show(tree, id);
+    else panel.clear();
+  };
+  const search = new SearchBox(focus);
 
   const loadClan = async (id: number) => {
-    const tree = await getJson<ClanTree>(`/api/clans/${id}/tree`);
+    tree = await getJson<ClanTree>(`/api/clans/${id}/tree`);
+    search.setTree(tree);
     canvas.setTree(tree, demoMarks(tree));
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
@@ -117,6 +141,7 @@ async function start(root: HTMLElement): Promise<void> {
 
   bar.append(
     switcher("Род", clans.map((c) => [c.id, `${c.name} · ${c.persons}`]), clans[0]!.id, (id) => void loadClan(id)),
+    search.element,
     switcher("Стиль", STYLES, "gobelen", (style) => {
       document.body.dataset.style = style;
       canvas.update({ style });

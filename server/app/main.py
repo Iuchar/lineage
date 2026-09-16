@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import DB_PATH, DIST
 from app.db.connection import connect
+from app.db.person import PersonDetails, PersonNotFoundError, person_details
 from app.db.tree import ClanNotFoundError, ClanSummary, ClanTree, clan_tree, list_clans
 
 app = FastAPI(
@@ -47,6 +48,14 @@ def get_clan_tree(clan_id: int, conn: Database) -> ClanTree:
         return clan_tree(conn, clan_id)
     except ClanNotFoundError:
         raise HTTPException(status_code=404, detail="Такого рода нет") from None
+
+
+@app.get("/api/persons/{person_id}")
+def get_person(person_id: int, conn: Database) -> PersonDetails:
+    try:
+        return person_details(conn, person_id)
+    except PersonNotFoundError:
+        raise HTTPException(status_code=404, detail="Такого человека нет") from None
 
 
 if (DIST / "assets").is_dir():
