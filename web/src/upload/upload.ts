@@ -4,6 +4,7 @@
 import type { ClanSummary, PersonBrief, ReloadPreview, ReloadReport, UploadInfo } from "../api/types";
 import type { ReviewMark } from "../canvas/cards";
 import { escapeHtml } from "../format";
+import { Picker } from "../ui/picker";
 
 export interface UploadActions {
   // новый род создан — открыть его
@@ -37,6 +38,7 @@ export class UploadFlow {
   private preview: ReloadPreview | null = null;
   private remove = new Set<number>(); // пропавшие, которых редактор решил удалить
   private active: number | null = null;
+  private clanPicker: Picker | null = null;
 
   constructor(
     stage: HTMLElement,
@@ -116,9 +118,6 @@ export class UploadFlow {
     const best = [...info.clans].sort((a, b) => b.matched - a.matched)[0];
     const reload = was ? was.reload : best !== undefined && best.matched > 0;
     const chosen = was?.clan ?? best?.id;
-    const options = info.clans
-      .map((c) => `<option value="${c.id}"${c.id === chosen ? " selected" : ""}>${esc(c.name)} · ${c.persons}</option>`)
-      .join("");
     const hint = best !== undefined && best.matched > 0
       ? `Свои узнаются по идентификаторам из файла. Совпало ${best.matched} из ${info.persons} — больше всего с ${esc(best.name)}.`
       : "Свои узнаются по идентификаторам из файла. С уже загруженными родами файл не совпал ни разу.";
@@ -134,20 +133,25 @@ export class UploadFlow {
         choice("new", !reload, "Новый род", "Отдельное дерево со своей вкладкой.",
           `<input class="field" name="name" value="${esc(was?.name ?? info.suggested_name)}">`) +
         (info.clans.length
-          ? choice("reload", reload, "Перезалить в существующий", hint, `<select class="field" name="clan">${options}</select>`)
+          ? choice("reload", reload, "Перезалить в существующий", hint, `<div data-picker="clan"></div>`)
           : "") +
         (error ? `<div class="err">${esc(sentence(error))}</div>` : "") +
         '<div class="acts"><button data-act="close">Отмена</button><button class="pri" data-act="go"></button></div></div>',
     );
+    this.clanPicker = null;
+    const slot = this.sheet.querySelector('[data-picker="clan"]');
+    if (slot && chosen !== undefined) {
+      this.clanPicker = new Picker(info.clans.map((c) => ({ value: String(c.id), label: `${c.name} · ${c.persons}` })), String(chosen));
+      slot.replaceWith(this.clanPicker.element);
+    }
     this.syncTarget();
   }
 
   private readTarget(): { reload: boolean; name: string; clan: number | null } {
-    const clan = this.sheet.querySelector<HTMLSelectElement>('select[name="clan"]');
     return {
       reload: this.sheet.querySelector<HTMLInputElement>('input[value="reload"]')?.checked ?? false,
       name: this.sheet.querySelector<HTMLInputElement>('input[name="name"]')?.value ?? "",
-      clan: clan ? Number(clan.value) : null,
+      clan: this.clanPicker ? Number(this.clanPicker.value) : null,
     };
   }
 
@@ -155,9 +159,8 @@ export class UploadFlow {
   private syncTarget(): void {
     const reload = this.sheet.querySelector<HTMLInputElement>('input[value="reload"]')?.checked ?? false;
     const name = this.sheet.querySelector<HTMLInputElement>('input[name="name"]');
-    const clan = this.sheet.querySelector<HTMLSelectElement>('select[name="clan"]');
     if (name) name.disabled = reload;
-    if (clan) clan.disabled = !reload;
+    if (this.clanPicker) this.clanPicker.disabled = !reload;
     const go = this.sheet.querySelector<HTMLButtonElement>('[data-act="go"]');
     if (go) go.textContent = reload ? "Разобрать" : "Создать род";
   }
@@ -176,7 +179,7 @@ export class UploadFlow {
     if (go) go.disabled = true;
     try {
       if (reload) {
-        const clanId = Number(this.sheet.querySelector<HTMLSelectElement>('select[name="clan"]')!.value);
+        const clanId = Number(this.clanPicker!.value);
         const preview = await request<ReloadPreview>(`/api/uploads/${info.token}/reload/${clanId}`);
         this.sheet.hidden = true;
         this.startReview(preview);
