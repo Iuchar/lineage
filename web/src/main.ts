@@ -177,19 +177,25 @@ async function start(root: HTMLElement): Promise<void> {
   zoomField.type = "text";
   zoomField.inputMode = "numeric";
   zoomField.hidden = true;
+  let editing = false;
   const closeZoom = () => {
+    editing = false;
     zoomField.hidden = true;
     zoomValue.hidden = false;
   };
+  // поле закрывается и по Delete, и по Escape — набранное при этом не применяется повторно с потерей фокуса
   const applyZoom = () => {
+    if (!editing) return;
     const value = Number.parseInt(zoomField.value.replace(/[^\d]/g, ""), 10);
-    if (Number.isFinite(value) && value > 0) canvas.setZoomPercent(value);
     closeZoom();
+    if (Number.isFinite(value) && value > 0) canvas.setZoomPercent(value);
   };
   zoomValue.addEventListener("click", () => {
+    editing = true;
     zoomValue.hidden = true;
     zoomField.hidden = false;
     zoomField.value = String(canvas.zoomPercent);
+    zoomField.focus();
     zoomField.select();
   });
   zoomField.addEventListener("keydown", (e) => {
@@ -197,8 +203,8 @@ async function start(root: HTMLElement): Promise<void> {
     else if (e.key === "Escape") closeZoom();
     else if (e.key === "Delete") {
       e.preventDefault();
-      canvas.resetZoom();
       closeZoom();
+      canvas.resetZoom();
     }
   });
   zoomField.addEventListener("blur", applyZoom);
