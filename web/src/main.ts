@@ -135,7 +135,7 @@ async function start(root: HTMLElement): Promise<void> {
     const tags = demoTags(tree);
     const heirs = demoHeirs(tree);
     canvas.setTree(tree, demoMarks(tree), new Map(), tags, heirs);
-    lineLabel.hidden = !heirs.size;
+    lineSwitch.hidden = !heirs.size;
     drawTagFilter(tags);
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
@@ -169,11 +169,41 @@ async function start(root: HTMLElement): Promise<void> {
     focus: (id) => canvas.centreOnPerson(id),
   });
 
+  // масштаб: щелчок по числу открывает ввод, Delete в нём возвращает к 100 %
   const zoomValue = document.createElement("button");
-  zoomValue.title = "Сбросить к 100%";
-  zoomValue.addEventListener("click", () => canvas.resetZoom());
-  canvas.onViewChange = (view) => {
-    zoomValue.textContent = `${Math.round(view.k * 100)}%`;
+  zoomValue.title = "Задать масштаб";
+  const zoomField = document.createElement("input");
+  zoomField.className = "zoomIn";
+  zoomField.type = "text";
+  zoomField.inputMode = "numeric";
+  zoomField.hidden = true;
+  const closeZoom = () => {
+    zoomField.hidden = true;
+    zoomValue.hidden = false;
+  };
+  const applyZoom = () => {
+    const value = Number.parseInt(zoomField.value.replace(/[^\d]/g, ""), 10);
+    if (Number.isFinite(value) && value > 0) canvas.setZoomPercent(value);
+    closeZoom();
+  };
+  zoomValue.addEventListener("click", () => {
+    zoomValue.hidden = true;
+    zoomField.hidden = false;
+    zoomField.value = String(canvas.zoomPercent);
+    zoomField.select();
+  });
+  zoomField.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") applyZoom();
+    else if (e.key === "Escape") closeZoom();
+    else if (e.key === "Delete") {
+      e.preventDefault();
+      canvas.resetZoom();
+      closeZoom();
+    }
+  });
+  zoomField.addEventListener("blur", applyZoom);
+  canvas.onViewChange = () => {
+    zoomValue.textContent = `${canvas.zoomPercent}%`;
   };
 
   const viewGroup = document.createElement("div");
@@ -189,9 +219,10 @@ async function start(root: HTMLElement): Promise<void> {
     return b;
   };
   zoomRow.append(
-    button("−", "Отдалить", () => canvas.zoomBy(1 / 1.25)),
+    button("−", "Отдалить на 10%", () => canvas.stepZoom(-1)),
     zoomValue,
-    button("+", "Приблизить", () => canvas.zoomBy(1.25)),
+    zoomField,
+    button("+", "Приблизить на 10%", () => canvas.stepZoom(1)),
   );
   const placeRow = document.createElement("div");
   placeRow.className = "sw";
@@ -233,13 +264,9 @@ async function start(root: HTMLElement): Promise<void> {
   });
 
   // режим «главная линия»: ствол по отметкам и постоянная подсветка; без отметок переключателя нет
-  const lineLabel = document.createElement("label");
-  lineLabel.className = "chk";
-  lineLabel.hidden = true;
-  lineLabel.innerHTML = '<input type="checkbox"> главная линия';
-  lineLabel.querySelector("input")!.addEventListener("change", (e) => {
-    canvas.update({ mainLine: (e.target as HTMLInputElement).checked });
-  });
+  const lineSwitch = switcher("Линия", [["plain", "обычная"], ["main", "главная"]] as [string, string][], "plain",
+    (mode) => canvas.update({ mainLine: mode === "main" }));
+  lineSwitch.hidden = true;
 
   const rulerLabel = document.createElement("label");
   rulerLabel.className = "chk";
@@ -285,7 +312,7 @@ async function start(root: HTMLElement): Promise<void> {
     switcher("Основатель", [["top", "сверху"], ["bottom", "снизу"]], "top", (side) => {
       canvas.update({ rootAtBottom: side === "bottom" });
     }),
-    lineLabel,
+    lineSwitch,
     portraitLabel,
     rulerLabel,
     tagFilter,

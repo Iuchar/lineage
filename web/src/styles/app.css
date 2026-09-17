@@ -14,6 +14,11 @@ body { margin: 0; font-family: 'Golos Text', system-ui, sans-serif; background: 
              padding: 6px 11px; cursor: pointer; border-right: 1px solid #333941; }
 .sw button:last-child { border-right: 0; }
 .sw button[aria-pressed=true] { background: #e9e4d8; color: #14161a; }
+/* поле ввода масштаба встаёт на место числа, ширина та же */
+.sw .zoomIn { width: 58px; border: 0; background: #e9e4d8; color: #14161a; text-align: center;
+  font: 500 11.5px/1 'Golos Text', sans-serif; padding: 6px 4px; border-right: 1px solid #333941; }
+.sw .zoomIn:focus { outline: none; }
+
 .chk { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #aeb6c2; cursor: pointer; }
 .hint { margin-left: auto; font: 400 11px/1.4 'IBM Plex Mono', monospace; color: #6f7783; }
 

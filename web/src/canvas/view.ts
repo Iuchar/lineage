@@ -13,8 +13,14 @@ export interface Size {
 
 export const MIN_ZOOM = 0.15;
 export const MAX_ZOOM = 2.5;
+// «100 %» на экране — этот масштаб полотна: прежняя единица мельчила
+export const ZOOM_BASE = 0.8;
+export const ZOOM_STEP = 10; // шаг кнопок, в процентах экрана
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+
+export const zoomPercent = (k: number): number => Math.round((k / ZOOM_BASE) * 100);
+export const zoomFromPercent = (percent: number): number => clamp((percent / 100) * ZOOM_BASE, MIN_ZOOM, MAX_ZOOM);
 
 // точка под курсором остаётся на месте
 export function zoomAt(view: View, cx: number, cy: number, factor: number): View {

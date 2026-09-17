@@ -10,7 +10,7 @@ import { NO_TAGS, type TagSet } from "./tags";
 import { lineageOf } from "./lineage";
 import { drawLinks } from "./links";
 import { drawRuler } from "./ruler";
-import { centreOn, fitAll, keepAnchor, type View, zoomAt } from "./view";
+import { centreOn, fitAll, keepAnchor, type View, zoomAt, ZOOM_BASE, ZOOM_STEP, zoomFromPercent, zoomPercent } from "./view";
 
 export interface CanvasState {
   style: StyleName;
@@ -152,15 +152,29 @@ export class TreeCanvas {
     this.setView(zoomAt(this.view, width / 2, height / 2, factor));
   }
 
+  // масштаб в процентах экрана: кнопки ходят по круглым числам, ввод принимает любое
+  get zoomPercent(): number {
+    return zoomPercent(this.view.k);
+  }
+
+  setZoomPercent(percent: number): void {
+    this.zoomBy(zoomFromPercent(percent) / this.view.k);
+  }
+
+  stepZoom(direction: -1 | 1): void {
+    const next = Math.round((this.zoomPercent + direction * ZOOM_STEP) / ZOOM_STEP) * ZOOM_STEP;
+    this.setZoomPercent(Math.max(ZOOM_STEP, next));
+  }
+
   resetZoom(): void {
-    this.zoomBy(1 / this.view.k);
+    this.setZoomPercent(100);
   }
 
   // показать человека в центре, не выбирая его; на мелком плане сначала приблизить, чтобы метки читались
   centreOnPerson(id: number): void {
     const centre = this.cardCentre(id);
     if (!centre) return;
-    const view = this.view.k < 0.8 ? { ...this.view, k: 1 } : this.view;
+    const view = this.view.k < ZOOM_BASE ? { ...this.view, k: ZOOM_BASE } : this.view;
     this.setView(centreOn(view, centre, this.viewportSize()));
   }
 
