@@ -23,7 +23,12 @@ body { margin: 0; font-family: 'Golos Text', system-ui, sans-serif; background: 
 .viewport.dragging { cursor: grabbing; }
 .canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .canvas * { -webkit-user-drag: none; } /* без нативного «призрака» при протяжке */
-.canvas svg.links { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.canvas svg.links, .canvas svg.ornament, .canvas svg.line { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+
+/* линия рода выбранного — «нить и тень»: путь акцентом стиля, связи и люди не на пути приглушены */
+.canvas svg.line path { fill: none; stroke: var(--acc); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.canvas.lineage svg.links { opacity: .35; }
+.canvas.lineage .node:not(.lin), .canvas.lineage .fold { opacity: .4; }
 
 .empty { margin: auto; padding: 40px 16px; color: #7c8492; font-size: 13px; line-height: 1.7; text-align: center; }
 .empty code { font: 400 12px 'IBM Plex Mono', monospace; color: #aeb6c2; }

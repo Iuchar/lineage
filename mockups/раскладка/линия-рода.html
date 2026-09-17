@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Линия рода — варианты</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Playfair+Display:wght@400;700&family=PT+Serif:ital,wght@0,400;1,400&family=Literata:opsz,wght@7..72,400;7..72,600&family=Caveat:wght@400;600&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- настоящие стили приложения; карточки и связи построены настоящей раскладкой рода Монад Кройве -->
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<style>
+html, body { height: auto; }
+body { background: #101113; color: #e6e2d8; font: 400 14px/1.55 'Golos Text', sans-serif; padding: 26px 30px 70px; }
+h1 { font: 400 26px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 90ch; margin: 0 0 14px; font-size: 13.5px; }
+.bar { position: sticky; top: 0; z-index: 30; background: #101113; padding: 10px 0 12px; margin-bottom: 16px; border-bottom: 1px solid #2a2d32; }
+.variant { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; background: #16181b; margin-bottom: 18px; }
+.frame { position: relative; overflow: auto hidden; }
+.frame .clip { position: relative; overflow: hidden; }
+.frame .canvas { transform-origin: 0 0; }
+.cap { padding: 10px 14px 13px; }
+.cap b { font: 500 15px/1.3 'Golos Text', sans-serif; }
+.cap .key { font: 500 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #c8a44e; margin-left: 8px; }
+.cap p { margin: 4px 0 0; color: #8a8f98; font-size: 13px; }
+
+/* ── линия рода: только переменные стиля ── */
+svg.line { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+svg.line path { fill: none; stroke: var(--acc); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* А — нить: путь цветом акцента, вдвое толще */
+
+/* Б — нить и тень рода: всё, что не на пути, приглушено */
+.v-dim svg.links { opacity: .35; }
+.v-dim .node:not(.lin) { opacity: .4; }
+
+/* В — нить с подложкой: под акцентной линией широкая полупрозрачная полоса того же цвета */
+.v-halo svg.line path.under { stroke-width: 9; opacity: .22; }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+<h1>Линия рода — варианты</h1>
+<p class="lede">Выбран человек — от основателя к нему подсвечивается путь по связям: спуск от союза, отрезок шины к нужному ребёнку и нить союза от кровного родителя.
+У пришлого супруга линии нет. Карточки и связи — настоящая раскладка рода Монад Кройве; показан кусок вокруг пути.</p>
+<div class="bar">
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Ночной кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp" style="margin-top:8px"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div>
+  <b style="margin-left:14px">Выбран</b><div class="sw" data-set="person" id="persons"></div></div>
+</div>
+<div id="out"></div>
+<script>
+const VARIANTS = [
+  { k: "thread", cls: "", n: "Нить", t: "Путь цветом акцента стиля, вдвое толще обычной связи. Остальное дерево как было." },
+  { k: "dim", cls: "v-dim", n: "Нить и тень", t: "Путь акцентом, а связи и люди не на пути приглушены. Линия рода читается сразу, но дерево вокруг уходит в тень." },
+  { k: "halo", cls: "v-halo", n: "Нить с подложкой", t: "Под акцентной линией широкая полупрозрачная полоса того же цвета — путь заметен и на общем плане, без приглушения остального." },
+];
+const state = { style: "gobelen", theme: "dark", person: "@I555@" };
+let data;
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  const s = data.scenes[`${state.style}|${state.person}`];
+  const out = document.getElementById("out");
+  out.innerHTML = VARIANTS.map((v) => {
+    const hl = v.k === "halo" ? s.hl.replaceAll("<path ", '<path class="under" ') + s.hl : s.hl;
+    // у пришлого линии нет — и приглушать нечего
+    return `<div class="variant ${s.line.length ? v.cls : ""}"><div class="frame"><div class="clip viewport"><div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+      `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}` +
+      `<svg class="line" width="${s.width}" height="${s.height}">${hl}</svg></div></div></div>` +
+      `<div class="cap"><b>${v.n}</b><span class="key">${v.k}</span><p>${v.t}</p></div></div>`;
+  }).join("");
+  out.querySelectorAll(".node").forEach((n) => { if (s.line.includes(Number(n.dataset.id))) n.classList.add("lin"); });
+  fit();
+}
+
+function fit() {
+  const s = data.scenes[`${state.style}|${state.person}`];
+  const bw = s.box.r - s.box.l, bh = s.box.b - s.box.t;
+  document.querySelectorAll(".frame").forEach((frame) => {
+    // мельче половины карточки не разобрать — тогда кусок прокручивается вбок
+    const k = Math.max(0.6, Math.min(1, frame.clientWidth / bw));
+    const clip = frame.querySelector(".clip");
+    clip.style.width = `${Math.round(bw * k)}px`;
+    clip.style.height = `${Math.round(bh * k)}px`;
+    frame.querySelector(".canvas").style.transform = `scale(${k}) translate(${-s.box.l}px, ${-s.box.t}px)`;
+  });
+}
+
+fetch("линия-рода.data.json").then((r) => r.json()).then((d) => {
+  data = d;
+  document.getElementById("persons").innerHTML = d.select.map(([x, label], i) =>
+    `<button data-v="${x}" aria-pressed="${i === 0}">${label.split(" —")[0].split(",")[0]}</button>`).join("");
+  document.querySelectorAll(".sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    state[sw.dataset.set] = b.dataset.v; draw();
+  }));
+  draw();
+});
+addEventListener("resize", fit);
+</script>
+</body>
+</html>

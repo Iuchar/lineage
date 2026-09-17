@@ -5,15 +5,15 @@
 import type { ClanTree } from "./api/types";
 import { NO_MARKS, type PersonMarks } from "./canvas/cards";
 
-const STAND_MARKS: Record<string, { burnt: string; hidden: string; linked: string }> = {
-  "Монад Кройве": { burnt: "@I524@", hidden: "@I531@", linked: "@I57@" },
-  "Гленн Уриск": { burnt: "@I1008@", hidden: "@I1009@", linked: "@I1004@" },
+const STAND_MARKS: Record<string, { burnt: string[]; hidden: string[]; linked: string[] }> = {
+  "Монад Кройве": { burnt: ["@I524@", "@I528@"], hidden: ["@I531@"], linked: ["@I57@"] }, // @I528@ — Лаклан
+  "Гленн Уриск": { burnt: ["@I1008@"], hidden: ["@I1009@"], linked: ["@I1004@"] },
 };
 
 export function demoMarks(tree: ClanTree): PersonMarks {
   if (new URLSearchParams(location.search).get("demo") !== "marks") return NO_MARKS;
   const sample = STAND_MARKS[tree.clan.name];
   if (!sample) return NO_MARKS;
-  const id = (xref: string) => tree.persons.filter((p) => p.xref === xref).map((p) => p.id);
+  const id = (xrefs: string[]) => tree.persons.filter((p) => xrefs.includes(p.xref)).map((p) => p.id);
   return { burnt: new Set(id(sample.burnt)), hidden: new Set(id(sample.hidden)), linked: new Set(id(sample.linked)) };
 }

@@ -38,6 +38,7 @@ export function drawCards(
   style: StyleName,
   selected: number | null,
   marks: PersonMarks,
+  lineage?: ReadonlySet<number>, // люди на подсвеченной линии рода
 ): string {
   const ordinal = LINK_STYLES[style].ordinal;
   const order = marriageOrder(tree);
@@ -46,6 +47,7 @@ export function drawCards(
     const point = layout.positions.get(person.id)!;
     const classes = ["node"];
     if (person.id === selected) classes.push("sel");
+    if (lineage?.has(person.id)) classes.push("lin");
     if (marks.burnt.has(person.id)) classes.push("burnt");
     if (person.is_branch_stub) classes.push("stub");
 

@@ -12,6 +12,16 @@ export interface LinksSvg {
   paths: string;
   marks: string;
   folds: FoldAnchor[];
+  descents: Map<number, DescentGeometry>; // по id семьи — для подсветки линии рода
+}
+
+// спуск к детям одной семьи: ствол от (x, y) до шины, [завиток над стволом], спуски на шине к верху детей
+export interface DescentGeometry {
+  x: number;
+  y: number;
+  bus: number;
+  curl: string | null; // d завитка, когда известен один родитель
+  kidEnd: number; // зазор между концом спуска и карточкой ребёнка
 }
 
 // где у свёрнутого союза встаёт стопка: x — ось спуска, y — край стопки со стороны пары.
@@ -64,6 +74,7 @@ export function drawLinks(
   let paths = "";
   let marks = "";
   const folds: FoldAnchor[] = [];
+  const descents = new Map<number, DescentGeometry>();
 
   for (const family of tree.families) {
     const parents = [family.husband, family.wife].filter((id): id is number => id != null && visible(id));
@@ -171,7 +182,10 @@ export function drawLinks(
       continue;
     }
     if (!kids.length || !parents.length) continue;
-    paths += descent(family, parents, kids, pos, { w, h, style, CL, famLevel, famX, famIndex, persons });
+    paths += descent(family, parents, kids, pos, {
+      w, h, style, CL, famLevel, famX, famIndex, persons,
+      record: (geometry) => descents.set(family.id, geometry),
+    });
     if (S.tip) {
       for (const id of kids) {
         const p = pos.get(id)!;
@@ -180,7 +194,7 @@ export function drawLinks(
     }
   }
 
-  return { paths, marks, folds };
+  return { paths, marks, folds, descents };
 }
 
 interface DescentContext {
@@ -194,6 +208,7 @@ interface DescentContext {
   persons: Map<number, TreePerson>;
   up?: boolean;
   families?: Map<number, TreeFamily>;
+  record?: (geometry: DescentGeometry) => void;
 }
 
 // Спуск к стопке свёрнутой ветки: с нити союза или завитком, как к детям, но короче — до стопки.
@@ -255,6 +270,7 @@ function descent(
   let out = "";
   let px: number;
   let py: number;
+  let curl: string | null = null;
   if (c.famX != null && c.famLevel != null) {
     px = c.famX;
     py = c.famLevel;
@@ -266,6 +282,7 @@ function descent(
     const bend = 17;
     px = cx;
     py = y0 + bend * 2;
+    curl = `M${cx} ${y0}C${cx + bend} ${y0} ${cx + bend} ${y0 + bend} ${cx} ${y0 + bend}C${cx - bend} ${y0 + bend} ${cx - bend} ${y0 + bend * 2} ${cx} ${y0 + bend * 2}`;
     out += `<path d="M${cx} ${y0}C${cx + bend} ${y0} ${cx + bend} ${y0 + bend} ${cx} ${y0 + bend}C${cx - bend} ${y0 + bend} ${cx - bend} ${y0 + bend * 2} ${cx} ${y0 + bend * 2}" stroke="${c.CL}" stroke-width="${S.width}" fill="none" stroke-linecap="round"/>`;
   }
 
@@ -276,6 +293,7 @@ function descent(
   const kxs = kids.map((id) => pos.get(id)!.x + c.w / 2);
   const runL = Math.min(px, ...kxs);
   const runR = Math.max(px, ...kxs);
+  c.record?.({ x: px, y: py, bus, curl, kidEnd: S.descentGap });
   out += `<path d="M${px} ${py}V${bus}" stroke="${c.CL}" stroke-width="${S.width}" fill="none"/><path d="M${runL} ${bus}H${runR}" stroke="${c.CL}" stroke-width="${S.width}" fill="none"/>`;
   for (const id of kids) {
     const p = pos.get(id)!;

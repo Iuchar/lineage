@@ -5,6 +5,7 @@ import { foldsHiding, foldTree } from "../layout/fold";
 import { layoutTree, type LayoutResult } from "../layout/layout";
 import { STYLE_METRICS, type StyleName } from "../layout/metrics";
 import { drawCards, drawFolds, NO_MARKS, type PersonMarks } from "./cards";
+import { lineageOf } from "./lineage";
 import { drawLinks } from "./links";
 import { drawRuler } from "./ruler";
 import { centreOn, fitAll, keepAnchor, type View, zoomAt } from "./view";
@@ -153,10 +154,16 @@ export class TreeCanvas {
     const color = (name: string, fallback: string) => (styles.getPropertyValue(name) || fallback).trim();
     const links = drawLinks(tree, layout, style, color, undefined, foldedIds);
     const defs = style === "viktorian" ? POLLEN(color("--orn", "transparent"), width, height) : "";
+    // линия рода выбранного: путь акцентом, остальное дерево в тени
+    const lineage = this.selected != null ? lineageOf(tree, layout, style, links, this.selected) : null;
+    const lit = lineage?.paths ? lineage : null;
+    this.surface.classList.toggle("lineage", lit !== null);
 
     this.surface.innerHTML =
-      `<svg class="links" width="${width}" height="${height}">${defs}${links.paths}${links.marks}</svg>` +
-      drawCards(tree, layout, style, this.selected, this.marks) +
+      (defs ? `<svg class="ornament" width="${width}" height="${height}">${defs}</svg>` : "") +
+      `<svg class="links" width="${width}" height="${height}">${links.paths}${links.marks}</svg>` +
+      (lit ? `<svg class="line" width="${width}" height="${height}"><path d="${lit.paths}"/></svg>` : "") +
+      drawCards(tree, layout, style, this.selected, this.marks, lit?.persons) +
       drawFolds(links.folds, folds, style);
 
     // лампа «Ночного кабинета» ездит за выбранным
@@ -277,6 +284,7 @@ export class TreeCanvas {
         if (fold?.dataset.fold) return this.toggleFold(Number(fold.dataset.fold));
         const node = hits.find((el) => el.closest(".node"))?.closest<HTMLElement>(".node");
         if (node?.dataset.id) this.select(Number(node.dataset.id));
+        else if (this.selected != null) this.select(null); // щелчок по пустому месту снимает выбор
       }
     };
     vp.addEventListener("pointerup", endDrag);
