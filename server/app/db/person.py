@@ -28,7 +28,7 @@ class PersonDetails(BaseModel):
     xref: str
     name_raw: str | None
     events: list[PersonEvent]  # в порядке файла
-    marriages: list[MarriageDetails]  # в порядке браков
+    marriages: list[MarriageDetails]  # в порядке файла; очередь браков по правилу — в дереве рода
 
 
 class PersonNotFoundError(LookupError):

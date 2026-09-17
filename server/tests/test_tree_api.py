@@ -50,7 +50,8 @@ def test_tree_holds_the_whole_clan(client: TestClient) -> None:
     by_id = {p["id"]: p for p in tree["persons"]}
     fams = {f["id"]: f for f in tree["families"]}
     malcolm = next(p for p in tree["persons"] if p["xref"] == "@I538@")
-    assert [by_id[fams[f]["wife"]]["given"] for f in malcolm["spouse_families"]] == ["Иона", "Финнула", "Элспет"]
+    # в файле жёны идут Иона, Финнула, Элспет; очередь по годам рождения совпадает с заметками «1-я жена» и т. д.
+    assert [by_id[fams[f]["wife"]]["given"] for f in malcolm["spouse_families"]] == ["Элспет", "Иона", "Финнула"]
 
     hamish = next(p for p in tree["persons"] if p["xref"] == "@I51@")
     assert (hamish["birth"]["year"], hamish["death"]["year"], hamish["birth"]["kind"]) == (1798, 1920, "exact")
@@ -87,3 +88,13 @@ def test_person_details_carry_notes_and_marriages(client: TestClient) -> None:
 
 def test_unknown_person_is_404(client: TestClient) -> None:
     assert client.get("/api/persons/999999").status_code == 404
+
+
+def test_marriage_order_follows_spouse_birth_not_file(client: TestClient) -> None:
+    # у Айли в файле мужья идут Форбс, Хикс, Хай; в её заметках и по годам рождения — Форбс, Хай, Хикс
+    tree = client.get("/api/clans/2/tree").json()
+    persons = {p["id"]: p for p in tree["persons"]}
+    families = {f["id"]: f for f in tree["families"]}
+    aili = next(p for p in tree["persons"] if p["given"] == "Айли")
+    husbands = [persons[families[f]["husband"]]["surname"] for f in aili["spouse_families"]]
+    assert husbands == ["Форбс", "Хай", "Хикс"]

@@ -32,7 +32,8 @@ def write_fixtures(folder: Path) -> None:
     conn = connect(":memory:")
     for key, (name, file) in FIXTURE_CLANS.items():
         report = import_clan(conn, name, load_file(ROOT / file), source_file=file)
-        payload = clan_tree(conn, report.clan_id).model_dump(mode="json")
+        # очередь браков как в файле: раскладка и связи сверяются со стендом, который правила очереди не знал
+        payload = clan_tree(conn, report.clan_id, file_order=True).model_dump(mode="json")
         (folder / f"{key}.tree.json").write_text(
             json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8"
         )
