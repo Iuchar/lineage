@@ -2,6 +2,8 @@
 
 import type { ClanTree } from "../api/types";
 import { cardName, escapeHtml, lifeYears } from "../format";
+import { silhouette } from "./portrait";
+import { MAX_ON_CARD, NO_TAGS, TAG_COLORS, type TagSet } from "./tags";
 import type { FoldInfo } from "../layout/fold";
 import type { LayoutResult } from "../layout/layout";
 import type { StyleName } from "../layout/metrics";
@@ -15,6 +17,15 @@ export interface PersonMarks {
 }
 
 export const NO_MARKS: PersonMarks = { burnt: new Set(), hidden: new Set(), linked: new Set() };
+
+export interface CardExtras {
+  portraits: boolean; // портреты включены; снимка нет — рисуется заглушка
+  photos?: ReadonlyMap<number, string>; // адрес снимка человека, когда он есть
+  tags?: TagSet;
+  filter?: string | null; // выбранная метка: её люди в полную силу, остальные в тени
+}
+
+export const NO_EXTRAS: CardExtras = { portraits: false };
 
 // метки разбора перезалива: живут, пока идёт разбор, и не берут цвет «выжжен»
 export type ReviewMark = "new" | "mod" | "gone";
@@ -44,7 +55,10 @@ export function drawCards(
   marks: PersonMarks,
   lineage?: ReadonlySet<number>, // люди на подсвеченной линии рода
   review?: ReadonlyMap<number, ReviewMark>,
+  extras: CardExtras = NO_EXTRAS,
 ): string {
+  const tags = extras.tags ?? NO_TAGS;
+  const color = new Map(tags.list.map((t) => [t.id, TAG_COLORS[t.color]]));
   const ordinal = LINK_STYLES[style].ordinal;
   const order = marriageOrder(tree);
   let html = "";
@@ -55,6 +69,21 @@ export function drawCards(
     if (lineage?.has(person.id)) classes.push("lin");
     const reviewed = review?.get(person.id);
     if (reviewed) classes.push(`up-${reviewed}`);
+
+    // портрет: снимок или заглушка-профиль; у заглушек «Ветвь» портрета нет
+    const photo = extras.portraits && !person.is_branch_stub
+      ? (extras.photos?.get(person.id) ?? silhouette(person))
+      : null;
+    if (photo) classes.push("has-por");
+
+    const own = tags.of.get(person.id) ?? [];
+    if (extras.filter && own.includes(extras.filter)) classes.push("tagged");
+    const shown = own.slice(0, MAX_ON_CARD);
+    const rest = own.length - shown.length;
+    const tagsHtml = shown.length
+      ? `<span class="tags">${shown.map((id) => `<i style="--c:${color.get(id) ?? "#888"}"></i>`).join("")}` +
+        `${rest > 0 ? `<small>+${rest}</small>` : ""}</span>`
+      : "";
     if (marks.burnt.has(person.id)) classes.push("burnt");
     if (person.is_branch_stub) classes.push("stub");
 
@@ -77,10 +106,15 @@ export function drawCards(
       badge = '<span class="badge calm"><i>также в другом роду</i></span>';
     }
 
+    // у газеты метки стоят отдельной строкой под именем, у остальных стилей — своим знаком поверх карточки
+    const underName = style === "gazeta" ? tagsHtml : "";
+    const overCard = style === "gazeta" ? "" : tagsHtml;
+    const porStyle = photo ? ` style="--img:${photo}"` : "";
     html +=
       `<div class="${classes.join(" ")}" data-id="${person.id}" style="left:${point.x}px;top:${point.y}px;width:${layout.cardWidth}px;height:${layout.cardHeight}px">` +
-      `<div class="box">${ordLine}<div class="por"></div>` +
-      `<div class="nm">${escapeHtml(cardName(person))}${sup}</div><div class="yr">${escapeHtml(lifeYears(person))}</div>${badge}</div></div>`;
+      `<div class="box">${ordLine}<div class="por"${porStyle}></div>` +
+      `<div class="nm">${escapeHtml(cardName(person))}${sup}</div>${underName}` +
+      `<div class="yr">${escapeHtml(lifeYears(person))}</div>${badge}${overCard}</div></div>`;
   }
   return html;
 }

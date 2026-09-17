@@ -1,0 +1,30 @@
+/* ═══ Портреты на карточках: миниатюра в духе каждого стиля ═══ */
+/* Размер карточки не меняется — текст отступает. Снимка нет — стоит заглушка-профиль (portrait.ts). */
+
+/* гобелен: портрет занимает медальон, который у стиля уже есть */
+[data-style=gobelen] .node.has-por .por { background: var(--img) center / cover; }
+
+[data-style=viktorian] .node.has-por .por,
+[data-style=gazeta] .node.has-por .por,
+[data-style=kabinet] .node.has-por .por,
+[data-style=polotno] .node.has-por .por { display: block; position: absolute; background: var(--img) center / cover; }
+
+/* викторианский: овальная камея в тонкой рамке */
+[data-style=viktorian] .node.has-por .por { left: 9px; top: 50%; width: 32px; height: 40px; margin-top: -20px;
+  border-radius: 50%; border: 1px solid var(--link); box-shadow: 0 0 0 2px var(--card), 0 0 0 3px var(--link); }
+[data-style=viktorian] .node.has-por .box { padding-left: 38px; }
+
+/* газета: снимок растром, как в печати */
+[data-style=gazeta] .node.has-por .por { left: 0; top: 9px; width: 34px; height: 42px; filter: grayscale(1) contrast(1.15); }
+[data-style=gazeta] .node.has-por .por::after { content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle, rgba(0,0,0,.35) .8px, transparent 1.2px) 0 0 / 3px 3px; }
+[data-style=gazeta] .node.has-por .box { padding-left: 44px; }
+
+/* кабинет: фото, приколотое к углу карточки */
+[data-style=kabinet] .node.has-por .por { right: -8px; top: -10px; width: 34px; height: 40px;
+  border: 3px solid #f6f1e6; border-bottom-width: 7px; transform: rotate(5deg); box-shadow: 0 3px 8px rgba(0,0,0,.35); z-index: 1; }
+[data-style=kabinet] .node.has-por .nm { padding-right: 24px; }
+
+/* полотно: без рамки, круглый оттиск в оттенках серого справа от годов — слева промежуток занят линиями браков */
+[data-style=polotno] .node.has-por .por { right: 4px; top: 36px; width: 28px; height: 28px;
+  border-radius: 50%; filter: grayscale(1); opacity: .85; }

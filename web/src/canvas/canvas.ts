@@ -5,6 +5,7 @@ import { foldsHiding, foldTree } from "../layout/fold";
 import { layoutTree, type LayoutResult } from "../layout/layout";
 import { STYLE_METRICS, type StyleName } from "../layout/metrics";
 import { drawCards, drawFolds, NO_MARKS, type PersonMarks, type ReviewMark } from "./cards";
+import { NO_TAGS, type TagSet } from "./tags";
 import { lineageOf } from "./lineage";
 import { drawLinks } from "./links";
 import { drawRuler } from "./ruler";
@@ -39,6 +40,11 @@ export class TreeCanvas {
   marks: PersonMarks = NO_MARKS;
   // метки разбора перезалива; пусто — обычная карта
   review: ReadonlyMap<number, ReviewMark> = new Map();
+  // портреты: включены ли и чьи снимки известны; без снимка рисуется заглушка-профиль
+  portraits = true;
+  photos: ReadonlyMap<number, string> = new Map();
+  tags: TagSet = NO_TAGS;
+  filter: string | null = null; // выбранная метка — её люди в полную силу, остальные в тени
   // ручной сдвиг среди братьев: id → на сколько мест; живёт до смены рода, в базу не пишется
   readonly manual = new Map<number, number>();
   // свёрнутые союзы; живут до смены рода, как и ручной сдвиг
@@ -66,10 +72,13 @@ export class TreeCanvas {
     return this.view.k;
   }
 
-  setTree(tree: ClanTree, marks: PersonMarks = NO_MARKS, review: ReadonlyMap<number, ReviewMark> = new Map()): void {
+  setTree(tree: ClanTree, marks: PersonMarks = NO_MARKS, review: ReadonlyMap<number, ReviewMark> = new Map(),
+          tags: TagSet = NO_TAGS): void {
     this.tree = tree;
     this.marks = marks;
     this.review = review;
+    this.tags = tags;
+    this.filter = null;
     this.selected = null;
     this.manual.clear();
     this.folded.clear();
@@ -82,6 +91,18 @@ export class TreeCanvas {
   nudge(id: number, direction: -1 | 1): void {
     this.manual.set(id, (this.manual.get(id) ?? 0) + direction);
     this.keepView(() => this.render());
+  }
+
+  // показать или спрятать портреты; вид остаётся на месте
+  showPortraits(on: boolean): void {
+    this.portraits = on;
+    this.keepView(() => this.render());
+  }
+
+  // оставить в полную силу людей с меткой; пусто — снять фильтр
+  filterByTag(tag: string | null): void {
+    this.filter = tag;
+    this.render();
   }
 
   // свернуть или развернуть ветку под союзом; вид остаётся на месте
@@ -170,12 +191,14 @@ export class TreeCanvas {
     const lineage = this.selected != null ? lineageOf(tree, layout, style, links, this.selected) : null;
     const lit = lineage?.paths ? lineage : null;
     this.surface.classList.toggle("lineage", lit !== null);
+    this.surface.classList.toggle("filtered", this.filter !== null);
 
     this.surface.innerHTML =
       (defs ? `<svg class="ornament" width="${width}" height="${height}">${defs}</svg>` : "") +
       `<svg class="links" width="${width}" height="${height}">${links.paths}${links.marks}</svg>` +
       (lit ? `<svg class="line" width="${width}" height="${height}"><path d="${lit.paths}"/></svg>` : "") +
-      drawCards(tree, layout, style, this.selected, this.marks, lit?.persons, this.review) +
+      drawCards(tree, layout, style, this.selected, this.marks, lit?.persons, this.review,
+        { portraits: this.portraits, photos: this.photos, tags: this.tags, filter: this.filter }) +
       drawFolds(links.folds, folds, style);
 
     // лампа «Ночного кабинета» ездит за выбранным

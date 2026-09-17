@@ -10,15 +10,19 @@ import "./styles/fold.css";
 import "./styles/ruler.css";
 import "./styles/panel.css";
 import "./styles/upload.css";
+import "./styles/portrait.css";
+import "./styles/tags.css";
 
 import type { ClanSummary, ClanTree } from "./api/types";
 import { NO_MARKS } from "./canvas/cards";
 import { TreeCanvas } from "./canvas/canvas";
-import { demoMarks } from "./demo";
+import { demoMarks, demoTags } from "./demo";
 import { PersonPanel } from "./panel/panel";
 import { SearchBox } from "./panel/search";
 import { UploadFlow } from "./upload/upload";
 import type { StyleName } from "./layout/metrics";
+import { silhouette } from "./canvas/portrait";
+import { TAG_COLORS, type TagSet } from "./canvas/tags";
 
 const STYLES: [StyleName, string][] = [
   ["gobelen", "Гобелен"],
@@ -102,6 +106,12 @@ async function start(root: HTMLElement): Promise<void> {
       if (tree) void panel.show(tree, id);
     },
     manualOffset: (id) => canvas.manual.get(id) ?? 0,
+    portrait: (person) =>
+      canvas.portraits && !person.is_branch_stub ? (canvas.photos.get(person.id) ?? silhouette(person)) : null,
+    tagsOf: (id) => {
+      const own = canvas.tags.of.get(id) ?? [];
+      return canvas.tags.list.filter((t) => own.includes(t.id));
+    },
     toggleFold: (familyId) => canvas.toggleFold(familyId),
     isFolded: (familyId) => canvas.folded.has(familyId),
   });
@@ -122,7 +132,9 @@ async function start(root: HTMLElement): Promise<void> {
     currentClan = id;
     tree = await getJson<ClanTree>(`/api/clans/${id}/tree`);
     search.setTree(tree);
-    canvas.setTree(tree, demoMarks(tree));
+    const tags = demoTags(tree);
+    canvas.setTree(tree, demoMarks(tree), new Map(), tags);
+    drawTagFilter(tags);
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
 
@@ -184,6 +196,40 @@ async function start(root: HTMLElement): Promise<void> {
   placeRow.append(button("Целиком", "Показать род целиком", () => canvas.fit()), button("К выбранному", "Центр на выбранном", () => canvas.goToSelected()));
   viewGroup.append(zoomRow, placeRow);
 
+  // кнопки меток: выбранная оставляет своих людей в полную силу, остальных уводит в тень
+  const tagFilter = document.createElement("div");
+  tagFilter.className = "grp";
+  const drawTagFilter = (tags: TagSet) => {
+    if (!tags.list.length) {
+      tagFilter.hidden = true;
+      return;
+    }
+    tagFilter.hidden = false;
+    tagFilter.innerHTML = '<b>Метки</b><div class="tagFilter"></div>';
+    const row = tagFilter.querySelector(".tagFilter")!;
+    for (const tag of tags.list) {
+      const chip = document.createElement("button");
+      chip.className = "chip";
+      chip.style.setProperty("--c", TAG_COLORS[tag.color]);
+      chip.innerHTML = `<i></i>${tag.name}`;
+      chip.setAttribute("aria-pressed", "false");
+      chip.addEventListener("click", () => {
+        const on = chip.getAttribute("aria-pressed") !== "true";
+        row.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === chip && on)));
+        canvas.filterByTag(on ? tag.id : null);
+      });
+      row.append(chip);
+    }
+  };
+
+  const portraitLabel = document.createElement("label");
+  portraitLabel.className = "chk";
+  portraitLabel.innerHTML = '<input type="checkbox" checked> портреты';
+  portraitLabel.querySelector("input")!.addEventListener("change", (e) => {
+    canvas.showPortraits((e.target as HTMLInputElement).checked);
+    if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
+  });
+
   const rulerLabel = document.createElement("label");
   rulerLabel.className = "chk";
   rulerLabel.innerHTML = '<input type="checkbox"> линейка дат';
@@ -228,7 +274,9 @@ async function start(root: HTMLElement): Promise<void> {
     switcher("Основатель", [["top", "сверху"], ["bottom", "снизу"]], "top", (side) => {
       canvas.update({ rootAtBottom: side === "bottom" });
     }),
+    portraitLabel,
     rulerLabel,
+    tagFilter,
     stat,
   );
 

@@ -2,6 +2,8 @@
 
 import type { ClanTree, PersonDetails, PersonEvent, TreePerson } from "../api/types";
 import { cardName, escapeHtml, formatDate, lifeYears } from "../format";
+import { silhouette } from "../canvas/portrait";
+import { TAG_COLORS, type Tag } from "../canvas/tags";
 import { descendantsOf } from "../layout/fold";
 import { relativesOf } from "./relatives";
 
@@ -12,6 +14,9 @@ export interface PanelActions {
   manualOffset: (id: number) => number;
   toggleFold: (familyId: number) => void;
   isFolded: (familyId: number) => boolean;
+  // портрет человека: снимок, заглушка или ничего, когда портреты выключены
+  portrait: (person: TreePerson) => string | null;
+  tagsOf: (personId: number) => Tag[];
 }
 
 const EVENT_LABELS: Record<string, string> = {
@@ -78,12 +83,19 @@ export class PersonPanel {
     if (person.is_branch_stub) {
       h += `<h3>${escapeHtml(cardName(person))}</h3><div class="sub">ветка уходит дальше · ${escapeHtml(person.xref)}</div>`;
     } else {
-      h += '<div class="por"></div>';
+      const photo = this.actions.portrait(person);
+      h += photo ? `<div class="por" style="background:${photo} center / cover"></div>` : '<div class="por"></div>';
       h += `<h3>${escapeHtml([person.given, person.surname].filter(Boolean).join(" ") || "без имени")}</h3>`;
       if (person.married_surname && person.married_surname !== person.surname) {
         h += `<div class="maiden">по мужу ${escapeHtml(person.married_surname)}</div>`;
       }
       h += `<div class="sub">${escapeHtml(lifeYears(person))} · ${escapeHtml(person.xref)}</div>`;
+      const tags = this.actions.tagsOf(person.id);
+      if (tags.length) {
+        h += `<div class="chips">${tags
+          .map((t) => `<span style="--c:${TAG_COLORS[t.color]}"><i></i>${escapeHtml(t.name)}</span>`)
+          .join("")}</div>`;
+      }
     }
 
     h += '<div class="lbl">Сведения</div>';

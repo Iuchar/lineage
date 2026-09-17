@@ -1,0 +1,52 @@
+/* ═══ Метки на карточке: у каждого стиля свой знак из его ремесла ═══ */
+/* Цвет метки приходит разметкой в --c из палитры (tags.ts). Больше четырёх меток — «+N». */
+
+.tags { position: absolute; display: flex; pointer-events: none; }
+.tags small { font: 500 8px/1 'IBM Plex Mono', monospace; color: var(--mut); align-self: center; margin-left: 2px; }
+
+/* фильтр по метке: люди с меткой в полную силу, остальные и связи — в тени, как у линии рода */
+.canvas.filtered svg.links { opacity: .35; }
+.canvas.filtered .node:not(.tagged) { opacity: .4; }
+
+/* кнопки фильтра в верхней панели */
+.bar .tagFilter { display: flex; gap: 6px; flex-wrap: wrap; }
+.bar .chip { display: inline-flex; align-items: center; gap: 6px; font: 500 11.5px/1 'Golos Text', sans-serif;
+  color: #aeb6c2; background: #1d2126; border: 1px solid #333941; border-radius: 999px; padding: 4px 9px 4px 7px; cursor: pointer; }
+.bar .chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.bar .chip[aria-pressed=true] { color: #14161a; background: #e9e4d8; border-color: #e9e4d8; }
+
+/* метки человека в панели */
+.side .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.side .chips span { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--fg);
+  border: 1px solid var(--edge); border-radius: 999px; padding: 3px 9px 3px 7px; }
+.side .chips i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+
+/* ── Гобелен: кисточки с золотой головкой и плотной юбкой ── */
+[data-style=gobelen] .tags { position: static; width: max-content; margin: 3px auto 0; gap: 4px; }
+[data-style=gobelen] .tags i { position: relative; width: 9px; height: 19px;
+  background: linear-gradient(var(--acc), var(--acc)) 50% 0 / 1px 5px no-repeat,
+              radial-gradient(circle at 50% 7px, var(--acc) 2.4px, transparent 2.9px); }
+[data-style=gobelen] .tags i::after { content: ''; position: absolute; left: 0; right: 0; top: 9px; bottom: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px) 0 0 / 3px 100%, var(--c);
+  clip-path: polygon(28% 0, 72% 0, 100% 100%, 0 100%); }
+/* на светлой шерсти тонкий тёмный контур, иначе нити теряются */
+[data-style=gobelen][data-theme=light] .tags i { filter: drop-shadow(0 0 .6px rgba(45,28,6,.75)); }
+
+/* ── Викторианский: ляссе, ленты-закладки из-под рамки ── */
+[data-style=viktorian] .tags { top: 100%; right: 12px; gap: 3px; }
+[data-style=viktorian] .tags i { width: 6px; height: 15px; background: var(--c);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%); }
+
+/* ── Газета: рубрикаторы отдельной строкой под именем ── */
+[data-style=gazeta] .tags { position: static; gap: 3px; margin-top: 5px; }
+[data-style=gazeta] .tags i { width: 6px; height: 6px; background: var(--c); }
+[data-style=gazeta] .node .yr { margin-top: 5px; }
+
+/* ── Ночной кабинет: канцелярские кнопки в углу карточки ── */
+[data-style=kabinet] .tags { bottom: 7px; right: 9px; gap: 4px; }
+[data-style=kabinet] .tags i { width: 9px; height: 9px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.6), var(--c) 55%); box-shadow: 1px 2px 2px rgba(0,0,0,.35); }
+
+/* ── Полотно II: короткие штрихи под годами, как пометки карандашом ── */
+[data-style=polotno] .tags { top: 52px; left: 0; gap: 4px; }
+[data-style=polotno] .tags i { width: 12px; height: 2px; background: var(--c); }
