@@ -5,6 +5,7 @@ import "./styles/viktorian.css";
 import "./styles/gazeta.css";
 import "./styles/kabinet.css";
 import "./styles/polotno.css";
+import "./styles/fold.css";
 import "./styles/ruler.css";
 import "./styles/panel.css";
 
@@ -75,6 +76,7 @@ async function start(root: HTMLElement): Promise<void> {
   let tree: ClanTree | null = null;
 
   const focus = (id: number) => {
+    canvas.reveal(id);
     canvas.select(id);
     canvas.goToSelected();
   };
@@ -86,7 +88,13 @@ async function start(root: HTMLElement): Promise<void> {
       if (tree) void panel.show(tree, id);
     },
     manualOffset: (id) => canvas.manual.get(id) ?? 0,
+    toggleFold: (familyId) => canvas.toggleFold(familyId),
+    isFolded: (familyId) => canvas.folded.has(familyId),
   });
+  // панель показывает, свёрнута ли ветка, — перерисовать после щелчка по стопке на карте
+  canvas.onFoldChange = () => {
+    if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
+  };
   canvas.onSelect = (id) => {
     if (tree && id != null) void panel.show(tree, id);
     else panel.clear();

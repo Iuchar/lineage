@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Сворачивание веток — варианты</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Playfair+Display:wght@400;700&family=PT+Serif:ital,wght@0,400;1,400&family=Literata:opsz,wght@7..72,400;7..72,600&family=Caveat:wght@400;600&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- настоящие стили приложения, чтобы варианты выглядели как на рабочем полотне -->
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #101113; color: #e6e2d8; font: 400 14px/1.55 'Golos Text', sans-serif; padding: 26px 30px 70px; }
+h1 { font: 400 26px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 86ch; margin: 0 0 16px; font-size: 13.5px; }
+.bar { position: sticky; top: 0; z-index: 9; background: #101113; padding: 10px 0 12px; margin-bottom: 18px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+.grp { display: flex; align-items: center; gap: 7px; }
+.grp > b { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #7c8492; }
+.sw { display: flex; border: 1px solid #333941; border-radius: 6px; overflow: hidden; }
+.sw button { border: 0; background: #1d2126; color: #aeb6c2; font: 500 11.5px/1 'Golos Text', sans-serif;
+  padding: 6px 11px; cursor: pointer; border-right: 1px solid #333941; }
+.sw button:last-child { border-right: 0; }
+.sw button[aria-pressed=true] { background: #e9e4d8; color: #14161a; }
+
+.variants { display: grid; grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); gap: 18px; }
+.variant { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; background: #16181b; }
+.variant .canvas { position: relative; overflow: hidden; }
+.variant .scene { position: absolute; left: 0; top: 0; width: 820px; height: 360px; transform-origin: 0 0; }
+.variant svg.links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cap { padding: 10px 14px 13px; }
+.cap b { font: 500 15px/1.3 'Golos Text', sans-serif; }
+.cap .key { font: 500 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #c8a44e; margin-left: 8px; }
+.cap p { margin: 4px 0 0; color: #8a8f98; font-size: 13px; }
+
+/* ── знаки свёрнутой ветки: только переменные стиля, своих цветов нет ── */
+.fold { position: absolute; transform: translate(-50%, 0); white-space: nowrap; font-family: var(--font); color: var(--mut); cursor: pointer; }
+.fold-knot { width: 26px; height: 26px; border-radius: 50%; border: 1.3px solid var(--acc); background: var(--bg);
+  display: flex; align-items: center; justify-content: center; font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--acc); }
+.fold-caption { font-size: 15px; color: var(--fg); opacity: .78; padding-top: 7px; }
+.fold-caption::before { content: ''; position: absolute; left: 50%; top: 0; width: 16px; height: 1.2px; background: var(--link); transform: translateX(-50%); }
+.fold-stack { width: 104px; height: 50px; }
+.fold-stack i { position: absolute; left: 0; top: 0; width: 104px; height: 40px; border: 1.2px solid var(--link); background: var(--card, var(--bg)); }
+.fold-stack i:nth-child(1) { transform: translate(10px, 10px); opacity: .45; }
+.fold-stack i:nth-child(2) { transform: translate(5px, 5px); opacity: .7; }
+.fold-stack span { position: absolute; left: 0; top: 0; width: 104px; height: 40px; display: flex; align-items: center; justify-content: center;
+  border: 1.2px solid var(--link); background: var(--card, var(--bg)); font-family: var(--font); font-size: 14px; color: var(--fg); }
+.fold-tab { font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--acc); border: 1px solid var(--acc);
+  border-radius: 9px; padding: 3px 6px; background: var(--bg); }
+.toggle { position: absolute; transform: translate(-50%, -50%); width: 14px; height: 14px; border-radius: 50%;
+  background: var(--bg); border: 1px solid var(--link); color: var(--link); font: 500 11px/12px 'IBM Plex Mono', monospace; text-align: center; }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+
+<h1>Сворачивание веток — варианты</h1>
+<p class="lede">На фрагменте Монад Кройве: Грегор и Мораг, их дети и внуки. Ветка сворачивается у союза: спуск укорачивается,
+потомки уходят с карты, а соседние ветки сдвигаются, заполняя место. Отличаются варианты тем, что остаётся под парой.
+Переключатель сверху — стиль, тема и «развёрнуто / свёрнуто»; знаки берут цвета и шрифт выбранного стиля.</p>
+
+<div class="bar">
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Ночной кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+  <div class="grp"><b>Ветка</b><div class="sw" data-set="fold">
+    <button data-v="folded" aria-pressed="true">свёрнута</button><button data-v="open">развёрнута</button>
+  </div></div>
+</div>
+
+<div class="variants" id="out"></div>
+
+<script>
+const METRICS = {
+  gobelen: { w: 104, h: 126, gap: 46 }, viktorian: { w: 150, h: 64, gap: 46 }, gazeta: { w: 150, h: 58, gap: 46 },
+  kabinet: { w: 150, h: 60, gap: 46 }, polotno: { w: 150, h: 68, gap: 46 },
+};
+const VARIANTS = [
+  { k: "knot", n: "Узелок со счётом", t: "Спуск укорачивается и заканчивается кружком с числом скрытых потомков. Щелчок по кружку разворачивает. Тише всех, на общем плане читается как точка на нити." },
+  { k: "caption", n: "Обрыв с подписью", t: "Спуск обрывается короткой чертой, под ней строка «ещё 5 в ветке» шрифтом стиля. Сразу понятно словами, но подпись занимает место под парой." },
+  { k: "stack", n: "Стопка карточек", t: "Под парой встаёт стопка карточек с надписью «5 в ветке» — видно, что там именно люди. Самый заметный вариант; у газеты и полотна без рамок стопка чужеродна." },
+  { k: "tab", n: "Ярлык у союза", t: "Спуска нет совсем: у знака союза висит ярлык «▸5». Карта самая компактная, но связь пары с потомками считывается только по ярлыку." },
+];
+
+const state = { style: "gobelen", theme: "dark", fold: "folded" };
+
+function person(x, y, m, name, years) {
+  return `<div class="node" style="left:${x}px;top:${y}px;width:${m.w}px;height:${m.h}px"><div class="box">` +
+    `${state.style === "gobelen" ? '<div class="ord"></div>' : ""}<div class="por"></div>` +
+    `<div class="nm">${name}</div><div class="yr">${years}</div></div></div>`;
+}
+
+function scene(variant) {
+  const m = METRICS[state.style];
+  const step = m.w + m.gap;
+  const row = m.h + 70;
+  // выводок из трёх детей центрирован под союзом и начинается у левого края
+  const union = 20 + m.w / 2 + step;
+  const pairLeft = union - m.w - m.gap / 2;
+  const top = 26;
+  // уровень единственного союза — как в приложении (marriageLevel)
+  const level = state.style === "polotno" ? top + 30 : top + m.h / 2;
+  let cards = person(pairLeft, top, m, "Грегор", "1937") + person(pairLeft + step, top, m, "Мораг", "1941");
+  // соседняя ветка справа: сдвигается к паре, когда наша свёрнута
+  const folded = state.fold === "folded";
+  const neighbourX = folded ? pairLeft + step * 2 + 40 : union + m.w / 2 + step + 86;
+  cards += person(neighbourX, top, m, "Уильям", "1954 — 1977");
+  let paths = `<path d="M${pairLeft + m.w} ${level}H${pairLeft + step}" stroke="var(--link)" stroke-width="1.2"/>`;
+  let extra = "";
+
+  if (!folded) {
+    const kids = [["Кэмерон", "1964 — 1998"], ["Эван", "1969"], ["Эйлид", "1972"]];
+    const bus = top + row - 28;
+    const kx = (i) => union - m.w / 2 + (i - 1) * step;
+    paths += `<path d="M${union} ${level}V${bus}" stroke="var(--link)"/><path d="M${kx(0) + m.w / 2} ${bus}H${kx(2) + m.w / 2}" stroke="var(--link)"/>`;
+    kids.forEach(([n, y], i) => {
+      cards += person(kx(i) , top + row, m, n, y);
+      paths += `<path d="M${kx(i) + m.w / 2} ${bus}V${top + row}" stroke="var(--link)"/>`;
+    });
+    extra += `<div class="toggle" style="left:${union}px;top:${level + 22}px">−</div>`;
+  } else if (variant === "knot") {
+    paths += `<path d="M${union} ${level}V${top + m.h + 22}" stroke="var(--link)"/>`;
+    extra += `<div class="fold fold-knot" style="left:${union}px;top:${top + m.h + 22}px">5</div>`;
+  } else if (variant === "caption") {
+    paths += `<path d="M${union} ${level}V${top + m.h + 26}" stroke="var(--link)"/>`;
+    extra += `<div class="fold fold-caption" style="left:${union}px;top:${top + m.h + 26}px">ещё 5 в ветке</div>`;
+  } else if (variant === "stack") {
+    paths += `<path d="M${union} ${level}V${top + m.h + 30}" stroke="var(--link)"/>`;
+    extra += `<div class="fold fold-stack" style="left:${union}px;top:${top + m.h + 30}px"><i></i><i></i><span>5 в ветке</span></div>`;
+  } else if (variant === "tab") {
+    extra += `<div class="fold fold-tab" style="left:${union}px;top:${level + 14}px">▸5</div>`;
+  }
+  return `<div class="scene"><svg class="links">${paths.replaceAll("<path ", '<path fill="none" stroke-width="1.2" ')}</svg>${cards}${extra}</div>`;
+}
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("out").innerHTML = VARIANTS.map((v) => `
+    <div class="variant">
+      <div class="canvas">${scene(v.k)}</div>
+      <div class="cap"><b>${v.n}</b><span class="key">${v.k}</span><p>${v.t}</p></div>
+    </div>`).join("");
+  fit();
+}
+
+// сцена целиком влезает в ширину окна: масштаб по ширине, не крупнее 1
+function fit() {
+  document.querySelectorAll(".variant .canvas").forEach((canvas) => {
+    const k = Math.min(1, canvas.clientWidth / 820);
+    // свёрнутой ветке нижний ряд не нужен — высота по содержимому
+    const h = METRICS[state.style].h;
+    const height = state.fold === "folded" ? h + 130 : h * 2 + 126;
+    canvas.style.height = `${Math.round(height * k)}px`;
+    canvas.querySelector(".scene").style.transform = `scale(${k})`;
+  });
+}
+addEventListener("resize", fit);
+
+document.querySelectorAll(".sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+  const button = e.target.closest("button");
+  if (!button) return;
+  sw.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+  state[sw.dataset.set] = button.dataset.v;
+  draw();
+}));
+draw();
+</script>
+</body>
+</html>

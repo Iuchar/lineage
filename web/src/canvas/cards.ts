@@ -2,8 +2,10 @@
 
 import type { ClanTree } from "../api/types";
 import { cardName, escapeHtml, lifeYears } from "../format";
+import type { FoldInfo } from "../layout/fold";
 import type { LayoutResult } from "../layout/layout";
 import type { StyleName } from "../layout/metrics";
+import type { FoldAnchor } from "./links";
 import { LINK_STYLES, ORDINAL_WORDS, ROMAN } from "./styles";
 
 export interface PersonMarks {
@@ -68,6 +70,31 @@ export function drawCards(
       `<div class="${classes.join(" ")}" data-id="${person.id}" style="left:${point.x}px;top:${point.y}px;width:${layout.cardWidth}px;height:${layout.cardHeight}px">` +
       `<div class="box">${ordLine}<div class="por"></div>` +
       `<div class="nm">${escapeHtml(cardName(person))}${sup}</div><div class="yr">${escapeHtml(lifeYears(person))}</div>${badge}</div></div>`;
+  }
+  return html;
+}
+
+const CASCADE = 3; // сколько имён детей показывает каскад полотна
+
+// Стопка под свёрнутым союзом. Рамочные стили — стопка карточек, газета — стопка верхних линеек,
+// полотно — каскад имён детей. Щелчок по стопке разворачивает ветку.
+export function drawFolds(anchors: FoldAnchor[], folds: ReadonlyMap<number, FoldInfo>, style: StyleName): string {
+  let html = "";
+  for (const anchor of anchors) {
+    const fold = folds.get(anchor.family);
+    if (!fold) continue;
+    const total = `${fold.descendants} в ветке`;
+    let inner: string;
+    if (style === "polotno") {
+      const names = fold.children.slice(0, CASCADE).map((p) => `<span>${escapeHtml(cardName(p))}</span>`).join("");
+      const rest = fold.children.length - CASCADE;
+      inner = `${names}<small>${rest > 0 ? `ещё ${rest} · ${total}` : total}</small>`;
+    } else if (style === "gazeta") {
+      inner = `<i></i><i></i><i></i><span>${total}</span><small>свёрнуто</small>`;
+    } else {
+      inner = `<i></i><i></i><span>${total}</span>`;
+    }
+    html += `<div class="fold${anchor.up ? " up" : ""}" data-fold="${anchor.family}" title="Развернуть ветку" style="left:${anchor.x}px;top:${anchor.y}px">${inner}</div>`;
   }
   return html;
 }

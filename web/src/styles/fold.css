@@ -1,0 +1,35 @@
+/* ═══ Стопка свёрнутой ветки: встаёт под союзом, щелчок разворачивает ═══ */
+.fold { position: absolute; transform: translateX(-50%); cursor: pointer; white-space: nowrap; }
+.fold.up { transform: translate(-50%, -100%); } /* основатель снизу — стопка над парой */
+
+/* гобелен, викторианский, кабинет — стопка карточек в рамках */
+.fold { width: 104px; height: 50px; }
+.fold i, .fold > span { position: absolute; left: 0; top: 0; width: 104px; height: 40px;
+  border: 1.2px solid var(--link); background: var(--card, var(--bg)); }
+.fold i:nth-child(1) { transform: translate(10px, 10px); opacity: .45; }
+.fold i:nth-child(2) { transform: translate(5px, 5px); opacity: .7; }
+.fold > span { display: flex; align-items: center; justify-content: center;
+  font-family: var(--font); font-size: 14px; color: var(--fg); }
+.fold:hover > span { border-color: var(--acc); }
+
+/* газета — стопка полос: верхние линейки трёх карточек сдвинуты вверх и вправо */
+[data-style=gazeta] .fold { width: 110px; height: 52px; }
+[data-style=gazeta] .fold i { width: 98px; height: 2px; border: 0; background: var(--fg); transform: none; }
+[data-style=gazeta] .fold i:nth-child(1) { top: 0; left: 12px; opacity: .25; }
+[data-style=gazeta] .fold i:nth-child(2) { top: 6px; left: 6px; opacity: .55; }
+[data-style=gazeta] .fold i:nth-child(3) { top: 12px; left: 0; opacity: 1; }
+[data-style=gazeta] .fold > span { display: block; left: 10px; top: 23px; width: auto; height: auto; border: 0; background: none;
+  font: 700 14px/1 'Playfair Display', serif; color: var(--fg); }
+[data-style=gazeta] .fold small { position: absolute; left: 10px; top: 42px; font: 400 9.5px/1 'PT Serif', serif;
+  letter-spacing: .07em; text-transform: uppercase; color: var(--mut); }
+[data-style=gazeta] .fold:hover > span { color: var(--acc); }
+
+/* полотно — каскад имён: каждая строка мельче и бледнее, внизу счёт набором годов */
+[data-style=polotno] .fold { width: auto; min-width: 112px; height: auto; padding-top: 4px; }
+[data-style=polotno] .fold > span { position: static; display: block; width: auto; height: auto; border: 0; background: none;
+  font: 300 20px/1.02 'Cormorant Garamond', serif; color: var(--fg); }
+[data-style=polotno] .fold > span:nth-child(2) { font-size: 17px; opacity: .55; }
+[data-style=polotno] .fold > span:nth-child(3) { font-size: 14px; opacity: .3; }
+[data-style=polotno] .fold small { display: block; margin-top: 6px; font: 400 9px/1 'IBM Plex Mono', monospace;
+  letter-spacing: .06em; color: var(--mut); }
+[data-style=polotno] .fold:hover > span:first-child { color: var(--acc); }

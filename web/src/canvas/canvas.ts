@@ -1,9 +1,10 @@
 // Холст рода: раскладка → карточки и связи → карта с протяжкой и зумом, линейка поверх.
 
 import type { ClanTree } from "../api/types";
+import { foldsHiding, foldTree } from "../layout/fold";
 import { layoutTree, type LayoutResult } from "../layout/layout";
 import { STYLE_METRICS, type StyleName } from "../layout/metrics";
-import { drawCards, NO_MARKS, type PersonMarks } from "./cards";
+import { drawCards, drawFolds, NO_MARKS, type PersonMarks } from "./cards";
 import { drawLinks } from "./links";
 import { drawRuler } from "./ruler";
 import { centreOn, fitAll, keepAnchor, type View, zoomAt } from "./view";
@@ -37,10 +38,13 @@ export class TreeCanvas {
   marks: PersonMarks = NO_MARKS;
   // ручной сдвиг среди братьев: id → на сколько мест; живёт до смены рода, в базу не пишется
   readonly manual = new Map<number, number>();
+  // свёрнутые союзы; живут до смены рода, как и ручной сдвиг
+  readonly folded = new Set<number>();
   state: CanvasState = { style: "gobelen", ruler: false, rootAtBottom: false };
 
   onViewChange: (view: View) => void = () => {};
   onSelect: (id: number | null) => void = () => {};
+  onFoldChange: () => void = () => {};
 
   constructor(host: HTMLElement) {
     this.viewport = document.createElement("div");
@@ -64,6 +68,7 @@ export class TreeCanvas {
     this.marks = marks;
     this.selected = null;
     this.manual.clear();
+    this.folded.clear();
     this.render();
     this.fit();
     this.onSelect(null);
@@ -73,6 +78,23 @@ export class TreeCanvas {
   nudge(id: number, direction: -1 | 1): void {
     this.manual.set(id, (this.manual.get(id) ?? 0) + direction);
     this.keepView(() => this.render());
+  }
+
+  // свернуть или развернуть ветку под союзом; вид остаётся на месте
+  toggleFold(familyId: number): void {
+    if (!this.folded.delete(familyId)) this.folded.add(familyId);
+    this.keepView(() => this.render());
+    this.onFoldChange();
+  }
+
+  // развернуть ветки, за которыми спрятан человек, — перед переходом к нему из поиска или панели
+  reveal(personId: number): void {
+    if (!this.tree) return;
+    const hiding = foldsHiding(this.tree, this.folded, personId);
+    if (!hiding.length) return;
+    for (const id of hiding) this.folded.delete(id);
+    this.render();
+    this.onFoldChange();
   }
 
   update(state: Partial<CanvasState>): void {
@@ -111,10 +133,13 @@ export class TreeCanvas {
     if (!this.tree) return;
     const { style } = this.state;
     const metrics = STYLE_METRICS[style];
-    this.layout = layoutTree(this.tree, metrics, {
+    const { tree, folds } = foldTree(this.tree, this.folded);
+    const foldedIds = new Set(folds.keys());
+    this.layout = layoutTree(tree, metrics, {
       ruler: this.state.ruler,
       rootAtBottom: this.state.rootAtBottom,
       manual: this.manual,
+      folded: foldedIds,
     });
     const layout = this.layout;
 
@@ -126,12 +151,13 @@ export class TreeCanvas {
 
     const styles = getComputedStyle(document.body);
     const color = (name: string, fallback: string) => (styles.getPropertyValue(name) || fallback).trim();
-    const links = drawLinks(this.tree, layout, style, color);
+    const links = drawLinks(tree, layout, style, color, undefined, foldedIds);
     const defs = style === "viktorian" ? POLLEN(color("--orn", "transparent"), width, height) : "";
 
     this.surface.innerHTML =
       `<svg class="links" width="${width}" height="${height}">${defs}${links.paths}${links.marks}</svg>` +
-      drawCards(this.tree, layout, style, this.selected, this.marks);
+      drawCards(tree, layout, style, this.selected, this.marks) +
+      drawFolds(links.folds, folds, style);
 
     // лампа «Ночного кабинета» ездит за выбранным
     const lamp = this.selected != null ? this.cardCentre(this.selected) : null;
@@ -246,8 +272,10 @@ export class TreeCanvas {
       this.drag = null;
       // короткое касание без протяжки — выбор человека
       if (drag && drag.moved <= 4 && e.type === "pointerup") {
-        const hit = document.elementsFromPoint(e.clientX, e.clientY).find((el) => el.closest(".node"));
-        const node = hit?.closest<HTMLElement>(".node");
+        const hits = document.elementsFromPoint(e.clientX, e.clientY);
+        const fold = hits.find((el) => el.closest(".fold"))?.closest<HTMLElement>(".fold");
+        if (fold?.dataset.fold) return this.toggleFold(Number(fold.dataset.fold));
+        const node = hits.find((el) => el.closest(".node"))?.closest<HTMLElement>(".node");
         if (node?.dataset.id) this.select(Number(node.dataset.id));
       }
     };

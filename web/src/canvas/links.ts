@@ -11,7 +11,19 @@ export type ColorLookup = (variable: string, fallback: string) => string;
 export interface LinksSvg {
   paths: string;
   marks: string;
+  folds: FoldAnchor[];
 }
+
+// где у свёрнутого союза встаёт стопка: x — ось спуска, y — край стопки со стороны пары.
+// Когда основатель снизу, дети над родителями, и стопка тоже над парой (up).
+export interface FoldAnchor {
+  family: number;
+  x: number;
+  y: number;
+  up: boolean;
+}
+
+const FOLD_DROP = 30; // от низа карточек до стопки
 
 type Segment = [number, number];
 
@@ -21,12 +33,14 @@ export function drawLinks(
   style: StyleName,
   color: ColorLookup,
   visible: (id: number) => boolean = () => true,
+  folded: ReadonlySet<number> = new Set(),
 ): LinksSvg {
   const S = LINK_STYLES[style];
   const w = layout.cardWidth;
   const h = layout.cardHeight;
   const pos = layout.positions;
   const persons = new Map<number, TreePerson>(tree.persons.map((p) => [p.id, p]));
+  const families = new Map<number, TreeFamily>(tree.families.map((f) => [f.id, f]));
   const CL = color("--link", "#888");
   const CA = color("--acc", "#c90");
 
@@ -49,6 +63,7 @@ export function drawLinks(
 
   let paths = "";
   let marks = "";
+  const folds: FoldAnchor[] = [];
 
   for (const family of tree.families) {
     const parents = [family.husband, family.wife].filter((id): id is number => id != null && visible(id));
@@ -149,6 +164,12 @@ export function drawLinks(
       }
     }
 
+    if (folded.has(family.id) && parents.length) {
+      const drop = foldDrop(parents, pos, { w, h, style, CL, famLevel, famX, famIndex, persons, up: layout.rootAtBottom, families });
+      paths += drop.path;
+      folds.push({ family: family.id, x: drop.x, y: drop.y, up: layout.rootAtBottom });
+      continue;
+    }
     if (!kids.length || !parents.length) continue;
     paths += descent(family, parents, kids, pos, { w, h, style, CL, famLevel, famX, famIndex, persons });
     if (S.tip) {
@@ -159,7 +180,7 @@ export function drawLinks(
     }
   }
 
-  return { paths, marks };
+  return { paths, marks, folds };
 }
 
 interface DescentContext {
@@ -171,6 +192,54 @@ interface DescentContext {
   famX: number | null;
   famIndex: number;
   persons: Map<number, TreePerson>;
+  up?: boolean;
+  families?: Map<number, TreeFamily>;
+}
+
+// Спуск к стопке свёрнутой ветки: с нити союза или завитком, как к детям, но короче — до стопки.
+function foldDrop(parents: number[], pos: Map<number, Point>, c: DescentContext): { path: string; x: number; y: number } {
+  const S = LINK_STYLES[c.style];
+  if (c.up) {
+    // над парой проходит шина её братьев: 30 над самым верхним из них, у многобрачных родителей выше.
+    // Стопка встаёт над шиной, спуск пересекает её так же, как спуск к развёрнутым детям.
+    const top = Math.min(...parents.map((id) => pos.get(id)!.y));
+    let clear = top - FOLD_DROP;
+    for (const id of parents) {
+      for (const fid of c.persons.get(id)?.parent_families ?? []) {
+        const brood = c.families?.get(fid);
+        if (!brood?.children.length) continue;
+        const kidsTop = Math.min(...brood.children.map((kid) => pos.get(kid)!.y));
+        const broods = Math.max(
+          1,
+          ...[brood.husband, brood.wife].map((pid) => (pid != null ? (c.persons.get(pid)?.spouse_families.length ?? 1) : 1)),
+        );
+        clear = Math.min(clear, kidsTop - 30 - (broods - 1) * 34 - 14);
+      }
+    }
+    const x = c.famX ?? pos.get(parents[0]!)!.x + c.w / 2;
+    const y = clear;
+    const from = c.famLevel ?? top;
+    return { path: `<path d="M${x} ${from}V${y + S.descentGap}" stroke="${c.CL}" stroke-width="${S.width}" fill="none"/>`, x, y };
+  }
+  const bottom = Math.max(...parents.map((id) => pos.get(id)!.y)) + c.h;
+  const y = bottom + FOLD_DROP;
+  if (c.famX != null && c.famLevel != null) {
+    return {
+      path: `<path d="M${c.famX} ${c.famLevel}V${y - S.descentGap}" stroke="${c.CL}" stroke-width="${S.width}" fill="none"/>`,
+      x: c.famX,
+      y,
+    };
+  }
+  const parent = pos.get(parents[0]!)!;
+  const cx = parent.x + c.w / 2;
+  const y0 = parent.y + c.h + S.descentGap;
+  const bend = 17;
+  const end = y0 + bend * 2;
+  return {
+    path: `<path d="M${cx} ${y0}C${cx + bend} ${y0} ${cx + bend} ${y0 + bend} ${cx} ${y0 + bend}C${cx - bend} ${y0 + bend} ${cx - bend} ${end} ${cx} ${end}V${end + 12}" stroke="${c.CL}" stroke-width="${S.width}" fill="none" stroke-linecap="round"/>`,
+    x: cx,
+    y: end + 12 + S.descentGap,
+  };
 }
 
 // Спуск к детям: с нити союза или, при одном известном родителе, завитком из-под карточки.

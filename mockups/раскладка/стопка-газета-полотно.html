@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Стопка для газеты и полотна — варианты</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Playfair+Display:wght@400;700&family=PT+Serif:ital,wght@0,400;1,400&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- настоящие стили приложения -->
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #101113; color: #e6e2d8; font: 400 14px/1.55 'Golos Text', sans-serif; padding: 26px 30px 70px; }
+h1 { font: 400 26px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+h2 { font: 500 11px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #c8a44e; margin: 34px 0 12px; }
+.lede { color: #8a8f98; max-width: 86ch; margin: 0 0 8px; font-size: 13.5px; }
+.variant { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; background: #16181b; margin-bottom: 16px; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(640px, 1fr)); }
+.canvas { position: relative; overflow: hidden; }
+.scene { position: absolute; left: 0; top: 0; width: 640px; height: 220px; transform-origin: 0 0; }
+svg.links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cap { padding: 10px 14px 13px; }
+.cap b { font: 500 15px/1.3 'Golos Text', sans-serif; }
+.cap .key { font: 500 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #c8a44e; margin-left: 8px; }
+.cap p { margin: 4px 0 0; color: #8a8f98; font-size: 13px; }
+
+/* ── общая часть знака: стоит под спуском, по центру союза ── */
+.fold { position: absolute; transform: translate(-50%, 0); cursor: pointer; white-space: nowrap; }
+
+/* для сравнения — стопка в рамках из выбранного варианта */
+.stack-framed { width: 104px; height: 50px; }
+.stack-framed i, .stack-framed span { position: absolute; left: 0; top: 0; width: 104px; height: 40px;
+  border: 1.2px solid var(--link); background: var(--bg); }
+.stack-framed i:nth-child(1) { transform: translate(10px, 10px); opacity: .45; }
+.stack-framed i:nth-child(2) { transform: translate(5px, 5px); opacity: .7; }
+.stack-framed span { display: flex; align-items: center; justify-content: center; font-family: var(--font); font-size: 14px; color: var(--fg); }
+
+/* Газета 1 — стопка полос: верхние линейки трёх карточек, сдвинутые, как листы в пачке */
+.g-rules { width: 110px; height: 52px; }
+.g-rules i { position: absolute; width: 98px; height: 2px; background: var(--fg); }
+.g-rules i:nth-child(1) { top: 0; left: 12px; opacity: .25; }
+.g-rules i:nth-child(2) { top: 6px; left: 6px; opacity: .55; }
+.g-rules i:nth-child(3) { top: 12px; left: 0; }
+.g-rules span { position: absolute; left: 10px; top: 23px; font: 700 14px/1 'Playfair Display', serif; color: var(--fg); }
+.g-rules small { position: absolute; left: 10px; top: 42px; font: 400 9.5px/1 'PT Serif', serif; letter-spacing: .07em; color: var(--mut); }
+
+/* Газета 2 — обрез пачки: верхняя карточка как обычно, под ней тонкие обрезы нижних листов */
+.g-edge { width: 116px; height: 58px; border-top: 2px solid var(--fg); }
+.g-edge span { position: absolute; left: 10px; top: 9px; font: 700 14px/1 'Playfair Display', serif; color: var(--fg); }
+.g-edge i { position: absolute; height: 1px; background: var(--fg); }
+.g-edge i:nth-child(2) { top: 38px; left: 4px; width: 110px; opacity: .7; }
+.g-edge i:nth-child(3) { top: 44px; left: 8px; width: 110px; opacity: .45; }
+.g-edge i:nth-child(4) { top: 50px; left: 12px; width: 110px; opacity: .25; }
+
+/* Газета 3 — колонка строк: линейка и три строки-заглушки убывающей длины, число сбоку */
+.g-lines { width: 116px; height: 44px; border-top: 2px solid var(--fg); }
+.g-lines i { position: absolute; left: 10px; height: 1.5px; background: var(--mut); opacity: .75; }
+.g-lines i:nth-child(1) { top: 11px; width: 58px; }
+.g-lines i:nth-child(2) { top: 20px; width: 46px; }
+.g-lines i:nth-child(3) { top: 29px; width: 34px; }
+.g-lines span { position: absolute; right: 8px; top: 7px; font: 700 22px/1 'Playfair Display', serif; color: var(--fg); }
+
+/* Полотно 1 — каскад имён: имена детей стопкой строк, каждая бледнее и мельче, внизу счёт набором годов */
+.p-names { width: 112px; padding-top: 4px; }
+.p-names span { display: block; font: 300 20px/1.02 'Cormorant Garamond', serif; color: var(--fg); }
+.p-names span:nth-child(2) { font-size: 17px; opacity: .55; }
+.p-names span:nth-child(3) { font-size: 14px; opacity: .3; }
+.p-names small { display: block; margin-top: 6px; font: 400 9px/1 'IBM Plex Mono', monospace; letter-spacing: .06em; color: var(--mut); }
+
+/* Полотно 2 — стопка строк: три волосяные черты убывающей длины, как свёрнутые имена, и подпись */
+.p-lines { width: 110px; height: 46px; }
+.p-lines i { position: absolute; left: 0; height: 1px; background: var(--fg); }
+.p-lines i:nth-child(1) { top: 0; width: 92px; opacity: .7; }
+.p-lines i:nth-child(2) { top: 6px; width: 72px; opacity: .45; }
+.p-lines i:nth-child(3) { top: 12px; width: 52px; opacity: .25; }
+.p-lines span { position: absolute; left: 0; top: 22px; font: 300 19px/1 'Cormorant Garamond', serif; color: var(--fg); }
+</style>
+</head>
+<body>
+
+<h1>Стопка для газеты и полотна</h1>
+<p class="lede">Выбрана «Стопка карточек». У газеты и полотна нет рамок, поэтому стопка в рамках там чужая. Ниже — стопка
+в духе каждого из двух стилей, у газеты три варианта, у полотна два; первым для сравнения стоит стопка в рамках. Сверху тёмная тема, снизу светлая (на широком экране — слева и справа).
+Ветка свёрнута; щелчок по знаку её разворачивает.</p>
+
+<div id="out"></div>
+
+<script>
+const METRICS = { gazeta: { w: 150, h: 58, gap: 46 }, polotno: { w: 150, h: 68, gap: 46 } };
+
+const GROUPS = [
+  { style: "gazeta", title: "Газета", variants: [
+    { k: "framed", n: "Стопка в рамках", t: "Как в выбранном варианте — для сравнения.",
+      html: '<i></i><i></i><span>5 в ветке</span>', cls: "stack-framed" },
+    { k: "rules", n: "Стопка полос", t: "Верхние линейки трёх карточек сдвинуты вверх и вправо, как листы в пачке; под ними «5 в ветке» набором карточки. Та же стопка, только из того, чем газета рисует карточку.",
+      html: '<i></i><i></i><i></i><span>5 в ветке</span><small>СВЁРНУТО</small>', cls: "g-rules" },
+    { k: "edge", n: "Обрез пачки", t: "Верхняя карточка как у газеты — линейка и «5 в ветке», а под ней тонкие обрезы нижних листов со сдвигом вправо, как у пачки номеров на столе.",
+      html: '<span>5 в ветке</span><i></i><i></i><i></i>', cls: "g-edge" },
+    { k: "lines", n: "Колонка строк", t: "Под линейкой три строки-заглушки убывающей длины и крупная цифра сбоку — свёрстанная, но не показанная колонка.",
+      html: '<i></i><i></i><i></i><span>5</span>', cls: "g-lines" },
+  ] },
+  { style: "polotno", title: "Полотно II", variants: [
+    { k: "framed", n: "Стопка в рамках", t: "Как в выбранном варианте — для сравнения.",
+      html: '<i></i><i></i><span>5 в ветке</span>', cls: "stack-framed" },
+    { k: "names", n: "Каскад имён", t: "Имена детей стопкой строк — каждая мельче и бледнее, под ними «5 в ветке» набором годов. Стопка сложена из самих имён: видно, кто там.",
+      html: '<span>Кэмерон</span><span>Эван</span><span>Эйлид</span><small>5 в ветке</small>', cls: "p-names" },
+    { k: "lines", n: "Стопка строк", t: "Три волосяные черты убывающей длины, будто свёрнутые имена, под ними «5 в ветке». Тише каскада имён.",
+      html: '<i></i><i></i><i></i><span>5 в ветке</span>', cls: "p-lines" },
+  ] },
+];
+
+function person(x, y, m, name, years) {
+  return `<div class="node" style="left:${x}px;top:${y}px;width:${m.w}px;height:${m.h}px"><div class="box">` +
+    `<div class="por"></div><div class="nm">${name}</div><div class="yr">${years}</div></div></div>`;
+}
+
+function scene(style, variant) {
+  const m = METRICS[style];
+  const step = m.w + m.gap;
+  const pairLeft = 30;
+  const union = pairLeft + m.w + m.gap / 2;
+  const top = 26;
+  // уровень единственного союза — как в приложении (marriageLevel)
+  const level = style === "polotno" ? top + 30 : top + m.h / 2;
+  const drop = top + m.h + 30;
+  const cards = person(pairLeft, top, m, "Грегор", "1937") + person(pairLeft + step, top, m, "Мораг", "1941") +
+    person(pairLeft + step * 2 + 40, top, m, "Уильям", "1954 — 1977");
+  const paths = `<path d="M${pairLeft + m.w} ${level}H${pairLeft + step}"/><path d="M${union} ${level}V${drop}"/>`;
+  return `<div class="scene"><svg class="links"><g fill="none" stroke="var(--link)" stroke-width="1.2">${paths}</g></svg>${cards}` +
+    `<div class="fold ${variant.cls}" style="left:${union}px;top:${drop}px">${variant.html}</div></div>`;
+}
+
+document.getElementById("out").innerHTML = GROUPS.map((g) => `<h2>${g.title}</h2>` + g.variants.map((v) => `
+  <div class="variant">
+    <div class="pair">
+      <div data-style="${g.style}" data-theme="dark"><div class="canvas">${scene(g.style, v)}</div></div>
+      <div data-style="${g.style}" data-theme="light"><div class="canvas">${scene(g.style, v)}</div></div>
+    </div>
+    <div class="cap"><b>${v.n}</b><span class="key">${v.k}</span><p>${v.t}</p></div>
+  </div>`).join("")).join("");
+
+// сцена целиком влезает в половину ширины
+function fit() {
+  document.querySelectorAll(".canvas").forEach((canvas) => {
+    const k = Math.min(1, canvas.clientWidth / 640);
+    canvas.style.height = `${Math.round(220 * k)}px`;
+    canvas.querySelector(".scene").style.transform = `scale(${k})`;
+  });
+}
+fit();
+addEventListener("resize", fit);
+</script>
+</body>
+</html>

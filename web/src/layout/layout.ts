@@ -9,6 +9,8 @@ export interface LayoutOptions {
   rootAtBottom: boolean;
   // ручной сдвиг среди братьев: id человека → на сколько мест (+ правее, − левее)
   manual?: ReadonlyMap<number, number>;
+  // свёрнутые союзы: дети уже убраны из дерева (fold.ts), под союзом нужно место для стопки
+  folded?: ReadonlySet<number>;
 }
 
 export interface Point {
@@ -43,6 +45,7 @@ export interface LayoutResult {
   width: number;
   height: number;
   ruler: RulerLayout | null;
+  rootAtBottom: boolean; // дети над родителями
 }
 
 // между братьями, между двумя бездетными, между ветками верхнего уровня
@@ -160,7 +163,9 @@ function merge(acc: Span[], contour: Span[], dx: number): Span[] {
 }
 
 // По горизонтали: дети подряд с контурным сжатием, пара встаёт между крайними детьми.
-function placeHorizontally(idx: Index, metrics: CardMetrics, manual: ReadonlyMap<number, number> | undefined) {
+function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOptions) {
+  const { manual } = options;
+  const folded = options.folded ?? new Set<number>();
   const positions = new Map<number, number>();
   const pairStep = metrics.width + metrics.pairGap;
   const olderFirst = byAge(idx);
@@ -213,7 +218,15 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, manual: ReadonlyMap
       kids.push(...brood);
     }
     const nodes = kids.map((c) => measure(c, seen)).filter((n): n is TreeNode => n !== null);
-    return buildNode(unit, applyManual(nodes, manual), id);
+    const node = buildNode(unit, applyManual(nodes, manual), id);
+    if (families.some((f) => folded.has(f.id))) {
+      // стопка свёрнутой ветки занимает ярус ниже по ширине союза — соседи под неё не заезжают
+      const below = node.contour[1];
+      const half = node.unitWidth / 2;
+      node.contour[1] = below ? { l: Math.min(below.l, -half), r: Math.max(below.r, half) } : { l: -half, r: half };
+      node.leaf = false;
+    }
+    return node;
   };
 
   const put = (node: TreeNode, centre: number) => {
@@ -225,7 +238,7 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, manual: ReadonlyMap
   const roots = idx.order.filter(
     (p) =>
       p.parent_families.length === 0 &&
-      p.spouse_families.some((f) => (idx.families.get(f)?.children.length ?? 0) > 0),
+      p.spouse_families.some((f) => (idx.families.get(f)?.children.length ?? 0) > 0 || folded.has(f)),
   );
   roots.sort((a, b) => (birthYear(a) || 9999) - (birthYear(b) || 9999));
 
@@ -406,7 +419,7 @@ export function layoutTree(tree: ClanTree, metrics: CardMetrics, options: Layout
   const idx = index(tree);
   const gen = generations(tree);
   const height = cardHeight(metrics, Math.max(1, ...tree.persons.map((p) => p.spouse_families.length)));
-  const xs = placeHorizontally(idx, metrics, options.manual);
+  const xs = placeHorizontally(idx, metrics, options);
   const gens = [...new Set(tree.persons.map((p) => gen.get(p.id)!))].sort((a, b) => a - b);
 
   let ruler: RulerLayout | null = null;
@@ -436,5 +449,14 @@ export function layoutTree(tree: ClanTree, metrics: CardMetrics, options: Layout
     width = Math.max(width, p.x + metrics.width);
     bottom = Math.max(bottom, p.y + height);
   }
-  return { positions, generation: gen, cardWidth: metrics.width, cardHeight: height, width, height: bottom, ruler };
+  return {
+    positions,
+    generation: gen,
+    cardWidth: metrics.width,
+    cardHeight: height,
+    width,
+    height: bottom,
+    ruler,
+    rootAtBottom: options.rootAtBottom,
+  };
 }

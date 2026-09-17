@@ -2,6 +2,7 @@
 
 import type { ClanTree, PersonDetails, PersonEvent, TreePerson } from "../api/types";
 import { cardName, escapeHtml, formatDate, lifeYears } from "../format";
+import { descendantsOf } from "../layout/fold";
 import { relativesOf } from "./relatives";
 
 export interface PanelActions {
@@ -9,6 +10,8 @@ export interface PanelActions {
   centre: () => void;
   nudge: (id: number, direction: -1 | 1) => void;
   manualOffset: (id: number) => number;
+  toggleFold: (familyId: number) => void;
+  isFolded: (familyId: number) => boolean;
 }
 
 const EVENT_LABELS: Record<string, string> = {
@@ -47,6 +50,7 @@ export class PersonPanel {
       if (target.dataset.act === "centre") this.actions.centre();
       if (target.dataset.act === "left") this.actions.nudge(id, -1);
       if (target.dataset.act === "right") this.actions.nudge(id, 1);
+      if (target.dataset.act === "fold") this.actions.toggleFold(Number(target.dataset.family));
     });
     host.append(this.element);
     this.clear();
@@ -110,6 +114,13 @@ export class PersonPanel {
           if (text || EVENT_LABELS[event.tag]) h += row(EVENT_LABELS[event.tag] ?? event.tag, text || "—");
         }
         h += row("Дети", marriage.children.length ? marriage.children.map(kin).join(", ") : "нет");
+        if (marriage.children.length) {
+          const folded = this.actions.isFolded(marriage.family.id);
+          const count = descendantsOf(tree, marriage.family.id).size;
+          h +=
+            `<div class="foldRow"><button data-act="fold" data-family="${marriage.family.id}" aria-pressed="${folded}">` +
+            `${folded ? "Развернуть ветку" : "Свернуть ветку"}</button><span>${count} в ветке</span></div>`;
+        }
       });
     }
 
