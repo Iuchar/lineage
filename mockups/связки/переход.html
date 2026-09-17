@@ -56,6 +56,10 @@ h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
   font: 500 11px/1 'Golos Text', sans-serif; padding: 5px 9px; cursor: pointer; }
 .trail .mk { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); }
 
+/* живая метка-дверь: курсор и лёгкий подъём при наведении, знаки состояния так себя не ведут */
+.node .badge.go { cursor: pointer; pointer-events: auto; }
+.node .badge.go:hover { filter: brightness(1.12); }
+
 /* ушко связки: язычок папки, выступающий из-под верхнего края карточки */
 .ear { position: absolute; z-index: 6; padding: 3px 11px 4px; background: var(--panelbg); color: var(--acc);
   border: 1px solid var(--acc); border-bottom: 0; font: 500 10px/1.2 'Golos Text', sans-serif;
@@ -69,8 +73,8 @@ h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
 Карты родов настоящие, масштаб — 100 % экрана.</p>
 <div class="ctl">
   <div class="grp"><b>Вариант</b><div class="sw" data-set="kind">
-    <button data-v="badge" aria-pressed="true">Х1 · метка на карточке</button><button data-v="panel">Х2 · панель человека</button>
-    <button data-v="ear">Х3 · ушко рода</button>
+    <button data-v="combo" aria-pressed="true">Х1 + Х2 · комбо</button><button data-v="badge">Х1 · метка</button>
+    <button data-v="panel">Х2 · панель</button><button data-v="ear">Х3 · ушко рода</button>
   </div></div>
   <div class="grp"><b>Шаг</b><div class="sw" data-set="step">
     <button data-v="before" aria-pressed="true">до перехода</button><button data-v="after">после перехода</button>
@@ -87,11 +91,12 @@ h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
 <div class="app" id="out"></div>
 <script>
 const ABOUT = {
+  combo: "<b>Х1 + Х2 · метка и панель вместе.</b> На карточке живая пометка «также в Уинтерхоуп →»: стрелка отличает дверь от знаков состояния, щелчок уводит в чужой род. В панели та же связка строкой — с именем двойника и годами, и кнопкой; если связок несколько, все стоят списком, а на карточке остаётся одна пометка со счётом. Возврат двойной: лентой над картой и кнопкой в панели, обе ведут туда, откуда пришёл.",
   badge: "<b>Х1 · метка на карточке.</b> Пометка «также в Уинтерхоуп» сама и есть переход: щёлкаешь по ней прямо на карте. Знак тот же, что у «выжжен из рода», только с именем рода и живой. Возврат — лентой над картой: видно, откуда пришёл, и кнопка «Вернуться».",
   panel: "<b>Х2 · панель человека.</b> На карте пометка остаётся молчаливой, переход живёт в панели: строка «Также в роду» со всеми связками и кнопкой. Если связок несколько, они все на виду. Возврат — там же, строкой «Пришли из …», и лентой над картой.",
   ear: "<b>Х3 · ушко рода.</b> У карточки сбоку вкладка с названием чужого рода — как язычок из соседней папки. Щелчок уводит в тот род, там у двойника такое же ушко, но повёрнутое назад. Возврата по ленте нет: дорога видна на самих карточках.",
 };
-const state = { kind: "badge", step: "before", style: "gobelen", theme: "dark" };
+const state = { kind: "combo", step: "before", style: "gobelen", theme: "dark" };
 let data, pair;
 
 function frameHtml(clan, focusId) {
@@ -106,7 +111,7 @@ function paneHtml(here, there) {
     ["Супруги", here.spouses.join(", ") || "—"], ["Дети", here.kids.join(", ") || "—"]];
   const rows = kin.map(([k, v]) => `<div class="rowk"><i>${k}</i><span>${v}</span></div>`).join("");
   // после перехода кнопка в панели одна: она же и есть дорога назад
-  const linkBlock = state.kind === "panel"
+  const linkBlock = state.kind === "panel" || state.kind === "combo"
     ? `<div class="link"><b>Также в роду</b><small>${there.clan} · ${there.name}, ${there.born}</small>` +
       `<button>${state.step === "after" ? `← Вернуться в «${there.clan}»` : `Перейти в «${there.clan}»`}</button></div>`
     : `<div class="link"><b>Также в роду</b><small>${there.clan}</small></div>`;
@@ -150,6 +155,11 @@ function mark(here, there) {
     ear.style.left = `${node.offsetLeft + 8}px`;
     ear.style.top = `${node.offsetTop - 17}px`;
     node.parentElement.append(ear);
+  } else if (state.kind !== "panel") {
+    // в комбо метка — дверь, стрелка отличает её от знаков состояния
+    const arrow = state.kind === "combo" ? " →" : "";
+    node.querySelector(".box").insertAdjacentHTML("beforeend",
+      `<span class="badge calm go"><i>также в ${there.clan}${arrow}</i></span>`);
   } else {
     node.querySelector(".box").insertAdjacentHTML("beforeend",
       `<span class="badge calm"><i>также в ${there.clan}</i></span>`);
