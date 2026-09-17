@@ -1,10 +1,11 @@
 /* ═══ Гобелен: тканое полотно, медальоны, стежки ═══ */
-/* полотно: мореный дуб в тёмной теме, небелёная шерсть в светлой */
+/* полотно: мореный дуб в тёмной теме, небелёная шерсть в светлой.
+   Светлая — «золотное шитьё»: та же золотая нить, но с тёмной подкладкой, иначе золото на светлом не читается */
 [data-style=gobelen] { --st-old: #8a7a5e; --st-new: #9d8b68; --bg: #241a12; --fg: #eadfc4; --mut: #a08d70; --acc: #c8a44e; --edge: #3a2c1e;
   --panelbg: #19110a; --link: #7d6b52; --warp: rgba(0,0,0,.2); --weft: rgba(255,236,196,.035);
   --font: 'Cormorant Garamond', Georgia, serif; --hand: 'Caveat', cursive; }
-[data-style=gobelen][data-theme=light] { --st-old: #9c9070; --st-new: #7d7154; --bg: #ded2b6; --fg: #2c2a20; --mut: #6f6851; --acc: #8a6a24;
-  --panelbg: #d2c5a6; --link: #8d8163; --edge: #bcae8c; --warp: rgba(84,70,40,.14); --weft: rgba(255,255,255,.3); }
+[data-style=gobelen][data-theme=light] { --st-old: #b09a66; --st-new: #93742f; --bg: #ded2b6; --fg: #2a2116; --mut: #6d5d42; --acc: #a8801f;
+  --panelbg: #d2c5a6; --link: #9a8762; --edge: #bba98a; --warp: rgba(84,70,40,.14); --weft: rgba(255,255,255,.3); }
 
 /* фактура — узелки на пересечениях нитей: точка не выстраивается в линию, муару нечего усиливать */
 [data-style=gobelen] .canvas { background: var(--bg);
@@ -24,6 +25,20 @@
 [data-style=gobelen] .node.sel .por { border-width: 2px; box-shadow: 0 0 18px rgba(200,164,78,.5); }
 [data-style=gobelen] .node .badge { font-family: var(--hand); font-size: 12px; color: #f0dfae; background: #7a2230;
   border-radius: 10px; padding: 1px 9px; left: 50%; transform: translateX(-50%); top: 124px; }
+
+/* светлая: золотой шнур медальона с тёмным кантом, нить связей и линии рода на тёмной подкладке */
+[data-style=gobelen][data-theme=light] .canvas svg.links,
+[data-style=gobelen][data-theme=light] .canvas svg.line { filter: drop-shadow(0 .7px 0 rgba(70,48,10,.55)); }
+[data-style=gobelen][data-theme=light] .node .por { border: 2px solid #b38a2e;
+  box-shadow: 0 0 0 1px #5d4415, inset 0 1px 0 rgba(255,244,210,.9), inset 0 0 0 1px #5d4415;
+  background: radial-gradient(circle at 40% 30%, #f3ead6, #c9b891); }
+[data-style=gobelen][data-theme=light] .node .ord { color: #7a6a3f; }
+[data-style=gobelen][data-theme=light] .node.sel .por { box-shadow: 0 0 0 1px #5d4415, inset 0 1px 0 rgba(255,244,210,.9),
+  inset 0 0 0 1px #5d4415, 0 0 16px rgba(168,128,31,.45); }
+/* у выжженного медальона шнура нет — остаётся прожжённая дыра, как в тёмной теме */
+[data-style=gobelen][data-theme=light] .node.burnt .por { box-shadow: none; }
+/* узелок на нити нынешнего союза: светлая бусина с тёмным контуром */
+[data-style=gobelen][data-theme=light] .canvas svg circle[fill="#e8dcb8"] { fill: #f4e6b8; stroke: #5d4415; stroke-width: .8px; }
 
 /* выжжен из рода — в медальоне прожжена дыра */
 [data-style=gobelen] .node.burnt .por { border-color: transparent;
