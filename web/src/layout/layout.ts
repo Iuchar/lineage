@@ -2,6 +2,7 @@
 // Правила и числа — из docs/decisions.md; перенос сверен со стендом по координатам (layout.test.ts).
 
 import type { ClanTree, TreeFamily, TreePerson } from "../api/types";
+import { estimateBirthYears } from "./estimate";
 import { type CardMetrics, cardHeight } from "./metrics";
 
 export interface LayoutOptions {
@@ -65,6 +66,7 @@ const collator = new Intl.Collator("ru", { numeric: true });
 
 interface Index {
   persons: Map<number, TreePerson>;
+  estimated: Map<number, number>; // оценка года у тех, у кого его нет; линейка по ней не строится
   families: Map<number, TreeFamily>;
   order: TreePerson[];
   familyOrder: TreeFamily[];
@@ -73,6 +75,7 @@ interface Index {
 function index(tree: ClanTree): Index {
   return {
     persons: new Map(tree.persons.map((p) => [p.id, p])),
+    estimated: estimateBirthYears(tree),
     families: new Map(tree.families.map((f) => [f.id, f])),
     order: tree.persons,
     familyOrder: tree.families,
@@ -111,11 +114,25 @@ export function generations(tree: ClanTree): Map<number, number> {
   return gen;
 }
 
-// Старший левее. Без даты — после датированных, между собой по идентификатору.
-function byAge(idx: Index) {
+// Старший левее. Человек без года остаётся на своём месте в записи семьи — между соседями, чьи годы известны:
+// во всех семьях исходных файлов дети записаны по старшинству, а оценка по родне ошибается сильнее разницы
+// между братьями. Если датированных братьев нет — по оценке (estimate.ts). Заглушки и люди без всякой зацепки —
+// после датированных, между собой по идентификатору.
+function byAge(idx: Index, order: readonly number[]) {
+  const keys = new Map<number, number>();
+  const dated = order.map((id) => birthYear(idx.persons.get(id)));
+  order.forEach((id, i) => {
+    if (dated[i] != null) return keys.set(id, dated[i]!);
+    if (idx.persons.get(id)?.is_branch_stub) return;
+    const before = dated.slice(0, i).filter((y): y is number => y != null).at(-1);
+    const after = dated.slice(i + 1).find((y): y is number => y != null);
+    const key = before != null && after != null ? (before + after) / 2
+      : before != null ? before + 0.5 : after != null ? after - 0.5 : idx.estimated.get(id);
+    if (key != null) keys.set(id, key);
+  });
   return (a: number, b: number): number => {
-    const ya = birthYear(idx.persons.get(a));
-    const yb = birthYear(idx.persons.get(b));
+    const ya = keys.get(a) ?? null;
+    const yb = keys.get(b) ?? null;
     if (ya != null && yb != null) return ya - yb;
     if (ya != null) return -1;
     if (yb != null) return 1;
@@ -168,7 +185,6 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOpti
   const folded = options.folded ?? new Set<number>();
   const positions = new Map<number, number>();
   const pairStep = metrics.width + metrics.pairGap;
-  const olderFirst = byAge(idx);
 
   const buildNode = (unit: number[], nodes: TreeNode[], id: number): TreeNode => {
     const unitWidth = unit.length * metrics.width + (unit.length - 1) * metrics.pairGap;
@@ -214,7 +230,7 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOpti
     for (const family of families) {
       // выводки идут группами по очереди союзов, внутри выводка — по старшинству
       const brood = family.children.filter((c) => !seen.has(c) && idx.persons.has(c));
-      brood.sort(olderFirst);
+      brood.sort(byAge(idx, family.children));
       kids.push(...brood);
     }
     const nodes = kids.map((c) => measure(c, seen)).filter((n): n is TreeNode => n !== null);
@@ -365,7 +381,7 @@ function shiftByYear(
 
   for (const person of idx.order) {
     const g = gen.get(person.id)!;
-    const year = birthYear(person);
+    const year = birthYear(person) ?? idx.estimated.get(person.id) ?? null;
     const median = ruler.median.get(g);
     let dy = 0;
     if (year != null && median != null) {

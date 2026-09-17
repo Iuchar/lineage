@@ -93,9 +93,11 @@ def _life_dates(conn: sqlite3.Connection, clan_id: int, tag: str) -> dict[int, L
 
 
 def _marriage_order(conn: sqlite3.Connection, clan_id: int, spouses: dict[int, list[int]],
-                    births: dict[int, LifeDate]) -> None:
-    """Очередь браков: по дате венчания, если она есть у всех браков человека; иначе по году рождения супругов,
-    если он известен у всех; иначе — как в файле. В базе остаётся порядок файла, чтобы выгрузка вернула его целым."""
+                    births: dict[int, LifeDate], deaths: dict[int, LifeDate], children: dict[int, list[int]]) -> None:
+    """Очередь браков. Браки сравниваются попарно одинаковыми признаками, от надёжного к слабому:
+    у обоих дата венчания — по ней; у обоих дети — по году первого ребёнка; один бездетный, и его супруг умер раньше
+    первого ребёнка в другом браке — бездетный раньше (развод этот признак не ловит); иначе — по году рождения супругов.
+    Если хоть одну пару сравнить нечем — порядок файла. В базе остаётся порядок файла, чтобы выгрузка вернула его целым."""
     marr: dict[int, int] = {}
     for row in conn.execute(
         """SELECT e.family_id, e.date_year FROM events e JOIN families f ON f.id = e.family_id
@@ -106,19 +108,40 @@ def _marriage_order(conn: sqlite3.Connection, clan_id: int, spouses: dict[int, l
     couples = {row["id"]: (row["husband_id"], row["wife_id"])
                for row in conn.execute("SELECT id, husband_id, wife_id FROM families WHERE clan_id = ?", (clan_id,))}
 
-    def spouse_birth(person: int, family: int) -> int | None:
-        husband, wife = couples.get(family, (None, None))
-        spouse = wife if husband == person else husband
-        date = births.get(spouse) if spouse is not None else None
-        return date.year if date else None
+    def year(dates: dict[int, LifeDate], pid: int | None) -> int | None:
+        return dates[pid].year if pid is not None and pid in dates else None
 
     for person, families in spouses.items():
         if len(families) < 2:
             continue
-        if all(f in marr for f in families):
-            families.sort(key=lambda f: marr[f])
-        elif all(spouse_birth(person, f) is not None for f in families):
-            families.sort(key=lambda f: spouse_birth(person, f) or 0)
+        spouse = {f: (couples[f][1] if couples[f][0] == person else couples[f][0]) for f in families}
+        first_child = {f: min((y for k in children.get(f, []) if (y := year(births, k)) is not None), default=None)
+                       for f in families}
+
+        def compare(a: int, b: int) -> int | None:
+            if a in marr and b in marr:
+                return marr[a] - marr[b]
+            ca, cb = first_child[a], first_child[b]
+            if ca is not None and cb is not None:
+                return ca - cb
+            for childless, other, sign in ((a, b, -1), (b, a, 1)):
+                died = year(deaths, spouse[childless])
+                if first_child[childless] is None and first_child[other] is not None and died is not None                         and died < first_child[other]:
+                    return sign
+            sa, sb = year(births, spouse[a]), year(births, spouse[b])
+            return None if sa is None or sb is None else sa - sb
+
+        pairs = [compare(a, b) for i, a in enumerate(families) for b in families[i + 1:]]
+        if any(c is None for c in pairs):
+            continue
+        # вставками: устойчиво и не требует от попарного сравнения строгой транзитивности
+        ordered: list[int] = []
+        for family in families:
+            at = len(ordered)
+            while at > 0 and (compare(ordered[at - 1], family) or 0) > 0:
+                at -= 1
+            ordered.insert(at, family)
+        families[:] = ordered
 
 
 def clan_tree(conn: sqlite3.Connection, clan_id: int, file_order: bool = False) -> ClanTree:
@@ -145,8 +168,6 @@ def clan_tree(conn: sqlite3.Connection, clan_id: int, file_order: bool = False) 
         (clan_id,),
     ):
         spouses.setdefault(row["person_id"], []).append(row["family_id"])
-    if not file_order:
-        _marriage_order(conn, clan_id, spouses, births)
 
     children: dict[int, list[int]] = {}
     for row in conn.execute(
@@ -155,6 +176,8 @@ def clan_tree(conn: sqlite3.Connection, clan_id: int, file_order: bool = False) 
         (clan_id,),
     ):
         children.setdefault(row["family_id"], []).append(row["person_id"])
+    if not file_order:
+        _marriage_order(conn, clan_id, spouses, births, deaths, children)
 
     persons = [
         TreePerson(

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Люди без года — варианты</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Playfair+Display:wght@400;700&family=PT+Serif:ital,wght@0,400;1,400&family=Literata:opsz,wght@7..72,400;7..72,600&family=Caveat:wght@400;600&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- настоящие стили приложения; дерево и линейка — настоящая раскладка Гленн Уриск -->
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<link rel="stylesheet" href="../../web/src/styles/ruler.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 26px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 92ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 14px;
+  border-bottom: 1px solid #2a2d32; display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 14px; }
+.variant { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; background: #16181b; }
+.frame { position: relative; overflow: hidden; }
+.frame .clip { position: absolute; top: 0; overflow: hidden; }
+.frame .canvas { transform-origin: 0 0; }
+.frame .ruler { transform-origin: 0 0; }
+.about { padding: 10px 14px 13px; }
+.about b { font: 500 15px/1.3 'Golos Text', sans-serif; }
+.about .key { font: 500 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #c8a44e; margin-left: 8px; }
+.about p { margin: 4px 0 0; color: #8a8f98; font-size: 13px; }
+/* люди, у которых убран год, — пунктирная обводка только в макете, чтобы их было видно */
+.node.undated { outline: 1.5px dashed #c8a44e; outline-offset: 5px; }
+</style>
+</head>
+<body data-style="viktorian" data-theme="dark">
+<h1>Люди без года</h1>
+<p class="lede">В четырёх родах живых людей без года рождения нет — без года только заглушки «Ветвь» и «Потомки», им место на ярусе поколения, и это уже так.
+Правило нужно для людей, которых добавят в редакторе или привезут новые файлы. Для примера у Мурдо (на самом деле 1748) и Тэвиша (1820) из Гленн Уриск год убран — они обведены пунктиром.
+Линейка включена: без неё меняется только порядок среди братьев.</p>
+<div class="ctl">
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen">Гобелен</button><button data-v="viktorian" aria-pressed="true">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<div class="grid" id="out"></div>
+<script>
+const state = { style: "viktorian", theme: "dark" };
+let data;
+const VARIANTS = (n) => [
+  { k: "now", title: "А · как сейчас", text: "Без года — в конце братьев и ровно на ярусе поколения. Мурдо, старший, уходит вправо за младших вместе со всей своей ветвью." },
+  { k: "kin", title: "Б · оценка по родне", text: `Год оценивается по супругу, детям и родителям: Мурдо ≈ ${n.kin["Мурдо"]}, Тэвиш ≈ ${n.kin["Тэвиш"]}. По оценке человек встаёт и среди братьев, и по высоте. На карточке по-прежнему «год неизвестен» — оценку видно только по месту.` },
+  { k: "file", title: "В · между соседями по файлу", text: `Среди братьев человек остаётся на своём месте в записи семьи, год берётся между соседними датированными братьями: Мурдо ≈ ${n.file["Мурдо"]}, Тэвиш ≈ ${n.file["Тэвиш"]}. Работает, только если братья есть; одиночку не сдвигает.` },
+  { k: "truth", title: "Для сравнения · настоящие годы", text: "Как стоит род, когда годы известны. Здесь Б и В дают ту же картину; расходятся, когда братьев нет или порядок в файле не по старшинству." },
+];
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("out").innerHTML = VARIANTS(data.notes).map((v) => {
+    const s = data.scenes[`${state.style}|${v.k}`];
+    return `<div class="variant" data-key="${v.k}"><div class="frame">` +
+      `<div class="ruler">${s.ruler}</div>` +
+      `<div class="clip"><div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+      `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div></div>` +
+      `<div class="about"><b>${v.title}</b><span class="key">${v.k}</span><p>${v.text}</p></div></div>`;
+  }).join("");
+  document.querySelectorAll(".variant").forEach((el) => {
+    const s = data.scenes[`${state.style}|${el.dataset.key}`];
+    el.querySelectorAll(".node").forEach((n) => { if (s.undated.includes(Number(n.dataset.id))) n.classList.add("undated"); });
+  });
+  fit();
+}
+
+function fit() {
+  document.querySelectorAll(".variant").forEach((el) => {
+    const s = data.scenes[`${state.style}|${el.dataset.key}`];
+    const frame = el.querySelector(".frame");
+    const bw = s.box.r - s.box.l, bh = s.box.b - s.box.t, rw = 212;
+    const k = Math.min(1, frame.clientWidth / (bw + rw));
+    frame.style.height = `${Math.round(bh * k)}px`;
+    const ruler = el.querySelector(".ruler");
+    ruler.style.height = `${bh}px`; ruler.style.transform = `scale(${k})`;
+    const clip = el.querySelector(".clip");
+    clip.style.left = `${rw * k}px`; clip.style.width = `${bw * k}px`; clip.style.height = `${bh * k}px`;
+    el.querySelector(".canvas").style.transform = `scale(${k}) translate(${-s.box.l}px, ${-s.box.t}px)`;
+  });
+}
+
+document.querySelectorAll(".sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  state[sw.dataset.set] = b.dataset.v; draw();
+}));
+fetch("без-года.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+addEventListener("resize", () => data && fit());
+</script>
+</body>
+</html>
