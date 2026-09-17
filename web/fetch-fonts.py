@@ -35,5 +35,5 @@ for subset, face in blocks:
     faces.append(face.replace(url, "./" + files[url]).replace("format('woff2')", 'format("woff2")'))
 header = ("/* Шрифты лежат в проекте, чтобы приложение работало без интернета.\n"
           "   Скачаны из Google Fonts (лицензия SIL Open Font License), подмножества cyrillic и latin. */\n\n")
-(OUT / "fonts.css").write_text(header + "\n".join(faces) + "\n", encoding="utf-8")
+(OUT / "fonts.css").write_bytes((header + "\n".join(faces) + "\n").encode("utf-8"))  # LF, как во всём проекте
 print(len(files), "файлов,", len(faces), "@font-face,", round(total / 1024), "КБ")
