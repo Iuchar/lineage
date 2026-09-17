@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Знак связки — варианты</title>
+<!-- шрифты и стили приложения; карта рода настоящая, Гленн Уриск -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 96ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.about { padding: 9px 2px 14px; color: #8a8f98; font-size: 12.5px; max-width: 96ch; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; color: #e6e2d8; }
+.app { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; }
+.frame { position: relative; overflow: hidden; height: 500px; background: var(--bg); }
+.frame .canvas { transform-origin: 0 0; }
+.legend { display: flex; gap: 22px; padding: 9px 14px; background: #16181b; border-top: 1px solid #2a2d32;
+  color: #8a8f98; font-size: 11.5px; }
+.legend b { color: #e6e2d8; font-weight: 500; }
+
+/* ── З1 · нить за край: связь уходит из рода настоящей нитью, а не плашкой ── */
+.tie { position: absolute; z-index: 6; display: flex; align-items: center; gap: 6px; pointer-events: auto; cursor: pointer; }
+.tie .thread { display: block; width: 46px; height: 10px; }
+.tie .thread path { fill: none; stroke: var(--acc); stroke-width: 1.6; stroke-linecap: round; }
+.tie .thread circle { fill: var(--acc); }
+.tie.mirror .thread { transform: scaleX(-1); }
+.tie.down { flex-direction: column; gap: 2px; align-items: flex-start; }
+.tie.down .thread { width: 10px; height: 26px; transform: rotate(90deg) translateX(8px); transform-origin: 0 50%; }
+.tie span { font: 500 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--acc); }
+
+/* ── З2 · сноска-отсылка: типографская отсылка «см. также», без плашки ── */
+.also { position: absolute; z-index: 6; white-space: nowrap; cursor: pointer; pointer-events: auto;
+  font: 400 10.5px/1.2 var(--font); color: var(--acc); border-bottom: 1px solid color-mix(in srgb, var(--acc) 55%, transparent); }
+.also i { font-style: italic; color: var(--mut); }
+
+/* ── З3 · ярлык-дверь: язычок на верхнем крае карточки ── */
+.doorTab { position: absolute; z-index: 6; padding: 3px 10px 4px; background: var(--panelbg); color: var(--acc);
+  border: 1px solid var(--acc); border-bottom: 0; font: 500 10px/1.2 'Golos Text', sans-serif; white-space: nowrap;
+  cursor: pointer; pointer-events: auto; clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 100%, 0 100%); }
+
+/* ── З4 · двойник: вторая карточка позади, человек стоит в двух родах ── */
+.twin { z-index: 1 !important; opacity: .45; pointer-events: none; }
+.twinName { position: absolute; z-index: 6; cursor: pointer; pointer-events: auto;
+  font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--acc); }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+<h1>Знак связки: чем дверь отличается от знаков состояния</h1>
+<p class="lede">На одной карте рядом стоят три карточки: у Сорхи связка с «Уинтерхоуп», у Эдвина знак «скрыт от зрителей», у Юэна — «выжжен из рода».
+Знаки состояния — плашки, и связка в виде такой же плашки со стрелкой от них почти не отличается. Здесь четыре способа сделать её другой по природе, а не по значку.
+Карта рода настоящая, масштаб 100 %.</p>
+<div class="ctl">
+  <div class="grp"><b>Знак связки</b><div class="sw" data-set="kind">
+    <button data-v="tie" aria-pressed="true">З1 · нить за край</button><button data-v="also">З2 · сноска «см. также»</button>
+    <button data-v="tab">З3 · ярлык-дверь</button><button data-v="twin">З4 · карточка-двойник</button>
+    <button data-v="plaque">как было · плашка со стрелкой</button>
+  </div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="app" id="out"></div>
+<script>
+const ABOUT = {
+  tie: "<b>З1 · нить за край.</b> От карточки вбок уходит короткая нить с узелком и именем рода: линия не кончилась, она продолжается в другом роду. Знаки состояния остаются плашками на карточке, связка живёт снаружи — спутать нельзя. Рисуется тем же почерком, что связи рода.",
+  also: "<b>З2 · сноска «см. также».</b> Не плашка, а типографская отсылка под карточкой: «также в Уинтерхоуп» набором текста с тонкой чертой. Состояния — заливка и рамка, связка — только буквы: разный вес, разная природа. Тише всех, на плотной карте может потеряться.",
+  tab: "<b>З3 · ярлык-дверь.</b> Язычок на верхнем крае карточки, как у папки в ящике: дверь отделена от плашек и местом, и формой. Читается сразу, но спорит с ярлыком рода у «Ночного кабинета» и с очередью брака у медальонов.",
+  twin: "<b>З4 · карточка-двойник.</b> За карточкой проступает вторая, сдвинутая, с именем чужого рода: человек буквально стоит в двух родах. Самый говорящий знак, но занимает место и мешает, когда карточки стоят плотно.",
+  plaque: "<b>Как было.</b> Плашка «также в Уинтерхоуп →» тем же знаком, что «скрыт от зрителей» и «выжжен из рода». Видно, почему стрелка слабый отличитель: рядом три одинаковых по природе знака.",
+};
+const state = { kind: "tie", style: "gobelen", theme: "dark" };
+const LINK_CLAN = "Уинтерхоуп";
+let data;
+
+const nodeBy = (name) => [...document.querySelectorAll(".frame .node")]
+  .find((n) => n.querySelector(".nm")?.textContent === name);
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("about").innerHTML = ABOUT[state.kind];
+  const s = data.maps["Гленн Уриск"][state.style];
+  document.getElementById("out").innerHTML =
+    `<div class="frame" data-w="${s.width}" data-h="${s.height}">` +
+    `<div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div>` +
+    `<div class="legend"><span><b>Сорха</b> — связка с «${LINK_CLAN}»</span>` +
+    `<span><b>Эдвин</b> — скрыт от зрителей</span><span><b>Юэн</b> — выжжен из рода</span></div>`;
+
+  // знаки состояния — как в приложении
+  const hidden = nodeBy("Эдвин");
+  hidden?.querySelector(".box").insertAdjacentHTML("beforeend", '<span class="badge calm"><i>скрыт от зрителей</i></span>');
+  const burnt = nodeBy("Юэн");
+  burnt?.classList.add("burnt");
+  burnt?.querySelector(".box").insertAdjacentHTML("beforeend",
+    `<span class="badge"><i>${state.style === "gazeta" ? "сведения изъяты" : "выжжен из рода"}</i></span>`);
+
+  const sorha = nodeBy("Сорха");
+  if (sorha) markLink(sorha);
+  fit();
+}
+
+// знак связки: у каждого варианта своя природа, не только другой значок
+function markLink(node) {
+  node.classList.add("sel");
+  const layer = node.parentElement;
+  const put = (el, left, top) => {
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+    layer.append(el);
+  };
+  if (state.kind === "tie") {
+    const el = document.createElement("div");
+    el.className = "tie";
+    const thread = '<svg class="thread" viewBox="0 0 46 10"><path d="M0 5h13"/><circle cx="17" cy="5" r="2.6"/>' +
+      '<path d="M21 5h16m-5-4 5 4-5 4"/></svg>';
+    const side = freeSide(node, 108);
+    // нить уходит в свободную сторону, а под карточкой — вниз-вбок, чтобы не лечь на нить брака
+    if (side === "right") {
+      el.innerHTML = thread + `<span>${LINK_CLAN}</span>`;
+      put(el, node.offsetLeft + node.offsetWidth - 4, node.offsetTop + node.offsetHeight / 2 - 6);
+    } else if (side === "left") {
+      el.classList.add("mirror");
+      el.innerHTML = `<span>${LINK_CLAN}</span>` + thread;
+      el.style.transform = "translateX(-100%)";
+      put(el, node.offsetLeft + 4, node.offsetTop + node.offsetHeight / 2 - 6);
+    } else {
+      el.classList.add("down");
+      el.innerHTML = thread + `<span>${LINK_CLAN}</span>`;
+      put(el, node.offsetLeft + node.offsetWidth / 2, node.offsetTop + node.offsetHeight + 2);
+    }
+  } else if (state.kind === "also") {
+    const el = document.createElement("div");
+    el.className = "also";
+    el.innerHTML = `<i>также в</i> ${LINK_CLAN}`;
+    put(el, node.offsetLeft + 4, node.offsetTop + node.offsetHeight + 3);
+  } else if (state.kind === "tab") {
+    const el = document.createElement("div");
+    el.className = "doorTab";
+    el.textContent = `→ ${LINK_CLAN}`;
+    put(el, node.offsetLeft + 8, node.offsetTop - 17);
+  } else if (state.kind === "twin") {
+    // вторая карточка — копия настоящей, чтобы форма была та же: медальон у гобелена, полоса у газеты
+    const back = node.cloneNode(true);
+    back.classList.add("twin");
+    back.classList.remove("sel");
+    back.querySelectorAll(".nm, .yr, .por, .ord, .badge").forEach((el) => el.remove());
+    put(back, node.offsetLeft + 9, node.offsetTop - 9);
+    const name = document.createElement("div");
+    name.className = "twinName";
+    name.textContent = LINK_CLAN;
+    put(name, node.offsetLeft + node.offsetWidth + 13, node.offsetTop - 5);
+  } else {
+    node.querySelector(".box").insertAdjacentHTML("beforeend",
+      `<span class="badge calm"><i>также в ${LINK_CLAN} →</i></span>`);
+  }
+}
+
+// с какой стороны карточки есть место под знак: соседи стоят в том же ярусе
+function freeSide(node, need) {
+  const layer = node.parentElement;
+  const mates = [...layer.querySelectorAll(".node")]
+    .filter((n) => n !== node && Math.abs(n.offsetTop - node.offsetTop) < node.offsetHeight);
+  const right = Math.min(...mates.filter((n) => n.offsetLeft >= node.offsetLeft + node.offsetWidth)
+    .map((n) => n.offsetLeft - node.offsetLeft - node.offsetWidth), Infinity);
+  const left = Math.min(...mates.filter((n) => n.offsetLeft + n.offsetWidth <= node.offsetLeft)
+    .map((n) => node.offsetLeft - n.offsetLeft - n.offsetWidth), Infinity);
+  if (right >= need) return "right";
+  if (left >= need) return "left";
+  return "down";
+}
+
+function fit() {
+  const frame = document.querySelector(".frame");
+  const at = nodeBy("Сорха");
+  const k = 0.8; // «100 %» экрана
+  const cx = at ? at.offsetLeft + at.offsetWidth / 2 : Number(frame.dataset.w) / 2;
+  const cy = at ? at.offsetTop + at.offsetHeight / 2 : Number(frame.dataset.h) / 2;
+  frame.querySelector(".canvas").style.transform =
+    `translate(${frame.clientWidth / 2 - cx * k}px,${frame.clientHeight / 2 - cy * k}px) scale(${k})`;
+}
+
+document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  state[sw.dataset.set] = b.dataset.v;
+  draw();
+}));
+fetch("проверка.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+addEventListener("resize", () => data && fit());
+</script>
+</body>
+</html>
