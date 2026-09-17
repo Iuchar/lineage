@@ -126,10 +126,231 @@
           }
         }
       }
+    },
+    "/api/uploads": {
+      "post": {
+        "summary": "Post Upload",
+        "operationId": "post_upload_api_uploads_post",
+        "parameters": [
+          {
+            "name": "file_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "файл.ged",
+              "title": "File Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/uploads/{token}/clan": {
+      "post": {
+        "summary": "Post New Clan",
+        "operationId": "post_new_clan_api_uploads__token__clan_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewClan"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClanSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/uploads/{token}/reload/{clan_id}": {
+      "get": {
+        "summary": "Get Reload Preview",
+        "operationId": "get_reload_preview_api_uploads__token__reload__clan_id__get",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          },
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReloadPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Post Reload",
+        "operationId": "post_reload_api_uploads__token__reload__clan_id__post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          },
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReloadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReloadReport"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "ClanMatch": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "persons": {
+            "type": "integer",
+            "title": "Persons"
+          },
+          "matched": {
+            "type": "integer",
+            "title": "Matched"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "persons",
+          "matched"
+        ],
+        "title": "ClanMatch"
+      },
       "ClanSummary": {
         "properties": {
           "id": {
@@ -185,6 +406,29 @@
           "families"
         ],
         "title": "ClanTree"
+      },
+      "FieldChange": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "was": {
+            "type": "string",
+            "title": "Was"
+          },
+          "now": {
+            "type": "string",
+            "title": "Now"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "was",
+          "now"
+        ],
+        "title": "FieldChange"
       },
       "HTTPValidationError": {
         "properties": {
@@ -336,6 +580,83 @@
         ],
         "title": "MarriageDetails"
       },
+      "NewClan": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "NewClan"
+      },
+      "PersonBrief": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "xref": {
+            "type": "string",
+            "title": "Xref"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "years": {
+            "type": "string",
+            "title": "Years"
+          },
+          "where": {
+            "type": "string",
+            "title": "Where"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "xref",
+          "name",
+          "years",
+          "where"
+        ],
+        "title": "PersonBrief"
+      },
+      "PersonChange": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "xref": {
+            "type": "string",
+            "title": "Xref"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/FieldChange"
+            },
+            "type": "array",
+            "title": "Changes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "xref",
+          "name",
+          "changes"
+        ],
+        "title": "PersonChange"
+      },
       "PersonDetails": {
         "properties": {
           "id": {
@@ -446,6 +767,104 @@
           "place"
         ],
         "title": "PersonEvent"
+      },
+      "ReloadPreview": {
+        "properties": {
+          "clan_id": {
+            "type": "integer",
+            "title": "Clan Id"
+          },
+          "clan_name": {
+            "type": "string",
+            "title": "Clan Name"
+          },
+          "matched": {
+            "type": "integer",
+            "title": "Matched"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "added": {
+            "items": {
+              "$ref": "#/components/schemas/PersonBrief"
+            },
+            "type": "array",
+            "title": "Added"
+          },
+          "changed": {
+            "items": {
+              "$ref": "#/components/schemas/PersonChange"
+            },
+            "type": "array",
+            "title": "Changed"
+          },
+          "missing": {
+            "items": {
+              "$ref": "#/components/schemas/PersonBrief"
+            },
+            "type": "array",
+            "title": "Missing"
+          },
+          "tree": {
+            "$ref": "#/components/schemas/ClanTree"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clan_id",
+          "clan_name",
+          "matched",
+          "total",
+          "added",
+          "changed",
+          "missing",
+          "tree"
+        ],
+        "title": "ReloadPreview"
+      },
+      "ReloadReport": {
+        "properties": {
+          "added": {
+            "type": "integer",
+            "title": "Added"
+          },
+          "changed": {
+            "type": "integer",
+            "title": "Changed"
+          },
+          "deleted": {
+            "type": "integer",
+            "title": "Deleted"
+          },
+          "kept": {
+            "type": "integer",
+            "title": "Kept"
+          }
+        },
+        "type": "object",
+        "required": [
+          "added",
+          "changed",
+          "deleted",
+          "kept"
+        ],
+        "title": "ReloadReport"
+      },
+      "ReloadRequest": {
+        "properties": {
+          "delete": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Delete",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "ReloadRequest"
       },
       "TreeFamily": {
         "properties": {
@@ -610,6 +1029,60 @@
           "spouse_families"
         ],
         "title": "TreePerson"
+      },
+      "UploadInfo": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "persons": {
+            "type": "integer",
+            "title": "Persons"
+          },
+          "families": {
+            "type": "integer",
+            "title": "Families"
+          },
+          "branch_stubs": {
+            "type": "integer",
+            "title": "Branch Stubs"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "suggested_name": {
+            "type": "string",
+            "title": "Suggested Name"
+          },
+          "clans": {
+            "items": {
+              "$ref": "#/components/schemas/ClanMatch"
+            },
+            "type": "array",
+            "title": "Clans"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "file_name",
+          "persons",
+          "families",
+          "branch_stubs",
+          "warnings",
+          "suggested_name",
+          "clans"
+        ],
+        "title": "UploadInfo"
       },
       "ValidationError": {
         "properties": {

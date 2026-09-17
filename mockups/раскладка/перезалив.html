@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Загрузка и перезалив .ged — варианты</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Playfair+Display:wght@400;700&family=PT+Serif:ital,wght@0,400;1,400&family=Literata:opsz,wght@7..72,400;7..72,600&family=Caveat:wght@400;600&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- настоящие стили приложения; дерево — настоящая раскладка Гленн Уриск -->
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<link rel="stylesheet" href="../../web/src/styles/panel.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 26px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 92ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.about { color: #8a8f98; font-size: 13px; margin: 0 0 10px; min-height: 2.6em; max-width: 92ch; }
+.about b { color: #e6e2d8; font-weight: 500; }
+
+/* кадр приложения */
+.app { height: 640px; display: flex; flex-direction: column; border: 1px solid #2a2d32; overflow: hidden; }
+.app .bar { padding: 8px 12px; gap: 12px; }
+.app .sw button.add { color: #e9e4d8; }
+.app .stage { position: relative; }
+.app .viewport { cursor: default; }
+.app .canvas { transform-origin: 0 0; }
+
+/* ── формы загрузки: цвета стиля, как у панели человека ── */
+.up { color: var(--fg); font-size: 12.5px; }
+.up h3 { margin: 0; font: 600 20px/1.15 var(--font); }
+.up .lbl { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--acc); margin: 16px 0 6px; }
+.up .file { font: 400 9.5px/1.5 'IBM Plex Mono', monospace; color: var(--mut); margin-top: 5px; }
+.up .choice { display: flex; gap: 8px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--edge); cursor: pointer; }
+.up .choice input { accent-color: var(--acc); margin: 2px 0 0; }
+.up .choice b { display: block; font-weight: 500; }
+.up .choice small { display: block; color: var(--mut); font-size: 11px; margin-top: 3px; line-height: 1.4; }
+.up .field { width: 100%; margin-top: 6px; background: transparent; color: var(--fg); border: 1px solid var(--edge);
+  border-radius: 4px; padding: 5px 7px; font: 400 12.5px 'Golos Text', sans-serif; }
+.up .field:disabled { opacity: .45; }
+.up .note { font-size: 11px; color: var(--mut); line-height: 1.45; margin-top: 10px; }
+.up .item { padding: 6px 0; border-bottom: 1px solid var(--edge); }
+.up .item b { font-weight: 500; }
+.up .item small { display: block; color: var(--mut); font-size: 11px; margin-top: 2px; }
+.up .item .diff { display: block; font-size: 11.5px; margin-top: 3px; }
+.up .item .diff s { color: var(--mut); }
+.up .item.go { cursor: pointer; }
+.up .item.go:hover b, .up .item.on b { color: var(--acc); }
+.up .keep { display: flex; margin-top: 6px; border: 1px solid var(--edge); border-radius: 4px; overflow: hidden; width: max-content; }
+.up .keep button { border: 0; background: transparent; color: var(--mut); font: 500 11px 'Golos Text', sans-serif; padding: 4px 10px; cursor: pointer; }
+.up .keep button[aria-pressed=true] { background: var(--acc); color: var(--bg); }
+.up .acts { display: flex; gap: 8px; margin-top: 16px; }
+.up .acts button { flex: 1; border: 1px solid var(--edge); background: transparent; color: var(--fg); border-radius: 4px;
+  font: 500 11.5px/1 'Golos Text', sans-serif; padding: 8px 6px; cursor: pointer; }
+.up .acts button.pri { border-color: var(--acc); background: var(--acc); color: var(--bg); }
+
+/* Б — лист над картой: карта в тени, лист по центру */
+.sheetWrap { position: absolute; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-start; justify-content: center; padding-top: 34px; }
+.sheet { width: min(460px, 92%); max-height: 86%; overflow: auto; background: var(--panelbg); border: 1px solid var(--edge);
+  box-shadow: 0 18px 50px rgba(0,0,0,.45); padding: 18px 20px 20px; }
+.sheet .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+
+/* В — разбор на карте: пропавший приглушён, новые и изменённые подписаны меткой стиля.
+   Метки разбора не берут цвет «выжжен» и тревожный красный: новый — заливкой спокойного цвета стиля,
+   изменён — контуром того же цвета, нет в файле — приглушённым текстом */
+.node.up-gone { opacity: .45; }
+[data-style=gobelen] .node.up-new .badge { background: var(--acc); color: var(--bg); }
+[data-style=gobelen] .node.up-mod .badge { background: transparent; color: var(--acc); box-shadow: inset 0 0 0 1px var(--acc); }
+[data-style=gobelen] .node.up-gone .badge { background: transparent; color: var(--mut); box-shadow: inset 0 0 0 1px var(--mut); }
+[data-style=viktorian] .node.up-new .badge i { background: var(--link); }
+[data-style=viktorian] .node.up-new .badge { color: var(--card); }
+[data-style=viktorian] .node.up-mod .badge i { background: var(--edge); }
+[data-style=viktorian] .node.up-mod .badge { color: var(--fg); }
+[data-style=viktorian] .node.up-gone .badge i { background: transparent; }
+[data-style=viktorian] .node.up-gone .badge { color: var(--mut); }
+[data-style=gazeta] .node.up-new .badge { color: var(--fg); border-bottom-color: var(--fg); }
+[data-style=gazeta] .node.up-mod .badge, [data-style=gazeta] .node.up-gone .badge { color: var(--mut); border-bottom: 1px dotted var(--mut); }
+[data-style=kabinet] .node.up-mod .badge { background: var(--card); color: var(--acc); box-shadow: inset 0 0 0 1px var(--acc); }
+[data-style=kabinet] .node.up-gone .badge { background: var(--card); color: var(--mut); box-shadow: inset 0 0 0 1px var(--mut); }
+[data-style=polotno] .node.up-new .badge { color: var(--fg); border-bottom-color: var(--fg); }
+[data-style=polotno] .node.up-mod .badge, [data-style=polotno] .node.up-gone .badge { color: var(--m1); border-bottom: 1px dotted var(--m1); }
+</style>
+</head>
+<body data-style="viktorian" data-theme="dark">
+<h1>Загрузка и перезалив .ged</h1>
+<p class="lede">В ряду родов появляется «+ Загрузить .ged». После выбора файла — куда он идёт: новым родом или перезаливом в существующий (род выбирается явно, приложение только подсказывает, где совпало больше идентификаторов).
+После разбора — сводка: добавлено, изменено, нет в файле. Пропавших по умолчанию оставляем, удаление — только отдельным нажатием. Пример — перезалив Гленн Уриск: двое детей у Кеннаха и Кирсти, три правки, один человек пропал. Варианты различаются тем, где всё это живёт.</p>
+
+<div class="ctl">
+  <div class="grp"><b>Вариант</b><div class="sw" data-set="variant">
+    <button data-v="mixed" aria-pressed="true">Б + В</button><button data-v="panel">А · в панели</button><button data-v="sheet">Б · лист над картой</button><button data-v="map">В · разбор на карте</button>
+  </div></div>
+  <div class="grp"><b>Шаг</b><div class="sw" data-set="step">
+    <button data-v="target" aria-pressed="true">куда залить</button><button data-v="summary">сводка</button>
+  </div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen">Гобелен</button><button data-v="viktorian" aria-pressed="true">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="app" id="frame"></div>
+
+<script>
+const ABOUT = {
+  mixed: "<b>Б + В.</b> Куда залить — листом над картой, как в Б. Сводка — разбором на карте, как в В: дерево из нового файла с метками, справа сводка, щелчок по строке ведёт к человеку.",
+  panel: "<b>А · в панели.</b> Всё идёт в правой панели вместо сведений о человеке — как будущая правка, без окон. Карта остаётся прежней, пока не нажато «Применить». Узко: изменения читаются списком.",
+  sheet: "<b>Б · лист над картой.</b> Карта уходит в тень, сверху лист шире панели: сводка в две колонки, всё видно разом. Самый привычный вид, но это окно — от карты отрезано.",
+  map: "<b>В · разбор на карте.</b> После разбора карта показывает дерево уже из нового файла: новые и изменённые подписаны меткой стиля, пропавший приглушён. Справа сводка; щелчок по строке ведёт к человеку на карте. На шаге выбора рода — как А.",
+};
+const state = { variant: "mixed", step: "target", style: "viktorian", theme: "dark", keep: true, on: null };
+let data;
+
+const choice = (checked, title, text, field) =>
+  `<label class="choice"><input type="radio" name="t" ${checked ? "checked" : ""}><span style="flex:1"><b>${title}</b><small>${text}</small>${field}</span></label>`;
+
+function targetForm() {
+  return `<div class="up"><h3>Загрузка файла</h3>
+    <div class="file">Gleann_Uruisg_tree.ged · 40 человек · 14 семей</div>
+    <div class="lbl" style="margin-top:14px">Куда</div>
+    ${choice(false, "Новый род", "Отдельное дерево со своей вкладкой.", '<input class="field" value="Гленн Уриск" disabled>')}
+    ${choice(true, "Перезалить в существующий", "Свои узнаются по идентификаторам из файла. Совпало 38 из 40 — больше всего с Гленн Уриск.", '<select class="field"><option>Гленн Уриск · 38</option><option>Уинтерхоуп · 62</option><option>О\'Дувейн · 17</option><option>Монад Кройве · 84</option></select>')}
+    <div class="acts"><button>Отмена</button><button class="pri">Разобрать</button></div></div>`;
+}
+
+function summary(clickable, cols) {
+  const c = data.changes;
+  const row = (p, body) => `<div class="item${clickable ? " go" : ""}${state.on === p.id ? " on" : ""}" data-id="${p.id}"><b>${p.name}</b>${body}</div>`;
+  const added = `<div class="lbl">Добавлено · ${c.added.length}</div>` + c.added.map((p) => row(p, `<small>${p.years} · ${p.where}</small>`)).join("");
+  const changed = `<div class="lbl">Изменено · ${c.changed.length}</div>` + c.changed.map((p) => row(p, `<span class="diff">${p.field}: <s>${p.was}</s> → ${p.now}</span>`)).join("");
+  const missing = `<div class="lbl">Нет в файле · ${c.missing.length}</div>` + c.missing.map((p) => row(p,
+    `<small>${p.years} · ${p.where}</small><div class="keep"><button data-keep="1" aria-pressed="${state.keep}">Оставить</button><button data-keep="0" aria-pressed="${!state.keep}">Удалить</button></div>`)).join("") +
+    `<div class="note">Ничего не удаляется молча: без нажатия «Удалить» человек остаётся в роду.</div>`;
+  const body = cols ? `<div class="cols"><div>${added}${missing}</div><div>${changed}</div></div>` : added + changed + missing;
+  return `<div class="up"><h3>Перезалив · Гленн Уриск</h3><div class="file">Gleann_Uruisg_tree.ged · совпало 38 из 40</div>${body}
+    <div class="acts"><button>Отмена</button><button class="pri">Применить</button></div></div>`;
+}
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("about").innerHTML = ABOUT[state.variant];
+  const scene = data.scenes[state.style];
+  const onMap = (state.variant === "map" || state.variant === "mixed") && state.step === "summary";
+  const asSheet = state.variant === "sheet" || (state.variant === "mixed" && state.step === "target");
+  const s = onMap ? scene : scene.before;
+
+  const tabs = ["Гленн Уриск · 38", "Уинтерхоуп · 62", "О'Дувейн · 17", "Монад Кройве · 84"]
+    .map((t, i) => `<button aria-pressed="${i === 0}">${t}</button>`).join("") + '<button class="add">+ Загрузить .ged</button>';
+  let side = "", overlay = "";
+  if (asSheet) {
+    side = '<div class="sideIn"><div class="empty">никто не выбран</div></div>';
+    overlay = `<div class="sheetWrap"><div class="sheet">${state.step === "target" ? targetForm() : summary(false, true)}</div></div>`;
+  } else {
+    side = `<div class="sideIn">${state.step === "target" ? targetForm() : summary(onMap, false)}</div>`;
+  }
+  document.getElementById("frame").innerHTML =
+    `<div class="bar"><div class="grp"><b>Род</b><div class="sw">${tabs}</div></div><div class="hint">${onMap ? "разбор файла · карта из нового файла" : "38 человек · 14 семей"}</div></div>` +
+    `<div class="stage"><div class="viewport"><div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div>` +
+    `<aside class="side">${side}</aside>${overlay}</div>`;
+  centre(state.on != null && onMap ? scene.positions[state.on] : s.focus, onMap ? scene : null);
+}
+
+function centre(point, scene) {
+  const vp = document.querySelector(".viewport");
+  const k = 0.85;
+  const w = scene ? scene.cardWidth : 150;
+  const x = vp.clientWidth / 2 - (point.x + w / 2) * k;
+  const y = vp.clientHeight / 2 - (point.y + 30) * k;
+  document.querySelector(".canvas").style.transform = `translate(${x}px,${y}px) scale(${k})`;
+}
+
+document.addEventListener("click", (e) => {
+  const sw = e.target.closest(".ctl .sw[data-set]");
+  const b = e.target.closest("button");
+  if (sw && b) {
+    sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    state[sw.dataset.set] = b.dataset.v;
+    state.on = null;
+    return draw();
+  }
+  if (b?.dataset.keep) { state.keep = b.dataset.keep === "1"; return draw(); }
+  const item = e.target.closest(".up .item.go");
+  if (item) { state.on = Number(item.dataset.id); draw(); }
+});
+
+fetch("перезалив.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+addEventListener("resize", () => data && draw());
+</script>
+</body>
+</html>

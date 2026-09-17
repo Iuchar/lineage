@@ -26,10 +26,17 @@
 uv run --project server rodoslovnye
 ```
 
-Загрузить файл новым родом — база создаётся в `data/rodoslovnye.sqlite3` при первой загрузке:
+Загрузить файл можно кнопкой «+ Загрузить .ged» в ряду родов: новым родом или перезаливом в существующий, со сводкой и разбором на карте. То же новым родом из командной строки — база создаётся в `data/rodoslovnye.sqlite3` при первой загрузке:
 
 ```bash
 uv run --project server rodoslovnye import Gleann_Uruisg_tree.ged --name "Гленн Уриск"
+```
+
+Проверять загрузку и перезалив лучше на отдельной базе, чтобы не трогать рабочие роды:
+
+```
+uv run --project server rodoslovnye import Gleann_Uruisg_tree.ged --name "Гленн Уриск" --db .work/check.sqlite3
+uv run --project server rodoslovnye --port 8730 --db .work/check.sqlite3
 ```
 
 Тесты сервера и интерфейса:

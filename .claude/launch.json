@@ -8,6 +8,12 @@
       "port": 8710
     },
     {
+      "name": "rodoslovnye-check",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "--project", "server", "rodoslovnye", "--port", "8730", "--db", ".work/check.sqlite3"],
+      "port": 8730
+    },
+    {
       "name": "mockups",
       "runtimeExecutable": "uv",
       "runtimeArgs": ["run", "--project", "server", "python", "-m", "http.server", "8720", "--bind", "127.0.0.1"],

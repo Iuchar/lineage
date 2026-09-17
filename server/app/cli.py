@@ -2,6 +2,7 @@
 
     rodoslovnye                                   собрать интерфейс, если устарел, и поднять сервер
     rodoslovnye import ФАЙЛ.ged --name "Род"      загрузить файл новым родом
+    rodoslovnye --port 8730 --db .work/check.sqlite3   поднять сервер на отдельной базе
 """
 
 import argparse
@@ -44,6 +45,12 @@ def build_interface(force: bool = False) -> None:
 
 def serve(args: argparse.Namespace) -> None:
     build_interface(force=args.rebuild)
+    if args.db != DB_PATH:
+        # отдельная база, например для проверки перезалива, чтобы не трогать рабочие роды
+        import app.config
+
+        app.config.DB_PATH = args.db
+        print(f"База: {args.db}")
     print(f"Родословные: http://{args.host}:{args.port}")
     uvicorn.run("app.main:app", host=args.host, port=args.port)
 
@@ -85,6 +92,7 @@ def main(argv: list[str] | None = None) -> None:
     serve_cmd.add_argument("--host", default="127.0.0.1")
     serve_cmd.add_argument("--port", type=int, default=8710)
     serve_cmd.add_argument("--rebuild", action="store_true", help="пересобрать интерфейс принудительно")
+    serve_cmd.add_argument("--db", type=Path, default=DB_PATH, help="путь к базе")
     serve_cmd.set_defaults(handler=serve)
 
     import_cmd = commands.add_parser("import", help="загрузить файл .ged новым родом")

@@ -4,7 +4,7 @@ import type { ClanTree } from "../api/types";
 import { foldsHiding, foldTree } from "../layout/fold";
 import { layoutTree, type LayoutResult } from "../layout/layout";
 import { STYLE_METRICS, type StyleName } from "../layout/metrics";
-import { drawCards, drawFolds, NO_MARKS, type PersonMarks } from "./cards";
+import { drawCards, drawFolds, NO_MARKS, type PersonMarks, type ReviewMark } from "./cards";
 import { lineageOf } from "./lineage";
 import { drawLinks } from "./links";
 import { drawRuler } from "./ruler";
@@ -37,6 +37,8 @@ export class TreeCanvas {
 
   selected: number | null = null;
   marks: PersonMarks = NO_MARKS;
+  // метки разбора перезалива; пусто — обычная карта
+  review: ReadonlyMap<number, ReviewMark> = new Map();
   // ручной сдвиг среди братьев: id → на сколько мест; живёт до смены рода, в базу не пишется
   readonly manual = new Map<number, number>();
   // свёрнутые союзы; живут до смены рода, как и ручной сдвиг
@@ -64,9 +66,10 @@ export class TreeCanvas {
     return this.view.k;
   }
 
-  setTree(tree: ClanTree, marks: PersonMarks = NO_MARKS): void {
+  setTree(tree: ClanTree, marks: PersonMarks = NO_MARKS, review: ReadonlyMap<number, ReviewMark> = new Map()): void {
     this.tree = tree;
     this.marks = marks;
+    this.review = review;
     this.selected = null;
     this.manual.clear();
     this.folded.clear();
@@ -125,6 +128,14 @@ export class TreeCanvas {
     this.zoomBy(1 / this.view.k);
   }
 
+  // показать человека в центре, не выбирая его; на мелком плане сначала приблизить, чтобы метки читались
+  centreOnPerson(id: number): void {
+    const centre = this.cardCentre(id);
+    if (!centre) return;
+    const view = this.view.k < 0.8 ? { ...this.view, k: 1 } : this.view;
+    this.setView(centreOn(view, centre, this.viewportSize()));
+  }
+
   goToSelected(): void {
     const centre = this.selected != null ? this.cardCentre(this.selected) : null;
     if (centre) this.setView(centreOn(this.view, centre, this.viewportSize()));
@@ -163,7 +174,7 @@ export class TreeCanvas {
       (defs ? `<svg class="ornament" width="${width}" height="${height}">${defs}</svg>` : "") +
       `<svg class="links" width="${width}" height="${height}">${links.paths}${links.marks}</svg>` +
       (lit ? `<svg class="line" width="${width}" height="${height}"><path d="${lit.paths}"/></svg>` : "") +
-      drawCards(tree, layout, style, this.selected, this.marks, lit?.persons) +
+      drawCards(tree, layout, style, this.selected, this.marks, lit?.persons, this.review) +
       drawFolds(links.folds, folds, style);
 
     // лампа «Ночного кабинета» ездит за выбранным

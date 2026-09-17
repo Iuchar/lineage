@@ -72,10 +72,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Upload */
+        post: operations["post_upload_api_uploads_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/uploads/{token}/clan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post New Clan */
+        post: operations["post_new_clan_api_uploads__token__clan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/uploads/{token}/reload/{clan_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Reload Preview */
+        get: operations["get_reload_preview_api_uploads__token__reload__clan_id__get"];
+        put?: never;
+        /** Post Reload */
+        post: operations["post_reload_api_uploads__token__reload__clan_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ClanMatch */
+        ClanMatch: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Persons */
+            persons: number;
+            /** Matched */
+            matched: number;
+        };
         /** ClanSummary */
         ClanSummary: {
             /** Id */
@@ -94,6 +157,15 @@ export interface components {
             persons: components["schemas"]["TreePerson"][];
             /** Families */
             families: components["schemas"]["TreeFamily"][];
+        };
+        /** FieldChange */
+        FieldChange: {
+            /** Label */
+            label: string;
+            /** Was */
+            was: string;
+            /** Now */
+            now: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -128,6 +200,35 @@ export interface components {
             /** Events */
             events: components["schemas"]["PersonEvent"][];
         };
+        /** NewClan */
+        NewClan: {
+            /** Name */
+            name: string;
+        };
+        /** PersonBrief */
+        PersonBrief: {
+            /** Id */
+            id: number;
+            /** Xref */
+            xref: string;
+            /** Name */
+            name: string;
+            /** Years */
+            years: string;
+            /** Where */
+            where: string;
+        };
+        /** PersonChange */
+        PersonChange: {
+            /** Id */
+            id: number;
+            /** Xref */
+            xref: string;
+            /** Name */
+            name: string;
+            /** Changes */
+            changes: components["schemas"]["FieldChange"][];
+        };
         /** PersonDetails */
         PersonDetails: {
             /** Id */
@@ -154,6 +255,43 @@ export interface components {
             date: components["schemas"]["LifeDate"] | null;
             /** Place */
             place: string | null;
+        };
+        /** ReloadPreview */
+        ReloadPreview: {
+            /** Clan Id */
+            clan_id: number;
+            /** Clan Name */
+            clan_name: string;
+            /** Matched */
+            matched: number;
+            /** Total */
+            total: number;
+            /** Added */
+            added: components["schemas"]["PersonBrief"][];
+            /** Changed */
+            changed: components["schemas"]["PersonChange"][];
+            /** Missing */
+            missing: components["schemas"]["PersonBrief"][];
+            tree: components["schemas"]["ClanTree"];
+        };
+        /** ReloadReport */
+        ReloadReport: {
+            /** Added */
+            added: number;
+            /** Changed */
+            changed: number;
+            /** Deleted */
+            deleted: number;
+            /** Kept */
+            kept: number;
+        };
+        /** ReloadRequest */
+        ReloadRequest: {
+            /**
+             * Delete
+             * @default []
+             */
+            delete: number[];
         };
         /** TreeFamily */
         TreeFamily: {
@@ -190,6 +328,25 @@ export interface components {
             parent_families: number[];
             /** Spouse Families */
             spouse_families: number[];
+        };
+        /** UploadInfo */
+        UploadInfo: {
+            /** Token */
+            token: string;
+            /** File Name */
+            file_name: string;
+            /** Persons */
+            persons: number;
+            /** Families */
+            families: number;
+            /** Branch Stubs */
+            branch_stubs: number;
+            /** Warnings */
+            warnings: string[];
+            /** Suggested Name */
+            suggested_name: string;
+            /** Clans */
+            clans: components["schemas"]["ClanMatch"][];
         };
         /** ValidationError */
         ValidationError: {
@@ -304,6 +461,140 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PersonDetails"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_upload_api_uploads_post: {
+        parameters: {
+            query?: {
+                file_name?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_new_clan_api_uploads__token__clan_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewClan"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClanSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_reload_preview_api_uploads__token__reload__clan_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReloadPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_reload_api_uploads__token__reload__clan_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReloadRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReloadReport"];
                 };
             };
             /** @description Validation Error */

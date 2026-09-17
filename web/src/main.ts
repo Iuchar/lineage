@@ -8,12 +8,15 @@ import "./styles/polotno.css";
 import "./styles/fold.css";
 import "./styles/ruler.css";
 import "./styles/panel.css";
+import "./styles/upload.css";
 
 import type { ClanSummary, ClanTree } from "./api/types";
+import { NO_MARKS } from "./canvas/cards";
 import { TreeCanvas } from "./canvas/canvas";
 import { demoMarks } from "./demo";
 import { PersonPanel } from "./panel/panel";
 import { SearchBox } from "./panel/search";
+import { UploadFlow } from "./upload/upload";
 import type { StyleName } from "./layout/metrics";
 
 const STYLES: [StyleName, string][] = [
@@ -65,10 +68,20 @@ async function start(root: HTMLElement): Promise<void> {
   stage.className = "stage";
   root.append(bar, stage);
 
-  const clans = await getJson<ClanSummary[]>("/api/clans");
+  let clans = await getJson<ClanSummary[]>("/api/clans");
   if (!clans.length) {
-    stage.innerHTML =
-      '<div class="empty">Родов пока нет. Загрузите файл командой<br><code>uv run --project server rodoslovnye import ФАЙЛ.ged --name "Род"</code></div>';
+    // родов нет — только загрузка; после создания первого рода страница собирается заново
+    const upload = new UploadFlow(stage, { created: () => location.reload(), review: () => {}, finished: () => {}, focus: () => {} });
+    const add = document.createElement("button");
+    add.className = "add";
+    add.textContent = "+ Загрузить .ged";
+    add.addEventListener("click", () => upload.choose());
+    const group = document.createElement("div");
+    group.className = "grp";
+    group.innerHTML = '<b>Род</b><div class="sw"></div>';
+    group.querySelector(".sw")!.append(add);
+    bar.append(group);
+    stage.insertAdjacentHTML("afterbegin", '<div class="empty">Родов пока нет — загрузите файл .ged</div>');
     return;
   }
 
@@ -96,17 +109,50 @@ async function start(root: HTMLElement): Promise<void> {
     if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
   };
   canvas.onSelect = (id) => {
+    if (upload.reviewing) return upload.highlight(id); // в разборе панель занята сводкой
     if (tree && id != null) void panel.show(tree, id);
     else panel.clear();
   };
   const search = new SearchBox(focus);
 
+  let currentClan = clans[0]!.id;
+  let beforeReview = currentClan; // куда вернуться, если разбор отменён
   const loadClan = async (id: number) => {
+    currentClan = id;
     tree = await getJson<ClanTree>(`/api/clans/${id}/tree`);
     search.setTree(tree);
     canvas.setTree(tree, demoMarks(tree));
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
+
+  const upload = new UploadFlow(stage, {
+    created: async (clan) => {
+      clans = await getJson<ClanSummary[]>("/api/clans");
+      drawClanTabs(clan.id);
+      await loadClan(clan.id);
+    },
+    review: (preview, marks) => {
+      beforeReview = currentClan;
+      panel.element.hidden = true;
+      tree = preview.tree;
+      search.setTree(preview.tree);
+      canvas.setTree(preview.tree, NO_MARKS, marks);
+      stat.textContent = "разбор файла · карта из нового файла";
+      const first = marks.keys().next();
+      if (!first.done) canvas.centreOnPerson(first.value); // сразу к первому изменению
+    },
+    finished: async (clanId, report) => {
+      panel.element.hidden = false;
+      const target = report ? clanId : beforeReview;
+      clans = await getJson<ClanSummary[]>("/api/clans");
+      drawClanTabs(target);
+      await loadClan(target);
+      if (report) {
+        stat.textContent += ` · перезалито: добавлено ${report.added}, изменено ${report.changed}, удалено ${report.deleted}`;
+      }
+    },
+    focus: (id) => canvas.centreOnPerson(id),
+  });
 
   const zoomValue = document.createElement("button");
   zoomValue.title = "Сбросить к 100%";
@@ -147,8 +193,27 @@ async function start(root: HTMLElement): Promise<void> {
   const stat = document.createElement("div");
   stat.className = "hint";
 
+  // вкладки родов и кнопка загрузки; перерисовываются, когда родов или людей в них становится больше
+  const clanTabs = document.createElement("div");
+  const drawClanTabs = (current: number) => {
+    const group = switcher("Род", clans.map((c) => [c.id, `${c.name} · ${c.persons}`]), current, (id) => {
+      if (upload.reviewing) {
+        upload.cancel(false);
+        panel.element.hidden = false;
+      }
+      void loadClan(id);
+    });
+    const add = document.createElement("button");
+    add.className = "add";
+    add.textContent = "+ Загрузить .ged";
+    add.addEventListener("click", () => upload.choose());
+    group.querySelector(".sw")!.append(add);
+    clanTabs.replaceChildren(group);
+  };
+  drawClanTabs(currentClan);
+
   bar.append(
-    switcher("Род", clans.map((c) => [c.id, `${c.name} · ${c.persons}`]), clans[0]!.id, (id) => void loadClan(id)),
+    clanTabs,
     search.element,
     switcher("Стиль", STYLES, "gobelen", (style) => {
       document.body.dataset.style = style;

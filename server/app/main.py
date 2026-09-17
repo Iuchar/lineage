@@ -4,14 +4,20 @@ import sqlite3
 from collections.abc import Iterator
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
+from app import uploads
 from app.config import DB_PATH, DIST
+from app.db.clans import ClanExistsError, import_clan
 from app.db.connection import connect
 from app.db.person import PersonDetails, PersonNotFoundError, person_details
+from app.db.reload import ClanMatch, ReloadPreview, ReloadReport, clan_matches, preview_reload, reload_clan, suggested_name
 from app.db.tree import ClanNotFoundError, ClanSummary, ClanTree, clan_tree, list_clans
+from app.gedcom.load import load_text
+from app.gedcom.records import GedcomSyntaxError
 
 app = FastAPI(
     title="Родословные",
@@ -56,6 +62,89 @@ def get_person(person_id: int, conn: Database) -> PersonDetails:
         return person_details(conn, person_id)
     except PersonNotFoundError:
         raise HTTPException(status_code=404, detail="Такого человека нет") from None
+
+
+MAX_UPLOAD = 20 * 1024 * 1024
+
+
+class UploadInfo(BaseModel):
+    token: str
+    file_name: str
+    persons: int
+    families: int
+    branch_stubs: int
+    warnings: list[str]
+    suggested_name: str
+    clans: list[ClanMatch]
+
+
+class NewClan(BaseModel):
+    name: str
+
+
+class ReloadRequest(BaseModel):
+    delete: list[int] = []  # кого из пропавших в файле удалить; остальные остаются
+
+
+def _upload(token: str) -> uploads.Upload:
+    upload = uploads.get(token)
+    if upload is None:
+        raise HTTPException(status_code=404, detail="Файл больше не ждёт заливки — загрузите его заново")
+    return upload
+
+
+@app.post("/api/uploads")
+async def post_upload(request: Request, conn: Database, file_name: str = "файл.ged") -> UploadInfo:
+    body = await request.body()
+    if len(body) > MAX_UPLOAD:
+        raise HTTPException(status_code=413, detail="Файл больше 20 МБ")
+    try:
+        data = load_text(body.decode("utf-8-sig"))
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail="Файл не в UTF-8 — такие пока не читаются") from None
+    except GedcomSyntaxError as error:
+        raise HTTPException(status_code=400, detail=f"Не похоже на GEDCOM: {error}") from None
+    if not data.persons:
+        raise HTTPException(status_code=400, detail="В файле нет ни одного человека")
+    return UploadInfo(
+        token=uploads.put(file_name, data), file_name=file_name,
+        persons=len(data.persons), families=len(data.families),
+        branch_stubs=sum(p.is_branch_stub for p in data.persons.values()),
+        warnings=data.warnings, suggested_name=suggested_name(data), clans=clan_matches(conn, data),
+    )
+
+
+@app.post("/api/uploads/{token}/clan")
+def post_new_clan(token: str, body: NewClan, conn: Database) -> ClanSummary:
+    upload = _upload(token)
+    try:
+        report = import_clan(conn, body.name, upload.data, upload.file_name)
+    except ClanExistsError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from None
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from None
+    uploads.drop(token)
+    return next(c for c in list_clans(conn) if c.id == report.clan_id)
+
+
+@app.get("/api/uploads/{token}/reload/{clan_id}")
+def get_reload_preview(token: str, clan_id: int, conn: Database) -> ReloadPreview:
+    upload = _upload(token)
+    try:
+        return preview_reload(conn, clan_id, upload.data)
+    except ClanNotFoundError:
+        raise HTTPException(status_code=404, detail="Такого рода нет") from None
+
+
+@app.post("/api/uploads/{token}/reload/{clan_id}")
+def post_reload(token: str, clan_id: int, body: ReloadRequest, conn: Database) -> ReloadReport:
+    upload = _upload(token)
+    try:
+        report = reload_clan(conn, clan_id, upload.data, set(body.delete), upload.file_name)
+    except ClanNotFoundError:
+        raise HTTPException(status_code=404, detail="Такого рода нет") from None
+    uploads.drop(token)
+    return report
 
 
 if (DIST / "assets").is_dir():

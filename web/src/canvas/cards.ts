@@ -16,6 +16,10 @@ export interface PersonMarks {
 
 export const NO_MARKS: PersonMarks = { burnt: new Set(), hidden: new Set(), linked: new Set() };
 
+// метки разбора перезалива: живут, пока идёт разбор, и не берут цвет «выжжен»
+export type ReviewMark = "new" | "mod" | "gone";
+const REVIEW_TEXT: Record<ReviewMark, string> = { new: "новый", mod: "изменён", gone: "нет в файле" };
+
 // очередь брака у супругов многобрачного: «первый», «второй» или I, II
 function marriageOrder(tree: ClanTree): Map<number, number> {
   const families = new Map(tree.families.map((f) => [f.id, f]));
@@ -39,6 +43,7 @@ export function drawCards(
   selected: number | null,
   marks: PersonMarks,
   lineage?: ReadonlySet<number>, // люди на подсвеченной линии рода
+  review?: ReadonlyMap<number, ReviewMark>,
 ): string {
   const ordinal = LINK_STYLES[style].ordinal;
   const order = marriageOrder(tree);
@@ -48,6 +53,8 @@ export function drawCards(
     const classes = ["node"];
     if (person.id === selected) classes.push("sel");
     if (lineage?.has(person.id)) classes.push("lin");
+    const reviewed = review?.get(person.id);
+    if (reviewed) classes.push(`up-${reviewed}`);
     if (marks.burnt.has(person.id)) classes.push("burnt");
     if (person.is_branch_stub) classes.push("stub");
 
@@ -59,7 +66,9 @@ export function drawCards(
     const sup = idx != null && ordinal === "name" ? `<sup>${ROMAN[idx] ?? idx + 1}</sup>` : "";
 
     let badge = "";
-    if (marks.burnt.has(person.id)) {
+    if (reviewed) {
+      badge = `<span class="badge calm"><i>${REVIEW_TEXT[reviewed]}</i></span>`;
+    } else if (marks.burnt.has(person.id)) {
       // у газеты знак говорит её голосом
       badge = `<span class="badge"><i>${style === "gazeta" ? "сведения изъяты" : "выжжен из рода"}</i></span>`;
     } else if (marks.hidden.has(person.id)) {
