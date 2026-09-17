@@ -12,6 +12,8 @@ export interface LayoutOptions {
   manual?: ReadonlyMap<number, number>;
   // свёрнутые союзы: дети уже убраны из дерева (fold.ts), под союзом нужно место для стопки
   folded?: ReadonlySet<number>;
+  // продолжатели главной линии: пара встаёт над таким ребёнком, и линия идёт прямым стволом
+  heirs?: ReadonlySet<number>;
 }
 
 export interface Point {
@@ -183,6 +185,7 @@ function merge(acc: Span[], contour: Span[], dx: number): Span[] {
 function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOptions) {
   const { manual } = options;
   const folded = options.folded ?? new Set<number>();
+  const heirs = options.heirs ?? new Set<number>();
   const positions = new Map<number, number>();
   const pairStep = metrics.width + metrics.pairGap;
 
@@ -203,7 +206,11 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOpti
       placed.push({ node, dx: d });
       acc = merge(acc, node.contour, d);
     }
-    const centre = (placed[0]!.dx + placed[placed.length - 1]!.dx) / 2;
+    const heir = placed.find((p) => heirs.has(p.node.id));
+    // над продолжателем встаёт сама карточка, а не середина его блока с супругами
+    const inUnit = heir ? heir.node.unit.indexOf(heir.node.id) : 0;
+    const shift = heir ? (inUnit - (heir.node.unit.length - 1) / 2) * pairStep : 0;
+    const centre = heir ? heir.dx + shift : (placed[0]!.dx + placed[placed.length - 1]!.dx) / 2;
     for (const p of placed) p.dx -= centre;
     acc = acc.map((c) => ({ l: c.l - centre, r: c.r - centre }));
     return { id, unit, unitWidth, kids: placed, contour: self.concat(acc), leaf: false };

@@ -5,6 +5,7 @@ import { foldsHiding, foldTree } from "../layout/fold";
 import { layoutTree, type LayoutResult } from "../layout/layout";
 import { STYLE_METRICS, type StyleName } from "../layout/metrics";
 import { drawCards, drawFolds, NO_MARKS, type PersonMarks, type ReviewMark } from "./cards";
+import { mainLine, NO_LINE } from "./heirs";
 import { NO_TAGS, type TagSet } from "./tags";
 import { lineageOf } from "./lineage";
 import { drawLinks } from "./links";
@@ -45,6 +46,8 @@ export class TreeCanvas {
   photos: ReadonlyMap<number, string> = new Map();
   tags: TagSet = NO_TAGS;
   filter: string | null = null; // выбранная метка — её люди в полную силу, остальные в тени
+  // отмеченные продолжатели главной линии; поля в данных пока нет, отметки приходят из демо-набора
+  heirs: ReadonlySet<number> = new Set();
   // ручной сдвиг среди братьев: id → на сколько мест; живёт до смены рода, в базу не пишется
   readonly manual = new Map<number, number>();
   // свёрнутые союзы; живут до смены рода, как и ручной сдвиг
@@ -73,11 +76,12 @@ export class TreeCanvas {
   }
 
   setTree(tree: ClanTree, marks: PersonMarks = NO_MARKS, review: ReadonlyMap<number, ReviewMark> = new Map(),
-          tags: TagSet = NO_TAGS): void {
+          tags: TagSet = NO_TAGS, heirs: ReadonlySet<number> = new Set()): void {
     this.tree = tree;
     this.marks = marks;
     this.review = review;
     this.tags = tags;
+    this.heirs = heirs;
     this.filter = null;
     this.selected = null;
     this.manual.clear();
@@ -174,6 +178,7 @@ export class TreeCanvas {
       rootAtBottom: this.state.rootAtBottom,
       manual: this.manual,
       folded: foldedIds,
+      heirs: this.heirs,
     });
     const layout = this.layout;
 
@@ -190,6 +195,14 @@ export class TreeCanvas {
     // линия рода выбранного: путь акцентом, остальное дерево в тени
     const lineage = this.selected != null ? lineageOf(tree, layout, style, links, this.selected) : null;
     const lit = lineage?.paths ? lineage : null;
+    // главная линия: ствол подсвечен всегда, дерево вокруг не глушится; при выборе человека
+    // на карте остаётся одна нить — его линия рода
+    // линия считается по всему роду, а не по свёрнутому виду: спрятанная ветка — не обрыв
+    const line = this.heirs.size ? mainLine(this.tree, this.heirs) : NO_LINE;
+    // свёрнутая ветка прячет конец линии — ствол тогда доходит до последнего видимого
+    const deepest = [...line.persons].find((id) => layout.positions.has(id));
+    const trunk = !lit && deepest != null ? lineageOf(tree, layout, style, links, deepest).paths : "";
+    const shown = line.last != null && layout.positions.has(line.last);
     this.surface.classList.toggle("lineage", lit !== null);
     this.surface.classList.toggle("filtered", this.filter !== null);
 
@@ -197,8 +210,10 @@ export class TreeCanvas {
       (defs ? `<svg class="ornament" width="${width}" height="${height}">${defs}</svg>` : "") +
       `<svg class="links" width="${width}" height="${height}">${links.paths}${links.marks}</svg>` +
       (lit ? `<svg class="line" width="${width}" height="${height}"><path d="${lit.paths}"/></svg>` : "") +
+      (trunk ? `<svg class="line main" width="${width}" height="${height}"><path d="${trunk}"/></svg>` : "") +
       drawCards(tree, layout, style, this.selected, this.marks, lit?.persons, this.review,
-        { portraits: this.portraits, photos: this.photos, tags: this.tags, filter: this.filter }) +
+        { portraits: this.portraits, photos: this.photos, tags: this.tags, filter: this.filter,
+          heirs: line.persons, broken: line.broken && shown ? line.last : null }) +
       drawFolds(links.folds, folds, style);
 
     // лампа «Ночного кабинета» ездит за выбранным

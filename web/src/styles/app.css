@@ -31,5 +31,9 @@ body { margin: 0; font-family: 'Golos Text', system-ui, sans-serif; background: 
 .canvas.lineage svg.links { opacity: .35; }
 .canvas.lineage .node:not(.lin), .canvas.lineage .fold { opacity: .4; }
 
+/* главная линия рода: ствол подсвечен всегда, дерево вокруг в полную силу, имена на линии — акцентом */
+.canvas svg.line.main path { stroke-width: 2.2; }
+.canvas .node.heir .nm { color: var(--acc); }
+
 .empty { margin: auto; padding: 40px 16px; color: #7c8492; font-size: 13px; line-height: 1.7; text-align: center; }
 .empty code { font: 400 12px 'IBM Plex Mono', monospace; color: #aeb6c2; }

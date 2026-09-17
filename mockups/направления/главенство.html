@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Главенство линии — варианты</title>
+<!-- шрифты и стили приложения; раскладка настоящая, род Монад Кройве -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 94ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 12px; }
+.variant { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; background: #16181b; }
+.frame { position: relative; overflow: hidden; height: 420px; cursor: default; }
+.frame .canvas { transform-origin: 0 0; }
+.about { padding: 9px 13px 12px; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; }
+.about .key { font: 500 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #c8a44e; margin-left: 8px; }
+.about p { margin: 4px 0 0; color: #8a8f98; font-size: 12.5px; }
+
+/* главная линия: постоянная нить акцентом, без приглушения остального дерева */
+svg.line { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+svg.line path { fill: none; stroke: var(--acc); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+/* люди главной линии: имя акцентом, чтобы линия читалась и без нити */
+.node.heir .nm { color: var(--acc); }
+</style>
+</head>
+<body data-style="viktorian" data-theme="dark">
+<h1>Главенство линии</h1>
+<p class="lede">Главная линия рода задаётся полем у человека: ни возраст, ни размер ветки её не определяют. Вопрос в том, что это поле делает на карте.
+В примере главной отмечена линия Дункан → Хэмиш → Юэн → Кайл → Иэйн → Роберт → Малькольм → Кеннет, восемь поколений Монад Кройве. Раскладка настоящая.</p>
+<div class="ctl">
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen">Гобелен</button><button data-v="viktorian" aria-pressed="true">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<div class="grid" id="out"></div>
+<script>
+const VARIANTS = [
+  { k: "now", n: "Сейчас · поля нет", t: "Братья стоят по старшинству, пара — между крайними детьми. Главная линия ничем не выделена и петляет по дереву." },
+  { k: "order", n: "А · порядок среди братьев", t: "Главный ребёнок встаёт первым среди братьев, остальные сдвигаются вправо. Тот же сдвиг, что делается вручную в панели, только постоянный. Дерево остаётся прежней ширины, но старшинство в ряду больше не читается." },
+  { k: "mark", n: "Б · выделение", t: "Раскладка не меняется: главная линия всё время подсвечена нитью акцентного цвета, имена на ней — акцентом. Видно, куда идёт род, при этом ничего не переставляется." },
+  { k: "trunk", n: "В · раскладка стволом", t: "Пара встаёт не между крайними детьми, а прямо над главным: линия идёт прямым стволом сверху вниз, ветки отходят вбок. Раскладка пересчитана целиком, карточки нигде не налезают." },
+];
+const state = { style: "viktorian", theme: "dark" };
+let data;
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("out").innerHTML = VARIANTS.map((v) => {
+    const s = data.scenes[`${state.style}|${v.k}`];
+    return `<div class="variant" data-k="${v.k}"><div class="frame viewport"><div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+      `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}` +
+      (s.path ? `<svg class="line" width="${s.width}" height="${s.height}"><path d="${s.path}"/></svg>` : "") +
+      `</div></div><div class="about"><b>${v.n}</b><span class="key">${v.k}</span><p>${v.t}</p></div></div>`;
+  }).join("");
+  // в варианте с выделением имена главной линии тоже акцентом
+  document.querySelectorAll('.variant[data-k=mark] .node').forEach((node) => {
+    if (data.line.includes(Number(node.dataset.id))) node.classList.add("heir");
+  });
+  fit();
+}
+
+function fit() {
+  document.querySelectorAll(".variant").forEach((el) => {
+    const s = data.scenes[`${state.style}|${el.dataset.k}`];
+    const frame = el.querySelector(".frame");
+    const bw = s.box.r - s.box.l, bh = s.box.b - s.box.t;
+    const k = Math.min(frame.clientWidth / bw, frame.clientHeight / bh);
+    const x = (frame.clientWidth - bw * k) / 2 - s.box.l * k, y = (frame.clientHeight - bh * k) / 2 - s.box.t * k;
+    el.querySelector(".canvas").style.transform = `translate(${x}px,${y}px) scale(${k})`;
+  });
+}
+
+document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  state[sw.dataset.set] = b.dataset.v; draw();
+}));
+fetch("главенство.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+addEventListener("resize", () => data && fit());
+</script>
+</body>
+</html>

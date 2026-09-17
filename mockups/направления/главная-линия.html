@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Главная линия и обрыв — варианты</title>
+<!-- шрифты и стили приложения; раскладка настоящая, род Монад Кройве -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 94ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 12px; }
+.variant { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; background: #16181b; }
+.pair { display: grid; grid-template-columns: 1fr 360px; }
+.frame { position: relative; overflow: hidden; height: 430px; cursor: default; }
+.frame .canvas { transform-origin: 0 0; }
+.frame.zoom { border-left: 1px solid #2a2d32; }
+.frame .tag { position: absolute; left: 9px; top: 7px; z-index: 5; font: 500 9.5px/1 'IBM Plex Mono', monospace;
+  letter-spacing: .14em; text-transform: uppercase; color: #6f757e; }
+.about { padding: 9px 13px 12px; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; }
+.about .key { font: 500 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #c8a44e; margin-left: 8px; }
+.about p { margin: 4px 0 0; color: #8a8f98; font-size: 12.5px; }
+
+/* главная линия: прямой ствол по отметкам плюс постоянная нить акцентом, дерево не приглушается */
+svg.line { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+svg.line path { fill: none; stroke: var(--acc); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+svg.line .end { stroke-width: 2.2; }
+svg.line .thread { stroke-width: 1.1; }
+svg.line .loop { fill: none; stroke: var(--acc); stroke-width: 1.6; }
+/* края левой панели гасятся, чтобы обрезанные карточки не спорили с линией */
+.frame[data-fit=all] { -webkit-mask-image: linear-gradient(to right, transparent, #000 34px, #000 calc(100% - 34px), transparent),
+  linear-gradient(to bottom, transparent, #000 26px, #000 calc(100% - 26px), transparent);
+  -webkit-mask-composite: source-in; mask-composite: intersect; }
+.node.heir .nm { color: var(--acc); }
+/* знак обрыва на карточке — говорит голосом стиля, как прочие метки */
+.node.broken .badge.calm i { font-style: normal; }
+</style>
+</head>
+<body data-style="viktorian" data-theme="dark">
+<h1>Главная линия и её обрыв</h1>
+<p class="lede">Сочетание Б и В: ствол идёт прямо по отметкам продолжателей, и вся линия постоянно подсвечена нитью акцентного цвета, имена на ней — акцентом.
+Дерево вокруг не приглушается. В примере линия отмечена до Уильяма (1954—1979), который умер бездетным: на нём она обрывается. Три способа показать обрыв.</p>
+<div class="ctl">
+  <div class="grp"><b>Обрыв</b><div class="sw" data-set="end">
+    <button data-v="fray" aria-pressed="true">О1 · оборванная нить</button><button data-v="knot">О2 · узел на нити</button>
+    <button data-v="badge">О3 · знак на карточке</button><button data-v="none">без знака</button>
+  </div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen">Гобелен</button><button data-v="viktorian" aria-pressed="true">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="grid" id="out"></div>
+<script>
+const ABOUT = {
+  fray: "<b>О1 · оборванная нить.</b> Ствол выходит из-под карточки и обрывается растрёпанным концом: нити расходятся, как у обрезанной ткани. Ничего не подписано, но по рисунку понятно, что дальше линии нет.",
+  knot: "<b>О2 · узел на нити.</b> Ствол выходит на короткий отрезок и завязан узлом с поперечиной: линия закрыта, а не потеряна. Тише первого и не спорит с фактурой стилей.",
+  badge: "<b>О3 · знак на карточке.</b> Ствол просто кончается у карточки, а под ней стоит подпись «линия пресеклась» знаком того же вида, что «выжжен из рода» и «скрыт от зрителей».",
+  none: "<b>Без знака.</b> Для сравнения: линия обрывается молча. Понять, кончилась ли она или редактор ещё не отметил продолжателя, нельзя.",
+};
+const state = { end: "fray", style: "viktorian", theme: "dark" };
+let data;
+
+// знаки обрыва рисуются в том же слое, что и нить линии
+function endMark(kind, end) {
+  const y = end.y + 6;
+  if (kind === "fray") {
+    // растрёпанный конец: нити расходятся веером, каждая своей длины и со своим изгибом
+    const threads = [[-9, 15, .55], [-5, 21, .8], [0, 25, .95], [5, 19, .75], [9, 13, .5]];
+    const fray = threads.map(([dx, len, op]) =>
+      `<path class="thread" d="M${end.x} ${y + 8}q${dx * .3} ${len * .5} ${dx} ${len}" opacity="${op}"/>`).join("");
+    return `<path class="end" d="M${end.x} ${y}V${y + 8}"/>${fray}`;
+  }
+  if (kind === "knot") {
+    // узел: нить делает петлю и коротким хвостом кончается
+    return `<path class="end" d="M${end.x} ${y}V${y + 11}"/>` +
+      `<circle class="loop" cx="${end.x}" cy="${y + 15}" r="4"/>` +
+      `<path class="end" d="M${end.x} ${y + 19}l2 6"/>`;
+  }
+  return "";
+}
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("about").innerHTML = ABOUT[state.end];
+  const s = data.scenes[state.style];
+  const canvas = `<div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}` +
+    `<svg class="line" width="${s.width}" height="${s.height}"><path d="${s.path}"/></svg></div>`;
+  document.getElementById("out").innerHTML =
+    `<div class="variant"><div class="pair"><div class="frame viewport" data-fit="all"><span class="tag">линия целиком</span>${canvas}</div>` +
+    `<div class="frame viewport zoom" data-fit="end"><span class="tag">конец линии</span>${canvas}</div></div>` +
+    `<div class="about"><b>Главная линия · ствол и подсветка</b><span class="key">${state.end}</span>` +
+    `<p>Линия: Дункан → Хэмиш → Юэн → Кайл → Иэйн → Роберт → Уильям. На Уильяме обрыв.</p></div></div>`;
+  document.querySelectorAll(".node").forEach((node) => {
+    const id = Number(node.dataset.id);
+    if (data.line.includes(id)) node.classList.add("heir");
+    if (id === data.last && state.end === "badge") {
+      node.classList.add("broken");
+      node.querySelector(".box").insertAdjacentHTML("beforeend", '<span class="badge calm"><i>линия пресеклась</i></span>');
+    }
+  });
+  // знак обрыва вешается по настоящему низу карточки: у стилей она разной высоты
+  document.querySelectorAll(".frame").forEach((frame) => {
+    const box = frame.querySelector(`.node[data-id="${data.last}"] .box`);
+    const canvas = frame.querySelector(".canvas").getBoundingClientRect();
+    const card = box.getBoundingClientRect();
+    // у газеты ни рамки, ни заливки нет: низ карточки — низ последней строки, иначе знак повиснет в пустоте
+    const face = getComputedStyle(box);
+    const framed = parseFloat(face.borderBottomWidth) > 0 || face.backgroundImage !== "none"
+      || !/^rgba\(\d+, \d+, \d+, 0\)$/.test(face.backgroundColor);
+    const inked = [...box.children].map((el) => el.getBoundingClientRect().bottom);
+    const bottom = framed ? card.bottom : Math.min(card.bottom, Math.max(card.top + 12, ...inked) + 3);
+    const end = { x: card.left - canvas.left + card.width / 2, y: bottom - canvas.top };
+    frame.querySelector("svg.line").insertAdjacentHTML("beforeend", endMark(state.end, end));
+  });
+  fit();
+}
+
+function fit() {
+  const s = data.scenes[state.style];
+  document.querySelectorAll(".frame").forEach((frame) => {
+    // слева вся линия, справа её конец крупно — мелкий знак обрыва иначе не разглядеть
+    const box = frame.dataset.fit === "end"
+      ? { l: s.end.x - 150, r: s.end.x + 150, t: s.end.y - 118, b: s.end.y + 82 }
+      : s.box;
+    const bw = box.r - box.l, bh = box.b - box.t;
+    const k = Math.min(frame.clientWidth / bw, frame.clientHeight / bh);
+    const x = (frame.clientWidth - bw * k) / 2 - box.l * k, y = (frame.clientHeight - bh * k) / 2 - box.t * k;
+    frame.querySelector(".canvas").style.transform = `translate(${x}px,${y}px) scale(${k})`;
+  });
+}
+
+document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  state[sw.dataset.set] = b.dataset.v; draw();
+}));
+fetch("главная-линия.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+addEventListener("resize", () => data && fit());
+</script>
+</body>
+</html>

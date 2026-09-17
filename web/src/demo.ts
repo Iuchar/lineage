@@ -24,6 +24,21 @@ const STAND_TAGS: Record<string, Record<string, string[]>> = {
   "Гленн Уриск": { "@I1016@": ["war"], "@I1019@": ["move", "check"], "@I1024@": ["chron"], "@I1029@": ["move"] },
 };
 
+// поля «продолжатель линии» в данных тоже нет: цепочки взяты из заметок к родам.
+// У Монад Кройве линия кончается на Уильяме (1954—1979) — детей нет, линия пресеклась;
+// у Гленн Уриск последняя отметка стоит на «Ветви Уинтерхоуп»: линия уходит в другой род.
+const STAND_HEIRS: Record<string, string[]> = {
+  "Монад Кройве": ["@I51@", "@I53@", "@I511@", "@I518@", "@I526@", "@I544@"],
+  "Гленн Уриск": ["@I1003@", "@I1007@", "@I1011@", "@I1016@", "@I1019@", "@I1024@", "@I1029@", "@I1035@", "@I1038@"],
+};
+
+export function demoHeirs(tree: ClanTree): ReadonlySet<number> {
+  if (new URLSearchParams(location.search).get("demo") !== "marks") return new Set();
+  const sample = STAND_HEIRS[tree.clan.name];
+  if (!sample) return new Set();
+  return new Set(tree.persons.filter((p) => sample.includes(p.xref)).map((p) => p.id));
+}
+
 export function demoTags(tree: ClanTree): TagSet {
   if (new URLSearchParams(location.search).get("demo") !== "marks") return NO_TAGS;
   const sample = STAND_TAGS[tree.clan.name];

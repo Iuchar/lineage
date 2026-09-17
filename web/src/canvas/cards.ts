@@ -23,6 +23,8 @@ export interface CardExtras {
   photos?: ReadonlyMap<number, string>; // адрес снимка человека, когда он есть
   tags?: TagSet;
   filter?: string | null; // выбранная метка: её люди в полную силу, остальные в тени
+  heirs?: ReadonlySet<number>; // люди на главной линии рода — имя акцентом
+  broken?: number | null; // последний на линии, если детей у него нет: линия пресеклась
 }
 
 export const NO_EXTRAS: CardExtras = { portraits: false };
@@ -78,6 +80,7 @@ export function drawCards(
 
     const own = tags.of.get(person.id) ?? [];
     if (extras.filter && own.includes(extras.filter)) classes.push("tagged");
+    if (extras.heirs?.has(person.id)) classes.push("heir");
     const shown = own.slice(0, MAX_ON_CARD);
     const rest = own.length - shown.length;
     const tagsHtml = shown.length
@@ -100,6 +103,8 @@ export function drawCards(
     } else if (marks.burnt.has(person.id)) {
       // у газеты знак говорит её голосом
       badge = `<span class="badge"><i>${style === "gazeta" ? "сведения изъяты" : "выжжен из рода"}</i></span>`;
+    } else if (extras.broken === person.id) {
+      badge = '<span class="badge calm"><i>линия пресеклась</i></span>';
     } else if (marks.hidden.has(person.id)) {
       badge = '<span class="badge calm"><i>скрыт от зрителей</i></span>';
     } else if (marks.linked.has(person.id)) {

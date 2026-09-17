@@ -16,7 +16,7 @@ import "./styles/tags.css";
 import type { ClanSummary, ClanTree } from "./api/types";
 import { NO_MARKS } from "./canvas/cards";
 import { TreeCanvas } from "./canvas/canvas";
-import { demoMarks, demoTags } from "./demo";
+import { demoHeirs, demoMarks, demoTags } from "./demo";
 import { PersonPanel } from "./panel/panel";
 import { SearchBox } from "./panel/search";
 import { UploadFlow } from "./upload/upload";
@@ -133,7 +133,7 @@ async function start(root: HTMLElement): Promise<void> {
     tree = await getJson<ClanTree>(`/api/clans/${id}/tree`);
     search.setTree(tree);
     const tags = demoTags(tree);
-    canvas.setTree(tree, demoMarks(tree), new Map(), tags);
+    canvas.setTree(tree, demoMarks(tree), new Map(), tags, demoHeirs(tree));
     drawTagFilter(tags);
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
