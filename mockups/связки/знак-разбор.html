@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Знак связки: сноска и ярлык по стилям</title>
+<!-- шрифты и стили приложения; карта рода настоящая, Гленн Уриск, масштаб 100 % -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<style>
+html, body { height: auto; }
+body { padding: 20px 24px 60px; }
+h1 { font: 400 26px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 96ch; margin: 0 0 12px; font-size: 13px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.grid { display: grid; grid-template-columns: 96px 1fr 1fr; gap: 10px; align-items: center; }
+.head { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #7c8492; }
+.rowname { font: 500 12.5px/1.3 'Golos Text', sans-serif; color: #e6e2d8; }
+.rowname small { display: block; color: #7c8492; font-size: 10.5px; margin-top: 3px; font-weight: 400; }
+.cell { position: relative; overflow: hidden; height: 190px; border: 1px solid #2a2d32; border-radius: 3px; background: var(--bg); }
+.cell .canvas { transform-origin: 0 0; }
+
+/* ── З2 · сноска: у каждого стиля свой голос отсылки, плашки нет ── */
+.also { position: absolute; z-index: 6; white-space: nowrap; cursor: pointer; }
+[data-style=gobelen] .also { font: 400 13px/1.2 var(--hand); color: var(--acc);
+  border-bottom: 1px solid color-mix(in srgb, var(--acc) 45%, transparent); }
+/* золото на светлой шерсти без подкладки не читается — та же тень, что у связей */
+[data-style=gobelen][data-theme=light] .also { color: #5d4415; border-bottom-color: #a8801f; text-shadow: none; }
+[data-style=gobelen][data-theme=light] .tab { color: #5d4415; border-color: #8a6a1e; border-width: 1.5px;
+  background: #f0e7cd; box-shadow: 0 1px 0 rgba(70,48,10,.25); }
+[data-style=viktorian] .tab { background: var(--card); border-width: 1px; }
+[data-style=viktorian] .also { font: italic 400 11px/1.2 var(--font); letter-spacing: .04em; color: var(--acc);
+  border-bottom: 1px solid color-mix(in srgb, var(--acc) 50%, transparent); }
+[data-style=gazeta] .also { font: italic 400 10.5px/1.2 var(--font); color: var(--acc);
+  border-bottom: 1px dotted color-mix(in srgb, var(--acc) 70%, transparent); }
+[data-style=kabinet] .also { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--acc); border-bottom: 1px solid color-mix(in srgb, var(--acc) 45%, transparent); }
+[data-style=polotno] .also { font: 500 9px/1 'Golos Text', sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--acc); border-bottom: 0; padding-left: 13px; }
+[data-style=polotno] .also::before { content: ''; position: absolute; left: 0; top: 50%; width: 9px; height: 1px; background: var(--acc); }
+.also i { font-style: inherit; color: var(--mut); }
+
+/* ── З3 · ярлык: язычок папки, у каждого стиля своя посадка ── */
+.tab { position: absolute; z-index: 6; white-space: nowrap; cursor: pointer;
+  font: 500 9.5px/1.2 'Golos Text', sans-serif; padding: 3px 9px 4px; color: var(--acc);
+  background: var(--panelbg); border: 1px solid var(--acc); border-bottom: 0;
+  clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 100%, 0 100%); }
+[data-style=gobelen] .tab { font-family: var(--hand); font-size: 12px; padding: 2px 11px 3px; }
+[data-style=gazeta] .tab { background: transparent; border: 0; border-bottom: 2px solid var(--acc); clip-path: none;
+  font: 500 9px/1.2 var(--font); letter-spacing: .08em; text-transform: uppercase; padding: 1px 2px 2px; }
+[data-style=polotno] .tab { background: transparent; border: 0; border-bottom: 1px solid var(--acc); clip-path: none;
+  font: 500 8.5px/1.2 'Golos Text', sans-serif; letter-spacing: .16em; text-transform: uppercase; padding: 1px 2px 3px; }
+/* у кабинета сверху уже сидит ярлык рода — дверь уходит к правому краю и говорит латунью */
+[data-style=kabinet] .tab { background: var(--acc); color: var(--bg); border-color: var(--acc);
+  font: 500 9px/1.2 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+</style>
+</head>
+<body data-theme="dark">
+<h1>Сноска и ярлык во всех пяти стилях</h1>
+<p class="lede">Два оставшихся знака связки рядом, стиль за стилем, в одном масштабе (100 %). В каждом кадре три карточки:
+Сорха со связкой, Эдвин «скрыт от зрителей», Юэн «выжжен из рода» — чтобы видеть, отличается ли дверь от знаков состояния и читается ли она на фактуре.</p>
+<div class="ctl">
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+  <div class="grp"><b>Место</b><div class="sw" data-set="place">
+    <button data-v="under" aria-pressed="true">под именем</button><button data-v="side">сбоку от карточки</button>
+  </div></div>
+</div>
+<div class="grid" id="out"></div>
+<script>
+const STYLES = [
+  ["gobelen", "Гобелен", "медальон, рукописная подпись"],
+  ["viktorian", "Викторианский", "гравюра, ленты-баньероли"],
+  ["gazeta", "Газета", "полоса, сноски и рубрики"],
+  ["kabinet", "Ночной кабинет", "картотека, ярлык рода сверху"],
+  ["polotno", "Полотно II", "только типографика, без рамок"],
+];
+const LINK_CLAN = "Уинтерхоуп";
+const state = { theme: "dark", place: "under" };
+let data;
+
+const nodeIn = (cell, name) => [...cell.querySelectorAll(".node")]
+  .find((n) => n.querySelector(".nm")?.textContent === name);
+
+function cellHtml(style) {
+  const s = data.maps["Гленн Уриск"][style];
+  return `<div class="cell" data-style="${style}" data-theme="${state.theme}">` +
+    `<div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div>`;
+}
+
+function draw() {
+  document.body.dataset.theme = state.theme;
+  const out = document.getElementById("out");
+  out.innerHTML = `<div class="head"></div><div class="head">З2 · сноска «также в»</div><div class="head">З3 · ярлык-дверь</div>` +
+    STYLES.map(([style, name, note]) =>
+      `<div class="rowname">${name}<small>${note}</small></div>${cellHtml(style)}${cellHtml(style)}`).join("");
+
+  [...out.querySelectorAll(".cell")].forEach((cell, i) => {
+    const hidden = nodeIn(cell, "Эдвин");
+    hidden?.querySelector(".box").insertAdjacentHTML("beforeend", '<span class="badge calm"><i>скрыт от зрителей</i></span>');
+    const burnt = nodeIn(cell, "Юэн");
+    burnt?.classList.add("burnt");
+    burnt?.querySelector(".box").insertAdjacentHTML("beforeend",
+      `<span class="badge"><i>${cell.dataset.style === "gazeta" ? "сведения изъяты" : "выжжен из рода"}</i></span>`);
+    const sorha = nodeIn(cell, "Сорха");
+    if (sorha) mark(sorha, i % 2 === 0 ? "also" : "tab");
+    fit(cell, sorha);
+  });
+}
+
+function mark(node, kind) {
+  const el = document.createElement("div");
+  const layer = node.parentElement;
+  if (kind === "also") {
+    el.className = "also";
+    el.innerHTML = `<i>также в</i> ${LINK_CLAN}`;
+    if (state.place === "side") {
+      el.style.left = `${node.offsetLeft - 6}px`;
+      el.style.top = `${node.offsetTop + node.offsetHeight / 2 - 6}px`;
+      el.style.transform = "translateX(-100%)";
+    } else {
+      el.style.left = `${node.offsetLeft + 4}px`;
+      el.style.top = `${node.offsetTop + node.offsetHeight + 3}px`;
+    }
+  } else {
+    el.className = "tab";
+    el.textContent = `→ ${LINK_CLAN}`;
+    if (state.place === "side") {
+      el.style.left = `${node.offsetLeft - 6}px`;
+      el.style.top = `${node.offsetTop + node.offsetHeight / 2 - 8}px`;
+      el.style.transform = "translateX(-100%)";
+    } else {
+      // в кабинете язычок уходит вправо, чтобы не спорить с ярлыком рода на том же крае
+      const kabinet = node.closest(".cell").dataset.style === "kabinet";
+      el.style.left = kabinet ? "auto" : `${node.offsetLeft + 8}px`;
+      el.style.right = kabinet ? `${layer.clientWidth - node.offsetLeft - node.offsetWidth + 8}px` : "auto";
+      el.style.top = `${node.offsetTop - 16}px`;
+    }
+  }
+  layer.append(el);
+}
+
+function fit(cell, at) {
+  const k = 0.8; // «100 %» экрана
+  const canvas = cell.querySelector(".canvas");
+  const cx = at ? at.offsetLeft + at.offsetWidth / 2 : 0;
+  const cy = at ? at.offsetTop + at.offsetHeight / 2 : 0;
+  canvas.style.transform = `translate(${cell.clientWidth / 2 - cx * k - 40}px,${cell.clientHeight / 2 - cy * k}px) scale(${k})`;
+}
+
+document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  state[sw.dataset.set] = b.dataset.v;
+  draw();
+}));
+fetch("проверка.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+addEventListener("resize", () => data && draw());
+</script>
+</body>
+</html>
