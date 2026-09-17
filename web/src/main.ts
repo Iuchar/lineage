@@ -1,3 +1,4 @@
+import "./fonts/fonts.css";
 import "./styles/app.css";
 import "./styles/cards.css";
 import "./styles/gobelen.css";
