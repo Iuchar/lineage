@@ -102,10 +102,11 @@ export class TreeCanvas {
   }
 
   update(state: Partial<CanvasState>): void {
-    const rulerChanged = state.ruler !== undefined && state.ruler !== this.state.ruler;
+    const moved = (Object.keys(state) as (keyof CanvasState)[]).some((key) => state[key] !== this.state[key]);
     this.state = { ...this.state, ...state };
-    // переключение линейки не меняет вид: масштаб остаётся, а точка взгляда — на том же месте экрана
-    if (rulerChanged) this.keepView(() => this.render());
+    // линейка, стиль и переворот основателя перестраивают полотно, но не вид: масштаб остаётся,
+    // а выбранный человек или тот, кто был в центре, — на том же месте экрана
+    if (moved) this.keepView(() => this.render());
     else this.render();
   }
 
