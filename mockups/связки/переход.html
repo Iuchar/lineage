@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Переход между родами — варианты</title>
+<!-- шрифты и стили приложения; карты родов настоящие, связка Сорха 1962: Гленн Уриск ↔ Уинтерхоуп -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<link rel="stylesheet" href="../../web/src/styles/upload.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 96ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.about { padding: 9px 2px 14px; color: #8a8f98; font-size: 12.5px; max-width: 96ch; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; color: #e6e2d8; }
+
+/* окно приложения: верхняя строка серая, как в приложении, карта и панель — в цветах стиля */
+.app { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; }
+.bar2 { display: flex; align-items: center; gap: 14px; padding: 8px 12px; background: #16181b; border-bottom: 1px solid #2a2d32; }
+.tabs { display: flex; border: 1px solid #333941; border-radius: 6px; overflow: hidden; }
+.tabs span { background: #1d2126; color: #aeb6c2; font: 500 11.5px/1 'Golos Text', sans-serif; padding: 6px 11px; border-right: 1px solid #333941; }
+.tabs span:last-child { border-right: 0; }
+.tabs span.on { background: #e9e4d8; color: #14161a; }
+.back { display: flex; align-items: center; gap: 7px; font: 400 11.5px/1 'Golos Text', sans-serif; color: #aeb6c2; }
+.back button { border: 1px solid #333941; background: #1d2126; color: #e9e4d8; border-radius: 6px;
+  font: 500 11.5px/1 'Golos Text', sans-serif; padding: 6px 10px; cursor: pointer; }
+.stagerow { display: grid; grid-template-columns: 1fr 320px; }
+.frame { position: relative; overflow: hidden; height: 470px; background: var(--bg); }
+.frame .canvas { transform-origin: 0 0; }
+.pane { border-left: 1px solid var(--edge); background: var(--panelbg); color: var(--fg); padding: 14px 15px 16px; }
+.pane .mk { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--acc); }
+.pane h3 { margin: 6px 0 2px; font: 600 19px/1.15 var(--font); }
+.pane .yrs { color: var(--mut); font-size: 11.5px; }
+.pane .rowk { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--edge); font-size: 12.5px; }
+.pane .rowk i { font-style: normal; color: var(--mut); }
+.pane .link { margin-top: 14px; border: 1px solid var(--edge); border-radius: 4px; padding: 9px 10px 10px; }
+.pane .link b { display: block; font: 500 12.5px 'Golos Text', sans-serif; }
+.pane .link small { display: block; color: var(--mut); font-size: 11px; margin: 2px 0 8px; }
+.pane .link button { width: 100%; border: 1px solid var(--acc); background: var(--acc); color: var(--bg); border-radius: 4px;
+  font: 500 11.5px/1 'Golos Text', sans-serif; padding: 8px 10px; cursor: pointer; }
+.pane .link button.ghost { background: transparent; color: var(--fg); border-color: var(--edge); margin-top: 6px; }
+
+/* лента возврата над картой: видно, откуда пришёл */
+.trail { display: flex; align-items: center; gap: 9px; padding: 7px 14px; background: color-mix(in srgb, var(--acc) 14%, var(--bg));
+  border-bottom: 1px solid var(--edge); color: var(--fg); font-size: 12px; }
+.trail button { border: 1px solid var(--acc); background: transparent; color: var(--acc); border-radius: 4px;
+  font: 500 11px/1 'Golos Text', sans-serif; padding: 5px 9px; cursor: pointer; }
+.trail .mk { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); }
+
+/* ушко связки: язычок папки, выступающий из-под верхнего края карточки */
+.ear { position: absolute; z-index: 6; padding: 3px 11px 4px; background: var(--panelbg); color: var(--acc);
+  border: 1px solid var(--acc); border-bottom: 0; font: 500 10px/1.2 'Golos Text', sans-serif;
+  white-space: nowrap; cursor: pointer; clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 100%, 0 100%); }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+<h1>Переход между родами и возврат</h1>
+<p class="lede">Сорха, 1962 — один человек в двух родах: в «Гленн Уриск» она дочь Кеннаха, в «Уинтерхоуп» — жена Эдвина.
+Связка не сливает их: у каждой свои данные, добавляется только переход и пометка «также в …». Вопрос в том, чем этот переход открывается и как возвращаться.
+Карты родов настоящие, масштаб — 100 % экрана.</p>
+<div class="ctl">
+  <div class="grp"><b>Вариант</b><div class="sw" data-set="kind">
+    <button data-v="badge" aria-pressed="true">Х1 · метка на карточке</button><button data-v="panel">Х2 · панель человека</button>
+    <button data-v="ear">Х3 · ушко рода</button>
+  </div></div>
+  <div class="grp"><b>Шаг</b><div class="sw" data-set="step">
+    <button data-v="before" aria-pressed="true">до перехода</button><button data-v="after">после перехода</button>
+  </div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="app" id="out"></div>
+<script>
+const ABOUT = {
+  badge: "<b>Х1 · метка на карточке.</b> Пометка «также в Уинтерхоуп» сама и есть переход: щёлкаешь по ней прямо на карте. Знак тот же, что у «выжжен из рода», только с именем рода и живой. Возврат — лентой над картой: видно, откуда пришёл, и кнопка «Вернуться».",
+  panel: "<b>Х2 · панель человека.</b> На карте пометка остаётся молчаливой, переход живёт в панели: строка «Также в роду» со всеми связками и кнопкой. Если связок несколько, они все на виду. Возврат — там же, строкой «Пришли из …», и лентой над картой.",
+  ear: "<b>Х3 · ушко рода.</b> У карточки сбоку вкладка с названием чужого рода — как язычок из соседней папки. Щелчок уводит в тот род, там у двойника такое же ушко, но повёрнутое назад. Возврата по ленте нет: дорога видна на самих карточках.",
+};
+const state = { kind: "badge", step: "before", style: "gobelen", theme: "dark" };
+let data, pair;
+
+function frameHtml(clan, focusId) {
+  const s = data.maps[clan][state.style];
+  return `<div class="frame" data-w="${s.width}" data-h="${s.height}" data-focus="${focusId}">` +
+    `<div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div>`;
+}
+
+function paneHtml(here, there) {
+  const kin = [["Годы", `${here.born ?? "?"} — ${here.died ?? "…"}`], ["Родители", here.parents.join(", ") || "—"],
+    ["Супруги", here.spouses.join(", ") || "—"], ["Дети", here.kids.join(", ") || "—"]];
+  const rows = kin.map(([k, v]) => `<div class="rowk"><i>${k}</i><span>${v}</span></div>`).join("");
+  // после перехода кнопка в панели одна: она же и есть дорога назад
+  const linkBlock = state.kind === "panel"
+    ? `<div class="link"><b>Также в роду</b><small>${there.clan} · ${there.name}, ${there.born}</small>` +
+      `<button>${state.step === "after" ? `← Вернуться в «${there.clan}»` : `Перейти в «${there.clan}»`}</button></div>`
+    : `<div class="link"><b>Также в роду</b><small>${there.clan}</small></div>`;
+  return `<div class="pane"><span class="mk">человек</span><h3>${here.name}</h3>` +
+    `<div class="yrs">${here.clan}</div>${rows}${linkBlock}</div>`;
+}
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("about").innerHTML = ABOUT[state.kind];
+  const here = state.step === "before" ? pair.a : pair.b;
+  const there = state.step === "before" ? pair.b : pair.a;
+  const tabs = ["Гленн Уриск", "Уинтерхоуп", "О'Дувейн", "Монад Кройве"]
+    .map((n) => `<span class="${n === here.clan ? "on" : ""}">${n}</span>`).join("");
+  // лента возврата: у ушка её нет — дорога нарисована на карточках
+  const trail = state.step === "after" && state.kind !== "ear"
+    ? `<div class="trail"><span class="mk">связка</span>Пришли из «${there.clan}», карточка «${there.name}»` +
+      `<button>← Вернуться</button></div>`
+    : "";
+  document.getElementById("out").innerHTML =
+    `<div class="bar2"><div class="tabs">${tabs}</div>` +
+    `<span class="back">Сорха, 1962 · один человек в двух родах</span></div>` +
+    trail +
+    `<div class="stagerow">${frameHtml(here.clan, here.id)}${paneHtml(here, there)}</div>`;
+  mark(here, there);
+  fit();
+}
+
+// знак связки на самой карточке: метка-переход или ушко чужого рода
+function mark(here, there) {
+  const node = document.querySelector(`.frame .node[data-id="${here.id}"]`);
+  if (!node) return;
+  node.classList.add("sel");
+  if (state.kind === "ear") {
+    // язычок висит над карточкой: между поколениями места хватает, между супругами — нет
+    const ear = document.createElement("div");
+    const back = state.step === "after";
+    ear.className = "ear";
+    ear.textContent = `${back ? "← назад в" : "→"} ${there.clan}`;
+    ear.style.left = `${node.offsetLeft + 8}px`;
+    ear.style.top = `${node.offsetTop - 17}px`;
+    node.parentElement.append(ear);
+  } else {
+    node.querySelector(".box").insertAdjacentHTML("beforeend",
+      `<span class="badge calm"><i>также в ${there.clan}</i></span>`);
+  }
+}
+
+function fit() {
+  document.querySelectorAll(".frame").forEach((frame) => {
+    const k = 0.8; // «100 %» экрана
+    const at = frame.querySelector(`.node[data-id="${frame.dataset.focus}"]`);
+    const cx = at ? at.offsetLeft + at.offsetWidth / 2 : Number(frame.dataset.w) / 2;
+    const cy = at ? at.offsetTop + at.offsetHeight / 2 : Number(frame.dataset.h) / 2;
+    frame.querySelector(".canvas").style.transform =
+      `translate(${frame.clientWidth / 2 - cx * k}px,${frame.clientHeight / 2 - cy * k}px) scale(${k})`;
+  });
+}
+
+document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  state[sw.dataset.set] = b.dataset.v;
+  draw();
+}));
+fetch("проверка.data.json").then((r) => r.json()).then((d) => {
+  data = d;
+  pair = d.pairs[3]; // Сорха 1962: Гленн Уриск ↔ Уинтерхоуп
+  draw();
+});
+addEventListener("resize", () => data && fit());
+</script>
+</body>
+</html>
