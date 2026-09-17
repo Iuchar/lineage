@@ -133,7 +133,9 @@ async function start(root: HTMLElement): Promise<void> {
     tree = await getJson<ClanTree>(`/api/clans/${id}/tree`);
     search.setTree(tree);
     const tags = demoTags(tree);
-    canvas.setTree(tree, demoMarks(tree), new Map(), tags, demoHeirs(tree));
+    const heirs = demoHeirs(tree);
+    canvas.setTree(tree, demoMarks(tree), new Map(), tags, heirs);
+    lineLabel.hidden = !heirs.size;
     drawTagFilter(tags);
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
@@ -230,6 +232,15 @@ async function start(root: HTMLElement): Promise<void> {
     if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
   });
 
+  // режим «главная линия»: ствол по отметкам и постоянная подсветка; без отметок переключателя нет
+  const lineLabel = document.createElement("label");
+  lineLabel.className = "chk";
+  lineLabel.hidden = true;
+  lineLabel.innerHTML = '<input type="checkbox"> главная линия';
+  lineLabel.querySelector("input")!.addEventListener("change", (e) => {
+    canvas.update({ mainLine: (e.target as HTMLInputElement).checked });
+  });
+
   const rulerLabel = document.createElement("label");
   rulerLabel.className = "chk";
   rulerLabel.innerHTML = '<input type="checkbox"> линейка дат';
@@ -274,6 +285,7 @@ async function start(root: HTMLElement): Promise<void> {
     switcher("Основатель", [["top", "сверху"], ["bottom", "снизу"]], "top", (side) => {
       canvas.update({ rootAtBottom: side === "bottom" });
     }),
+    lineLabel,
     portraitLabel,
     rulerLabel,
     tagFilter,

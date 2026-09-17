@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Проверка связок — варианты</title>
+<!-- шрифты и стили приложения; окружение кандидатов настоящее, из четырёх родов -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<link rel="stylesheet" href="../../web/src/styles/upload.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 96ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.about { padding: 9px 2px 14px; color: #8a8f98; font-size: 12.5px; max-width: 96ch; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; color: #e6e2d8; }
+
+/* окно приложения: карта и листы живут в цветах стиля, как панель человека */
+.app { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; background: var(--bg); color: var(--fg); }
+.frame { position: relative; overflow: hidden; background: var(--bg); }
+.frame .canvas { transform-origin: 0 0; }
+
+.mk { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--acc); }
+.mut { color: var(--mut); }
+
+/* ── П1 · разворот: два окружения рядом, шов посередине ── */
+.split .top { display: flex; align-items: baseline; gap: 12px; padding: 12px 16px 10px; border-bottom: 1px solid var(--edge); }
+.split .top h3 { margin: 0; font: 600 19px/1.15 var(--font); }
+.split .two { display: grid; grid-template-columns: 1fr 1fr; }
+.split .half + .half { border-left: 1px solid var(--edge); }
+.split .who { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 9px 14px 7px; }
+.split .who b { font: 500 13.5px/1 'Golos Text', sans-serif; }
+.split .frame { height: 396px; }
+.split .cmp { display: grid; grid-template-columns: 96px 1fr 1fr; gap: 0 14px; padding: 10px 16px 4px; border-top: 1px solid var(--edge); font-size: 12px; }
+.split .cmp .r { display: contents; }
+.split .cmp .k { color: var(--mut); font-size: 11px; padding: 3px 0; }
+.split .cmp .v { padding: 3px 0; }
+.split .cmp .same { color: var(--mut); }
+.split .acts { display: flex; gap: 10px; padding: 12px 16px 16px; }
+.split .acts button { border: 1px solid var(--edge); background: transparent; color: var(--fg); border-radius: 4px;
+  font: 500 12px/1 'Golos Text', sans-serif; padding: 10px 16px; cursor: pointer; }
+.split .acts .pri { border-color: var(--acc); background: var(--acc); color: var(--bg); }
+.split .acts .rest { margin-left: auto; color: var(--mut); align-self: center; font-size: 11.5px; }
+
+/* ── П2 · очередь: слева список пар, справа разворот ── */
+.queue { display: grid; grid-template-columns: 232px 1fr; }
+.queue .list { border-right: 1px solid var(--edge); padding: 10px 0 12px; }
+.queue .list .mk { padding: 0 14px 8px; display: block; }
+.queue .row { display: block; width: 100%; text-align: left; border: 0; background: transparent; color: var(--fg);
+  padding: 7px 14px; cursor: pointer; font: 400 12.5px 'Golos Text', sans-serif; border-left: 2px solid transparent; }
+.queue .row b { font-weight: 500; }
+.queue .row small { display: block; color: var(--mut); font-size: 11px; margin-top: 2px; }
+.queue .row.on { border-left-color: var(--acc); background: color-mix(in srgb, var(--acc) 12%, transparent); }
+.queue .row.done { opacity: .5; }
+.queue .row.done b::after { content: ' · связаны'; color: var(--acc); font-weight: 400; font-size: 11px; }
+.queue .pair { display: grid; grid-template-columns: 1fr 1fr; }
+.queue .half + .half { border-left: 1px solid var(--edge); }
+.queue .who { display: flex; justify-content: space-between; gap: 10px; padding: 9px 14px 6px; }
+.queue .frame { height: 330px; }
+.queue .cmp { grid-column: 1 / -1; display: grid; grid-template-columns: 96px 1fr 1fr; gap: 0 14px;
+  padding: 9px 16px 5px; border-top: 1px solid var(--edge); font-size: 12px; }
+.queue .cmp .r { display: contents; }
+.queue .cmp .k { color: var(--mut); font-size: 11px; padding: 3px 0; }
+.queue .cmp .v { padding: 3px 0; }
+.queue .cmp .same { color: var(--mut); }
+.queue .foot { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; padding: 11px 16px 14px; border-top: 1px solid var(--edge); }
+.queue .foot button { border: 1px solid var(--edge); background: transparent; color: var(--fg); border-radius: 4px;
+  font: 500 12px/1 'Golos Text', sans-serif; padding: 9px 15px; cursor: pointer; }
+.queue .foot .pri { border-color: var(--acc); background: var(--acc); color: var(--bg); }
+.queue .foot .hint { margin-left: auto; color: var(--mut); font-size: 11.5px; }
+
+/* ── П3 · панель сбоку: карта на месте, проверка в панели человека ── */
+.side { display: grid; grid-template-columns: 1fr 360px; }
+.side .frame { height: 520px; }
+.side .pane { border-left: 1px solid var(--edge); background: var(--panelbg); padding: 14px 16px 16px; overflow: auto; }
+.side .pane h3 { margin: 6px 0 0; font: 600 18px/1.15 var(--font); }
+.side .card { border: 1px solid var(--edge); border-radius: 4px; margin-top: 10px; }
+.side .card .who { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px 6px; }
+.side .card .frame { height: 196px; border-top: 1px solid var(--edge); }
+.side .kin { padding: 7px 10px 9px; font-size: 11.5px; line-height: 1.5; }
+.side .kin i { font-style: normal; color: var(--mut); }
+.side .acts { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.side .acts button { border: 1px solid var(--edge); background: transparent; color: var(--fg); border-radius: 4px;
+  font: 500 12px/1 'Golos Text', sans-serif; padding: 9px 12px; cursor: pointer; }
+.side .acts .pri { border-color: var(--acc); background: var(--acc); color: var(--bg); }
+.side .note { margin-top: 12px; font-size: 11.5px; color: var(--mut); line-height: 1.5; }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+<h1>Проверка связок между родами</h1>
+<p class="lede">Автопоиск ничего не связывает сам: он складывает в очередь пары, у которых сошлись личное имя и год рождения.
+Решает человек, и для этого ему нужно видеть окружение обоих — родителей, супругов, детей. Окружение здесь настоящее,
+взято из четырёх родов; пар в очереди семь, ровно столько находит правило «имя + год».</p>
+<div class="ctl">
+  <div class="grp"><b>Вариант</b><div class="sw" data-set="kind">
+    <button data-v="split" aria-pressed="true">П1 · разворот</button><button data-v="queue">П2 · очередь</button>
+    <button data-v="side">П3 · панель сбоку</button>
+  </div></div>
+  <div class="grp"><b>Пара</b><div class="sw" data-set="pair" id="pairs"></div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="app" id="out"></div>
+<script>
+const ABOUT = {
+  split: "<b>П1 · разворот.</b> Проверка занимает весь экран: два окружения рядом, между ними шов. Под ними построчное сравнение — что сошлось, что разошлось. Решение одним нажатием, очередь идёт дальше сама. Карта на это время уходит.",
+  queue: "<b>П2 · очередь.</b> То же сравнение, но слева стоит вся очередь: видно, сколько пар осталось и что уже решено, можно вернуться к любой. Окружения меньше, зато разбор идёт подряд, как сводка перезалива.",
+  side: "<b>П3 · панель сбоку.</b> Карта остаётся на месте, проверка живёт в панели человека: сверху свой, снизу двойник из чужого рода, оба с окружением. Ничего не перекрывается, но окружение мелкое и решать сложнее.",
+};
+const state = { kind: "split", pair: 0, style: "gobelen", theme: "dark" };
+let data;
+const DECIDED = [0, 1]; // в П2 первые две пары уже решены — показать, как выглядит пройденное
+
+const years = (s) => `${s.born ?? "?"} — ${s.died ?? ""}`.replace(/ — $/, " — …");
+const listOf = (arr) => (arr.length ? arr.join(", ") : "—");
+
+// строка сравнения: совпало — приглушённо, разошлось — в полную силу
+function compare(pair) {
+  const rows = [
+    ["Годы", years(pair.a), years(pair.b)],
+    ["Фамилия", pair.a.name.replace(pair.given, "").trim() || "—", pair.b.name.replace(pair.given, "").trim() || "—"],
+    ["Родители", listOf(pair.a.parents), listOf(pair.b.parents)],
+    ["Супруги", listOf(pair.a.spouses), listOf(pair.b.spouses)],
+    ["Дети", listOf(pair.a.kids), listOf(pair.b.kids)],
+  ];
+  return rows.map(([k, x, y]) =>
+    `<div class="r"><div class="k">${k}</div><div class="v${x === y ? " same" : ""}">${x}</div>` +
+    `<div class="v${x === y ? " same" : ""}">${y}</div></div>`).join("");
+}
+
+function sceneHtml(side, cls = "") {
+  const s = side.scenes[state.style];
+  // кандидат выделен в окружении так же, как выбранный человек на карте
+  return `<div class="frame${cls ? " " + cls : ""}" data-w="${s.width}" data-h="${s.height}" data-sel="${side.id}">` +
+    `<div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div>`;
+}
+
+function mapHtml(clan, focus) {
+  const s = data.maps[clan][state.style];
+  return `<div class="frame" data-w="${s.width}" data-h="${s.height}" data-k="0.62" data-focus="${focus}">` +
+    `<div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div>`;
+}
+
+function who(side) {
+  return `<div class="who"><b>${side.name}</b><span class="mk">${side.clan}</span></div>`;
+}
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("about").innerHTML = ABOUT[state.kind];
+  const pair = data.pairs[state.pair];
+  const out = document.getElementById("out");
+  out.className = `app ${state.kind}`;
+
+  if (state.kind === "split") {
+    out.innerHTML =
+      `<div class="top"><h3>${pair.given}, ${pair.born}</h3><span class="mk">пара ${state.pair + 1} из ${data.pairs.length}</span></div>` +
+      `<div class="two"><div class="half">${who(pair.a)}${sceneHtml(pair.a)}</div>` +
+      `<div class="half">${who(pair.b)}${sceneHtml(pair.b)}</div></div>` +
+      `<div class="cmp">${compare(pair)}</div>` +
+      `<div class="acts"><button class="pri">Один человек</button><button>Разные люди</button>` +
+      `<button>Отложить</button><span class="rest">дальше в очереди: ${data.pairs.length - state.pair - 1}</span></div>`;
+  } else if (state.kind === "queue") {
+    const rows = data.pairs.map((p, i) =>
+      `<button class="row${i === state.pair ? " on" : ""}${DECIDED.includes(i) ? " done" : ""}" data-i="${i}">` +
+      `<b>${p.given}, ${p.born}</b><small>${p.a.clan} · ${p.b.clan}</small></button>`).join("");
+    out.innerHTML =
+      `<div class="list"><span class="mk">очередь · ${data.pairs.length - DECIDED.length} осталось</span>${rows}</div>` +
+      `<div class="pair"><div class="half">${who(pair.a)}${sceneHtml(pair.a)}</div>` +
+      `<div class="half">${who(pair.b)}${sceneHtml(pair.b)}</div>` +
+      `<div class="cmp">${compare(pair)}</div></div>` +
+      `<div class="foot"><button class="pri">Один человек</button><button>Разные люди</button>` +
+      `<span class="hint">клавиши: ← разные · → один человек · пробел отложить</span></div>`;
+  } else {
+    const kin = (side) =>
+      `<div class="kin"><i>родители:</i> ${listOf(side.parents)}<br><i>супруги:</i> ${listOf(side.spouses)}` +
+      `<br><i>дети:</i> ${listOf(side.kids)}</div>`;
+    out.innerHTML =
+      mapHtml(pair.a.clan, pair.a.id) +
+      `<div class="pane"><span class="mk">связка · проверка</span><h3>${pair.given}, ${pair.born}</h3>` +
+      `<div class="card">${who(pair.a)}${sceneHtml(pair.a)}${kin(pair.a)}</div>` +
+      `<div class="card">${who(pair.b)}${sceneHtml(pair.b)}${kin(pair.b)}</div>` +
+      `<div class="acts"><button class="pri">Один человек</button><button>Разные люди</button><button>Отложить</button></div>` +
+      `<div class="note">Связка не сливает людей: каждый остаётся в своём роду со своими данными, добавляется только переход и пометка «также в …».</div></div>`;
+  }
+  document.querySelectorAll(".frame[data-sel]").forEach((frame) => {
+    frame.querySelector(`.node[data-id="${frame.dataset.sel}"]`)?.classList.add("sel");
+  });
+  document.querySelectorAll(".frame[data-focus]").forEach((frame) => {
+    frame.querySelector(`.node[data-id="${frame.dataset.focus}"]`)?.classList.add("sel");
+  });
+  fit();
+}
+
+function fit() {
+  document.querySelectorAll(".frame").forEach((frame) => {
+    const w = Number(frame.dataset.w), h = Number(frame.dataset.h);
+    const fixed = Number(frame.dataset.k || 0);
+    const k = fixed || Math.min(frame.clientWidth / (w + 30), frame.clientHeight / (h + 30), 1);
+    // карта рода наведена на кандидата, окружение — по центру кадра
+    const at = frame.dataset.focus ? frame.querySelector(`.node[data-id="${frame.dataset.focus}"]`) : null;
+    const cx = at ? at.offsetLeft + at.offsetWidth / 2 : w / 2;
+    const cy = at ? at.offsetTop + at.offsetHeight / 2 : h / 2;
+    const x = frame.clientWidth / 2 - cx * k, y = frame.clientHeight / 2 - cy * k;
+    frame.querySelector(".canvas").style.transform = `translate(${x}px,${y}px) scale(${k})`;
+  });
+}
+
+document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  state[sw.dataset.set] = sw.dataset.set === "pair" ? Number(b.dataset.v) : b.dataset.v;
+  draw();
+}));
+document.getElementById("out").addEventListener("click", (e) => {
+  const row = e.target.closest(".row"); if (!row) return;
+  state.pair = Number(row.dataset.i);
+  document.querySelectorAll('#pairs button').forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.v) === state.pair)));
+  draw();
+});
+fetch("проверка.data.json").then((r) => r.json()).then((d) => {
+  data = d;
+  document.getElementById("pairs").innerHTML = d.pairs
+    .map((p, i) => `<button data-v="${i}"${i === 0 ? ' aria-pressed="true"' : ""}>${p.given} ${p.born}</button>`).join("");
+  draw();
+});
+addEventListener("resize", () => data && fit());
+</script>
+</body>
+</html>

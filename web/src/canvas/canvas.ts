@@ -16,6 +16,8 @@ export interface CanvasState {
   style: StyleName;
   ruler: boolean;
   rootAtBottom: boolean;
+  // режим «главная линия»: ствол по отметкам продолжателей и подсветка; выключен — вид как обычно
+  mainLine: boolean;
 }
 
 // пыльца на фоне викторианского стиля — крошечные искры и точки, фактура бумаги
@@ -52,7 +54,7 @@ export class TreeCanvas {
   readonly manual = new Map<number, number>();
   // свёрнутые союзы; живут до смены рода, как и ручной сдвиг
   readonly folded = new Set<number>();
-  state: CanvasState = { style: "gobelen", ruler: false, rootAtBottom: false };
+  state: CanvasState = { style: "gobelen", ruler: false, rootAtBottom: false, mainLine: false };
 
   onViewChange: (view: View) => void = () => {};
   onSelect: (id: number | null) => void = () => {};
@@ -171,6 +173,7 @@ export class TreeCanvas {
     if (!this.tree) return;
     const { style } = this.state;
     const metrics = STYLE_METRICS[style];
+    const heirs = this.state.mainLine ? this.heirs : new Set<number>();
     const { tree, folds } = foldTree(this.tree, this.folded);
     const foldedIds = new Set(folds.keys());
     this.layout = layoutTree(tree, metrics, {
@@ -178,7 +181,7 @@ export class TreeCanvas {
       rootAtBottom: this.state.rootAtBottom,
       manual: this.manual,
       folded: foldedIds,
-      heirs: this.heirs,
+      heirs,
     });
     const layout = this.layout;
 
@@ -198,7 +201,7 @@ export class TreeCanvas {
     // главная линия: ствол подсвечен всегда, дерево вокруг не глушится; при выборе человека
     // на карте остаётся одна нить — его линия рода
     // линия считается по всему роду, а не по свёрнутому виду: спрятанная ветка — не обрыв
-    const line = this.heirs.size ? mainLine(this.tree, this.heirs) : NO_LINE;
+    const line = heirs.size ? mainLine(this.tree, heirs) : NO_LINE;
     // свёрнутая ветка прячет конец линии — ствол тогда доходит до последнего видимого
     const deepest = [...line.persons].find((id) => layout.positions.has(id));
     const trunk = !lit && deepest != null ? lineageOf(tree, layout, style, links, deepest).paths : "";
