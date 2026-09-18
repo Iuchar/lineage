@@ -13,6 +13,7 @@ import "./styles/upload.css";
 import "./styles/portrait.css";
 import "./styles/tags.css";
 import "./styles/links.css";
+import "./styles/editor.css";
 
 import type { ClanSummary, ClanTree, LinkPerson, TreePerson } from "./api/types";
 import { NO_MARKS } from "./canvas/cards";
@@ -21,6 +22,9 @@ import { demoHeirs, demoMarks, demoTags } from "./demo";
 import { LinkNav } from "./links/nav";
 import { ManualLink } from "./links/manual";
 import { LinkReview } from "./links/review";
+import { PersonEditor } from "./editor/form";
+import { Journal } from "./editor/journal";
+import { RelativeMenu } from "./editor/menu";
 import { PersonPanel } from "./panel/panel";
 import { SearchBox } from "./panel/search";
 import { UploadFlow } from "./upload/upload";
@@ -207,6 +211,74 @@ async function start(root: HTMLElement): Promise<void> {
       const person = tree?.persons.find((p) => p.id === id);
       if (person) manual.open(brief(person));
     },
+    editing: () => editing,
+    startEdit: (id) => {
+      if (tree) void editor.edit(tree, id);
+    },
+    addRelative: (kind, id, at) => {
+      if (tree) menu.open(tree, kind, id, at);
+    },
+    reverted: (change) => {
+      journal.toast(change);
+      void afterEdit(change.persons[0] ?? null);
+    },
+  });
+
+  // ── режим правки: форма В2 в панели, плюсы на карте, журнал с откатом ──
+  let editing = false;
+  const editor = new PersonEditor(panel.element, {
+    saved: (change, focusId) => {
+      journal.toast(change);
+      void afterEdit(focusId);
+    },
+    closed: () => {
+      if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
+      else panel.clear();
+    },
+  });
+  const menu = new RelativeMenu({
+    chosen: (plan, existing) => {
+      if (tree) editor.create(tree, currentClan, plan, existing);
+    },
+    closed: () => canvas.setEditing(editing),
+  });
+  canvas.onPlus = (kind, id, at) => {
+    if (tree) menu.open(tree, kind, id, at);
+  };
+  const journal = new Journal(stage, {
+    clanId: () => currentClan,
+    changed: (focusId) => void afterEdit(focusId),
+    goTo: (id) => {
+      canvas.reveal(id);
+      canvas.select(id);
+      canvas.centreOnPerson(id);
+    },
+  });
+  journal.group.hidden = true;
+  // род после правки: перечитать, ничего не сбрасывая — вид, свёрнутые ветки и выбор остаются
+  const afterEdit = async (focusId: number | null) => {
+    trees.delete(currentClan);
+    const [loaded, links, summaries] = await Promise.all([
+      getJson<ClanTree>(`/api/clans/${currentClan}/tree`), nav.load(currentClan), getJson<ClanSummary[]>("/api/clans"),
+    ]);
+    tree = loaded;
+    clans = summaries;
+    drawClanTabs(currentClan);
+    search.setTree(tree);
+    canvas.links = links;
+    canvas.refreshTree(tree, focusId);
+    if (focusId != null) canvas.centreOnPerson(focusId);
+    stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
+    void journal.refresh();
+    void countQueue();
+  };
+  const modeSwitch = switcher("Режим", [["view", "Просмотр"], ["edit", "Правка"]], "view", (mode) => {
+    editing = mode === "edit";
+    journal.group.hidden = !editing;
+    canvas.setEditing(editing);
+    menu.close();
+    if (editing) void journal.refresh();
+    if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
   });
   // панель показывает, свёрнута ли ветка, — перерисовать после щелчка по стопке на карте
   canvas.onFoldChange = () => {
@@ -231,6 +303,7 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.setTree(tree, demoMarks(tree), new Map(), tags, heirs);
     lineSwitch.hidden = !heirs.size;
     drawTagFilter(tags);
+    void journal.refresh();
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
 
@@ -275,21 +348,21 @@ async function start(root: HTMLElement): Promise<void> {
   zoomField.type = "text";
   zoomField.inputMode = "numeric";
   zoomField.hidden = true;
-  let editing = false;
+  let typing = false;
   const closeZoom = () => {
-    editing = false;
+    typing = false;
     zoomField.hidden = true;
     zoomValue.hidden = false;
   };
   // поле закрывается и по Delete, и по Escape — набранное при этом не применяется повторно с потерей фокуса
   const applyZoom = () => {
-    if (!editing) return;
+    if (!typing) return;
     const value = Number.parseInt(zoomField.value.replace(/[^\d]/g, ""), 10);
     closeZoom();
     if (Number.isFinite(value) && value > 0) canvas.setZoomPercent(value);
   };
   zoomValue.addEventListener("click", () => {
-    editing = true;
+    typing = true;
     zoomValue.hidden = true;
     zoomField.hidden = false;
     zoomField.value = String(canvas.zoomPercent);
@@ -405,6 +478,8 @@ async function start(root: HTMLElement): Promise<void> {
 
   bar.append(
     clanTabs,
+    modeSwitch,
+    journal.group,
     queueGroup,
     search.element,
     switcher("Стиль", STYLES, "gobelen", (style) => {

@@ -26,6 +26,7 @@ Pedigree = Literal["birth", "adopted", "foster"]
 class DateValue(BaseModel):
     gedcom: str | None
     ru: str
+    input: str  # что поставить в поле: по-русски, если это читается обратно в ту же дату, иначе строка GEDCOM
 
 
 class PersonForm(BaseModel):
@@ -219,7 +220,12 @@ def person_form(conn: sqlite3.Connection, person_id: int) -> PersonForm:
         event = record.first(tag)
         raw = event.value_of("DATE") if event else None
         parsed = parse_date(raw)
-        return DateValue(gedcom=raw, ru=format_ru(parsed) if parsed else "")
+        ru = format_ru(parsed) if parsed else ""
+        try:
+            back = parse_input(ru).gedcom if ru else None
+        except DateInputError:
+            back = None
+        return DateValue(gedcom=raw, ru=ru, input=ru if back == raw else (raw or ""))
 
     return PersonForm(
         id=person_id, clan_id=clan_id, given=person.given, surname=person.surname,

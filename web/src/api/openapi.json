@@ -125,6 +125,100 @@
             }
           }
         }
+      },
+      "put": {
+        "summary": "Put Person",
+        "operationId": "put_person_api_persons__person_id__put",
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove Person",
+        "operationId": "remove_person_api_persons__person_id__delete",
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Person Id"
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Branch"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/persons": {
@@ -373,6 +467,436 @@
         }
       }
     },
+    "/api/dates/parse": {
+      "get": {
+        "summary": "Get Parsed Date",
+        "description": "Как поле даты поняло набранное — для подсказки на лету. Непонятное — 400 с причиной.",
+        "operationId": "get_parsed_date_api_dates_parse_get",
+        "parameters": [
+          {
+            "name": "text",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Text"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParsedDate"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/persons/{person_id}/form": {
+      "get": {
+        "summary": "Get Person Form",
+        "operationId": "get_person_form_api_persons__person_id__form_get",
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonForm"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clans/{clan_id}/persons": {
+      "post": {
+        "summary": "Post Person",
+        "operationId": "post_person_api_clans__clan_id__persons_post",
+        "parameters": [
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewPerson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Created"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/persons/{person_id}/delete-preview": {
+      "get": {
+        "summary": "Get Delete Preview",
+        "operationId": "get_delete_preview_api_persons__person_id__delete_preview_get",
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletePreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clans/{clan_id}/changes": {
+      "get": {
+        "summary": "Get Clan Changes",
+        "operationId": "get_clan_changes_api_clans__clan_id__changes_get",
+        "parameters": [
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChangeInfo"
+                  },
+                  "title": "Response Get Clan Changes Api Clans  Clan Id  Changes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/persons/{person_id}/changes": {
+      "get": {
+        "summary": "Get Person Changes",
+        "operationId": "get_person_changes_api_persons__person_id__changes_get",
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChangeInfo"
+                  },
+                  "title": "Response Get Person Changes Api Persons  Person Id  Changes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clans/{clan_id}/undo": {
+      "post": {
+        "summary": "Post Undo",
+        "operationId": "post_undo_api_clans__clan_id__undo_post",
+        "parameters": [
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ChangeInfo"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Post Undo Api Clans  Clan Id  Undo Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clans/{clan_id}/redo": {
+      "post": {
+        "summary": "Post Redo",
+        "operationId": "post_redo_api_clans__clan_id__redo_post",
+        "parameters": [
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ChangeInfo"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Post Redo Api Clans  Clan Id  Redo Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/changes/{change_id}/undo-to": {
+      "post": {
+        "summary": "Post Undo To",
+        "operationId": "post_undo_to_api_changes__change_id__undo_to_post",
+        "parameters": [
+          {
+            "name": "change_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Change Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChangeInfo"
+                  },
+                  "title": "Response Post Undo To Api Changes  Change Id  Undo To Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/changes/{change_id}/revert": {
+      "post": {
+        "summary": "Post Revert",
+        "operationId": "post_revert_api_changes__change_id__revert_post",
+        "parameters": [
+          {
+            "name": "change_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Change Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/uploads": {
       "post": {
         "summary": "Post Upload",
@@ -585,6 +1109,54 @@
         ],
         "title": "Candidate"
       },
+      "ChangeInfo": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "undone": {
+            "type": "boolean",
+            "title": "Undone"
+          },
+          "persons": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Persons"
+          },
+          "reverts": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reverts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "summary",
+          "created_at",
+          "undone",
+          "persons",
+          "reverts"
+        ],
+        "title": "ChangeInfo"
+      },
       "ClanLink": {
         "properties": {
           "link_id": {
@@ -691,6 +1263,91 @@
           "families"
         ],
         "title": "ClanTree"
+      },
+      "Created": {
+        "properties": {
+          "person_id": {
+            "type": "integer",
+            "title": "Person Id"
+          },
+          "change": {
+            "$ref": "#/components/schemas/ChangeInfo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "person_id",
+          "change"
+        ],
+        "title": "Created"
+      },
+      "DateValue": {
+        "properties": {
+          "gedcom": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gedcom"
+          },
+          "ru": {
+            "type": "string",
+            "title": "Ru"
+          },
+          "input": {
+            "type": "string",
+            "title": "Input"
+          }
+        },
+        "type": "object",
+        "required": [
+          "gedcom",
+          "ru",
+          "input"
+        ],
+        "title": "DateValue"
+      },
+      "DeletePreview": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "children": {
+            "type": "integer",
+            "title": "Children"
+          },
+          "descendants": {
+            "type": "integer",
+            "title": "Descendants"
+          },
+          "inlaws": {
+            "type": "integer",
+            "title": "Inlaws"
+          },
+          "stubs": {
+            "type": "integer",
+            "title": "Stubs"
+          },
+          "branch_total": {
+            "type": "integer",
+            "title": "Branch Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "children",
+          "descendants",
+          "inlaws",
+          "stubs",
+          "branch_total"
+        ],
+        "title": "DeletePreview"
       },
       "FieldChange": {
         "properties": {
@@ -1039,6 +1696,35 @@
         ],
         "title": "NewLink"
       },
+      "NewPerson": {
+        "properties": {
+          "fields": {
+            "$ref": "#/components/schemas/PersonFields",
+            "default": {
+              "notes": []
+            }
+          },
+          "relation": {
+            "$ref": "#/components/schemas/Relation"
+          },
+          "existing_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Existing Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "relation"
+        ],
+        "title": "NewPerson"
+      },
       "PairDecision": {
         "properties": {
           "a": {
@@ -1056,6 +1742,36 @@
           "b"
         ],
         "title": "PairDecision"
+      },
+      "ParsedDate": {
+        "properties": {
+          "gedcom": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gedcom"
+          },
+          "ru": {
+            "type": "string",
+            "title": "Ru"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "gedcom",
+          "ru",
+          "kind"
+        ],
+        "title": "ParsedDate"
       },
       "PersonBrief": {
         "properties": {
@@ -1231,6 +1947,236 @@
           "place"
         ],
         "title": "PersonEvent"
+      },
+      "PersonFields": {
+        "properties": {
+          "given": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Given"
+          },
+          "surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surname"
+          },
+          "married_surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Married Surname"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "M",
+                  "F",
+                  "U"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          },
+          "birth": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth"
+          },
+          "death": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Death"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "PersonFields",
+        "description": "Что форма присылает. Даты — как набраны, по-русски или строкой GEDCOM."
+      },
+      "PersonForm": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "clan_id": {
+            "type": "integer",
+            "title": "Clan Id"
+          },
+          "given": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Given"
+          },
+          "surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surname"
+          },
+          "married_surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Married Surname"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "M",
+                  "F",
+                  "U"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          },
+          "birth": {
+            "$ref": "#/components/schemas/DateValue"
+          },
+          "death": {
+            "$ref": "#/components/schemas/DateValue"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "clan_id",
+          "given",
+          "surname",
+          "married_surname",
+          "sex",
+          "birth",
+          "death",
+          "notes"
+        ],
+        "title": "PersonForm",
+        "description": "Что показывает форма правки."
+      },
+      "Relation": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "child",
+              "parent",
+              "spouse",
+              "sibling"
+            ],
+            "title": "Kind"
+          },
+          "person_id": {
+            "type": "integer",
+            "title": "Person Id"
+          },
+          "other_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Other Id"
+          },
+          "parents": {
+            "type": "string",
+            "enum": [
+              "both",
+              "father",
+              "mother"
+            ],
+            "title": "Parents",
+            "default": "both"
+          },
+          "pedigree": {
+            "type": "string",
+            "enum": [
+              "birth",
+              "adopted",
+              "foster"
+            ],
+            "title": "Pedigree",
+            "default": "birth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "person_id"
+        ],
+        "title": "Relation",
+        "description": "Куда встаёт человек. kind: child, parent, spouse, sibling.\n\nchild — к person_id; other_id — второй родитель (None — неизвестен), new_union — отдельный союз.\nparent — к person_id, роль по полу нового человека.\nspouse — новый союз с person_id.\nsibling — к person_id; parents: both, father, mother."
       },
       "ReloadPreview": {
         "properties": {

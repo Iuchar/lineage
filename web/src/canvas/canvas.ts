@@ -8,9 +8,11 @@ import { drawCards, drawFolds, NO_MARKS, type PersonMarks, type ReviewMark } fro
 import { mainLine, NO_LINE } from "./heirs";
 import { NO_TAGS, type TagSet } from "./tags";
 import { lineageOf } from "./lineage";
-import { drawLinks } from "./links";
+import { drawLinks, type LinksSvg } from "./links";
 import { drawRuler } from "./ruler";
 import { centreOn, fitAll, keepAnchor, type View, zoomAt, ZOOM_BASE, ZOOM_STEP, zoomFromPercent, zoomPercent } from "./view";
+
+export type PlusKind = "parent" | "spouse" | "sibling" | "child";
 
 export interface CanvasState {
   style: StyleName;
@@ -32,6 +34,8 @@ export class TreeCanvas {
   readonly viewport: HTMLElement;
   private readonly surface: HTMLElement;
   private readonly rulerLayer: HTMLElement;
+  private readonly plusLayer: HTMLElement;
+  private svg: LinksSvg | null = null;
 
   private tree: ClanTree | null = null;
   private layout: LayoutResult | null = null;
@@ -62,6 +66,9 @@ export class TreeCanvas {
   onSelect: (id: number | null) => void = () => {};
   onFoldChange: () => void = () => {};
   onLinkOpen: (personId: number) => void = () => {};
+  // режим правки: у выбранного плюсы там, где встанет новый человек
+  editing = false;
+  onPlus: (kind: PlusKind, personId: number, at: DOMRect) => void = () => {};
 
   constructor(host: HTMLElement) {
     this.viewport = document.createElement("div");
@@ -71,7 +78,10 @@ export class TreeCanvas {
     this.rulerLayer = document.createElement("div");
     this.rulerLayer.className = "ruler";
     this.rulerLayer.hidden = true;
-    this.viewport.append(this.surface, this.rulerLayer);
+    // плюсы режима правки: в пикселях экрана, чтобы не мельчали при отдалении
+    this.plusLayer = document.createElement("div");
+    this.plusLayer.className = "plusLayer";
+    this.viewport.append(this.surface, this.rulerLayer, this.plusLayer);
     host.append(this.viewport);
     this.bindEvents();
   }
@@ -94,6 +104,24 @@ export class TreeCanvas {
     this.render();
     this.fit();
     this.onSelect(null);
+  }
+
+  // род перечитан после правки: ничего не сбрасывается, вид остаётся на месте
+  refreshTree(tree: ClanTree, select: number | null): void {
+    this.tree = tree;
+    const alive = new Set(tree.persons.map((p) => p.id));
+    for (const id of this.manual.keys()) if (!alive.has(id)) this.manual.delete(id);
+    const families = new Set(tree.families.map((f) => f.id));
+    for (const id of this.folded) if (!families.has(id)) this.folded.delete(id);
+    if (select != null && alive.has(select)) this.selected = select;
+    else if (this.selected != null && !alive.has(this.selected)) this.selected = null;
+    this.keepView(() => this.render());
+    this.onSelect(this.selected);
+  }
+
+  setEditing(on: boolean): void {
+    this.editing = on;
+    this.drawPluses();
   }
 
   // сдвинуть человека среди братьев; вид остаётся на месте
@@ -217,6 +245,7 @@ export class TreeCanvas {
     const styles = getComputedStyle(document.body);
     const color = (name: string, fallback: string) => (styles.getPropertyValue(name) || fallback).trim();
     const links = drawLinks(tree, layout, style, color, undefined, foldedIds);
+    this.svg = links;
     const defs = style === "viktorian" ? POLLEN(color("--orn", "transparent"), width, height) : "";
     // линия рода выбранного: путь акцентом, остальное дерево в тени
     const lineage = this.selected != null ? lineageOf(tree, layout, style, links, this.selected) : null;
@@ -265,10 +294,49 @@ export class TreeCanvas {
     this.apply();
   }
 
+  // места для нового человека у выбранного: сверху родитель (если их меньше двух), сбоку супруг — со свободной
+  // стороны, на шине братьев — брат или сестра, снизу ребёнок. Основатель снизу — верх и низ меняются местами
+  private plusSpots(): { kind: PlusKind; x: number; y: number }[] {
+    const tree = this.tree;
+    const layout = this.layout;
+    const id = this.selected;
+    if (!tree || !layout || id == null) return [];
+    const person = tree.persons.find((p) => p.id === id);
+    const at = layout.positions.get(id);
+    if (!person || !at || person.is_branch_stub) return [];
+    const w = layout.cardWidth;
+    const h = layout.cardHeight;
+    const cx = at.x + w / 2;
+    const down = this.state.rootAtBottom;
+    const spots: { kind: PlusKind; x: number; y: number }[] = [];
+    const parents = tree.families.find((f) => f.id === person.parent_families[0]);
+    const known = parents ? [parents.husband, parents.wife].filter((p) => p != null).length : 0;
+    if (known < 2) spots.push({ kind: "parent", x: cx, y: down ? at.y + h : at.y });
+    // сторона супруга — где просторнее: соседи в том же ряду
+    const row = [...layout.positions.entries()].filter(([pid, p]) => pid !== id && Math.abs(p.y - at.y) < h / 2);
+    const left = Math.min(...row.filter(([, p]) => p.x < at.x).map(([, p]) => at.x - (p.x + w)), 1e9);
+    const right = Math.min(...row.filter(([, p]) => p.x > at.x).map(([, p]) => p.x - (at.x + w)), 1e9);
+    spots.push({ kind: "spouse", x: right >= left ? at.x + w + 26 : at.x - 26, y: at.y + h / 2 });
+    const bus = parents ? this.svg?.descents.get(parents.id) : undefined;
+    if (bus) spots.push({ kind: "sibling", x: cx - 44, y: bus.bus });
+    spots.push({ kind: "child", x: cx, y: down ? at.y - 18 : at.y + h + 18 });
+    return spots;
+  }
+
+  private drawPluses(): void {
+    const spots = this.editing ? this.plusSpots() : [];
+    const titles: Record<PlusKind, string> = { parent: "Добавить родителя", spouse: "Добавить супруга",
+      sibling: "Добавить брата или сестру", child: "Добавить ребёнка" };
+    this.plusLayer.innerHTML = spots.map((s) =>
+      `<button class="plus" data-plus="${s.kind}" title="${titles[s.kind]}" ` +
+      `style="left:${(this.view.x + s.x * this.view.k).toFixed(1)}px;top:${(this.view.y + s.y * this.view.k).toFixed(1)}px">+</button>`).join("");
+  }
+
   private apply(): void {
     const { k, x, y } = this.view;
     this.surface.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${k.toFixed(3)})`;
     this.drawRuler();
+    this.drawPluses();
     this.onViewChange(this.view);
   }
 
@@ -316,6 +384,13 @@ export class TreeCanvas {
 
   private bindEvents(): void {
     const vp = this.viewport;
+    this.plusLayer.addEventListener("pointerdown", (e) => e.stopPropagation());
+    this.plusLayer.addEventListener("click", (e) => {
+      const plus = (e.target as HTMLElement).closest<HTMLElement>("[data-plus]");
+      if (!plus || this.selected == null) return;
+      this.plusLayer.querySelectorAll(".plus").forEach((b) => b.classList.toggle("on", b === plus));
+      this.onPlus(plus.dataset.plus as PlusKind, this.selected, plus.getBoundingClientRect());
+    });
 
     // колесо — зум к курсору; с Shift — горизонтальная протяжка
     vp.addEventListener(

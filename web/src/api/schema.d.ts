@@ -64,9 +64,11 @@ export interface paths {
         };
         /** Get Person */
         get: operations["get_person_api_persons__person_id__get"];
-        put?: never;
+        /** Put Person */
+        put: operations["put_person_api_persons__person_id__put"];
         post?: never;
-        delete?: never;
+        /** Remove Person */
+        delete: operations["remove_person_api_persons__person_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -178,6 +180,179 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/dates/parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Parsed Date
+         * @description Как поле даты поняло набранное — для подсказки на лету. Непонятное — 400 с причиной.
+         */
+        get: operations["get_parsed_date_api_dates_parse_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/persons/{person_id}/form": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Person Form */
+        get: operations["get_person_form_api_persons__person_id__form_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{clan_id}/persons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Person */
+        post: operations["post_person_api_clans__clan_id__persons_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/persons/{person_id}/delete-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Delete Preview */
+        get: operations["get_delete_preview_api_persons__person_id__delete_preview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{clan_id}/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Clan Changes */
+        get: operations["get_clan_changes_api_clans__clan_id__changes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/persons/{person_id}/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Person Changes */
+        get: operations["get_person_changes_api_persons__person_id__changes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{clan_id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Undo */
+        post: operations["post_undo_api_clans__clan_id__undo_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{clan_id}/redo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Redo */
+        post: operations["post_redo_api_clans__clan_id__redo_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/changes/{change_id}/undo-to": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Undo To */
+        post: operations["post_undo_to_api_changes__change_id__undo_to_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/changes/{change_id}/revert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Revert */
+        post: operations["post_revert_api_changes__change_id__revert_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/uploads": {
         parameters: {
             query?: never;
@@ -239,6 +414,21 @@ export interface components {
             a: components["schemas"]["Kin"];
             b: components["schemas"]["Kin"];
         };
+        /** ChangeInfo */
+        ChangeInfo: {
+            /** Id */
+            id: number;
+            /** Summary */
+            summary: string;
+            /** Created At */
+            created_at: string;
+            /** Undone */
+            undone: boolean;
+            /** Persons */
+            persons: number[];
+            /** Reverts */
+            reverts: number | null;
+        };
         /**
          * ClanLink
          * @description Для карты рода: у своего человека есть двойник в другом роду.
@@ -279,6 +469,36 @@ export interface components {
             persons: components["schemas"]["TreePerson"][];
             /** Families */
             families: components["schemas"]["TreeFamily"][];
+        };
+        /** Created */
+        Created: {
+            /** Person Id */
+            person_id: number;
+            change: components["schemas"]["ChangeInfo"];
+        };
+        /** DateValue */
+        DateValue: {
+            /** Gedcom */
+            gedcom: string | null;
+            /** Ru */
+            ru: string;
+            /** Input */
+            input: string;
+        };
+        /** DeletePreview */
+        DeletePreview: {
+            /** Name */
+            name: string;
+            /** Children */
+            children: number;
+            /** Descendants */
+            descendants: number;
+            /** Inlaws */
+            inlaws: number;
+            /** Stubs */
+            stubs: number;
+            /** Branch Total */
+            branch_total: number;
         };
         /** FieldChange */
         FieldChange: {
@@ -380,12 +600,33 @@ export interface components {
              */
             replace: boolean;
         };
+        /** NewPerson */
+        NewPerson: {
+            /**
+             * @default {
+             *       "notes": []
+             *     }
+             */
+            fields: components["schemas"]["PersonFields"];
+            relation: components["schemas"]["Relation"];
+            /** Existing Id */
+            existing_id?: number | null;
+        };
         /** PairDecision */
         PairDecision: {
             /** A */
             a: number;
             /** B */
             b: number;
+        };
+        /** ParsedDate */
+        ParsedDate: {
+            /** Gedcom */
+            gedcom: string | null;
+            /** Ru */
+            ru: string;
+            /** Kind */
+            kind: string;
         };
         /** PersonBrief */
         PersonBrief: {
@@ -437,6 +678,83 @@ export interface components {
             date: components["schemas"]["LifeDate"] | null;
             /** Place */
             place: string | null;
+        };
+        /**
+         * PersonFields
+         * @description Что форма присылает. Даты — как набраны, по-русски или строкой GEDCOM.
+         */
+        PersonFields: {
+            /** Given */
+            given?: string | null;
+            /** Surname */
+            surname?: string | null;
+            /** Married Surname */
+            married_surname?: string | null;
+            /** Sex */
+            sex?: ("M" | "F" | "U") | null;
+            /** Birth */
+            birth?: string | null;
+            /** Death */
+            death?: string | null;
+            /**
+             * Notes
+             * @default []
+             */
+            notes: string[];
+        };
+        /**
+         * PersonForm
+         * @description Что показывает форма правки.
+         */
+        PersonForm: {
+            /** Id */
+            id: number;
+            /** Clan Id */
+            clan_id: number;
+            /** Given */
+            given: string | null;
+            /** Surname */
+            surname: string | null;
+            /** Married Surname */
+            married_surname: string | null;
+            /** Sex */
+            sex: ("M" | "F" | "U") | null;
+            birth: components["schemas"]["DateValue"];
+            death: components["schemas"]["DateValue"];
+            /** Notes */
+            notes: string[];
+        };
+        /**
+         * Relation
+         * @description Куда встаёт человек. kind: child, parent, spouse, sibling.
+         *
+         *     child — к person_id; other_id — второй родитель (None — неизвестен), new_union — отдельный союз.
+         *     parent — к person_id, роль по полу нового человека.
+         *     spouse — новый союз с person_id.
+         *     sibling — к person_id; parents: both, father, mother.
+         */
+        Relation: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "child" | "parent" | "spouse" | "sibling";
+            /** Person Id */
+            person_id: number;
+            /** Other Id */
+            other_id?: number | null;
+            /**
+             * Parents
+             * @default both
+             * @enum {string}
+             */
+            parents: "both" | "father" | "mother";
+            /**
+             * Pedigree
+             * @default birth
+             * @enum {string}
+             */
+            pedigree: "birth" | "adopted" | "foster";
         };
         /** ReloadPreview */
         ReloadPreview: {
@@ -656,6 +974,74 @@ export interface operations {
             };
         };
     };
+    put_person_api_persons__person_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PersonFields"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_person_api_persons__person_id__delete: {
+        parameters: {
+            query?: {
+                branch?: boolean;
+            };
+            header?: never;
+            path: {
+                person_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     find_persons_api_persons_get: {
         parameters: {
             query: {
@@ -840,6 +1226,320 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_parsed_date_api_dates_parse_get: {
+        parameters: {
+            query?: {
+                text?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParsedDate"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_person_form_api_persons__person_id__form_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonForm"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_person_api_clans__clan_id__persons_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewPerson"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Created"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_delete_preview_api_persons__person_id__delete_preview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletePreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_clan_changes_api_clans__clan_id__changes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_person_changes_api_persons__person_id__changes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_undo_api_clans__clan_id__undo_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_redo_api_clans__clan_id__redo_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_undo_to_api_changes__change_id__undo_to_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                change_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_revert_api_changes__change_id__revert_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                change_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"];
+                };
             };
             /** @description Validation Error */
             422: {

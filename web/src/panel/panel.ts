@@ -1,6 +1,8 @@
 // Панель выбранного человека справа: сведения, родня, браки, заметки, место среди братьев.
 
-import type { ClanLink, ClanTree, PersonDetails, PersonEvent, TreePerson } from "../api/types";
+import type { ChangeInfo, ClanLink, ClanTree, PersonDetails, PersonEvent, TreePerson } from "../api/types";
+import type { PlusKind } from "../canvas/canvas";
+import { historyHtml, revertChange } from "../editor/journal";
 import { cardName, escapeHtml, formatDate, lifeYears } from "../format";
 import { silhouette } from "../canvas/portrait";
 import { TAG_COLORS, type Tag } from "../canvas/tags";
@@ -23,6 +25,11 @@ export interface PanelActions {
   openLink: (link: ClanLink) => void;
   unlink: (link: ClanLink) => void;
   linkWith: (personId: number) => void;
+  // режим правки
+  editing: () => boolean;
+  startEdit: (personId: number) => void;
+  addRelative: (kind: PlusKind, personId: number, at: DOMRect) => void;
+  reverted: (change: ChangeInfo) => void;
 }
 
 const EVENT_LABELS: Record<string, string> = {
@@ -51,6 +58,7 @@ export class PersonPanel {
   private request = 0;
   private last: { tree: ClanTree; person: TreePerson; details: PersonDetails | null } | null = null;
   private confirming: number | null = null; // связка, которую просят снять: второе нажатие подтверждает
+  private tab: "person" | "history" = "person";
 
   constructor(
     host: HTMLElement,
@@ -59,7 +67,7 @@ export class PersonPanel {
     this.element = document.createElement("aside");
     this.element.className = "side";
     this.element.addEventListener("click", (e) => {
-      const target = (e.target as HTMLElement).closest<HTMLElement>("[data-id],[data-act]");
+      const target = (e.target as HTMLElement).closest<HTMLElement>("[data-id],[data-act],[data-add],[data-tab],[data-revert]");
       if (!target) return;
       if (target.dataset.id) this.actions.select(Number(target.dataset.id));
       const id = Number(target.dataset.person);
@@ -79,6 +87,15 @@ export class PersonPanel {
           this.redraw();
         }
       }
+      if (target.dataset.act === "edit" && this.last) this.actions.startEdit(this.last.person.id);
+      if (target.dataset.add && this.last) {
+        this.actions.addRelative(target.dataset.add as PlusKind, this.last.person.id, target.getBoundingClientRect());
+      }
+      if (target.dataset.tab) {
+        this.tab = target.dataset.tab as "person" | "history";
+        this.redraw();
+      }
+      if (target.dataset.revert) void this.revert(Number(target.dataset.revert));
       if (target.dataset.act === "unlink-no") {
         this.confirming = null;
         this.redraw();
@@ -108,7 +125,10 @@ export class PersonPanel {
   async show(tree: ClanTree, personId: number): Promise<void> {
     const person = tree.persons.find((p) => p.id === personId);
     if (!person) return this.clear();
-    if (this.last?.person.id !== personId) this.confirming = null;
+    if (this.last?.person.id !== personId) {
+      this.confirming = null;
+      this.tab = "person";
+    }
     const request = ++this.request;
     this.render(tree, person, null); // сразу из дерева, подробности дорисуются
     const response = await fetch(`/api/persons/${personId}`);
@@ -119,7 +139,22 @@ export class PersonPanel {
   private render(tree: ClanTree, person: TreePerson, details: PersonDetails | null): void {
     this.last = { tree, person, details };
     const rel = relativesOf(tree, person.id);
-    let h = '<div class="sideIn">';
+    const editing = this.actions.editing() && !person.is_branch_stub;
+    let h = "";
+    if (editing) {
+      h += `<div class="tabs2"><button data-tab="person"${this.tab === "person" ? ' class="on"' : ""}>Человек</button>` +
+        `<button data-tab="history"${this.tab === "history" ? ' class="on"' : ""}>История</button></div>`;
+      if (this.tab === "history") {
+        this.element.innerHTML = `${h}<div class="sideIn jr" data-role="history"><div class="note">…</div></div>`;
+        void historyHtml(person.id).then((html) => {
+          const box = this.element.querySelector("[data-role=history]");
+          if (box && this.last?.person.id === person.id && this.tab === "history") box.innerHTML = html;
+        });
+        return;
+      }
+    }
+    h += '<div class="sideIn">';
+    if (editing) h += '<div class="btns" style="margin:0 0 12px"><button class="pri" data-act="edit">Править</button></div>';
 
     if (person.is_branch_stub) {
       h += `<h3>${escapeHtml(cardName(person))}</h3><div class="sub">ветка уходит дальше · ${escapeHtml(person.xref)}</div>`;
@@ -155,6 +190,7 @@ export class PersonPanel {
       h += row(label, text);
     }
 
+    if (editing) h += this.addHtml(tree, person);
     if (!person.is_branch_stub) h += this.linksHtml(person);
 
     if (rel.marriages.length) {
@@ -200,6 +236,32 @@ export class PersonPanel {
     h += '<div class="actions"><button data-act="centre">В центр</button></div>';
     h += "</div>";
     this.element.innerHTML = h;
+  }
+
+  // раздел «Добавить»: те же места, что плюсы на карте; занятые приглушены
+  private addHtml(tree: ClanTree, person: TreePerson): string {
+    const rel = relativesOf(tree, person.id);
+    const full = (p: TreePerson | null) => (p ? [p.given, p.surname].filter(Boolean).join(" ") : "");
+    const parents = [rel.father, rel.mother].filter(Boolean).length;
+    const spouses = rel.marriages.map((m) => m.spouse).filter(Boolean) as TreePerson[];
+    const cell = (kind: PlusKind, title: string, note: string, off = false, wide = false) =>
+      `<button type="button" class="${off ? "done" : ""}${wide ? " wide" : ""}" data-add="${kind}"${off ? " disabled" : ""}>` +
+      `+ ${title}<small>${escapeHtml(note)}</small></button>`;
+    return '<div class="lbl">Добавить</div><div class="addGrid">' +
+      cell("parent", "родитель", parents === 2 ? `есть оба: ${full(rel.father).split(" ")[0]}, ${full(rel.mother).split(" ")[0]}`
+        : parents === 1 ? `есть: ${full(rel.father ?? rel.mother)}` : "не записаны", parents === 2) +
+      cell("spouse", person.sex === "F" ? "муж" : person.sex === "M" ? "жена" : "супруг",
+        spouses.length ? `ещё один союз · сейчас ${spouses.length}` : "новый союз") +
+      cell("sibling", "брат или сестра", parents ? `к ${[rel.father, rel.mother].filter(Boolean).map((p) => full(p).split(" ")[0]).join(" и ")}` : "сначала появятся родители", !parents) +
+      cell("child", "сын или дочь", spouses.length ? `с ${full(spouses[0]!).split(" ")[0]} или без второго родителя` : "с другим родителем или без него") +
+      "</div>";
+  }
+
+  private async revert(changeId: number): Promise<void> {
+    const result = await revertChange(changeId);
+    if (result.ok) return this.actions.reverted(result.change);
+    const box = this.element.querySelector<HTMLElement>("[data-role=history] [data-role=err]");
+    if (box) box.textContent = result.detail;
   }
 
   // «Также в роду»: каждая связка строкой с переходом; по той, что привела сюда, — возврат
