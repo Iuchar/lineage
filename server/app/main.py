@@ -13,6 +13,8 @@ from app import uploads
 from app.config import DB_PATH, DIST
 from app.db.clans import ClanExistsError, import_clan
 from app.db.connection import connect
+from app.db.links import (Candidate, ClanLink, Link, LinkClashError, LinkError, LinkNotFoundError, LinkPerson,
+                          candidates, clan_links, create_link, delete_link, list_links, reject_pair, search_persons)
 from app.db.person import PersonDetails, PersonNotFoundError, person_details
 from app.db.reload import ClanMatch, ReloadPreview, ReloadReport, clan_matches, preview_reload, reload_clan, suggested_name
 from app.db.tree import ClanNotFoundError, ClanSummary, ClanTree, clan_tree, list_clans
@@ -62,6 +64,65 @@ def get_person(person_id: int, conn: Database) -> PersonDetails:
         return person_details(conn, person_id)
     except PersonNotFoundError:
         raise HTTPException(status_code=404, detail="Такого человека нет") from None
+
+
+@app.get("/api/persons")
+def find_persons(q: str, conn: Database, exclude_clan: int | None = None) -> list[LinkPerson]:
+    """Поиск по всем родам — для ручной связки."""
+    return search_persons(conn, q, exclude_clan)
+
+
+@app.get("/api/clans/{clan_id}/links")
+def get_clan_links(clan_id: int, conn: Database) -> list[ClanLink]:
+    return clan_links(conn, clan_id)
+
+
+class NewLink(BaseModel):
+    a: int
+    b: int
+    note: str | None = None
+    replace: bool = False  # у человека в том роду уже есть двойник — снять старую связку и поставить эту
+
+
+class PairDecision(BaseModel):
+    a: int
+    b: int
+
+
+@app.get("/api/links")
+def get_links(conn: Database) -> list[Link]:
+    return list_links(conn)
+
+
+@app.get("/api/links/candidates")
+def get_candidates(conn: Database) -> list[Candidate]:
+    return candidates(conn)
+
+
+@app.post("/api/links")
+def post_link(body: NewLink, conn: Database) -> Link:
+    try:
+        return create_link(conn, body.a, body.b, body.note, body.replace)
+    except LinkClashError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from None
+    except LinkError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from None
+
+
+@app.delete("/api/links/{link_id}", status_code=204)
+def remove_link(link_id: int, conn: Database) -> None:
+    try:
+        delete_link(conn, link_id)
+    except LinkNotFoundError:
+        raise HTTPException(status_code=404, detail="Такой связки нет") from None
+
+
+@app.post("/api/links/reject", status_code=204)
+def post_reject(body: PairDecision, conn: Database) -> None:
+    try:
+        reject_pair(conn, body.a, body.b)
+    except LinkError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from None
 
 
 MAX_UPLOAD = 20 * 1024 * 1024

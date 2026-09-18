@@ -99,5 +99,5 @@ def test_potomki_marked_retroactively_in_old_databases(tmp_path: Path) -> None:
     conn.execute("INSERT INTO schema_migrations VALUES (1, 'раньше')")
     conn.execute("INSERT INTO clans (name, imported_at) VALUES ('Старый', 'раньше')")
     conn.execute("INSERT INTO persons (clan_id, xref, given, raw) VALUES (1, '@I1@', 'Потомки', '{}')")
-    assert migrate(conn) == [2]
+    assert migrate(conn)[0] == 2  # дальше идут новые миграции, эта должна примениться первой
     assert count(conn, "SELECT is_branch_stub FROM persons") == 1

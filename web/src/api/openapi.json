@@ -127,6 +127,252 @@
         }
       }
     },
+    "/api/persons": {
+      "get": {
+        "summary": "Find Persons",
+        "description": "Поиск по всем родам — для ручной связки.",
+        "operationId": "find_persons_api_persons_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "exclude_clan",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Exclude Clan"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LinkPerson"
+                  },
+                  "title": "Response Find Persons Api Persons Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clans/{clan_id}/links": {
+      "get": {
+        "summary": "Get Clan Links",
+        "operationId": "get_clan_links_api_clans__clan_id__links_get",
+        "parameters": [
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClanLink"
+                  },
+                  "title": "Response Get Clan Links Api Clans  Clan Id  Links Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/links": {
+      "get": {
+        "summary": "Get Links",
+        "operationId": "get_links_api_links_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Link"
+                  },
+                  "type": "array",
+                  "title": "Response Get Links Api Links Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Post Link",
+        "operationId": "post_link_api_links_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewLink"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Link"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/links/candidates": {
+      "get": {
+        "summary": "Get Candidates",
+        "operationId": "get_candidates_api_links_candidates_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Candidate"
+                  },
+                  "type": "array",
+                  "title": "Response Get Candidates Api Links Candidates Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/links/{link_id}": {
+      "delete": {
+        "summary": "Remove Link",
+        "operationId": "remove_link_api_links__link_id__delete",
+        "parameters": [
+          {
+            "name": "link_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Link Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/links/reject": {
+      "post": {
+        "summary": "Post Reject",
+        "operationId": "post_reject_api_links_reject_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/uploads": {
       "post": {
         "summary": "Post Upload",
@@ -323,6 +569,45 @@
   },
   "components": {
     "schemas": {
+      "Candidate": {
+        "properties": {
+          "a": {
+            "$ref": "#/components/schemas/Kin"
+          },
+          "b": {
+            "$ref": "#/components/schemas/Kin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "a",
+          "b"
+        ],
+        "title": "Candidate"
+      },
+      "ClanLink": {
+        "properties": {
+          "link_id": {
+            "type": "integer",
+            "title": "Link Id"
+          },
+          "person_id": {
+            "type": "integer",
+            "title": "Person Id"
+          },
+          "other": {
+            "$ref": "#/components/schemas/LinkPerson"
+          }
+        },
+        "type": "object",
+        "required": [
+          "link_id",
+          "person_id",
+          "other"
+        ],
+        "title": "ClanLink",
+        "description": "Для карты рода: у своего человека есть двойник в другом роду."
+      },
       "ClanMatch": {
         "properties": {
           "id": {
@@ -443,6 +728,43 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "Kin": {
+        "properties": {
+          "person": {
+            "$ref": "#/components/schemas/LinkPerson"
+          },
+          "parents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Parents"
+          },
+          "spouses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Spouses"
+          },
+          "children": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Children"
+          }
+        },
+        "type": "object",
+        "required": [
+          "person",
+          "parents",
+          "spouses",
+          "children"
+        ],
+        "title": "Kin",
+        "description": "Окружение кандидата: по нему тёзки из разных семей расходятся сразу."
+      },
       "LifeDate": {
         "properties": {
           "raw": {
@@ -559,6 +881,96 @@
         ],
         "title": "LifeDate"
       },
+      "Link": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "a": {
+            "$ref": "#/components/schemas/LinkPerson"
+          },
+          "b": {
+            "$ref": "#/components/schemas/LinkPerson"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "note",
+          "created_at",
+          "a",
+          "b"
+        ],
+        "title": "Link"
+      },
+      "LinkPerson": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "clan_id": {
+            "type": "integer",
+            "title": "Clan Id"
+          },
+          "clan_name": {
+            "type": "string",
+            "title": "Clan Name"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "born": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Born"
+          },
+          "died": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Died"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "clan_id",
+          "clan_name",
+          "name",
+          "born",
+          "died"
+        ],
+        "title": "LinkPerson"
+      },
       "MarriageDetails": {
         "properties": {
           "family_id": {
@@ -592,6 +1004,58 @@
           "name"
         ],
         "title": "NewClan"
+      },
+      "NewLink": {
+        "properties": {
+          "a": {
+            "type": "integer",
+            "title": "A"
+          },
+          "b": {
+            "type": "integer",
+            "title": "B"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "replace": {
+            "type": "boolean",
+            "title": "Replace",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "a",
+          "b"
+        ],
+        "title": "NewLink"
+      },
+      "PairDecision": {
+        "properties": {
+          "a": {
+            "type": "integer",
+            "title": "A"
+          },
+          "b": {
+            "type": "integer",
+            "title": "B"
+          }
+        },
+        "type": "object",
+        "required": [
+          "a",
+          "b"
+        ],
+        "title": "PairDecision"
       },
       "PersonBrief": {
         "properties": {

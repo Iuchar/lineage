@@ -72,6 +72,112 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/persons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find Persons
+         * @description Поиск по всем родам — для ручной связки.
+         */
+        get: operations["find_persons_api_persons_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{clan_id}/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Clan Links */
+        get: operations["get_clan_links_api_clans__clan_id__links_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Links */
+        get: operations["get_links_api_links_get"];
+        put?: never;
+        /** Post Link */
+        post: operations["post_link_api_links_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/links/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Candidates */
+        get: operations["get_candidates_api_links_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/links/{link_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Link */
+        delete: operations["remove_link_api_links__link_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/links/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Reject */
+        post: operations["post_reject_api_links_reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/uploads": {
         parameters: {
             query?: never;
@@ -128,6 +234,22 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Candidate */
+        Candidate: {
+            a: components["schemas"]["Kin"];
+            b: components["schemas"]["Kin"];
+        };
+        /**
+         * ClanLink
+         * @description Для карты рода: у своего человека есть двойник в другом роду.
+         */
+        ClanLink: {
+            /** Link Id */
+            link_id: number;
+            /** Person Id */
+            person_id: number;
+            other: components["schemas"]["LinkPerson"];
+        };
         /** ClanMatch */
         ClanMatch: {
             /** Id */
@@ -172,6 +294,19 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /**
+         * Kin
+         * @description Окружение кандидата: по нему тёзки из разных семей расходятся сразу.
+         */
+        Kin: {
+            person: components["schemas"]["LinkPerson"];
+            /** Parents */
+            parents: string[];
+            /** Spouses */
+            spouses: string[];
+            /** Children */
+            children: string[];
+        };
         /** LifeDate */
         LifeDate: {
             /** Raw */
@@ -193,6 +328,32 @@ export interface components {
             /** Phrase */
             phrase: string | null;
         };
+        /** Link */
+        Link: {
+            /** Id */
+            id: number;
+            /** Note */
+            note: string | null;
+            /** Created At */
+            created_at: string;
+            a: components["schemas"]["LinkPerson"];
+            b: components["schemas"]["LinkPerson"];
+        };
+        /** LinkPerson */
+        LinkPerson: {
+            /** Id */
+            id: number;
+            /** Clan Id */
+            clan_id: number;
+            /** Clan Name */
+            clan_name: string;
+            /** Name */
+            name: string;
+            /** Born */
+            born: number | null;
+            /** Died */
+            died: number | null;
+        };
         /** MarriageDetails */
         MarriageDetails: {
             /** Family Id */
@@ -204,6 +365,27 @@ export interface components {
         NewClan: {
             /** Name */
             name: string;
+        };
+        /** NewLink */
+        NewLink: {
+            /** A */
+            a: number;
+            /** B */
+            b: number;
+            /** Note */
+            note?: string | null;
+            /**
+             * Replace
+             * @default false
+             */
+            replace: boolean;
+        };
+        /** PairDecision */
+        PairDecision: {
+            /** A */
+            a: number;
+            /** B */
+            b: number;
         };
         /** PersonBrief */
         PersonBrief: {
@@ -462,6 +644,202 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PersonDetails"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    find_persons_api_persons_get: {
+        parameters: {
+            query: {
+                q: string;
+                exclude_clan?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkPerson"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_clan_links_api_clans__clan_id__links_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClanLink"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_links_api_links_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Link"][];
+                };
+            };
+        };
+    };
+    post_link_api_links_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewLink"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Link"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_candidates_api_links_candidates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Candidate"][];
+                };
+            };
+        };
+    };
+    remove_link_api_links__link_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_reject_api_links_reject_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PairDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
