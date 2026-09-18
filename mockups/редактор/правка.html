@@ -40,6 +40,7 @@ h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
 .side .row.ed { cursor: text; }
 .side .row.pen i::after { content: ' ✎'; color: var(--acc); font-style: normal; font-size: 12px; opacity: .8; }
 .side h3 .pen { color: var(--acc); font: 400 12px 'Golos Text', sans-serif; opacity: .8; }
+.pop .note2 { font-size: 11px; color: var(--mut); margin-top: 8px; line-height: 1.4; }
 .bind { font-size: 12px; line-height: 1.45; padding: 8px 9px; margin: 6px 0 10px; border: 1px solid var(--acc); border-radius: 4px; }
 .bind b { font-weight: 500; color: var(--acc); }
 .porHint { font-size: 10.5px; color: var(--acc); margin-top: 6px; opacity: .85; }
@@ -148,6 +149,10 @@ h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
   <div class="grp" id="parentGrp"><b>Второй родитель</b><div class="sw" data-set="second">
     <button data-v="aina" aria-pressed="true">Аина Драммонд — жена</button><button data-v="none">неизвестен</button>
   </div></div>
+  <div class="grp" id="plusGrp"><b>Плюс</b><div class="sw" data-set="plus">
+    <button data-v="parent" aria-pressed="true">родитель</button><button data-v="spouse">супруг</button>
+    <button data-v="sibling">брат / сестра</button><button data-v="child">ребёнок</button>
+  </div></div>
   <div class="grp" id="stepGrp"><b>Шаг</b><div class="sw" data-set="step">
     <button data-v="view" aria-pressed="true">1 · до правки</button><button data-v="edit">2 · правлю</button><button data-v="saved">3 · сохранено</button>
   </div></div>
@@ -170,6 +175,7 @@ const PARTS = {
   ],
   add: [
     ["combo", "Д1 + Д2", "<b>Д1 + Д2 · плюс на карте → список → форма нового человека.</b> У выбранной в режиме правки карточки кружки «+» стоят там, где встанет новый человек: сбоку — супруг, снизу — ребёнок, сверху — родитель, если место свободно. Плюс под человеком ничего не решает за вас: список спрашивает пол и второго родителя — жена, другая женщина новым союзом, неизвестен, — или предлагает выбрать уже записанного. Выбрал — в панели форма нового человека (как В2), привязанного ровно к тем, кого выбрали, а на карте на его месте пустая карточка в пунктире. Переключатель «Второй родитель» показывает, куда он встанет в обоих случаях: к браку с Аиной или отдельным союзом с одним родителем — раскладка настоящая."],
+    ["places", "все места на карте", "<b>Все места на карте.</b> Плюсы стоят там, где встанет новый человек, и у каждого свой короткий список. <b>Сверху</b> — родитель: только если записано меньше двух (у Мурдо оба есть, поэтому показана Аина — она пришла в род через брак). <b>Сбоку</b>, со свободной стороны, — супруг: новый союз. <b>На шине братьев</b>, рядом со спуском к человеку, — брат или сестра: список спрашивает, чей это ребёнок — обоих родителей или только одного. <b>Снизу</b> — ребёнок: спрашивает второго родителя. Любой список ведёт в форму нового человека с готовой привязкой, как в Д1 + Д2."],
     ["panel", "Д1 · из панели", "<b>Д1 · кнопки в панели</b> — для сравнения. В режиме правки у человека раздел «Добавить»: отец, мать, супруг, брат или сестра, ребёнок в конкретном браке; занятые места приглушены."],
     ["map", "Д2 · плюсы на карте", "<b>Д2 · плюсы на карте</b> — для сравнения. Список раскрывается прямо у карточки и перекрывает соседей."],
   ],
@@ -181,7 +187,7 @@ const PARTS = {
     ["field", "одно поле", "<b>Ввод даты одним полем.</b> Пишешь как говоришь — «около 1750», «до 1800», «между 1740 и 1745», «12 мар 1748» — поле тут же показывает, как поняло: по-русски и что уйдёт в файл. Неточное остаётся неточным, приложение не додумывает. Непонятное не сохраняется и говорит, почему."],
   ],
 };
-const state = { part: "edit", kind: "inline", step: "view", second: "aina", style: "gobelen", theme: "dark" };
+const state = { part: "edit", kind: "inline", step: "view", second: "aina", plus: "parent", style: "gobelen", theme: "dark" };
 let data;
 
 const MURDO = "Мурдо Гленн Уриск";
@@ -256,12 +262,23 @@ function panelDelete() {
       <p style="margin:10px 0 0;color:var(--mut);font-size:11px">Удаление пишется в журнал и откатывается, как любая правка.</p></div></div>`;
 }
 
-function panelAdd(stage) {
+function panelAina() {
+  const act = (k) => (state.plus === k ? " on" : "");
+  return `<div class="sideIn"><div class="btns" style="margin:0 0 12px"><button class="pri">Править</button></div>
+    <div class="por" style="background:var(--aina-img) center / cover"></div><h3>Аина Драммонд</h3><div class="sub">пришла в род через брак</div>
+    <div class="lbl">Добавить</div><div class="addGrid">
+    <button class="${act("parent")}">+ отец<small>не записан</small></button><button>+ мать<small>не записана</small></button>
+    <button>+ ещё союз<small>муж: Мурдо</small></button><button>+ брат или сестра<small>сначала появятся её родители</small></button>
+    <button class="wide">+ сын или дочь<small>с Мурдо, с другим родителем или без него</small></button></div></div>`;
+}
+
+function panelAdd(stage, active = "") {
   const on = stage === "form";
+  const act = (k) => (active === k ? " on" : "");
   let h = `<div class="sideIn">${head()}<div class="lbl">Добавить</div><div class="addGrid">
     <button class="done">+ отец<small>есть: Тормод</small></button><button class="done">+ мать<small>есть: Аилса</small></button>
-    <button>+ жена<small>ещё один брак</small></button><button>+ брат или сестра<small>к Тормоду и Аилсе</small></button>
-    <button class="wide${on ? " on" : ""}">+ сын или дочь<small>с Аиной Драммонд, с другим родителем или без него</small></button></div>`;
+    <button class="${act("spouse")}">+ жена<small>ещё один союз</small></button><button class="${act("sibling")}">+ брат или сестра<small>к Тормоду и Аилсе</small></button>
+    <button class="wide${on || active === "child" ? " on" : ""}">+ сын или дочь<small>с Аиной Драммонд, с другим родителем или без него</small></button></div>`;
   if (on) {
     h += `<div class="edit" style="margin-top:12px"><label>Новый ребёнок Мурдо и Аины</label>
       <div class="seg" style="margin-bottom:6px"><span class="on">новый человек</span><span>выбрать из рода</span></div>
@@ -353,6 +370,7 @@ function draw() {
   const stepped = (state.part === "edit" && state.kind !== "delete") || (state.part === "add" && state.kind === "combo");
   document.getElementById("stepGrp").hidden = !stepped;
   document.getElementById("parentGrp").hidden = !(adding() && state.step !== "view");
+  document.getElementById("plusGrp").hidden = !(state.part === "add" && state.kind === "places");
   const names = state.part === "add" ? ["1 · плюс и список", "2 · новый человек", "3 · создан"] : ["1 · до правки", "2 · правлю", "3 · сохранено"];
   document.querySelectorAll("#stepGrp button").forEach((b, i) => { b.textContent = names[i]; });
 
@@ -363,6 +381,7 @@ function draw() {
     if (state.kind === "delete") side = panelDelete();
     if (stepped && state.step === "saved") extra = '<div class="toast">Сохранено: рождение Мурдо — около 1748<button>Отменить</button></div>';
   } else if (state.part === "add") {
+    if (state.kind === "places") side = state.plus === "parent" ? panelAina() : panelAdd("idle", state.plus);
     if (state.kind === "panel") side = panelAdd("form");
     if (state.kind === "map") side = panelAdd("idle");
     if (state.kind === "combo") {
@@ -406,6 +425,61 @@ function datesHtml() {
 }
 
 // навести карту на Мурдо и разложить плюсы / пунктир поверх неё
+const POPS = {
+  parent: `<div class="t">родитель Аины Драммонд</div><div class="seg" style="margin-bottom:8px"><span class="on">отец</span><span>мать</span></div>` +
+    `<div class="opt"><span>новый человек</span><i>запишется в род</i></div><div class="opt"><span>выбрать уже записанного…</span><i>из рода</i></div>` +
+    `<div class="note2">Второй родитель потом встанет в тот же союз.</div>`,
+  spouse: `<div class="t">новый союз Мурдо</div><div class="opt"><span>жена — новый человек</span><i>запишется в род</i></div>` +
+    `<div class="opt"><span>выбрать уже записанную…</span><i>из рода</i></div>` +
+    `<div class="note2">Встанет вторым союзом после Аины; очередь меняется в форме.</div>`,
+  sibling: `<div class="t">брат или сестра Мурдо</div><div class="seg" style="margin-bottom:8px"><span class="on">брат</span><span>сестра</span></div>` +
+    `<div class="t" style="margin:4px 0">чей ребёнок</div>` +
+    `<div class="opt"><span>Тормода и Аилсы</span><i>родной</i></div><div class="opt"><span>только Тормода</span><i>единокровный</i></div>` +
+    `<div class="opt"><span>только Аилсы</span><i>единоутробный</i></div><div class="opt"><span>выбрать уже записанного…</span><i>из рода</i></div>`,
+  child: `<div class="t">ребёнок Мурдо</div><div class="seg" style="margin-bottom:8px"><span class="on">сын</span><span>дочь</span></div>` +
+    `<div class="t" style="margin:4px 0">второй родитель</div><div class="opt"><span>Аина Драммонд</span><i>жена</i></div>` +
+    `<div class="opt"><span>другая — новый союз</span><i>записать её</i></div><div class="opt"><span>неизвестен</span><i>союз с одним родителем</i></div>` +
+    `<div class="opt"><span>выбрать уже записанного…</span><i>из рода</i></div>`,
+};
+
+// плюсы вокруг выбранного: у Мурдо сверху пусто — оба родителя записаны
+function placePluses(map, s, x, y, k) {
+  const aina = state.plus === "parent";
+  const who = aina ? s.aina : s.murdo;
+  const cx = who.x + who.w / 2;
+  map.querySelector(`.node[data-id="${data.murdo}"]`)?.classList.toggle("sel", !aina);
+  const ainaNode = [...map.querySelectorAll(".node")].find((n) => n.querySelector(".nm")?.textContent === "Аина");
+  ainaNode?.classList.toggle("sel", aina);
+  const img = ainaNode?.querySelector(".por")?.style.getPropertyValue("--img");
+  if (img) document.querySelector(".app").style.setProperty("--aina-img", img);
+  const spots = aina
+    // родитель — на середине верхнего края карточки: выше идёт шина братьев мужа (там плюс спутался бы с «братом»),
+    // а углы заняты — у кабинета ярлык рода и приколотое фото
+    ? { parent: [cx, who.y], spouse: [who.x + who.w + 26, who.y + who.h / 2], child: [cx, who.y + who.h + 18] }
+    : { spouse: [who.x - 26, who.y + who.h / 2], sibling: [cx - 44, s.bus.y], child: [cx, who.y + who.h + 18] };
+  for (const [kind, [px, py]] of Object.entries(spots)) {
+    const p = document.createElement("div");
+    p.className = `plus${kind === state.plus ? " on" : ""}`;
+    p.textContent = "+";
+    p.title = kind;
+    p.style.left = `${x + px * k - 11}px`;
+    p.style.top = `${y + py * k - 11}px`;
+    map.append(p);
+    if (kind === state.plus) {
+      const pop = document.createElement("div");
+      pop.className = "pop";
+      pop.style.width = "250px";
+      pop.innerHTML = POPS[kind];
+      map.append(pop);
+      // список — сбоку от плюса, по возможности справа, и целиком в кадре
+      const sx = x + px * k, sy = y + py * k;
+      const right = sx + 20 + 250 <= map.clientWidth - 8;
+      pop.style.left = `${right ? sx + 20 : Math.max(8, sx - 20 - 250)}px`;
+      pop.style.top = `${Math.min(Math.max(8, sy - pop.offsetHeight / 2), map.clientHeight - pop.offsetHeight - 8)}px`;
+    }
+  }
+}
+
 function place() {
   const map = document.querySelector(".map");
   const key = adding() && state.step !== "view" ? addedKey() : "base";
@@ -437,6 +511,7 @@ function place() {
     const yr = map.querySelector(`.node[data-id="${data.murdo}"] .yr`);
     if (yr) yr.textContent = "около 1748 — 1851";
   }
+  if (state.part === "add" && state.kind === "places") placePluses(map, s, x, y, k);
   if (state.part === "add" && (state.kind === "map" || (state.kind === "combo" && state.step === "view"))) {
     const m = s.murdo;
     const at = (px, py) => ({ left: `${x + px * k - 11}px`, top: `${y + py * k - 11}px` });
