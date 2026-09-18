@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Правка родни — варианты</title>
+<!-- этап 5: шрифты и стили приложения, карты настоящие — роды Монад Кройве и Гленн Уриск -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<link rel="stylesheet" href="../../web/src/styles/panel.css">
+<link rel="stylesheet" href="../../web/src/styles/portrait.css">
+<link rel="stylesheet" href="../../web/src/styles/editor.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 100ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.about { padding: 6px 2px 12px; color: #8a8f98; font-size: 12.5px; max-width: 100ch; line-height: 1.5; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; color: #e6e2d8; }
+
+.app { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; }
+.body { display: flex; height: 600px; position: relative; }
+.map { position: relative; flex: 1; overflow: hidden; background: var(--bg); }
+.map .canvas { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+.app .side { width: 280px; overflow: auto; }
+.node.fresh .box { outline: 1.5px dashed var(--acc); outline-offset: 5px; }
+.toast { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 8; display: flex; gap: 12px; align-items: center;
+  background: var(--panelbg); color: var(--fg); border: 1px solid var(--edge); border-radius: 5px; padding: 8px 12px;
+  font-size: 12px; box-shadow: 0 8px 26px rgba(0,0,0,.35); white-space: nowrap; }
+.toast button { border: 0; background: none; color: var(--acc); font: 500 12px 'Golos Text', sans-serif; cursor: pointer; padding: 0; }
+.mplus { position: absolute; z-index: 7; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--acc);
+  background: var(--acc); color: var(--bg); font: 500 15px/19px 'Golos Text', sans-serif; text-align: center; }
+
+/* Б1: пустая карточка над братьями */
+.ghost { position: absolute; box-sizing: border-box; border: 1.5px dashed color-mix(in srgb, var(--fg) 35%, transparent); border-radius: 6px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+  color: var(--mut); font: 400 13px/1.3 'Golos Text', sans-serif; background: color-mix(in srgb, var(--bg) 70%, transparent); }
+.ghost span { color: var(--acc); font-size: 12px; }
+/* Б2: узел без карточки */
+.knot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; box-sizing: border-box;
+  border: 1.5px solid var(--link); background: var(--bg); }
+.knotLbl { position: absolute; transform: translate(12px, -50%); white-space: nowrap; color: var(--mut);
+  font: 400 11px/1 'IBM Plex Mono', monospace; letter-spacing: .02em; }
+/* знак союза, выбранный щелчком */
+.unionSel { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; box-sizing: border-box;
+  border: 2px solid var(--acc); box-shadow: 0 0 0 4px color-mix(in srgb, var(--acc) 25%, transparent); }
+.unionSel.hov { border-style: dashed; box-shadow: none; }
+.unionTip { position: absolute; transform: translate(-50%, 0); white-space: nowrap; font: 500 11px/1 'Golos Text', sans-serif;
+  color: var(--fg); background: var(--panelbg); border: 1px solid var(--edge); border-radius: 4px; padding: 5px 7px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+.adoptTag { position: absolute; transform: translate(-50%, 0); white-space: nowrap; font: 500 10px/1 'Golos Text', sans-serif;
+  color: var(--acc); background: var(--bg); padding: 2px 5px; border: 1px solid var(--acc); border-radius: 8px; }
+
+/* панель */
+.side .rowAct { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.side .mini { border: 0; background: none; color: var(--acc); font: 500 11px 'Golos Text', sans-serif; cursor: pointer; padding: 0; white-space: nowrap; }
+.side .menu { border: 1px solid var(--acc); border-radius: 5px; margin: 4px 0 10px; padding: 2px 10px; font-size: 12px; }
+.side .menu div { padding: 7px 0; border-top: 1px solid var(--edge); display: flex; justify-content: space-between; gap: 8px; }
+.side .menu div:first-child { border-top: 0; }
+.side .menu i { font-style: normal; color: var(--mut); font-size: 11px; text-align: right; }
+.side .menu .bad { color: #c9564a; }
+.side .kinList { border: 1px solid var(--edge); border-radius: 4px; margin-top: 4px; }
+.side .kinList > div { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-top: 1px solid var(--edge); font-size: 12px; }
+.side .kinList > div:first-child { border-top: 0; }
+.side .kinList span { flex: 1; min-width: 0; }
+.side .kinList small { display: block; color: var(--mut); font-size: 10.5px; }
+.side .kinList .off span { text-decoration: line-through; opacity: .55; }
+.side .kinList button { border: 0; background: none; color: var(--acc); font: 500 12px 'Golos Text', sans-serif; cursor: pointer; padding: 0 2px; }
+.side .kinList .num { width: 16px; color: var(--acc); font: 500 12px 'IBM Plex Mono', monospace; }
+.side .kinList .moved { background: color-mix(in srgb, var(--acc) 12%, transparent); }
+.side .kinList button:disabled { color: var(--mut); opacity: .4; }
+.side .fam { border: 1px solid var(--edge); border-radius: 5px; padding: 2px 10px 10px; margin-top: 6px; }
+.side .note2 { font-size: 11px; color: var(--mut); line-height: 1.45; margin-top: 6px; }
+.side .unionLink { display: flex; justify-content: space-between; width: 100%; margin: 8px 0 6px; padding: 8px 10px; border: 1px solid var(--edge);
+  border-radius: 4px; background: transparent; color: var(--acc); font: 500 12px 'Golos Text', sans-serif; cursor: pointer; text-align: left; }
+.side .unionLink span { font-size: 15px; line-height: 1; }
+.side .unionHead { font: 400 19px/1.25 'Cormorant Garamond', serif; margin: 2px 0 2px; }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+<h1>Правка родни: пять вопросов этапа 5</h1>
+<p class="lede">Карты настоящие, данные — из вашей базы: род Монад Кройве (Дункан, основатель, 1740; Айли с тремя бездетными браками)
+и Гленн Уриск (Мурдо и Аина, их дочь Мойра). Новые люди и «ошибки» — условные примеры, так и подписаны. Каждый вопрос — в пяти стилях и обеих темах.</p>
+<div class="ctl">
+  <div class="grp"><b>Вопрос</b><div class="sw" data-set="part">
+    <button data-v="sib" aria-pressed="true">1 · брат без родителей</button><button data-v="fix">2 · исправить родню</button>
+    <button data-v="adopt">3 · приёмные</button><button data-v="order">4 · порядок браков</button><button data-v="family">5 · правка семьи</button>
+  </div></div>
+  <div class="grp"><b>Вариант</b><div class="sw" data-set="kind" id="kinds"></div></div>
+  <div class="grp" id="stepGrp"><b>Шаг</b><div class="sw" data-set="step" id="steps"></div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="app" id="out"></div>
+<script>
+const PARTS = {
+  sib: {
+    steps: [["view", "1 · добавить"], ["form", "2 · новый брат"], ["saved", "3 · записан"]],
+    kinds: [
+      ["b1", "Б1 · пустая карточка", "<b>Б1 · над братьями пустая карточка «родители не записаны».</b> Пример: у Дункана брат Алистер (имя и год условные), родители обоих неизвестны. Сейчас так нельзя — сервер требует сначала родителей. В файле это законная семья, где записаны одни дети. На карте над ними встаёт пустая карточка в пунктире со спуском-пунктиром: видно, что братья — одна семья, и есть куда добавить родителей. Минус — пустая карточка занимает целый ярус над основателем."],
+      ["b2", "Б2 · узел без карточки", "<b>Б2 · только шина и узел.</b> Тот же пример. Над братьями — обычная шина выводка, а вместо родителей — маленький пустой кружок с подписью «родители не записаны». Ярус над основателем не тратится, карта остаётся той же высоты. Добавить родителей — плюсом у любого из братьев, как сейчас; тогда кружок сменится парой."],
+    ],
+  },
+  fix: {
+    steps: [["pick", "1 · что исправить"], ["confirm", "2 · подтверждение"], ["saved", "3 · исправлено"]],
+    kinds: [
+      ["r1", "Р1 · из строк панели", "<b>Р1 · правка прямо у строки родства.</b> Пример: допустим, Мойра ошибочно записана дочерью Мурдо и Аины. В режиме «Правка» у строк «Родители» и «Муж» в панели Мойры есть «изменить» — короткий список: перенести к другим родителям, оставить одного из двух, отвязать совсем. Человек при этом не удаляется. Подтверждение говорит, что сдвинется на карте, и всё откатывается журналом."],
+      ["r2", "Р2 · раздел «Родня» в форме", "<b>Р2 · раздел «Родня» в форме «Править».</b> Тот же пример. Вся родня человека — списком в форме: родители, браки, дети. У строки — «перенести…» и ×. Крестик только помечает строку, применяется всё по «Сохранить» одной правкой журнала, вместе с остальными полями формы."],
+    ],
+  },
+  adopt: {
+    steps: [["view", "1 · просмотр"], ["edit", "2 · правка"]],
+    kinds: [
+      ["p1", "П1 · пометка у ребёнка", "<b>П1 · приёмный — пометка родства в той же семье.</b> Пример: допустим, Мойра приёмная у Мурдо и Аины. Ребёнок записан в одной семье, как сейчас, но с родством «приёмная» (в файле это PEDI adopted — оно уже сохраняется при добавлении, только не видно). На карте спуск к ней пунктиром, в панели — «приёмная» у родителей. Родных родителей записать некуда."],
+      ["p2", "П2 · две семьи", "<b>П2 · две семьи: родная и приёмная.</b> Тот же пример. Ребёнок записан в двух семьях сразу: у приёмных — «приёмная», у родных — «родная»; GEDCOM это позволяет. На карте человек стоит один раз — под семьёй, где рос (пунктирный спуск и ярлык «приёмная»). Родные родители — строкой в панели с переходом; если они не записаны — «+ записать родных». П1 — частный случай П2, когда родных нет."],
+    ],
+  },
+  order: {
+    steps: [["view", "1 · сейчас"], ["edit", "2 · правлю"], ["saved", "3 · сохранено"]],
+    kinds: [
+      ["o1", "О1 · в форме", "<b>О1 · очередь браков в форме «Править».</b> Айли Монад Кройве (1821—1903), три бездетных брака, дат венчания нет — очередь сейчас угадана по годам рождения мужей: Роберт Форбс, Ирвинг Хай, Артур Хикс. В форме у браков стрелки ↑ ↓; сохранённая очередь пишется в файл и главнее правила. Пример правки: Артур Хикс вторым. На карте меняются номера браков и высоты нитей."],
+      ["o2", "О2 · стрелки в панели", "<b>О2 · стрелки прямо у браков в панели.</b> Тот же пример. В режиме «Правка» у строк «1-й брак», «2-й брак»… — ↑ ↓, каждое нажатие сразу сохраняется отдельной правкой журнала, как сдвиг среди братьев и сестёр. Быстрее, но три-четыре нажатия дают три-четыре записи в журнале."],
+    ],
+  },
+  family: {
+    steps: [["view", "1 · просмотр"], ["edit", "2 · правка"]],
+    kinds: [
+      ["s3", "С1 + С2", "<b>С1 + С2 · к союзу ведут два пути, правка — в его форме.</b> Чтобы союз не приходилось угадывать на карте, к нему ведут: <b>строка «Союз: венчание, развод, дети ›»</b> у брака в панели человека — главный путь; <b>знак союза на карте</b> — при наведении подсвечивается кольцом и подписью, щелчок выбирает семью. Карточка союза — как в С2: супруги, венчание, развод, дети по порядку; «‹ Мурдо» возвращает к человеку. <b>Правка</b> — «Править» в карточке союза, форма из С2: венчание, развод, дети по старшинству со стрелками и отвязкой, «+ сын или дочь». Из формы человека брак не правится — в ней ссылка на союз.",
+        [["view", "1 · человек"], ["hover", "2 · наведение на союз"], ["union", "3 · карточка союза"], ["edit", "4 · правка союза"]]],
+      ["s1", "С1 · в форме человека", "<b>С1 · брак правится в форме человека.</b> Мурдо и Аина; даты брака в ваших файлах нет ни у одной семьи — поля новые. В форме «Править» у каждого брака раскрывается блок: венчание (дата и место тем же полем даты), развод с датой. Одна запись семьи: в форме Аины тот же блок. Разведённый союз на карте рисуется как прошлый."],
+      ["s2", "С2 · щелчок по союзу", "<b>С2 · союз — отдельный предмет на карте.</b> Щелчок по знаку союза (узел, от которого идёт спуск к детям) выбирает семью, а не человека. В панели — карточка союза: супруги, венчание, развод, дети по порядку. Сюда же естественно ложатся «отвязать ребёнка» из вопроса 2 и порядок детей. В режиме «Правка» — кнопка «Править» и такая же форма."],
+    ],
+  },
+};
+const state = { part: "sib", kind: "b1", step: "view", style: "gobelen", theme: "dark" };
+let data;
+const ID = () => data.ids;
+const scene = (key) => data.scenes[`${state.style}|${key}`];
+const kin = (t) => `<button class="kin">${t}</button>`;
+const row = (k, v) => `<div class="row"><span>${k}</span><i>${v}</i></div>`;
+const head = (name, sub, img = "--p-img") =>
+  `<div class="por" style="background:var(${img}) center / cover"></div><h3>${name}</h3><div class="sub">${sub}</div>`;
+const editBtn = '<div class="btns" style="margin:0 0 12px"><button class="pri">Править</button></div>';
+
+function barHtml(clan) {
+  const tabs = clan === "m" ? '<button>Гленн Уриск · 38</button><button aria-pressed="true">Монад Кройве · 84</button>'
+    : '<button aria-pressed="true">Гленн Уриск · 38</button><button>Монад Кройве · 84</button>';
+  return `<div class="bar"><div class="grp"><b>Род</b><div class="sw">${tabs}</div></div>
+    <div class="grp"><b>Режим</b><div class="sw"><button>Просмотр</button><button aria-pressed="true">Правка</button></div></div>
+    <div class="grp"><div class="sw"><button>↶ Отменить</button><button>Журнал · 4</button></div></div></div>`;
+}
+function mapHtml(key, extraSvg = "") {
+  const s = scene(key);
+  return `<div class="map"><div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}${extraSvg}</svg>${s.cards}</div></div>`;
+}
+
+// ── 1 · брат без родителей ──
+function sibPanel() {
+  if (state.step === "view") {
+    return `<div class="sideIn">${editBtn}${head("Дункан Монад Кройве", "1740 — 1842 · @I575@")}
+      <div class="lbl">Сведения</div>${row("Пол", "мужской")}${row("Родители", "не указаны")}
+      <div class="lbl">Добавить</div><div class="addGrid">
+      <button>+ родитель<small>не записаны</small></button><button>+ жена<small>ещё один союз · сейчас 1</small></button>
+      <button style="border-style:solid;border-color:var(--acc);color:var(--acc)">+ брат или сестра<small>родители не записаны — будет общая семья без них</small></button>
+      <button>+ сын или дочь<small>с Бригит или без второго родителя</small></button></div>
+      <div class="lbl">Брак</div>${row("Жена", kin("Бригит Фаркухарсон"))}${row("Дети", `${kin("Ангус")}, ${kin("Колин")}, ${kin("Хэмиш")}`)}</div>`;
+  }
+  if (state.step === "form") {
+    return `<div class="sideIn form"><span class="lbl" style="margin-top:0">новый человек</span>
+      <div class="bind">брат <b>Дункана Монад Кройве</b> · родители не записаны — их общая семья появится без родителей; добавите их потом — встанут над обоими</div>
+      <label class="fl">Имя</label><input class="field" value="Алистер">
+      <div class="two"><div><label class="fl">Фамилия</label><input class="field" value="Монад Кройве"></div><div><label class="fl">По мужу</label><input class="field" placeholder="—"></div></div>
+      <label class="fl">Пол</label><div class="seg"><button class="on">мужской</button><button>женский</button><button>неизвестен</button></div>
+      <label class="fl">Рождение</label><input class="field" value="около 1743"><div class="parse">понял: <b>около 1743</b> · в файл: ABT 1743</div>
+      <div class="btns"><button class="pri">Добавить</button><button>Отмена</button></div></div>`;
+  }
+  return `<div class="sideIn">${editBtn}${head("Алистер Монад Кройве", "около 1743 · новый", "--b-img")}
+    <div class="lbl">Сведения</div>${row("Пол", "мужской")}${row("Родители", "не записаны")}${row("Брат", kin("Дункан Монад Кройве"))}
+    <div class="lbl">Добавить</div><div class="addGrid">
+    <button>+ родитель<small>встанет над обоими братьями</small></button><button>+ жена<small>новый союз</small></button>
+    <button>+ брат или сестра<small>в ту же семью без родителей</small></button><button>+ сын или дочь<small>с другим родителем или без него</small></button></div></div>`;
+}
+
+// ── 2 · исправить родню ──
+function fixPanel() {
+  const moira = head("Мойра Гленн Уриск", "1787 — 1884 · пример ошибки", "--m-img");
+  if (state.step === "confirm") {
+    return `<div class="sideIn">${moira}<div class="warn"><b>Отвязать Мойру от Мурдо и Аины?</b>
+      <p>Мойра останется в роду, но без родителей. На карте она уйдёт из-под Мурдо и Аины и встанет отдельной веткой справа — вместе с мужем Робертом Кинкейдом и пометкой «Ветвь» под ними.</p>
+      <p>У Мурдо и Аины останется один ребёнок — Дэрмид.</p>
+      <div class="btns"><button class="pri">Отвязать</button><button>Отмена</button></div>
+      <p style="margin:10px 0 0;color:var(--mut);font-size:11px">Правка пишется в журнал и откатывается. Привязать к другим родителям — «перенести…» вместо «отвязать».</p></div></div>`;
+  }
+  if (state.step === "saved") {
+    return `<div class="sideIn">${editBtn}${moira}<div class="lbl">Сведения</div>${row("Пол", "женский")}${row("Родители", "не указаны")}
+      <div class="lbl">Брак</div>${row("Муж", kin("Роберт Кинкейд"))}${row("Дети", kin("Ветвь"))}</div>`;
+  }
+  if (state.kind === "r1") {
+    return `<div class="sideIn">${editBtn}${moira}<div class="lbl">Сведения</div>${row("Пол", "женский")}
+      <div class="row rowAct"><span>Родители</span><button class="mini">изменить ▾</button></div>
+      <div class="menu"><div><span>Перенести к другим родителям…</span><i>выбрать семью</i></div>
+        <div><span>Оставить только отца</span><i>Мурдо</i></div><div><span>Оставить только мать</span><i>Аина</i></div>
+        <div class="bad"><span>Отвязать от обоих</span><i>человек останется</i></div></div>
+      ${row("Отец", kin("Мурдо Гленн Уриск"))}${row("Мать", kin("Аина Драммонд"))}
+      <div class="lbl">Брак</div><div class="row rowAct"><span>Муж · ${kin("Роберт Кинкейд")}</span><button class="mini">изменить ▾</button></div>
+      ${row("Дети", kin("Ветвь"))}</div>`;
+  }
+  return `<div class="sideIn form"><span class="lbl" style="margin-top:0">правка · Мойра Гленн Уриск</span>
+    <label class="fl">Имя</label><input class="field" value="Мойра">
+    <div class="two"><div><label class="fl">Фамилия</label><input class="field" value="Гленн Уриск"></div><div><label class="fl">По мужу</label><input class="field" value="Кинкейд"></div></div>
+    <label class="fl">Родители</label><div class="kinList">
+      <div class="off"><span>Мурдо и Аина<small>родная дочь · отвязать при сохранении</small></span><button title="вернуть">↺</button></div>
+      <div><span style="color:var(--mut)">другие родители…</span><button>перенести</button></div></div>
+    <label class="fl">Браки</label><div class="kinList"><div><span>Роберт Кинкейд<small>1 ребёнок: Ветвь</small></span><button>заменить…</button><button title="отвязать">×</button></div></div>
+    <label class="fl">Дети</label><div class="kinList"><div><span style="color:var(--mut)">только через браки</span></div></div>
+    <div class="btns"><button class="pri">Сохранить</button><button>Отмена</button></div></div>`;
+}
+
+// ── 3 · приёмные ──
+function adoptPanel() {
+  const moira = head("Мойра Гленн Уриск", "1787 — 1884 · пример", "--m-img");
+  if (state.step === "edit") {
+    const p2 = state.kind === "p2";
+    return `<div class="sideIn form"><span class="lbl" style="margin-top:0">правка · Мойра Гленн Уриск</span>
+      <label class="fl">${p2 ? "Приёмные родители" : "Родители"}</label><div class="kinList"><div><span>Мурдо и Аина<small>здесь стоит на карте</small></span></div></div>
+      <label class="fl">Родство с ними</label><div class="seg"><button>родная</button><button class="on">приёмная</button><button>под опекой</button></div>
+      ${p2 ? `<label class="fl">Родные родители</label><div class="kinList"><div><span style="color:var(--mut)">не записаны</span><button>+ записать…</button></div></div>
+      <div class="note2">Записанные родные родители — вторая семья Мойры. На карте она остаётся под приёмными, у родных в панели — «родная дочь» с переходом.</div>` : ""}
+      <div class="btns"><button class="pri">Сохранить</button><button>Отмена</button></div></div>`;
+  }
+  const rel = state.kind === "p1"
+    ? `${row("Отец", `${kin("Мурдо Гленн Уриск")} · приёмный`)}${row("Мать", `${kin("Аина Драммонд")} · приёмная`)}`
+    : `${row("Приёмные", `${kin("Мурдо")} и ${kin("Аина")}`)}${row("Родные", "не записаны")}`;
+  return `<div class="sideIn">${editBtn}${moira}<div class="lbl">Сведения</div>${row("Пол", "женский")}${rel}
+    <div class="lbl">Брак</div>${row("Муж", kin("Роберт Кинкейд"))}${row("Дети", kin("Ветвь"))}</div>`;
+}
+
+// ── 4 · порядок браков ──
+const HUSBANDS = [["Роберт Форбс", "1815 — 1850"], ["Ирвинг Хай", "1817 — 1861"], ["Артур Хикс", "1837 — 1869"]];
+function orderPanel() {
+  const aili = head("Айли Монад Кройве", "1821 — 1903 · @I57@", "--a-img");
+  const order = state.step === "view" ? [0, 1, 2] : [0, 2, 1];
+  const ORD = ["1-й", "2-й", "3-й"];
+  if (state.kind === "o1" && state.step === "edit") {
+    const rows = order.map((h, i) => `<div class="${h === 2 ? "moved" : ""}"><b class="num">${i + 1}</b><span>${HUSBANDS[h][0]}<small>${HUSBANDS[h][1]} · детей нет</small></span>` +
+      `<button${i === 0 ? " disabled" : ""}>↑</button><button${i === 2 ? " disabled" : ""}>↓</button></div>`).join("");
+    return `<div class="sideIn form"><span class="lbl" style="margin-top:0">правка · Айли Монад Кройве</span>
+      <label class="fl">Имя</label><input class="field" value="Айли">
+      <label class="fl">Браки — по очереди</label><div class="kinList">${rows}</div>
+      <div class="note2">Было угадано: дат венчания и детей нет — по годам рождения мужей. Ваша очередь запишется в файл и будет главнее правила. «Как было» — вернуть к правилу.</div>
+      <div class="btns"><button class="pri">Сохранить</button><button>Отмена</button></div></div>`;
+  }
+  const arrows = (i) => state.kind === "o2" && state.step !== "saved"
+    ? ` <button class="mini"${i === 0 ? ' style="opacity:.3"' : ""}>↑</button> <button class="mini"${i === 2 ? ' style="opacity:.3"' : ""}>↓</button>` : "";
+  const marr = order.map((h, i) => `<div class="row rowAct"><span>${ORD[i]} брак · ${kin(HUSBANDS[h][0])}</span><span>${arrows(i)}</span></div>${row("Дети", "нет")}`).join("");
+  return `<div class="sideIn">${editBtn}${aili}<div class="lbl">Сведения</div>${row("Пол", "женский")}${row("Отец", kin("Хэмиш Монад Кройве"))}${row("Мать", kin("Изабелла Стюарт"))}
+    <div class="lbl">Браки${state.kind === "o2" && state.step === "view" ? ' <span style="text-transform:none;letter-spacing:0;color:var(--mut);font-weight:400">· очередь угадана</span>' : ""}</div>${marr}</div>`;
+}
+
+// ── 5 · правка семьи ──
+function familyPanel() {
+  if (state.kind === "s3") return comboPanel();
+  const form = state.step === "edit";
+  const fields = `<label class="fl">Венчание</label><div class="two"><div><input class="field" placeholder="дата: около 1780"><div class="parse">пусто — не записано</div></div>
+      <div><input class="field" placeholder="место"></div></div>
+    <label class="fl">Союз</label><div class="seg"><button class="on">в браке</button><button>развод</button></div>
+    <div class="note2">Развод с датой — тем же полем даты. Разведённый союз на карте — как прошлый брак.</div>`;
+  if (state.kind === "s1") {
+    if (!form) {
+      return `<div class="sideIn">${editBtn}${head("Мурдо Гленн Уриск", "1748 — 1851 · @I1007@")}<div class="lbl">Сведения</div>${row("Пол", "мужской")}
+        ${row("Отец", kin("Тормод Гленн Уриск"))}${row("Мать", kin("Аилса Мензис"))}
+        <div class="lbl">Брак</div>${row("Жена", kin("Аина Драммонд"))}${row("Дети", `${kin("Дэрмид")}, ${kin("Мойра")}`)}</div>`;
+    }
+    return `<div class="sideIn form"><span class="lbl" style="margin-top:0">правка · Мурдо Гленн Уриск</span>
+      <label class="fl">Имя</label><input class="field" value="Мурдо">
+      <label class="fl">Рождение</label><input class="field" value="1748">
+      <label class="fl">Брак с Аиной Драммонд</label><div class="fam">${fields}</div>
+      <div class="note2">Тот же блок — в форме Аины: запись семьи одна.</div>
+      <div class="btns"><button class="pri">Сохранить</button><button>Отмена</button></div></div>`;
+  }
+  const kids = `<div class="kinList"><div><b class="num">1</b><span>Дэрмид Гленн Уриск<small>1783 · родной</small></span>${form ? "<button>↓</button><button title='отвязать'>×</button>" : ""}</div>
+    <div><b class="num">2</b><span>Мойра Гленн Уриск<small>1787 · родная</small></span>${form ? "<button>↑</button><button title='отвязать'>×</button>" : ""}</div></div>`;
+  if (!form) {
+    return `<div class="sideIn"><span class="lbl" style="margin-top:0">союз</span>${editBtn}<div class="unionHead">Мурдо Гленн Уриск и Аина Драммонд</div>
+      <div class="sub">единственный брак у обоих · @F1004@</div>
+      <div class="lbl">Супруги</div>${row("Муж", kin("Мурдо Гленн Уриск"))}${row("Жена", kin("Аина Драммонд"))}
+      <div class="lbl">Союз</div>${row("Венчание", "не записано")}${row("Развод", "нет")}
+      <div class="lbl">Дети</div>${kids}
+      <div class="foldRow" style="margin-top:10px"><button>Свернуть ветку</button><span>18 в ветке</span></div></div>`;
+  }
+  return `<div class="sideIn form"><span class="lbl" style="margin-top:0">правка · союз Мурдо и Аины</span>${fields}
+    <label class="fl">Дети — по старшинству</label>${kids}
+    <div class="addGrid" style="margin-top:8px"><button class="wide">+ сын или дочь<small>в этот союз</small></button></div>
+    <div class="btns"><button class="pri">Сохранить</button><button>Отмена</button></div></div>`;
+}
+
+function comboPanel() {
+  const st = state.step;
+  const union = `<div class="sideIn"><button class="mini" style="display:block;margin-bottom:12px">‹ Мурдо Гленн Уриск</button>
+    <span class="lbl" style="margin-top:0">союз</span>${editBtn}<div class="unionHead">Мурдо Гленн Уриск и Аина Драммонд</div>
+    <div class="sub">единственный брак у обоих · @F1004@</div>
+    <div class="lbl">Супруги</div>${row("Муж", kin("Мурдо Гленн Уриск"))}${row("Жена", kin("Аина Драммонд"))}
+    <div class="lbl">Союз</div>${row("Венчание", "не записано")}${row("Развод", "нет")}
+    <div class="lbl">Дети</div><div class="kinList"><div><b class="num">1</b><span>Дэрмид Гленн Уриск<small>1783 · родной</small></span></div>
+    <div><b class="num">2</b><span>Мойра Гленн Уриск<small>1787 · родная</small></span></div></div>
+    <div class="foldRow" style="margin-top:10px"><button>Свернуть ветку</button><span>18 в ветке</span></div></div>`;
+  if (st === "union") return union;
+  if (st === "edit") {
+    // правка — форма союза из С2: открывается кнопкой «Править» в карточке союза
+    state.kind = "s2";
+    const form = familyPanel();
+    state.kind = "s3";
+    return form;
+  }
+  return `<div class="sideIn">${editBtn}${head("Мурдо Гленн Уриск", "1748 — 1851 · @I1007@")}<div class="lbl">Сведения</div>${row("Пол", "мужской")}
+    ${row("Отец", kin("Тормод Гленн Уриск"))}${row("Мать", kin("Аилса Мензис"))}
+    <div class="lbl">Брак</div>${row("Жена", kin("Аина Драммонд"))}${row("Венчание", "не записано")}${row("Дети", `${kin("Дэрмид")}, ${kin("Мойра")}`)}
+    <button class="unionLink">Союз: венчание, развод, дети<span>›</span></button>
+    <div class="foldRow"><button>Свернуть ветку</button><span>18 в ветке</span></div></div>`;
+}
+
+// ── сборка ──
+function sceneFor() {
+  const p = state.part, st = state.step, k = state.kind;
+  if (p === "sib") return { clan: "m", key: st === "view" ? "m-base" : "m-sib", sel: st === "saved" ? ID().brother : ID().duncan };
+  if (p === "fix") return { clan: "g", key: st === "saved" ? "g-unlink" : "g-base", sel: ID().moira };
+  if (p === "adopt") return { clan: "g", key: "g-adopt", sel: ID().moira };
+  if (p === "order") return { clan: "m", key: st === "saved" || (k === "o2" && st === "edit") ? "m-aili" : "m-base", sel: ID().aili };
+  if (k === "s3") return { clan: "g", key: "g-base", sel: st === "union" || st === "edit" ? null : ID().murdo };
+  return { clan: "g", key: "g-base", sel: k === "s1" ? ID().murdo : null };
+}
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  const part = PARTS[state.part];
+  if (!part.kinds.some(([k]) => k === state.kind)) state.kind = part.kinds[0][0];
+  const steps = part.kinds.find(([k]) => k === state.kind)[3] ?? part.steps;
+  if (!steps.some(([k]) => k === state.step)) state.step = steps[0][0];
+  document.getElementById("kinds").innerHTML = part.kinds
+    .map(([k, n]) => `<button data-v="${k}"${k === state.kind ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
+  document.getElementById("steps").innerHTML = steps
+    .map(([k, n]) => `<button data-v="${k}"${k === state.step ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
+  document.getElementById("about").innerHTML = part.kinds.find(([k]) => k === state.kind)[2];
+  document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.querySelectorAll("button")
+    .forEach((b) => b.setAttribute("aria-pressed", String(state[sw.dataset.set] === b.dataset.v))));
+
+  const sc = sceneFor();
+  const s = scene(sc.key);
+  let svg = "";
+  if (sc.key === "m-sib") svg = state.kind === "b1" ? s.b1 : s.b2;
+  if (sc.key === "g-adopt") svg = s.adopt;
+  const side = { sib: sibPanel, fix: fixPanel, adopt: adoptPanel, order: orderPanel, family: familyPanel }[state.part]();
+  let extra = "";
+  if (state.part === "sib" && state.step === "saved") extra = '<div class="toast">Добавлен брат Дункана — Алистер<button>Отменить</button></div>';
+  if (state.part === "fix" && state.step === "saved") extra = '<div class="toast">Мойра отвязана от Мурдо и Аины<button>Отменить</button></div>';
+  if (state.part === "order" && state.step === "saved") extra = '<div class="toast">Айли: очередь браков — Форбс, Хикс, Хай<button>Отменить</button></div>';
+  document.getElementById("out").innerHTML = barHtml(sc.clan) + `<div class="body">${mapHtml(sc.key, svg)}<aside class="side">${side}</aside>${extra}</div>`;
+  place(sc, s);
+}
+
+function place(sc, s) {
+  const map = document.querySelector(".map");
+  const canvas = map.querySelector(".canvas");
+  const k = 0.8;
+  const app = document.querySelector(".app");
+  const imgOf = (id) => map.querySelector(`.node[data-id="${id}"] .por`)?.style.getPropertyValue("--img");
+  // портреты в панели — те же, что на карточках
+  for (const [v, id] of [["--p-img", sc.part === "family" ? ID().murdo : ID().duncan], ["--b-img", ID().brother], ["--m-img", ID().moira], ["--a-img", ID().aili]]) {
+    const img = imgOf(state.part === "family" && v === "--p-img" ? ID().murdo : id);
+    if (img) app.style.setProperty(v, img);
+  }
+  if (state.part === "family") { const img = imgOf(ID().murdo); if (img) app.style.setProperty("--p-img", img); }
+  if (sc.sel != null) map.querySelector(`.node[data-id="${sc.sel}"]`)?.classList.add("sel");
+
+  // кадр: выбранный (и новый брат, и союз) по центру
+  let cx, cy;
+  const at = s.at;
+  if (state.part === "sib" && sc.key === "m-sib") {
+    const a = at[ID().duncan], b = at[ID().brother];
+    cx = (a.x + b.x + a.w) / 2; cy = (a.y + a.h / 2) - 60;
+  } else if (state.part === "family") {
+    const u = scene("g-base").union; cx = u.x; cy = u.y + 40;
+  } else {
+    const a = at[sc.sel]; cx = a.x + a.w / 2; cy = a.y + a.h / 2;
+  }
+  const x = map.clientWidth / 2 - cx * k, y = map.clientHeight / 2 - cy * k;
+  canvas.style.transform = `translate(${x}px,${y}px) scale(${k})`;
+
+  if (sc.key === "m-sib") {
+    const g = s.ghost;
+    if (state.kind === "b1") {
+      canvas.insertAdjacentHTML("beforeend", `<div class="ghost" style="left:${g.x}px;top:${g.y}px;width:${g.w}px;height:${g.h}px">родители<br>не записаны<span>+ добавить</span></div>`);
+    } else {
+      canvas.insertAdjacentHTML("beforeend", `<div class="knot" style="left:${s.knot.x}px;top:${s.knot.y}px"></div><div class="knotLbl" style="left:${s.knot.x}px;top:${s.knot.y}px">родители не записаны</div>`);
+    }
+    const fresh = map.querySelector(`.node[data-id="${ID().brother}"]`);
+    if (fresh && state.step === "form") { fresh.classList.add("fresh"); fresh.querySelector(".nm").textContent = "новый брат"; }
+  }
+  if (state.part === "sib" && state.step === "view") {
+    // плюс «брат или сестра» у человека без родителей — над левым краем карточки
+    const a = at[ID().duncan];
+    map.insertAdjacentHTML("beforeend", `<div class="mplus" style="left:${x + (a.x - 4) * k - 11}px;top:${y + (a.y - 16) * k - 11}px">+</div>`);
+  }
+  if (state.part === "adopt" && state.kind === "p2") {
+    const a = at[ID().moira];
+    canvas.insertAdjacentHTML("beforeend", `<div class="adoptTag" style="left:${a.x + a.w / 2}px;top:${a.y - 24}px">приёмная</div>`);
+  }
+  if (state.part === "family" && state.kind === "s3" && state.step !== "view") {
+    const u = scene("g-base").union;
+    const hover = state.step === "hover";
+    canvas.insertAdjacentHTML("beforeend", `<div class="unionSel${hover ? " hov" : ""}" style="left:${u.x}px;top:${u.y}px"></div>` +
+      (hover ? `<div class="unionTip" style="left:${u.x}px;top:${at[ID().murdo].y + at[ID().murdo].h + 10}px">союз Мурдо и Аины · открыть</div>` : ""));
+  }
+  if (state.part === "family" && state.kind === "s2") {
+    const u = scene("g-base").union;
+    canvas.insertAdjacentHTML("beforeend", `<div class="unionSel" style="left:${u.x}px;top:${u.y}px"></div>`);
+  }
+}
+
+document.querySelector(".ctl").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); const sw = b?.closest(".sw[data-set]"); if (!sw) return;
+  state[sw.dataset.set] = b.dataset.v;
+  draw();
+});
+fetch("родня.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+</script>
+</body>
+</html>
