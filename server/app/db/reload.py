@@ -106,6 +106,8 @@ def reload_clan(conn: sqlite3.Connection, clan_id: int, data: ClanData, delete: 
     ]
 
     with conn:
+        # перезалив меняет род мимо журнала: откатывать старые правки поверх нового файла нельзя
+        conn.execute("DELETE FROM changes WHERE clan_id = ?", (clan_id,))
         conn.execute(
             "UPDATE clans SET source_file = COALESCE(?, source_file), imported_at = ?, header_raw = ? WHERE id = ?",
             (source_file, datetime.now(UTC).isoformat(timespec="seconds"), _raw(data.header), clan_id),

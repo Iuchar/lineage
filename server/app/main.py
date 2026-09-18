@@ -13,6 +13,11 @@ from app import uploads
 from app.config import DB_PATH, DIST
 from app.db.clans import ClanExistsError, import_clan
 from app.db.connection import connect
+from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonFields, PersonForm, add_person,
+                           delete_person, delete_preview, person_form, update_person)
+from app.db.journal import (ChangeInfo, JournalError, RevertConflictError, clan_changes, person_changes, redo, revert,
+                            undo, undo_to)
+from app.gedcom.ru_dates import DateInputError, parse_input
 from app.db.links import (Candidate, ClanLink, Link, LinkClashError, LinkError, LinkNotFoundError, LinkPerson,
                           candidates, clan_links, create_link, delete_link, list_links, reject_pair, search_persons)
 from app.db.person import PersonDetails, PersonNotFoundError, person_details
@@ -123,6 +128,106 @@ def post_reject(body: PairDecision, conn: Database) -> None:
         reject_pair(conn, body.a, body.b)
     except LinkError as error:
         raise HTTPException(status_code=400, detail=str(error)) from None
+
+
+# ── редактор: даты, форма человека, правка, добавление, удаление, журнал ──
+
+class ParsedDate(BaseModel):
+    gedcom: str | None
+    ru: str
+    kind: str
+
+
+@app.get("/api/dates/parse")
+def get_parsed_date(text: str = "") -> ParsedDate:
+    """Как поле даты поняло набранное — для подсказки на лету. Непонятное — 400 с причиной."""
+    try:
+        parsed = parse_input(text)
+    except DateInputError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from None
+    return ParsedDate(gedcom=parsed.gedcom, ru=parsed.ru, kind=parsed.kind)
+
+
+def _edit_errors(error: Exception) -> HTTPException:
+    if isinstance(error, RevertConflictError):
+        return HTTPException(status_code=409, detail=str(error))
+    return HTTPException(status_code=400, detail=str(error))
+
+
+@app.get("/api/persons/{person_id}/form")
+def get_person_form(person_id: int, conn: Database) -> PersonForm:
+    try:
+        return person_form(conn, person_id)
+    except EditError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from None
+
+
+@app.put("/api/persons/{person_id}")
+def put_person(person_id: int, body: PersonFields, conn: Database) -> ChangeInfo:
+    try:
+        return update_person(conn, person_id, body)
+    except (EditError, JournalError) as error:
+        raise _edit_errors(error) from None
+
+
+@app.post("/api/clans/{clan_id}/persons")
+def post_person(clan_id: int, body: NewPerson, conn: Database) -> Created:
+    try:
+        return add_person(conn, clan_id, body)
+    except (EditError, JournalError) as error:
+        raise _edit_errors(error) from None
+
+
+@app.get("/api/persons/{person_id}/delete-preview")
+def get_delete_preview(person_id: int, conn: Database) -> DeletePreview:
+    try:
+        return delete_preview(conn, person_id)
+    except EditError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from None
+
+
+@app.delete("/api/persons/{person_id}")
+def remove_person(person_id: int, conn: Database, branch: bool = False) -> ChangeInfo:
+    try:
+        return delete_person(conn, person_id, branch)
+    except (EditError, JournalError) as error:
+        raise _edit_errors(error) from None
+
+
+@app.get("/api/clans/{clan_id}/changes")
+def get_clan_changes(clan_id: int, conn: Database) -> list[ChangeInfo]:
+    return clan_changes(conn, clan_id)
+
+
+@app.get("/api/persons/{person_id}/changes")
+def get_person_changes(person_id: int, conn: Database) -> list[ChangeInfo]:
+    return person_changes(conn, person_id)
+
+
+@app.post("/api/clans/{clan_id}/undo")
+def post_undo(clan_id: int, conn: Database) -> ChangeInfo | None:
+    return undo(conn, clan_id)
+
+
+@app.post("/api/clans/{clan_id}/redo")
+def post_redo(clan_id: int, conn: Database) -> ChangeInfo | None:
+    return redo(conn, clan_id)
+
+
+@app.post("/api/changes/{change_id}/undo-to")
+def post_undo_to(change_id: int, conn: Database) -> list[ChangeInfo]:
+    try:
+        return undo_to(conn, change_id)
+    except JournalError as error:
+        raise _edit_errors(error) from None
+
+
+@app.post("/api/changes/{change_id}/revert")
+def post_revert(change_id: int, conn: Database) -> ChangeInfo:
+    try:
+        return revert(conn, change_id)
+    except (EditError, JournalError) as error:
+        raise _edit_errors(error) from None
 
 
 MAX_UPLOAD = 20 * 1024 * 1024
