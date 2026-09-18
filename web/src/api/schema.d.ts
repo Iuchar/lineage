@@ -353,6 +353,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/persons/{person_id}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Photo */
+        post: operations["post_photo_api_persons__person_id__photo_post"];
+        /** Delete Photo */
+        delete: operations["delete_photo_api_persons__person_id__photo_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{clan_id}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Export
+         * @description Род файлом GEDCOM 5.5.1 — со всеми правками и всем, что пришло из исходного файла.
+         */
+        get: operations["get_export_api_clans__clan_id__export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/uploads": {
         parameters: {
             query?: never;
@@ -469,6 +507,11 @@ export interface components {
             persons: components["schemas"]["TreePerson"][];
             /** Families */
             families: components["schemas"]["TreeFamily"][];
+            /**
+             * Tags
+             * @default []
+             */
+            tags: components["schemas"]["TagDef"][];
         };
         /** Created */
         Created: {
@@ -604,7 +647,8 @@ export interface components {
         NewPerson: {
             /**
              * @default {
-             *       "notes": []
+             *       "notes": [],
+             *       "new_tags": {}
              *     }
              */
             fields: components["schemas"]["PersonFields"];
@@ -701,6 +745,23 @@ export interface components {
              * @default []
              */
             notes: string[];
+            /** Tags */
+            tags?: string[] | null;
+            /**
+             * New Tags
+             * @default {}
+             */
+            new_tags: {
+                [key: string]: string;
+            };
+            /** Burnt */
+            burnt?: boolean | null;
+            /** Hidden */
+            hidden?: boolean | null;
+            /** Heir */
+            heir?: boolean | null;
+            /** Portrait */
+            portrait?: ("auto" | "silhouette" | "none") | null;
         };
         /**
          * PersonForm
@@ -723,6 +784,21 @@ export interface components {
             death: components["schemas"]["DateValue"];
             /** Notes */
             notes: string[];
+            /** Tags */
+            tags: string[];
+            /** Burnt */
+            burnt: boolean;
+            /** Hidden */
+            hidden: boolean;
+            /** Heir */
+            heir: boolean;
+            /**
+             * Portrait
+             * @enum {string}
+             */
+            portrait: "auto" | "silhouette" | "none";
+            /** Photo */
+            photo: string | null;
         };
         /**
          * Relation
@@ -793,6 +869,13 @@ export interface components {
              */
             delete: number[];
         };
+        /** TagDef */
+        TagDef: {
+            /** Name */
+            name: string;
+            /** Color */
+            color: string;
+        };
         /** TreeFamily */
         TreeFamily: {
             /** Id */
@@ -828,6 +911,34 @@ export interface components {
             parent_families: number[];
             /** Spouse Families */
             spouse_families: number[];
+            /**
+             * Tags
+             * @default []
+             */
+            tags: string[];
+            /**
+             * Burnt
+             * @default false
+             */
+            burnt: boolean;
+            /**
+             * Hidden
+             * @default false
+             */
+            hidden: boolean;
+            /**
+             * Heir
+             * @default false
+             */
+            heir: boolean;
+            /**
+             * Portrait
+             * @default auto
+             * @enum {string}
+             */
+            portrait: "auto" | "silhouette" | "none";
+            /** Photo */
+            photo?: string | null;
         };
         /** UploadInfo */
         UploadInfo: {
@@ -1539,6 +1650,99 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChangeInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_photo_api_persons__person_id__photo_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_photo_api_persons__person_id__photo_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_export_api_clans__clan_id__export_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
                 };
             };
             /** @description Validation Error */

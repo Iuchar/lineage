@@ -142,11 +142,13 @@ describe("поколения", () => {
       persons: [1, 2, 3, 4].map((id) => ({
         id, xref: `@I${id}@`, given: null, surname: null, married_surname: null, sex: null,
         is_branch_stub: false, birth: null, death: null, parent_families: [], spouse_families: [],
+        tags: [], burnt: false, hidden: false, heir: false, portrait: "auto" as const, photo: null,
       })),
       families: [
         { id: 10, xref: "@F10@", husband: 1, wife: null, children: [2] },
         { id: 11, xref: "@F11@", husband: 2, wife: 3, children: [4] },
       ],
+      tags: [],
     } satisfies ClanTree;
     expect(Object.fromEntries(generations(tree))).toEqual({ 1: 0, 2: 1, 3: 1, 4: 2 });
   });

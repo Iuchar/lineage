@@ -18,6 +18,7 @@ import "./styles/editor.css";
 import type { ClanSummary, ClanTree, LinkPerson, TreePerson } from "./api/types";
 import { NO_MARKS } from "./canvas/cards";
 import { TreeCanvas } from "./canvas/canvas";
+import { mergeData, treeData } from "./canvas/treedata";
 import { demoHeirs, demoMarks, demoTags } from "./demo";
 import { LinkNav } from "./links/nav";
 import { ManualLink } from "./links/manual";
@@ -176,6 +177,10 @@ async function start(root: HTMLElement): Promise<void> {
     else openLink(personId);
   };
 
+  // что рисует карта сверх родства: из дерева рода, а демо-набор разработчика (?demo=marks) — поверх
+  const dataOf = (loaded: ClanTree) =>
+    mergeData(treeData(loaded), { marks: demoMarks(loaded), tags: demoTags(loaded), heirs: demoHeirs(loaded) });
+
   // прийти к человеку из другого рода: карта открылась целиком, её надо приблизить, иначе его не найти
   const arrive = (id: number) => {
     canvas.reveal(id);
@@ -196,7 +201,8 @@ async function start(root: HTMLElement): Promise<void> {
     },
     manualOffset: (id) => canvas.manual.get(id) ?? 0,
     portrait: (person) =>
-      canvas.portraits && !person.is_branch_stub ? (canvas.photos.get(person.id) ?? silhouette(person)) : null,
+      canvas.portraits && !person.is_branch_stub && !canvas.noPortrait.has(person.id)
+        ? (canvas.photos.get(person.id) ?? silhouette(person)) : null,
     tagsOf: (id) => {
       const own = canvas.tags.of.get(id) ?? [];
       return canvas.tags.list.filter((t) => own.includes(t.id));
@@ -266,6 +272,15 @@ async function start(root: HTMLElement): Promise<void> {
     drawClanTabs(currentClan);
     search.setTree(tree);
     canvas.links = links;
+    // метки, состояния, линия и снимки тоже могли поменяться этой правкой
+    const data = dataOf(tree);
+    canvas.marks = data.marks;
+    canvas.tags = data.tags;
+    canvas.heirs = data.heirs;
+    canvas.photos = data.photos;
+    canvas.noPortrait = data.noPortrait;
+    lineSwitch.hidden = !data.heirs.size;
+    drawTagFilter(data.tags);
     canvas.refreshTree(tree, focusId);
     if (focusId != null) canvas.centreOnPerson(focusId);
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
@@ -297,12 +312,13 @@ async function start(root: HTMLElement): Promise<void> {
     const [loaded, links] = await Promise.all([getJson<ClanTree>(`/api/clans/${id}/tree`), nav.load(id)]);
     tree = loaded;
     search.setTree(tree);
-    const tags = demoTags(tree);
-    const heirs = demoHeirs(tree);
+    const data = dataOf(tree);
     canvas.links = links;
-    canvas.setTree(tree, demoMarks(tree), new Map(), tags, heirs);
-    lineSwitch.hidden = !heirs.size;
-    drawTagFilter(tags);
+    canvas.photos = data.photos;
+    canvas.noPortrait = data.noPortrait;
+    canvas.setTree(tree, data.marks, new Map(), data.tags, data.heirs);
+    lineSwitch.hidden = !data.heirs.size;
+    drawTagFilter(data.tags);
     void journal.refresh();
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };

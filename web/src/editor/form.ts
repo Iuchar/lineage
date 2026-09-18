@@ -4,6 +4,8 @@
 
 import type { ChangeInfo, ClanTree, Created, DeletePreview, PersonFields, PersonForm, Relation, TreePerson } from "../api/types";
 import { escapeHtml, lifeYears } from "../format";
+import { TAG_COLORS, type TagColor } from "../canvas/tags";
+import { silhouette } from "../canvas/portrait";
 import { send } from "./api";
 import { bindDateFields, dateFieldHtml } from "./datefield";
 
@@ -21,6 +23,7 @@ export interface NewPersonPlan {
 }
 
 const SEXES: [string, string][] = [["M", "мужской"], ["F", "женский"], ["U", "неизвестен"]];
+const PORTRAITS: [string, string][] = [["auto", "портрет"], ["silhouette", "заглушка"], ["none", "без портрета"]];
 const PEDIGREES: [string, string][] = [["birth", "родной"], ["adopted", "приёмный"], ["foster", "под опекой"]];
 
 const seg = (name: string, options: [string, string][], current: string | null) =>
@@ -29,6 +32,7 @@ const seg = (name: string, options: [string, string][], current: string | null) 
 
 export class PersonEditor {
   private tree: ClanTree | null = null;
+  private newTags = new Map<string, TagColor>(); // метки, которых ещё нет в наборе рода
 
   constructor(private readonly host: HTMLElement, private readonly actions: FormActions) {}
 
@@ -38,10 +42,12 @@ export class PersonEditor {
     const result = await send<PersonForm>("GET", `/api/persons/${personId}/form`);
     if (!result.ok) return this.actions.closed();
     const form = result.data;
+    const hasParents = (tree.persons.find((p) => p.id === personId)?.parent_families.length ?? 0) > 0;
     this.host.innerHTML =
       `<div class="sideIn form"><span class="lbl" style="margin-top:0">правка</span>` +
       `<h3>${escapeHtml([form.given, form.surname].filter(Boolean).join(" ") || "без имени")}</h3>` +
-      this.fieldsHtml(form) +
+      this.portraitHtml(form, true) +
+      this.fieldsHtml(form) + this.metaHtml(form, hasParents) +
       '<div class="err" data-role="err"></div>' +
       '<div class="btns"><button class="pri" data-act="save">Сохранить</button><button data-act="cancel">Отмена</button></div>' +
       '<button class="danger" data-act="delete">Удалить человека…</button></div>';
@@ -52,6 +58,7 @@ export class PersonEditor {
       this.actions.saved(saved.data, personId);
     });
     this.on("delete", () => void this.confirmDelete(personId));
+    this.bindPhoto(personId);
   }
 
   // ── новый человек на выбранном месте ──
@@ -60,12 +67,14 @@ export class PersonEditor {
     const blank: PersonForm = {
       id: 0, clan_id: clanId, given: null, surname: plan.surname, married_surname: null, sex: plan.sex,
       birth: { gedcom: null, ru: "", input: "" }, death: { gedcom: null, ru: "", input: "" }, notes: [],
+      tags: [], burnt: false, hidden: false, heir: false, portrait: "auto", photo: null,
     };
     this.host.innerHTML =
       `<div class="sideIn form"><span class="lbl" style="margin-top:0">новый человек</span>` +
       `<div class="bind">${plan.bind}</div>` +
       seg("source", [["new", "новый человек"], ["existing", "выбрать из рода"]], "new") +
-      `<div data-role="new">${this.fieldsHtml(blank)}` +
+      `<div data-role="new">${this.portraitHtml(blank, false)}${this.fieldsHtml(blank)}` +
+      this.metaHtml(blank, plan.relation.kind === "child" || plan.relation.kind === "sibling") +
       (plan.pedigree ? `<label class="fl">Родство с родителями</label>${seg("pedigree", PEDIGREES, "birth")}` : "") +
       `</div><div data-role="existing" hidden><input class="field" data-role="q" placeholder="имя или фамилия">` +
       `<div class="pickList" data-role="list"></div></div>` +
@@ -115,6 +124,94 @@ export class PersonEditor {
       const created = await send<Created>("POST", `/api/clans/${clanId}/persons`, body);
       if (!created.ok) return this.error(created.detail);
       this.actions.saved(created.data.change, created.data.person_id);
+    });
+  }
+
+  // ── портрет: снимок, заглушка или без портрета; снимок грузится только уже записанному ──
+  private portraitHtml(form: PersonForm, upload: boolean): string {
+    // без снимка — та же заглушка-профиль, что на карточке
+    const person = this.tree?.persons.find((p) => p.id === form.id);
+    const img = form.photo ? `url('${form.photo}')` : person ? silhouette(person) : "none";
+    return `<div class="porEd"><div class="por" style="background:${img} center / cover"></div><div class="porOpts">` +
+      seg("portrait", PORTRAITS, form.portrait) +
+      (upload
+        ? `<div class="porBtns"><label class="chip">${form.photo ? "заменить снимок…" : "загрузить снимок…"}` +
+          `<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-role="photo" hidden></label>` +
+          (form.photo ? '<button type="button" class="chip" data-act="unphoto">убрать снимок</button>' : "") + "</div>"
+        : '<div class="parse">снимок можно загрузить после создания</div>') +
+      "</div></div>";
+  }
+
+  private bindPhoto(personId: number): void {
+    const input = this.host.querySelector<HTMLInputElement>("[data-role=photo]");
+    input?.addEventListener("change", async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const response = await fetch(`/api/persons/${personId}/photo`, { method: "POST", body: file, headers: { "Content-Type": file.type } });
+      const body = (await response.json().catch(() => ({}))) as ChangeInfo & { detail?: string };
+      if (!response.ok) return this.error(body.detail ?? "Снимок не загрузился");
+      this.actions.saved(body, personId);
+    });
+    this.on("unphoto", async () => {
+      const result = await send<ChangeInfo>("DELETE", `/api/persons/${personId}/photo`);
+      if (!result.ok) return this.error(result.detail);
+      this.actions.saved(result.data, personId);
+    });
+  }
+
+  // ── метки, состояния, главная линия ──
+  private metaHtml(form: PersonForm, hasParents: boolean): string {
+    this.newTags.clear();
+    const known = this.tree?.tags ?? [];
+    const chip = (name: string, color: string, on: boolean) =>
+      `<button type="button" class="tagChip${on ? " on" : ""}" data-tag="${escapeHtml(name)}" style="--c:${TAG_COLORS[color as TagColor] ?? "#888"}">` +
+      `<i></i>${escapeHtml(name)}</button>`;
+    const flag = (name: string, label: string, on: boolean, note: string) =>
+      `<label class="flag"><input type="checkbox" data-flag="${name}"${on ? " checked" : ""}><span>${label}<i>${note}</i></span></label>`;
+    return `<label class="fl">Метки</label><div class="tagChips" data-role="tags">` +
+      known.map((t) => chip(t.name, t.color, form.tags.includes(t.name))).join("") +
+      form.tags.filter((t) => !known.some((k) => k.name === t)).map((t) => chip(t, "дымный", true)).join("") +
+      '<button type="button" class="chip" data-act="newtag">+ новая метка</button></div>' +
+      '<div class="newTag" data-role="newtag" hidden><input class="field" data-role="tagname" placeholder="название метки">' +
+      `<div class="swatches">${Object.entries(TAG_COLORS).map(([name, hex], i) =>
+        `<button type="button" data-color="${name}" title="${name}" style="--c:${hex}"${i === 0 ? ' class="on"' : ""}></button>`).join("")}</div>` +
+      '<button type="button" class="chip" data-act="addtag">добавить</button></div>' +
+      '<label class="fl">Состояние</label>' +
+      flag("burnt", "выжжен из рода", form.burnt, "знак на карточке") +
+      flag("hidden", "скрыт от зрителей", form.hidden, "редактор видит с пометкой") +
+      (hasParents ? '<label class="fl">Главная линия</label>' +
+        flag("heir", "продолжатель главной линии", form.heir, "пара родителей встанет над ним прямым стволом") : "");
+  }
+
+  private bindMeta(): void {
+    const box = this.host.querySelector<HTMLElement>("[data-role=newtag]");
+    this.host.querySelector("[data-role=tags]")?.addEventListener("click", (e) => {
+      const chip = (e.target as HTMLElement).closest<HTMLElement>("[data-tag]");
+      if (chip) chip.classList.toggle("on");
+    });
+    this.on("newtag", () => {
+      if (!box) return;
+      box.hidden = !box.hidden;
+      box.querySelector<HTMLInputElement>("[data-role=tagname]")?.focus();
+    });
+    box?.querySelector(".swatches")?.addEventListener("click", (e) => {
+      const swatch = (e.target as HTMLElement).closest<HTMLElement>("[data-color]");
+      if (!swatch) return;
+      box.querySelectorAll("[data-color]").forEach((b) => b.classList.toggle("on", b === swatch));
+    });
+    this.on("addtag", () => {
+      const name = box?.querySelector<HTMLInputElement>("[data-role=tagname]")?.value.trim();
+      const color = (box?.querySelector<HTMLElement>("[data-color].on")?.dataset.color ?? "синий") as TagColor;
+      if (!name || !box) return;
+      const exists = this.host.querySelector<HTMLElement>(`[data-tag="${CSS.escape(name)}"]`);
+      if (exists) exists.classList.add("on");
+      else {
+        this.newTags.set(name, color);
+        box.previousElementSibling?.querySelector("[data-act=newtag]")?.insertAdjacentHTML("beforebegin",
+          `<button type="button" class="tagChip on" data-tag="${escapeHtml(name)}" style="--c:${TAG_COLORS[color]}"><i></i>${escapeHtml(name)}</button>`);
+      }
+      box.hidden = true;
+      box.querySelector<HTMLInputElement>("[data-role=tagname]")!.value = "";
     });
   }
 
@@ -175,11 +272,20 @@ export class PersonEditor {
       sex: (this.segValue("sex") ?? null) as PersonFields["sex"],
       birth: date("birth"), death: date("death"),
       notes: [...this.host.querySelectorAll<HTMLTextAreaElement>("[data-note]")].map((t) => t.value).filter((t) => t.trim()),
+      tags: [...this.host.querySelectorAll<HTMLElement>("[data-tag].on")].map((c) => c.dataset.tag!),
+      new_tags: Object.fromEntries(this.newTags),
+      burnt: this.checked("burnt"), hidden: this.checked("hidden"), heir: this.checked("heir"),
+      portrait: (this.segValue("portrait") ?? "auto") as PersonFields["portrait"],
     };
+  }
+
+  private checked(name: string): boolean {
+    return this.host.querySelector<HTMLInputElement>(`[data-flag=${name}]`)?.checked ?? false;
   }
 
   private bind(): void {
     bindDateFields(this.host);
+    this.bindMeta();
     this.host.querySelectorAll<HTMLElement>("[data-seg]").forEach((group) => {
       group.addEventListener("click", (e) => {
         const button = (e.target as HTMLElement).closest<HTMLButtonElement>("button[data-v]");

@@ -7,7 +7,7 @@ export function around(tree: ClanTree, personId: number): ClanTree {
   const persons = new Map(tree.persons.map((p) => [p.id, p]));
   const families = new Map(tree.families.map((f) => [f.id, f]));
   const self = persons.get(personId);
-  if (!self) return { clan: tree.clan, persons: [], families: [] };
+  if (!self) return { clan: tree.clan, persons: [], families: [], tags: tree.tags };
 
   const kept: TreeFamily[] = [];
   const ids = new Set<number>([personId]);
@@ -31,5 +31,5 @@ export function around(tree: ClanTree, personId: number): ClanTree {
     spouse_families: p.spouse_families.filter((f) => keptIds.has(f)),
   });
   // порядок людей — как в роду: раскладка опирается на порядок записи
-  return { clan: tree.clan, persons: tree.persons.filter((p) => ids.has(p.id)).map(cut), families: kept };
+  return { clan: tree.clan, persons: tree.persons.filter((p) => ids.has(p.id)).map(cut), families: kept, tags: tree.tags };
 }

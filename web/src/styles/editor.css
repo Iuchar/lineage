@@ -109,3 +109,23 @@
 .sw .swLink { display: flex; align-items: center; background: #1d2126; color: #aeb6c2; font: 500 11.5px/1 'Golos Text', sans-serif;
   padding: 6px 11px; border-left: 1px solid #333941; text-decoration: none; }
 .sw .swLink:hover { color: #e9e4d8; }
+
+/* форма: портрет, метки, состояния */
+.side .porEd { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; margin: 4px 0 6px; }
+.side .porEd .por { flex: none; width: 58px; height: 70px; border: 1px solid var(--edge); background-color: rgba(127,127,127,.1); }
+.side .porOpts { flex: 1 1 100%; min-width: 0; }
+.side .porOpts .seg button { font-size: 11px; padding: 5px 2px; }
+.side .porBtns { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.side .tagChips { display: flex; flex-wrap: wrap; gap: 5px; }
+.side .tagChip { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--edge); border-radius: 10px; padding: 2px 9px;
+  background: transparent; color: var(--mut); font: 400 11px 'Golos Text', sans-serif; cursor: pointer; }
+.side .tagChip i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); opacity: .45; }
+.side .tagChip.on { color: var(--fg); border-color: var(--c); }
+.side .tagChip.on i { opacity: 1; }
+.side .newTag { margin-top: 8px; padding: 8px; border: 1px dashed var(--edge); border-radius: 4px; }
+.side .swatches { display: flex; gap: 6px; margin: 8px 0; }
+.side .swatches button { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; background: var(--c); cursor: pointer; padding: 0; }
+.side .swatches button.on { border-color: var(--fg); }
+.side .flag { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; padding: 4px 0; cursor: pointer; }
+.side .flag input { accent-color: var(--acc); margin: 2px 0 0; }
+.side .flag i { display: block; font-style: normal; color: var(--mut); font-size: 10.5px; margin-top: 1px; }

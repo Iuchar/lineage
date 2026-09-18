@@ -50,11 +50,12 @@ export class TreeCanvas {
   // портреты: включены ли и чьи снимки известны; без снимка рисуется заглушка-профиль
   portraits = true;
   photos: ReadonlyMap<number, string> = new Map();
+  noPortrait: ReadonlySet<number> = new Set(); // портрет выключен у этого человека
   tags: TagSet = NO_TAGS;
   filter: string | null = null; // выбранная метка — её люди в полную силу, остальные в тени
   // двойники людей рода в других родах: сноска «также в …» под именем ведёт туда
   links: ReadonlyMap<number, readonly ClanLink[]> = new Map();
-  // отмеченные продолжатели главной линии; поля в данных пока нет, отметки приходят из демо-набора
+  // отмеченные продолжатели главной линии — из записей людей (_HEIR), в режиме «главная линия»
   heirs: ReadonlySet<number> = new Set();
   // ручной сдвиг среди братьев: id → на сколько мест; живёт до смены рода, в базу не пишется
   readonly manual = new Map<number, number>();
@@ -267,7 +268,7 @@ export class TreeCanvas {
       (lit ? `<svg class="line" width="${width}" height="${height}"><path d="${lit.paths}"/></svg>` : "") +
       (trunk ? `<svg class="line main" width="${width}" height="${height}"><path d="${trunk}"/></svg>` : "") +
       drawCards(tree, layout, style, this.selected, this.marks, lit?.persons, this.review,
-        { portraits: this.portraits, photos: this.photos, tags: this.tags, filter: this.filter,
+        { portraits: this.portraits, photos: this.photos, noPortrait: this.noPortrait, tags: this.tags, filter: this.filter,
           heirs: line.persons, broken: line.broken && shown ? line.last : null, links: this.links }) +
       drawFolds(links.folds, folds, style);
 

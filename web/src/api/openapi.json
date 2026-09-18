@@ -897,6 +897,122 @@
         }
       }
     },
+    "/api/persons/{person_id}/photo": {
+      "post": {
+        "summary": "Post Photo",
+        "operationId": "post_photo_api_persons__person_id__photo_post",
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Photo",
+        "operationId": "delete_photo_api_persons__person_id__photo_delete",
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clans/{clan_id}/export": {
+      "get": {
+        "summary": "Get Export",
+        "description": "Род файлом GEDCOM 5.5.1 — со всеми правками и всем, что пришло из исходного файла.",
+        "operationId": "get_export_api_clans__clan_id__export_get",
+        "parameters": [
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/uploads": {
       "post": {
         "summary": "Post Upload",
@@ -1254,6 +1370,14 @@
             },
             "type": "array",
             "title": "Families"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/TagDef"
+            },
+            "type": "array",
+            "title": "Tags",
+            "default": []
           }
         },
         "type": "object",
@@ -1701,7 +1825,8 @@
           "fields": {
             "$ref": "#/components/schemas/PersonFields",
             "default": {
-              "notes": []
+              "notes": [],
+              "new_tags": {}
             }
           },
           "relation": {
@@ -2028,6 +2153,77 @@
             "type": "array",
             "title": "Notes",
             "default": []
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          },
+          "new_tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "New Tags",
+            "default": {}
+          },
+          "burnt": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Burnt"
+          },
+          "hidden": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hidden"
+          },
+          "heir": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heir"
+          },
+          "portrait": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "silhouette",
+                  "none"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portrait"
           }
         },
         "type": "object",
@@ -2105,6 +2301,45 @@
             },
             "type": "array",
             "title": "Notes"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "burnt": {
+            "type": "boolean",
+            "title": "Burnt"
+          },
+          "hidden": {
+            "type": "boolean",
+            "title": "Hidden"
+          },
+          "heir": {
+            "type": "boolean",
+            "title": "Heir"
+          },
+          "portrait": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "silhouette",
+              "none"
+            ],
+            "title": "Portrait"
+          },
+          "photo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo"
           }
         },
         "type": "object",
@@ -2117,7 +2352,13 @@
           "sex",
           "birth",
           "death",
-          "notes"
+          "notes",
+          "tags",
+          "burnt",
+          "hidden",
+          "heir",
+          "portrait",
+          "photo"
         ],
         "title": "PersonForm",
         "description": "Что показывает форма правки."
@@ -2276,6 +2517,24 @@
         "type": "object",
         "title": "ReloadRequest"
       },
+      "TagDef": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "color"
+        ],
+        "title": "TagDef"
+      },
       "TreeFamily": {
         "properties": {
           "id": {
@@ -2422,6 +2681,50 @@
             },
             "type": "array",
             "title": "Spouse Families"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "default": []
+          },
+          "burnt": {
+            "type": "boolean",
+            "title": "Burnt",
+            "default": false
+          },
+          "hidden": {
+            "type": "boolean",
+            "title": "Hidden",
+            "default": false
+          },
+          "heir": {
+            "type": "boolean",
+            "title": "Heir",
+            "default": false
+          },
+          "portrait": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "silhouette",
+              "none"
+            ],
+            "title": "Portrait",
+            "default": "auto"
+          },
+          "photo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo"
           }
         },
         "type": "object",

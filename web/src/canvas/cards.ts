@@ -20,6 +20,7 @@ export const NO_MARKS: PersonMarks = { burnt: new Set(), hidden: new Set() };
 export interface CardExtras {
   portraits: boolean; // портреты включены; снимка нет — рисуется заглушка
   photos?: ReadonlyMap<number, string>; // адрес снимка человека, когда он есть
+  noPortrait?: ReadonlySet<number>; // у этих людей портрет выключен поштучно
   tags?: TagSet;
   filter?: string | null; // выбранная метка: её люди в полную силу, остальные в тени
   heirs?: ReadonlySet<number>; // люди на главной линии рода — имя акцентом
@@ -73,7 +74,7 @@ export function drawCards(
     if (reviewed) classes.push(`up-${reviewed}`);
 
     // портрет: снимок или заглушка-профиль; у заглушек «Ветвь» портрета нет
-    const photo = extras.portraits && !person.is_branch_stub
+    const photo = extras.portraits && !person.is_branch_stub && !extras.noPortrait?.has(person.id)
       ? (extras.photos?.get(person.id) ?? silhouette(person))
       : null;
     if (photo) classes.push("has-por");
@@ -109,6 +110,8 @@ export function drawCards(
       badge = '<span class="badge calm"><i>скрыт от зрителей</i></span>';
     }
     if (badge) classes.push("badged");
+    // строки под именем раскладываются по порядку: знак состояния, сноска связки, метки — классы говорят, что есть
+    if (shown.length) classes.push("has-tags");
 
     // связка — не плашка, а отсылка набором текста: состояния рисуются заливкой, дверь — только буквами
     const twins = extras.links?.get(person.id) ?? [];
@@ -116,6 +119,7 @@ export function drawCards(
       ? `<span class="also" data-person="${person.id}"><i>также в</i> ${escapeHtml(twins[0]!.other.clan_name)}` +
         `${twins.length > 1 ? `<b> +${twins.length - 1}</b>` : ""}</span>`
       : "";
+    if (twins.length) classes.push("linked");
 
     // у газеты метки стоят отдельной строкой под именем, у остальных стилей — своим знаком поверх карточки
     const underName = style === "gazeta" ? tagsHtml : "";
