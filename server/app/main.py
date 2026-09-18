@@ -18,6 +18,7 @@ from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonF
                            delete_person, delete_preview, person_form, update_person)
 from app.db.journal import (ChangeInfo, JournalError, RevertConflictError, clan_changes, person_changes, redo, revert,
                             undo, undo_to)
+from app.db.photos import photo_path, remove_photo, save_photo
 from app.gedcom.export import ExportError, export_clan
 from app.gedcom.ru_dates import DateInputError, parse_input
 from app.db.links import (Candidate, ClanLink, Link, LinkClashError, LinkError, LinkNotFoundError, LinkPerson,
@@ -230,6 +231,30 @@ def post_revert(change_id: int, conn: Database) -> ChangeInfo:
         return revert(conn, change_id)
     except (EditError, JournalError) as error:
         raise _edit_errors(error) from None
+
+
+@app.post("/api/persons/{person_id}/photo")
+async def post_photo(person_id: int, request: Request, conn: Database) -> ChangeInfo:
+    try:
+        return save_photo(conn, person_id, await request.body(), request.headers.get("content-type"))
+    except (EditError, JournalError) as error:
+        raise _edit_errors(error) from None
+
+
+@app.delete("/api/persons/{person_id}/photo")
+def delete_photo(person_id: int, conn: Database) -> ChangeInfo:
+    try:
+        return remove_photo(conn, person_id)
+    except (EditError, JournalError) as error:
+        raise _edit_errors(error) from None
+
+
+@app.get("/api/photos/{clan}/{name}", include_in_schema=False)
+def get_photo(clan: str, name: str) -> FileResponse:
+    try:
+        return FileResponse(photo_path(clan, name))
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Снимка нет") from None
 
 
 @app.get("/api/clans/{clan_id}/export", response_class=PlainTextResponse)

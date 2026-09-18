@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from app.db.journal import ChangeInfo, Edit, JournalError
 from app.gedcom.convert import _person
 from app.gedcom.dates import parse_date
+from app.gedcom.meta import TAG_COLORS, PersonMeta, add_tag_def, read_meta, write_meta
 from app.gedcom.records import Record
 from app.gedcom.ru_dates import DateInputError, format_ru, parse_input
 
@@ -41,6 +42,12 @@ class PersonForm(BaseModel):
     birth: DateValue
     death: DateValue
     notes: list[str]
+    tags: list[str]
+    burnt: bool
+    hidden: bool
+    heir: bool
+    portrait: Literal["auto", "silhouette", "none"]
+    photo: str | None
 
 
 class PersonFields(BaseModel):
@@ -53,6 +60,14 @@ class PersonFields(BaseModel):
     birth: str | None = None
     death: str | None = None
     notes: list[str] = []
+    # служебное: метки (новые — с цветом), состояния, главная линия, портрет
+    # не прислано (None) — остаётся как было: частичная форма ничего не стирает
+    tags: list[str] | None = None
+    new_tags: dict[str, str] = {}  # имя → цвет; метки, которых ещё нет в наборе рода
+    burnt: bool | None = None
+    hidden: bool | None = None
+    heir: bool | None = None
+    portrait: Literal["auto", "silhouette", "none"] | None = None
 
 
 class Relation(BaseModel):
@@ -169,6 +184,16 @@ def _apply_fields(record: Record, fields: PersonFields) -> None:
     _set_event_date(record, "BIRT", _date(fields.birth, "Рождение"))
     _set_event_date(record, "DEAT", _date(fields.death, "Смерть"))
 
+    was = read_meta(record)
+    write_meta(record, PersonMeta(
+        tags=was.tags if fields.tags is None else fields.tags,
+        burnt=was.burnt if fields.burnt is None else fields.burnt,
+        hidden=was.hidden if fields.hidden is None else fields.hidden,
+        heir=was.heir if fields.heir is None else fields.heir,
+        portrait=was.portrait if fields.portrait is None else fields.portrait,
+        photo=was.photo,
+    ))
+
     old = _notes(record)
     texts = [t.strip() for t in fields.notes if t.strip()]
     for note, text in zip(old, texts, strict=False):
@@ -215,6 +240,7 @@ def person_form(conn: sqlite3.Connection, person_id: int) -> PersonForm:
     clan_id = _clan(conn, person_id)
     record = _raw(conn, person_id)
     person = _person(record)
+    meta = read_meta(record)
 
     def date(tag: str) -> DateValue:
         event = record.first(tag)
@@ -231,6 +257,8 @@ def person_form(conn: sqlite3.Connection, person_id: int) -> PersonForm:
         id=person_id, clan_id=clan_id, given=person.given, surname=person.surname,
         married_surname=person.married_surname, sex=person.sex,  # type: ignore[arg-type]
         birth=date("BIRT"), death=date("DEAT"), notes=[n.text() for n in _notes(record)],
+        tags=meta.tags, burnt=meta.burnt, hidden=meta.hidden, heir=meta.heir, portrait=meta.portrait,
+        photo=f"/api/{meta.photo}" if meta.photo else None,
     )
 
 
@@ -239,11 +267,19 @@ def update_person(conn: sqlite3.Connection, person_id: int, fields: PersonFields
     record = edit.person(person_id)
     before = Record.from_json(record.to_json())
     _apply_fields(record, fields)
+    _new_tags(edit, fields)
     edit.summary = _describe(before, record)
     try:
         return edit.commit()
     except JournalError as error:
         raise EditError(str(error)) from None
+
+
+def _new_tags(edit: Edit, fields: PersonFields) -> None:
+    """Новые метки попадают в набор рода — в заголовок файла, той же правкой."""
+    for name, color in fields.new_tags.items():
+        if name.strip() and name in (fields.tags or []):
+            add_tag_def(edit.header(), name.strip(), color if color in TAG_COLORS else TAG_COLORS[0])
 
 
 def _describe(before: Record, after: Record) -> str:
@@ -261,6 +297,19 @@ def _describe(before: Record, after: Record) -> str:
             parts.append(f"{label} {_date_ru(before, tag)} → {_date_ru(after, tag)}")
     if [n.text() for n in _notes(before)] != [n.text() for n in _notes(after)]:
         parts.append("заметки")
+    mb, ma = read_meta(before), read_meta(after)
+    for tag in ma.tags:
+        if tag not in mb.tags:
+            parts.append(f"метка «{tag}»")
+    for tag in mb.tags:
+        if tag not in ma.tags:
+            parts.append(f"снята метка «{tag}»")
+    for flag, on, off in (("burnt", "выжжен из рода", "снова в роду"), ("hidden", "скрыт от зрителей", "виден зрителям"),
+                          ("heir", "продолжатель линии", "не продолжатель линии")):
+        if getattr(mb, flag) != getattr(ma, flag):
+            parts.append(on if getattr(ma, flag) else off)
+    if mb.portrait != ma.portrait:
+        parts.append({"auto": "портрет включён", "silhouette": "портрет — заглушка", "none": "портрет выключен"}[ma.portrait])
     return f"{_first_name(after)}: {', '.join(parts) or 'правка'}"
 
 
@@ -330,6 +379,7 @@ def add_person(conn: sqlite3.Connection, clan_id: int, body: NewPerson) -> Creat
     else:
         new_id, record = edit.new_person()
         _apply_fields(record, body.fields)
+        _new_tags(edit, body.fields)
     anchor = edit.person(relation.person_id)
     who, anchor_name = _name(record), _first_name(anchor)
 

@@ -93,6 +93,16 @@ class Edit:
             raise JournalError("Запись уже удалена этой правкой")
         return record
 
+    def header(self) -> Record:
+        """Заголовок файла рода: в нём набор меток с цветами."""
+        key = ("HEAD", self.clan_id)
+        if key not in self.touched:
+            raw = self.conn.execute("SELECT header_raw FROM clans WHERE id = ?", (self.clan_id,)).fetchone()[0]
+            data = json.loads(raw) if raw else None
+            record = _load(data) if data else Record(level=0, tag="HEAD")
+            self.touched[key] = _Touched("HEAD", self.clan_id, "", data, record)
+        return self.touched[key].record  # type: ignore[return-value]
+
     def new_person(self) -> tuple[int, Record]:
         return self._new("INDI", "persons", "I")
 
@@ -157,6 +167,11 @@ def _json(record: Record) -> str:
 
 def apply_records(conn: sqlite3.Connection, clan_id: int, records: list[dict[str, Any]], side: str) -> None:
     """Поставить записи в состояние side («b» или «a») и пересобрать из них таблицы. Без своей транзакции."""
+    for r in records:
+        if r.get("k") == "HEAD":
+            data = r[side]
+            conn.execute("UPDATE clans SET header_raw = ? WHERE id = ?",
+                         (json.dumps(data, ensure_ascii=False, separators=(",", ":")) if data else None, clan_id))
     persons = [r for r in records if r.get("k") == "INDI"]
     families = [r for r in records if r.get("k") == "FAM"]
     # сначала строки, потом связи между ними: связи ссылаются на номера людей и семей
@@ -332,6 +347,13 @@ def revert(conn: sqlite3.Connection, change_id: int) -> ChangeInfo:
     summary = conn.execute("SELECT summary FROM changes WHERE id = ?", (change_id,)).fetchone()[0]
     edit = Edit(conn, clan_id, summary=f"Вернуть: {summary}")
     for r in records:
+        if r.get("k") == "HEAD":
+            now_head = conn.execute("SELECT header_raw FROM clans WHERE id = ?", (clan_id,)).fetchone()[0]
+            if (json.loads(now_head) if now_head else None) != r["a"]:
+                raise RevertConflictError("После этой правки набор меток меняли ещё раз — верните через общий журнал")
+            edit.header()
+            edit.touched[("HEAD", clan_id)].record = _load(r["b"]) if r["b"] else Record(level=0, tag="HEAD")
+            continue
         if r.get("k") not in ("INDI", "FAM"):
             continue
         table = "persons" if r["k"] == "INDI" else "families"

@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from typing import Literal
 
 from pydantic import BaseModel
+
+from app.gedcom.meta import read_meta, read_tag_defs
+from app.gedcom.records import Record
 
 
 class ClanSummary(BaseModel):
@@ -39,6 +43,13 @@ class TreePerson(BaseModel):
     death: LifeDate | None
     parent_families: list[int]
     spouse_families: list[int]  # в порядке браков
+    # служебные теги приложения из записи человека (app/gedcom/meta.py)
+    tags: list[str] = []
+    burnt: bool = False
+    hidden: bool = False
+    heir: bool = False
+    portrait: Literal["auto", "silhouette", "none"] = "auto"
+    photo: str | None = None  # адрес снимка, если он есть
 
 
 class TreeFamily(BaseModel):
@@ -49,10 +60,16 @@ class TreeFamily(BaseModel):
     children: list[int]  # в порядке файла
 
 
+class TagDef(BaseModel):
+    name: str
+    color: str
+
+
 class ClanTree(BaseModel):
     clan: ClanSummary
     persons: list[TreePerson]
     families: list[TreeFamily]
+    tags: list[TagDef] = []  # набор меток рода с цветами
 
 
 class ClanNotFoundError(LookupError):
@@ -179,15 +196,21 @@ def clan_tree(conn: sqlite3.Connection, clan_id: int, file_order: bool = False) 
     if not file_order:
         _marriage_order(conn, clan_id, spouses, births, deaths, children)
 
-    persons = [
-        TreePerson(
+    def person(row: sqlite3.Row) -> TreePerson:
+        meta = read_meta(Record.from_json(json.loads(row["raw"])))
+        return TreePerson(
             id=row["id"], xref=row["xref"], given=row["given"], surname=row["surname"],
             married_surname=row["married_surname"], sex=row["sex"], is_branch_stub=bool(row["is_branch_stub"]),
             birth=births.get(row["id"]), death=deaths.get(row["id"]),
             parent_families=parents.get(row["id"], []), spouse_families=spouses.get(row["id"], []),
+            tags=meta.tags, burnt=meta.burnt, hidden=meta.hidden, heir=meta.heir, portrait=meta.portrait,
+            photo=f"/api/{meta.photo}" if meta.photo else None,
         )
+
+    persons = [
+        person(row)
         for row in conn.execute(
-            """SELECT id, xref, given, surname, married_surname, sex, is_branch_stub
+            """SELECT id, xref, given, surname, married_surname, sex, is_branch_stub, raw
                  FROM persons WHERE clan_id = ? ORDER BY id""",
             (clan_id,),
         )
@@ -201,4 +224,7 @@ def clan_tree(conn: sqlite3.Connection, clan_id: int, file_order: bool = False) 
             "SELECT id, xref, husband_id, wife_id FROM families WHERE clan_id = ? ORDER BY id", (clan_id,)
         )
     ]
-    return ClanTree(clan=ClanSummary(**dict(summary)), persons=persons, families=families)
+    header = conn.execute("SELECT header_raw FROM clans WHERE id = ?", (clan_id,)).fetchone()[0]
+    tags = read_tag_defs(Record.from_json(json.loads(header)) if header else None)
+    return ClanTree(clan=ClanSummary(**dict(summary)), persons=persons, families=families,
+                    tags=[TagDef(name=t.name, color=t.color) for t in tags])
