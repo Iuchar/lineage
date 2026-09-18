@@ -17,8 +17,13 @@ export interface PersonMarks {
 
 export const NO_MARKS: PersonMarks = { burnt: new Set(), hidden: new Set() };
 
+export type SurnameMode = "maiden" | "married" | null;
+
 export interface CardExtras {
   portraits: boolean; // портреты включены; снимка нет — рисуется заглушка
+  // фамилия второй строкой: при рождении (у жён — девичья) или после брака; null — не показывать
+  surnames?: SurnameMode;
+  marked?: ReadonlySet<number>; // отмеченные продолжатели главной ветви — ромб перед именем в любом виде
   photos?: ReadonlyMap<number, string>; // адрес снимка человека, когда он есть
   noPortrait?: ReadonlySet<number>; // у этих людей портрет выключен поштучно
   tags?: TagSet;
@@ -83,6 +88,9 @@ export function drawCards(
     const own = tags.of.get(person.id) ?? [];
     if (extras.filter && own.includes(extras.filter)) classes.push("tagged");
     if (extras.heirs?.has(person.id)) classes.push("heir");
+    if (extras.marked?.has(person.id)) classes.push("hr");
+    const surname = extras.surnames && !person.is_branch_stub
+      ? (extras.surnames === "married" ? person.married_surname || person.surname : person.surname) : null;
     const shown = own.slice(0, MAX_ON_CARD);
     const rest = own.length - shown.length;
     const tagsHtml = shown.length
@@ -132,7 +140,7 @@ export function drawCards(
     html +=
       `<div class="${classes.join(" ")}" data-id="${person.id}" style="left:${point.x}px;top:${point.y}px;width:${layout.cardWidth}px;height:${layout.cardHeight}px">${pedi}` +
       `<div class="box">${ordLine}<div class="por"${porStyle}></div>` +
-      `<div class="nm">${escapeHtml(cardName(person))}${sup}</div>${underName}` +
+      `<div class="nm">${escapeHtml(cardName(person))}${sup}</div>${surname ? `<div class="sn">${escapeHtml(surname)}</div>` : ""}${underName}` +
       `<div class="yr">${escapeHtml(lifeYears(person))}</div>${badge}${also}${overCard}</div></div>`;
   }
   return html;

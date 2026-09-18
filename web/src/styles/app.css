@@ -42,3 +42,19 @@ body { margin: 0; font-family: 'Golos Text', system-ui, sans-serif; background: 
 
 .empty { margin: auto; padding: 40px 16px; color: #7c8492; font-size: 13px; line-height: 1.7; text-align: center; }
 .empty code { font: 400 12px 'IBM Plex Mono', monospace; color: #aeb6c2; }
+
+/* фон стиля до краёв окна: узор лежит на отдельном слое под древом, у самого древа фона нет */
+.viewport > .canvas.tree { background: transparent !important; }
+.canvas.backdrop { pointer-events: none; }
+.canvas.backdrop::after { display: none; }
+
+/* легенда главной ветви — внизу слева; скрытая — одна кнопка «◆ легенда» */
+.viewport .legend { position: absolute; left: 14px; bottom: 14px; z-index: 7; max-width: 300px; background: var(--panelbg); color: var(--fg);
+  border: 1px solid var(--edge); border-radius: 5px; padding: 9px 12px 10px; font: 400 12px/1.45 'Golos Text', sans-serif;
+  box-shadow: 0 6px 20px rgba(0,0,0,.28); }
+.viewport .legend b { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.viewport .legend b i { display: inline-block; width: 26px; border-top: 2px solid var(--acc); }
+.viewport .legend small { display: block; color: var(--mut); font-size: 11px; margin-top: 3px; }
+.viewport .legend button { border: 0; background: none; color: var(--acc); font: 500 11px 'Golos Text', sans-serif; padding: 0; margin-top: 4px; cursor: pointer; }
+.viewport .legend.closed { padding: 5px 9px; }
+.viewport .legend.closed button { margin: 0; }

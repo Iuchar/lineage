@@ -687,15 +687,16 @@ export interface components {
         /**
          * Kin
          * @description Окружение кандидата: по нему тёзки из разных семей расходятся сразу.
+         *     Родственник, который сам ждёт проверки, узнаётся по id в очереди; связанный — по полю linked.
          */
         Kin: {
             person: components["schemas"]["LinkPerson"];
             /** Parents */
-            parents: string[];
+            parents: components["schemas"]["KinPerson"][];
             /** Spouses */
-            spouses: string[];
+            spouses: components["schemas"]["KinPerson"][];
             /** Children */
-            children: string[];
+            children: components["schemas"]["KinPerson"][];
         };
         /** KinChanges */
         KinChanges: {
@@ -716,6 +717,17 @@ export interface components {
              * @default false
              */
             marriage_order_auto: boolean;
+        };
+        /**
+         * KinPerson
+         * @description Родственник кандидата: имя, а если он сам связан с другим родом — с кем.
+         */
+        KinPerson: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            linked?: components["schemas"]["LinkPerson"] | null;
         };
         /** LifeDate */
         LifeDate: {

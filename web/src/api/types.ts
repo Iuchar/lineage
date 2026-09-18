@@ -34,3 +34,4 @@ export type FamilyFields = Schemas["FamilyFields"];
 export type KinChanges = Schemas["KinChanges"];
 export type ParentChange = Schemas["ParentChange"];
 export type SpouseChange = Schemas["SpouseChange"];
+export type KinPerson = Schemas["KinPerson"];

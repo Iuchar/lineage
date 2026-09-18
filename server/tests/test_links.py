@@ -53,9 +53,20 @@ def test_candidates_are_the_seven_seams_between_clans(conn: sqlite3.Connection) 
 
 def test_candidate_carries_surroundings(conn: sqlite3.Connection) -> None:
     eogan = next(c for c in candidates(conn) if c.a.person.name.startswith("Эоган"))
-    assert eogan.a.parents == eogan.b.parents == ["Ниалл Гленн Уриск", "Мор Кинкейд"]
-    assert eogan.b.spouses == ["Хэрриет Ноублс"]
-    assert "Уилфред Уинтерхоуп" in eogan.b.children
+    names = lambda people: [k.name for k in people]  # noqa: E731
+    assert names(eogan.a.parents) == names(eogan.b.parents) == ["Ниалл Гленн Уриск", "Мор Кинкейд"]
+    assert names(eogan.b.spouses) == ["Хэрриет Ноублс"]
+    assert "Уилфред Уинтерхоуп" in names(eogan.b.children)
+    assert all(k.linked is None for k in eogan.a.parents)
+
+
+def test_linked_relative_is_marked_in_the_queue(conn: sqlite3.Connection) -> None:
+    # мать Кормака Ниав связана — в очереди у Кормака она «связан · О'Дувейн»
+    niav = person(conn, "Уинтерхоуп", "Ниав", 1908), person(conn, "О'Дувейн", "Ниав", 1908)
+    create_link(conn, *niav)
+    kormak = next(c for c in candidates(conn) if c.a.person.name.startswith("Кормак"))
+    mother = next(k for k in kormak.a.parents if k.name.startswith("Ниав"))
+    assert mother.id == niav[0] and mother.linked is not None and mother.linked.clan_name == "О'Дувейн"
 
 
 def test_linked_and_rejected_pairs_leave_the_queue(conn: sqlite3.Connection) -> None:

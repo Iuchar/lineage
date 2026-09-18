@@ -2,6 +2,7 @@
 // Человек виден, если к нему ведёт хоть одна дорога мимо свёрнутых союзов.
 
 import type { ClanTree, TreeFamily, TreePerson } from "../api/types";
+import { parentless } from "./layout";
 
 export interface FoldInfo {
   family: number;
@@ -45,6 +46,8 @@ function visiblePersons(tree: ClanTree, folded: ReadonlySet<number>): Set<number
     if (person.parent_families.length) continue;
     if (spousesOf(person).every((id) => !persons.get(id)!.parent_families.length)) visible.add(person.id);
   }
+  // и братья с сёстрами без родителей: их семья — опора сама по себе
+  for (const family of tree.families) if (parentless(family)) for (const id of family.children) visible.add(id);
 
   let changed = true;
   while (changed) {
@@ -76,7 +79,7 @@ export function foldTree(tree: ClanTree, folded: ReadonlySet<number>): FoldedTre
   const families: TreeFamily[] = [];
   for (const family of tree.families) {
     const parents = [family.husband, family.wife].filter((id): id is number => id != null && visible.has(id));
-    if (!parents.length) continue;
+    if (!parents.length && !parentless(family)) continue;
     const isFolded = folded.has(family.id) && family.children.length > 0;
     if (isFolded) {
       folds.set(family.id, {

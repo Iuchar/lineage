@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ClanTree, TreeFamily, TreePerson } from "../api/types";
 import { drawLinks } from "../canvas/links";
 import monadhTree from "./fixtures/monadh.tree.json";
+import { foldTree } from "./fold";
 import { generations, layoutTree, primaryFamilies } from "./layout";
 import { STYLE_METRICS } from "./metrics";
 
@@ -48,6 +49,15 @@ describe("братья без родителей", () => {
     // без брата раскладка прежняя: все на своих местах
     const plain = layoutTree(base, STYLE_METRICS.gobelen, options);
     expect(plain.positions.size).toBe(base.persons.length);
+  });
+
+  it("свёрнутая ветка не рассыпает братьев без родителей", () => {
+    const tree = withBrother();
+    const union = DUNCAN.spouse_families[0]!;
+    const { tree: shown } = foldTree(tree, new Set([union]));
+    // видны братья, жена Дункана — и всё; семья без родителей на месте
+    expect(shown.persons.map((p) => p.id).sort()).toEqual([DUNCAN.id, 901, tree.families.find((f) => f.id === union)!.wife!].sort());
+    expect(shown.families.find((f) => f.id === 900)?.children).toEqual([DUNCAN.id, 901]);
   });
 
   it("узел с подписью над шиной, шина — место для плюса брата", () => {

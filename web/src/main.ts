@@ -484,9 +484,28 @@ async function start(root: HTMLElement): Promise<void> {
     if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
   });
 
-  // режим «главная линия»: ствол по отметкам и постоянная подсветка; без отметок переключателя нет
-  const lineSwitch = switcher("Линия", [["plain", "обычная"], ["main", "главная"]] as [string, string][], "plain",
+  // вид древа: стандарт — раскладка обычная, главная ветвь тонким стволом; «главная ветвь» — пары над продолжателями.
+  // Без отмеченных продолжателей переключателя нет
+  const lineSwitch = switcher("Вид древа", [["plain", "стандарт"], ["main", "главная ветвь"]] as [string, string][], "plain",
     (mode) => canvas.update({ mainLine: mode === "main" }));
+
+  // фамилия второй строкой на карточке: при рождении (у жён — девичья) или после брака
+  const surnameSwitch = switcher("Фамилии", [["off", "выкл."], ["maiden", "девичья"], ["married", "после брака"]] as [string, string][],
+    "maiden", (mode) => {
+      canvas.setSurnames(mode === "off" ? null : (mode as "maiden" | "married"));
+    });
+
+  // ветки: свернуть все — остаются основатели и стопки, щелчок по стопке раскрывает по поколению
+  const branchGroup = document.createElement("div");
+  branchGroup.className = "grp";
+  branchGroup.innerHTML = "<b>Ветки</b>";
+  const branchRow = document.createElement("div");
+  branchRow.className = "sw";
+  branchRow.append(
+    button("свернуть все", "Свернуть все ветки: останутся основатели и стопки", () => canvas.foldAll()),
+    button("развернуть все", "Развернуть все ветки сразу", () => canvas.unfoldAll()),
+  );
+  branchGroup.append(branchRow);
   lineSwitch.hidden = true;
 
   const rulerLabel = document.createElement("label");
@@ -542,10 +561,12 @@ async function start(root: HTMLElement): Promise<void> {
       canvas.render();
     }),
     viewGroup,
+    branchGroup,
     switcher("Основатель", [["top", "сверху"], ["bottom", "снизу"]], "top", (side) => {
       canvas.update({ rootAtBottom: side === "bottom" });
     }),
     lineSwitch,
+    surnameSwitch,
     portraitLabel,
     rulerLabel,
     tagFilter,

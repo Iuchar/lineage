@@ -4,7 +4,7 @@ import type { ClanLink, ClanTree } from "../api/types";
 import { foldsHiding, foldTree } from "../layout/fold";
 import { layoutTree, type LayoutResult } from "../layout/layout";
 import { STYLE_METRICS, type StyleName } from "../layout/metrics";
-import { drawCards, drawFolds, NO_MARKS, type PersonMarks, type ReviewMark } from "./cards";
+import { drawCards, drawFolds, NO_MARKS, type PersonMarks, type ReviewMark, type SurnameMode } from "./cards";
 import { mainLine, NO_LINE } from "./heirs";
 import { NO_TAGS, type TagSet } from "./tags";
 import { lineageOf } from "./lineage";
@@ -24,6 +24,13 @@ export interface CanvasState {
   mainLine: boolean;
 }
 
+// общее кратное шагов всех узоров (14 у гобелена и кабинета, 58 у пыльцы): фон выравнивается по этой сетке
+const TILE = 406;
+const LEGEND_KEY = "rodoslovnye.legend";
+
+const generationsWord = (n: number) =>
+  n % 10 === 1 && n % 100 !== 11 ? "поколение" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "поколения" : "поколений";
+
 // пыльца на фоне викторианского стиля — крошечные искры и точки, фактура бумаги
 const POLLEN = (color: string, width: number, height: number) =>
   `<defs><pattern id="vic" width="58" height="58" patternUnits="userSpaceOnUse">` +
@@ -37,6 +44,11 @@ export class TreeCanvas {
   private readonly surface: HTMLElement;
   private readonly rulerLayer: HTMLElement;
   private readonly plusLayer: HTMLElement;
+  // фон стиля до краёв окна: отдельный слой под древом, движется и масштабируется вместе с ним
+  private readonly backdrop: HTMLElement;
+  private backdropKey = "";
+  private readonly legend: HTMLElement;
+  private legendText = "";
   private svg: LinksSvg | null = null;
 
   private tree: ClanTree | null = null;
@@ -61,6 +73,8 @@ export class TreeCanvas {
   links: ReadonlyMap<number, readonly ClanLink[]> = new Map();
   // отмеченные продолжатели главной линии — из записей людей (_HEIR), в режиме «главная линия»
   heirs: ReadonlySet<number> = new Set();
+  // фамилия второй строкой: при рождении, после брака или не показывать
+  surnames: SurnameMode = "maiden";
   // ручной сдвиг среди братьев: id → на сколько мест; живёт до смены рода, в базу не пишется
   readonly manual = new Map<number, number>();
   // свёрнутые союзы; живут до смены рода, как и ручной сдвиг
@@ -79,15 +93,32 @@ export class TreeCanvas {
   constructor(host: HTMLElement) {
     this.viewport = document.createElement("div");
     this.viewport.className = "viewport";
+    this.backdrop = document.createElement("div");
+    this.backdrop.className = "canvas backdrop";
     this.surface = document.createElement("div");
-    this.surface.className = "canvas";
+    this.surface.className = "canvas tree";
     this.rulerLayer = document.createElement("div");
     this.rulerLayer.className = "ruler";
     this.rulerLayer.hidden = true;
     // плюсы режима правки: в пикселях экрана, чтобы не мельчали при отдалении
     this.plusLayer = document.createElement("div");
     this.plusLayer.className = "plusLayer";
-    this.viewport.append(this.surface, this.rulerLayer, this.plusLayer);
+    // легенда главной ветви — внизу слева, её можно скрыть; выбор помнит браузер
+    this.legend = document.createElement("div");
+    this.legend.className = "legend";
+    this.legend.hidden = true;
+    this.legend.addEventListener("pointerdown", (e) => e.stopPropagation());
+    this.legend.addEventListener("click", (e) => {
+      const act = (e.target as HTMLElement).closest<HTMLElement>("[data-legend]")?.dataset.legend;
+      if (!act) return;
+      try {
+        localStorage.setItem(LEGEND_KEY, act === "hide" ? "off" : "on");
+      } catch {
+        // без хранилища легенда просто вернётся при следующем открытии
+      }
+      this.drawLegend();
+    });
+    this.viewport.append(this.backdrop, this.surface, this.rulerLayer, this.plusLayer, this.legend);
     host.append(this.viewport);
     this.bindEvents();
   }
@@ -154,17 +185,60 @@ export class TreeCanvas {
     this.keepView(() => this.render());
   }
 
+  // фамилии на карточках: высота карточки меняется, вид остаётся на месте
+  setSurnames(mode: SurnameMode): void {
+    this.surnames = mode;
+    this.keepView(() => this.render());
+  }
+
   // оставить в полную силу людей с меткой; пусто — снять фильтр
   filterByTag(tag: string | null): void {
     this.filter = tag;
     this.render();
   }
 
-  // свернуть или развернуть ветку под союзом; вид остаётся на месте
+  // свернуть или развернуть ветку под союзом; вид остаётся на месте.
+  // Разворот открывает одно поколение: дети встают на место, их собственные ветки — стопками
   toggleFold(familyId: number): void {
-    if (!this.folded.delete(familyId)) this.folded.add(familyId);
+    if (this.folded.delete(familyId)) {
+      const family = this.tree?.families.find((f) => f.id === familyId);
+      for (const child of family?.children ?? []) {
+        for (const union of this.unionsOf(child)) this.folded.add(union);
+      }
+    } else {
+      this.folded.add(familyId);
+    }
     this.keepView(() => this.render());
     this.onFoldChange();
+  }
+
+  // свернуть все: остаются основатели и стопки; щелчок по стопке раскрывает по поколению
+  foldAll(): void {
+    if (!this.tree) return;
+    for (const family of this.tree.families) {
+      if (family.children.length && (family.husband != null || family.wife != null)) this.folded.add(family.id);
+    }
+    this.selected = null;
+    this.render();
+    // целиком, но не крупнее 100 %: две карточки и стопка не должны заливать экран
+    const fitted = fitAll(this.size, this.viewportSize());
+    const centre = { x: this.size.width / 2, y: this.size.height / 2 };
+    this.setView(fitted.k > ZOOM_BASE ? centreOn({ ...fitted, k: ZOOM_BASE }, centre, this.viewportSize()) : fitted);
+    this.onFoldChange();
+  }
+
+  unfoldAll(): void {
+    this.folded.clear();
+    this.keepView(() => this.render());
+    this.onFoldChange();
+  }
+
+  // союзы человека, под которыми есть дети
+  private unionsOf(personId: number): number[] {
+    const tree = this.tree;
+    if (!tree) return [];
+    const person = tree.persons.find((p) => p.id === personId);
+    return (person?.spouse_families ?? []).filter((id) => (tree.families.find((f) => f.id === id)?.children.length ?? 0) > 0);
   }
 
   // развернуть ветки, за которыми спрятан человек, — перед переходом к нему из поиска или панели
@@ -245,6 +319,7 @@ export class TreeCanvas {
     if (!this.tree) return;
     const { style } = this.state;
     const metrics = STYLE_METRICS[style];
+    // «главная ветвь»: пары встают над продолжателями; в стандарте раскладка обычная
     const heirs = this.state.mainLine ? this.heirs : new Set<number>();
     const { tree, folds } = foldTree(this.tree, this.folded);
     const foldedIds = new Set(folds.keys());
@@ -254,6 +329,7 @@ export class TreeCanvas {
       manual: this.manual,
       folded: foldedIds,
       heirs,
+      surnames: this.surnames != null,
     });
     const layout = this.layout;
 
@@ -267,14 +343,14 @@ export class TreeCanvas {
     const color = (name: string, fallback: string) => (styles.getPropertyValue(name) || fallback).trim();
     const links = drawLinks(tree, layout, style, color, undefined, foldedIds);
     this.svg = links;
-    const defs = style === "viktorian" ? POLLEN(color("--orn", "transparent"), width, height) : "";
+    this.pollen = style === "viktorian" ? color("--orn", "transparent") : null;
     // линия рода выбранного: путь акцентом, остальное дерево в тени
     const lineage = this.selected != null ? lineageOf(tree, layout, style, links, this.selected) : null;
     const lit = lineage?.paths ? lineage : null;
-    // главная линия: ствол подсвечен всегда, дерево вокруг не глушится; при выборе человека
-    // на карте остаётся одна нить — его линия рода
-    // линия считается по всему роду, а не по свёрнутому виду: спрятанная ветка — не обрыв
-    const line = heirs.size ? mainLine(this.tree, heirs) : NO_LINE;
+    // главная ветвь видна в любом виде: в стандарте тонким стволом, в «главной ветви» — прямым и толще;
+    // при выборе человека на карте остаётся одна нить — его линия рода.
+    // Линия считается по всему роду, а не по свёрнутому виду: спрятанная ветка — не обрыв
+    const line = this.heirs.size ? mainLine(this.tree, this.heirs) : NO_LINE;
     // свёрнутая ветка прячет конец линии — ствол тогда доходит до последнего видимого
     const deepest = [...line.persons].find((id) => layout.positions.has(id));
     const trunk = !lit && deepest != null ? lineageOf(tree, layout, style, links, deepest).paths : "";
@@ -282,15 +358,19 @@ export class TreeCanvas {
     this.surface.classList.toggle("lineage", lit !== null);
     this.surface.classList.toggle("filtered", this.filter !== null);
 
+    const main = this.state.mainLine;
     this.surface.innerHTML =
-      (defs ? `<svg class="ornament" width="${width}" height="${height}">${defs}</svg>` : "") +
       `<svg class="links" width="${width}" height="${height}">${links.paths}${links.marks}</svg>` +
       (lit ? `<svg class="line" width="${width}" height="${height}"><path d="${lit.paths}"/></svg>` : "") +
-      (trunk ? `<svg class="line main" width="${width}" height="${height}"><path d="${trunk}"/></svg>` : "") +
+      (trunk ? `<svg class="line main${main ? "" : " soft"}" width="${width}" height="${height}"><path d="${trunk}"/></svg>` : "") +
       drawCards(tree, layout, style, this.selected, this.marks, lit?.persons, this.review,
         { portraits: this.portraits, photos: this.photos, noPortrait: this.noPortrait, tags: this.tags, filter: this.filter,
-          heirs: line.persons, broken: line.broken && shown ? line.last : null, links: this.links }) +
+          heirs: main ? line.persons : undefined, marked: this.heirs, surnames: this.surnames,
+          broken: main && line.broken && shown ? line.last : null, links: this.links }) +
       drawFolds(links.folds, folds, style);
+    this.legendText = this.legendHtml(line.persons, main);
+    this.backdropKey = "";
+    this.drawLegend();
 
     // лампа «Ночного кабинета» ездит за выбранным
     const lamp = this.selected != null ? this.cardCentre(this.selected) : null;
@@ -299,6 +379,51 @@ export class TreeCanvas {
       this.surface.style.setProperty("--lampy", `${lamp.y}px`);
     }
     this.apply();
+  }
+
+  private pollen: string | null = null;
+
+  // легенда главной ветви: основатель и последний продолжатель по именам, без склонений
+  private legendHtml(persons: ReadonlySet<number>, main: boolean): string {
+    if (!this.tree || persons.size < 2) return "";
+    const byId = new Map(this.tree.persons.map((p) => [p.id, p]));
+    const order = [...persons];
+    const name = (id: number | undefined) => (id != null ? byId.get(id)?.given ?? "" : "");
+    const n = persons.size;
+    return `<b><i></i>главная ветвь рода</b><small>${n} ${generationsWord(n)}: ${name(order[order.length - 1])} — ${name(order[0])}. ` +
+      `◆ — продолжатель${main ? "; пары стоят над продолжателями" : ""}.</small>`;
+  }
+
+  private drawLegend(): void {
+    let off = false;
+    try {
+      off = localStorage.getItem(LEGEND_KEY) === "off";
+    } catch {
+      off = false;
+    }
+    this.legend.hidden = !this.legendText;
+    this.legend.classList.toggle("closed", off);
+    this.legend.innerHTML = off
+      ? '<button data-legend="show" title="Показать легенду главной ветви">◆ легенда</button>'
+      : `${this.legendText}<button data-legend="hide">скрыть легенду</button>`;
+  }
+
+  // фон стиля под всем окном: слой в координатах древа, привязанный к сетке узора, — шва нет ни при сдвиге, ни при зуме
+  private drawBackdrop(): void {
+    const { k, x, y } = this.view;
+    const { width, height } = this.viewportSize();
+    const left = Math.floor(-x / k / TILE) * TILE - TILE;
+    const top = Math.floor(-y / k / TILE) * TILE - TILE;
+    const w = Math.ceil(width / k / TILE) * TILE + 3 * TILE;
+    const h = Math.ceil(height / k / TILE) * TILE + 3 * TILE;
+    this.backdrop.style.width = `${w}px`;
+    this.backdrop.style.height = `${h}px`;
+    this.backdrop.style.transform = `translate(${(x + left * k).toFixed(1)}px,${(y + top * k).toFixed(1)}px) scale(${k.toFixed(3)})`;
+    const key = `${this.pollen}|${w}|${h}`;
+    if (key !== this.backdropKey) {
+      this.backdropKey = key;
+      this.backdrop.innerHTML = this.pollen ? `<svg class="ornament" width="${w}" height="${h}">${POLLEN(this.pollen, w, h)}</svg>` : "";
+    }
   }
 
   private cardCentre(id: number): { x: number; y: number } | null {
@@ -311,7 +436,14 @@ export class TreeCanvas {
   }
 
   private setView(view: View): void {
-    this.view = view;
+    const { width, height } = this.viewportSize();
+    const w = this.size.width * view.k;
+    const h = this.size.height * view.k;
+    // упор: древо можно отвести в сторону, но его край не уходит дальше середины экрана
+    const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+    this.view = width && height
+      ? { ...view, x: clamp(view.x, width / 2 - w, width / 2), y: clamp(view.y, height / 2 - h, height / 2) }
+      : view;
     this.apply();
   }
 
@@ -382,6 +514,7 @@ export class TreeCanvas {
   private apply(): void {
     const { k, x, y } = this.view;
     this.surface.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${k.toFixed(3)})`;
+    this.drawBackdrop();
     this.drawRuler();
     this.drawPluses();
     this.onViewChange(this.view);

@@ -1928,21 +1928,21 @@
           },
           "parents": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/KinPerson"
             },
             "type": "array",
             "title": "Parents"
           },
           "spouses": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/KinPerson"
             },
             "type": "array",
             "title": "Spouses"
           },
           "children": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/KinPerson"
             },
             "type": "array",
             "title": "Children"
@@ -1956,7 +1956,7 @@
           "children"
         ],
         "title": "Kin",
-        "description": "Окружение кандидата: по нему тёзки из разных семей расходятся сразу."
+        "description": "Окружение кандидата: по нему тёзки из разных семей расходятся сразу.\nРодственник, который сам ждёт проверки, узнаётся по id в очереди; связанный — по полю linked."
       },
       "KinChanges": {
         "properties": {
@@ -1998,6 +1998,35 @@
         },
         "type": "object",
         "title": "KinChanges"
+      },
+      "KinPerson": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "linked": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LinkPerson"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "KinPerson",
+        "description": "Родственник кандидата: имя, а если он сам связан с другим родом — с кем."
       },
       "LifeDate": {
         "properties": {

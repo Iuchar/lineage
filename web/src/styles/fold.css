@@ -33,3 +33,6 @@
 [data-style=polotno] .fold small { display: block; margin-top: 6px; font: 400 9px/1 'IBM Plex Mono', monospace;
   letter-spacing: .06em; color: var(--mut); }
 [data-style=polotno] .fold:hover > span:first-child { color: var(--acc); }
+/* каскад имён не шире карточки: при развороте по поколению стопки стоят тесно, длинные «ветвь … из …» обрезаются */
+[data-style=polotno] .fold { max-width: 150px; }
+[data-style=polotno] .fold > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

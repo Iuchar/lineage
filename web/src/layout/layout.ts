@@ -14,6 +14,8 @@ export interface LayoutOptions {
   folded?: ReadonlySet<number>;
   // продолжатели главной линии: пара встаёт над таким ребёнком, и линия идёт прямым стволом
   heirs?: ReadonlySet<number>;
+  // фамилия второй строкой на карточке — карточка выше на строку
+  surnames?: boolean;
 }
 
 export interface Point {
@@ -63,7 +65,8 @@ const LINK_ROOM = 96; // место под завиток и шину вывод
 const EXTRA_MARRIAGE_ROOM = 34; // разнос шин на каждый следующий брак
 const SHIFT_SHARE = 0.34; // сдвиг внутри яруса — не больше трети карточки
 const CHILD_DROP = 12;
-const PARENTLESS_ROOM = 64; // над братьями без родителей: шина, узел и подпись
+const PARENTLESS_ROOM = 64;
+const SURNAME_ROOM = 13; // строка фамилии под именем // над братьями без родителей: шина, узел и подпись
 
 const collator = new Intl.Collator("ru", { numeric: true });
 
@@ -487,7 +490,8 @@ function shiftByYear(
 export function layoutTree(tree: ClanTree, metrics: CardMetrics, options: LayoutOptions): LayoutResult {
   const idx = index(tree);
   const gen = generations(tree);
-  const height = cardHeight(metrics, Math.max(1, ...tree.persons.map((p) => p.spouse_families.length)));
+  const height = cardHeight(metrics, Math.max(1, ...tree.persons.map((p) => p.spouse_families.length))) +
+    (options.surnames ? SURNAME_ROOM : 0);
   const xs = placeHorizontally(idx, metrics, options);
   const gens = [...new Set(tree.persons.map((p) => gen.get(p.id)!))].sort((a, b) => a - b);
 

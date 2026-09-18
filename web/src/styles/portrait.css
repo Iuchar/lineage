@@ -28,3 +28,7 @@
 /* полотно: без рамки, круглый оттиск в оттенках серого справа от годов — слева промежуток занят линиями браков */
 [data-style=polotno] .node.has-por .por { right: 4px; top: 36px; width: 28px; height: 28px;
   border-radius: 50%; filter: grayscale(1); opacity: .85; }
+
+/* выжжен из рода: маска и на портрете — обесцвечен, затемнён, опалённый край (маска «тень») */
+[data-style] .canvas .node.burnt.has-por .por { filter: grayscale(1) brightness(.42) contrast(1.15);
+  box-shadow: inset 0 0 10px 3px rgba(60, 12, 6, .8); }

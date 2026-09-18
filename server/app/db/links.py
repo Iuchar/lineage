@@ -38,13 +38,22 @@ class ClanLink(BaseModel):
     other: LinkPerson
 
 
+class KinPerson(BaseModel):
+    """Родственник кандидата: имя, а если он сам связан с другим родом — с кем."""
+
+    id: int
+    name: str
+    linked: LinkPerson | None = None
+
+
 class Kin(BaseModel):
-    """Окружение кандидата: по нему тёзки из разных семей расходятся сразу."""
+    """Окружение кандидата: по нему тёзки из разных семей расходятся сразу.
+    Родственник, который сам ждёт проверки, узнаётся по id в очереди; связанный — по полю linked."""
 
     person: LinkPerson
-    parents: list[str]
-    spouses: list[str]
-    children: list[str]
+    parents: list[KinPerson]
+    spouses: list[KinPerson]
+    children: list[KinPerson]
 
 
 class Candidate(BaseModel):
@@ -176,23 +185,30 @@ def reject_pair(conn: sqlite3.Connection, a_id: int, b_id: int) -> None:
 
 
 def _kin(conn: sqlite3.Connection, person: sqlite3.Row) -> Kin:
-    def names(sql: str, *args: int) -> list[str]:
-        return [_full_name(r["given"], r["surname"]) for r in conn.execute(sql, args)]
+    def linked(pid: int) -> LinkPerson | None:
+        row = conn.execute("""SELECT CASE WHEN a_person_id = ? THEN b_person_id ELSE a_person_id END
+                                FROM person_links WHERE ? IN (a_person_id, b_person_id) ORDER BY id LIMIT 1""",
+                           (pid, pid)).fetchone()
+        return _brief(_person(conn, row[0])) if row else None
+
+    def names(sql: str, *args: int) -> list[KinPerson]:
+        return [KinPerson(id=r["id"], name=_full_name(r["given"], r["surname"]), linked=linked(r["id"]))
+                for r in conn.execute(sql, args)]
 
     parents = names(
-        """SELECT p.given, p.surname FROM family_children fc JOIN families f ON f.id = fc.family_id
+        """SELECT p.id, p.given, p.surname FROM family_children fc JOIN families f ON f.id = fc.family_id
              JOIN persons p ON p.id IN (f.husband_id, f.wife_id)
             WHERE fc.person_id = ? ORDER BY p.id = f.wife_id""",
         person["id"],
     )
     spouses = names(
-        """SELECT p.given, p.surname FROM spouse_families sf JOIN families f ON f.id = sf.family_id
+        """SELECT p.id, p.given, p.surname FROM spouse_families sf JOIN families f ON f.id = sf.family_id
              JOIN persons p ON p.id IN (f.husband_id, f.wife_id) AND p.id <> ?
             WHERE sf.person_id = ? ORDER BY sf.position""",
         person["id"], person["id"],
     )
     children = names(
-        """SELECT p.given, p.surname FROM spouse_families sf JOIN family_children fc ON fc.family_id = sf.family_id
+        """SELECT p.id, p.given, p.surname FROM spouse_families sf JOIN family_children fc ON fc.family_id = sf.family_id
              JOIN persons p ON p.id = fc.person_id
             WHERE sf.person_id = ? ORDER BY sf.position, fc.position""",
         person["id"],
