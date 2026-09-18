@@ -471,7 +471,14 @@ async function start(root: HTMLElement): Promise<void> {
     add.className = "add";
     add.textContent = "+ Загрузить .ged";
     add.addEventListener("click", () => upload.choose());
-    group.querySelector(".sw")!.append(add);
+    // выгрузка открытого рода файлом — со всеми правками и всем, что пришло из исходного файла
+    const exportLink = document.createElement("a");
+    exportLink.className = "swLink";
+    exportLink.textContent = "↓ .ged";
+    exportLink.title = "Выгрузить этот род файлом GEDCOM";
+    exportLink.href = `/api/clans/${current}/export`;
+    exportLink.setAttribute("download", "");
+    group.querySelector(".sw")!.append(add, exportLink);
     clanTabs.replaceChildren(group);
   };
   drawClanTabs(currentClan);

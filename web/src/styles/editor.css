@@ -104,3 +104,8 @@
   background: var(--panelbg, #16181b); color: var(--fg); border: 1px solid var(--edge); border-radius: 5px; padding: 8px 12px;
   font-size: 12px; box-shadow: 0 8px 26px rgba(0,0,0,.35); white-space: nowrap; }
 .toast button { border: 0; background: none; color: var(--acc); font: 500 12px 'Golos Text', sans-serif; cursor: pointer; padding: 0; }
+
+/* выгрузка рода — ссылка, одетая кнопкой переключателя */
+.sw .swLink { display: flex; align-items: center; background: #1d2126; color: #aeb6c2; font: 500 11.5px/1 'Golos Text', sans-serif;
+  padding: 6px 11px; border-left: 1px solid #333941; text-decoration: none; }
+.sw .swLink:hover { color: #e9e4d8; }

@@ -1,6 +1,7 @@
 """Один процесс отдаёт и API, и собранный интерфейс."""
 
 import sqlite3
+from urllib.parse import quote
 from collections.abc import Iterator
 from typing import Annotated
 
@@ -17,6 +18,7 @@ from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonF
                            delete_person, delete_preview, person_form, update_person)
 from app.db.journal import (ChangeInfo, JournalError, RevertConflictError, clan_changes, person_changes, redo, revert,
                             undo, undo_to)
+from app.gedcom.export import ExportError, export_clan
 from app.gedcom.ru_dates import DateInputError, parse_input
 from app.db.links import (Candidate, ClanLink, Link, LinkClashError, LinkError, LinkNotFoundError, LinkPerson,
                           candidates, clan_links, create_link, delete_link, list_links, reject_pair, search_persons)
@@ -228,6 +230,18 @@ def post_revert(change_id: int, conn: Database) -> ChangeInfo:
         return revert(conn, change_id)
     except (EditError, JournalError) as error:
         raise _edit_errors(error) from None
+
+
+@app.get("/api/clans/{clan_id}/export", response_class=PlainTextResponse)
+def get_export(clan_id: int, conn: Database) -> PlainTextResponse:
+    """Род файлом GEDCOM 5.5.1 — со всеми правками и всем, что пришло из исходного файла."""
+    try:
+        text = export_clan(conn, clan_id)
+    except ExportError:
+        raise HTTPException(status_code=404, detail="Такого рода нет") from None
+    name = conn.execute("SELECT name FROM clans WHERE id = ?", (clan_id,)).fetchone()[0]
+    return PlainTextResponse(text, media_type="text/plain; charset=utf-8", headers={
+        "Content-Disposition": f"attachment; filename*=UTF-8''{quote(name)}.ged"})
 
 
 MAX_UPLOAD = 20 * 1024 * 1024
