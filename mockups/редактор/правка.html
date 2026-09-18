@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Редактор — варианты</title>
+<!-- шрифты и стили приложения; карта настоящая, род Гленн Уриск, выбран Мурдо (1748—1851) -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<link rel="stylesheet" href="../../web/src/styles/panel.css">
+<link rel="stylesheet" href="../../web/src/styles/portrait.css">
+<link rel="stylesheet" href="../../web/src/styles/upload.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 100ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.about { padding: 6px 2px 12px; color: #8a8f98; font-size: 12.5px; max-width: 100ch; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; color: #e6e2d8; }
+
+/* окно приложения */
+.app { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; }
+.app .bar { position: relative; }
+.body { display: flex; height: 560px; position: relative; }
+.map { position: relative; flex: 1; overflow: hidden; background: var(--bg); }
+.map .canvas { transform-origin: 0 0; }
+.app .side { width: 280px; }
+
+/* новая карточка: пунктир по краю, пока человек не заполнен */
+.node.fresh .box { outline: 1.5px dashed var(--acc); outline-offset: 5px; }
+
+/* ── правка на месте ── */
+.side .row.ed { cursor: text; }
+.side .row.ed:hover i::after { content: ' ✎'; color: var(--acc); font-style: normal; }
+.side .edit { border-bottom: 1px solid var(--acc); padding: 6px 0 8px; }
+.side .edit label { display: block; font-size: 12.5px; margin-bottom: 4px; }
+.side .field, .fld { width: 100%; background: transparent; color: var(--fg); border: 1px solid var(--edge); border-radius: 4px;
+  padding: 6px 8px; font: 400 12.5px 'Golos Text', sans-serif; }
+.side .field:focus, .fld.on { outline: none; border-color: var(--acc); }
+.parse { font: 400 10.5px/1.4 'IBM Plex Mono', monospace; color: var(--mut); margin-top: 4px; }
+.parse b { color: var(--acc); font-weight: 500; }
+.parse.err b { color: #c9564a; }
+.toast { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 8; display: flex; gap: 12px; align-items: center;
+  background: var(--panelbg); color: var(--fg); border: 1px solid var(--edge); border-radius: 5px; padding: 8px 12px;
+  font-size: 12px; box-shadow: 0 8px 26px rgba(0,0,0,.35); white-space: nowrap; }
+.toast button, .linkish { border: 0; background: none; color: var(--acc); font: 500 12px 'Golos Text', sans-serif; cursor: pointer; padding: 0; }
+
+/* ── форма ── */
+.form .fl { display: block; font-size: 11px; color: var(--mut); margin: 10px 0 4px; }
+.form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.seg { display: flex; border: 1px solid var(--edge); border-radius: 4px; overflow: hidden; }
+.seg span { flex: 1; text-align: center; padding: 6px 4px; font-size: 12px; color: var(--mut); }
+.seg span.on { background: var(--acc); color: var(--bg); }
+.btns { display: flex; gap: 8px; margin-top: 16px; }
+.btns button, .pbtn { flex: 1; border: 1px solid var(--edge); background: transparent; color: var(--fg); border-radius: 4px;
+  font: 500 11.5px/1 'Golos Text', sans-serif; padding: 8px 8px; cursor: pointer; }
+.btns .pri, .pbtn.pri { border-color: var(--acc); background: var(--acc); color: var(--bg); }
+.danger { display: block; width: 100%; margin-top: 18px; border: 1px solid color-mix(in srgb, #c9564a 60%, transparent); background: transparent;
+  color: #c9564a; border-radius: 4px; font: 500 11.5px/1 'Golos Text', sans-serif; padding: 8px; cursor: pointer; }
+.porEd { display: flex; gap: 10px; align-items: flex-end; }
+.porEd .opts { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; }
+.porEd .opts span { color: var(--mut); }
+.porEd .opts span.on { color: var(--acc); }
+.noteEd { border: 1px solid var(--edge); border-radius: 4px; padding: 7px 8px; margin-top: 6px; font-size: 12px; line-height: 1.45; }
+.noteEd small { display: flex; justify-content: space-between; color: var(--mut); font-size: 10.5px; margin-top: 5px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--edge); border-radius: 10px; padding: 2px 8px;
+  font-size: 11px; margin: 0 4px 4px 0; }
+.chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+.warn { border: 1px solid color-mix(in srgb, #c9564a 55%, transparent); border-radius: 4px; padding: 10px 10px 12px; margin-top: 12px; }
+.warn b { display: block; font-size: 13px; margin-bottom: 6px; }
+.warn p { margin: 0 0 8px; font-size: 12px; line-height: 1.5; }
+.warn .opt { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; padding: 6px 0; border-top: 1px solid var(--edge); }
+.warn .opt i { font-style: normal; color: var(--mut); display: block; font-size: 11px; }
+
+/* ── добавить родню: плюсы у карточки ── */
+.plus { position: absolute; z-index: 7; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--acc);
+  background: var(--panelbg); color: var(--acc); font: 500 15px/19px 'Golos Text', sans-serif; text-align: center; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+.plus.on { background: var(--acc); color: var(--bg); }
+.pop { position: absolute; z-index: 8; width: 230px; background: var(--panelbg); color: var(--fg); border: 1px solid var(--edge);
+  border-radius: 5px; box-shadow: 0 10px 30px rgba(0,0,0,.4); padding: 10px 11px 11px; font-size: 12px; }
+.pop .t { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--acc); margin-bottom: 8px; }
+.pop .opt { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid var(--edge); cursor: pointer; }
+.pop .opt:first-of-type { border-top: 0; }
+.pop .opt i { font-style: normal; color: var(--mut); font-size: 11px; }
+.addGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.addGrid button { border: 1px dashed var(--edge); background: transparent; color: var(--fg); border-radius: 4px; padding: 7px 6px;
+  font: 500 11.5px/1.2 'Golos Text', sans-serif; cursor: pointer; text-align: left; }
+.addGrid button small { display: block; color: var(--mut); font-size: 10.5px; font-weight: 400; margin-top: 2px; }
+.addGrid button.done { border-style: solid; opacity: .5; cursor: default; }
+.addGrid button.wide { grid-column: 1 / -1; }
+.addGrid button.on { border-style: solid; border-color: var(--acc); color: var(--acc); }
+
+/* ── журнал ── */
+.bar .undo { color: #e9e4d8; }
+.drop { position: absolute; right: 290px; top: 44px; z-index: 30; width: 360px; background: #1d2126; color: #d9d4c8;
+  border: 1px solid #333941; border-radius: 6px; box-shadow: 0 12px 34px rgba(0,0,0,.5); padding: 6px 0; font-size: 12px; }
+.drop .day, .jr .day { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #7c8492; padding: 10px 12px 5px; }
+.drop .e, .jr .e { display: grid; grid-template-columns: 38px 1fr auto; gap: 8px; padding: 6px 12px; align-items: baseline; }
+.drop .e:hover { background: #2a2f36; }
+.drop .e time, .jr .e time { font: 400 10px 'IBM Plex Mono', monospace; color: #7c8492; }
+.drop .e s, .jr .e s { color: #7c8492; }
+.drop .e button, .jr .e button { border: 0; background: none; color: #e9c46a; font: 500 11px 'Golos Text', sans-serif; cursor: pointer; white-space: nowrap; }
+.drop .e.undone, .jr .e.undone { opacity: .45; text-decoration: line-through; }
+.tabs2 { display: flex; border-bottom: 1px solid var(--edge); }
+.tabs2 span { flex: 1; text-align: center; padding: 9px 0; font-size: 12px; color: var(--mut); border-bottom: 2px solid transparent; }
+.tabs2 span.on { color: var(--fg); border-bottom-color: var(--acc); }
+.jr .day { color: var(--mut); padding: 12px 0 5px; }
+.jr .e { padding: 6px 0; border-bottom: 1px solid var(--edge); grid-template-columns: 34px 1fr; font-size: 12px; line-height: 1.4; }
+.jr .e time { color: var(--mut); }
+.jr .e s { color: var(--mut); }
+.jr .e button { grid-column: 2; justify-self: start; color: var(--acc); padding: 3px 0 0; }
+
+/* ── даты ── */
+.dates { padding: 16px; }
+.drow { display: grid; grid-template-columns: 190px 1fr 150px; gap: 14px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--edge); }
+.drow .fld { font-size: 13px; }
+.drow .ru { font-size: 13px; }
+.drow .ru small { display: block; color: var(--mut); font-size: 10.5px; margin-top: 2px; }
+.drow code { font: 400 11px 'IBM Plex Mono', monospace; color: var(--mut); }
+.drow.err .ru { color: #c9564a; }
+.dhead { display: grid; grid-template-columns: 190px 1fr 150px; gap: 14px; font: 500 8.5px/1 'IBM Plex Mono', monospace;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--acc); padding-bottom: 6px; border-bottom: 1px solid var(--edge); }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+<h1>Редактор: правка на месте, в панели справа</h1>
+<p class="lede">Этап 3. По проектному документу отдельных страниц и модальных окон нет — правка живёт в панели человека. Карта настоящая,
+род Гленн Уриск, выбран Мурдо (1748—1851), жена Аина Драммонд, дети Дэрмид и Мойра. Четыре вопроса: как править поля, как добавлять родню,
+где журнал с откатом и как вводить даты. Каждый нарисован во всех пяти стилях и обеих темах.</p>
+<div class="ctl">
+  <div class="grp"><b>Вопрос</b><div class="sw" data-set="part">
+    <button data-v="edit" aria-pressed="true">1 · правка человека</button><button data-v="add">2 · добавить родню</button>
+    <button data-v="log">3 · журнал и откат</button><button data-v="date">4 · ввод даты</button>
+  </div></div>
+  <div class="grp"><b>Вариант</b><div class="sw" data-set="kind" id="kinds"></div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="app" id="out"></div>
+<script>
+const PARTS = {
+  edit: [
+    ["inline", "В1 · на месте", "<b>В1 · правка на месте.</b> Панель выглядит как при просмотре, но в режиме «Правка» каждая строка откликается на щелчок: превращается в поле, Enter сохраняет. Сохраняется сразу, внизу карты — «Сохранено · Отменить». Ничего не надо «открывать на правку»; одно действие — одна запись в журнале."],
+    ["form", "В2 · форма", "<b>В2 · форма.</b> «Править» превращает панель в форму со всеми полями человека: имя, фамилии, пол, даты, портрет, метки, заметки со своими уровнями видимости. «Сохранить» пишет всё разом одной записью журнала, «Отмена» возвращает как было. Удаление — внизу, отдельной красной кнопкой."],
+    ["delete", "удаление", "<b>Удаление человека.</b> Не молча: панель показывает, кого это затронет, и даёт выбрать — убрать только его (дети остаются в роду, семья остаётся с одним родителем) или вместе со всей ветвью. Число потомков считается честно, по всем поколениям. Удаление тоже откатывается журналом."],
+  ],
+  add: [
+    ["panel", "Д1 · из панели", "<b>Д1 · кнопки в панели.</b> В режиме правки у человека раздел «Добавить»: отец, мать, супруг, ребёнок — по кнопке на каждое место; занятые места приглушены. Ребёнок добавляется в конкретный брак. Нажал — в панели короткая форма: новый человек или выбрать из рода. Новая карточка сразу встаёт на карту на своё место, с пунктиром, пока не заполнена."],
+    ["map", "Д2 · плюсы на карте", "<b>Д2 · плюсы на карте.</b> У выбранной в режиме правки карточки появляются кружки «+» там, где встанет новый человек: сверху — родитель (если места есть), сбоку — супруг, снизу — ребёнок. Щелчок раскрывает маленький список прямо у карточки. Нагляднее, но плюсы лезут в соседние карточки на плотной карте."],
+    ["done", "после добавления", "<b>После добавления.</b> Сын Мурдо и Аины уже стоит на карте третьим ребёнком — раскладка пересчитана настоящая. Пунктир вокруг карточки держится, пока у нового человека нет ни даты, ни пола; в панели он сразу открыт на правку."],
+  ],
+  log: [
+    ["bar", "Ж1 · в верхней панели", "<b>Ж1 · журнал в верхней панели.</b> Кнопка «↶ Отменить» отменяет последнее действие, рядом «Журнал» с числом правок: выпадающий список последних изменений — что, у кого, когда. Щелчок по строке ведёт к человеку, «откатить до сюда» отменяет всё после этой точки. Отменённое остаётся в списке зачёркнутым и возвращается «Повторить»."],
+    ["side", "Ж2 · вкладка в панели", "<b>Ж2 · вкладка в панели.</b> У панели справа две вкладки: «Человек» и «Журнал». Журнал сгруппирован по дням и шире выпадающего списка, но пока он открыт, человека не видно. Кнопка «↶ Отменить» всё равно стоит наверху — на частую отмену не надо переключаться."],
+  ],
+  date: [
+    ["field", "одно поле", "<b>Ввод даты одним полем.</b> Пишешь как говоришь — «около 1750», «до 1800», «между 1740 и 1745», «12 мар 1748» — поле тут же показывает, как поняло: по-русски и что уйдёт в файл. Неточное остаётся неточным, приложение не додумывает. Непонятное не сохраняется и говорит, почему."],
+  ],
+};
+const state = { part: "edit", kind: "inline", style: "gobelen", theme: "dark" };
+let data;
+
+const MURDO = "Мурдо Гленн Уриск";
+const scene = (key) => data.scenes[`${state.style}|${key}`];
+
+function barHtml() {
+  const edit = !(state.part === "edit" && state.kind === "none");
+  const log = state.part === "log";
+  return `<div class="bar">
+    <div class="grp"><b>Род</b><div class="sw"><button aria-pressed="true">Гленн Уриск · 38</button><button>Уинтерхоуп · 62</button></div></div>
+    <div class="grp"><b>Режим</b><div class="sw"><button${edit ? "" : ' aria-pressed="true"'}>Просмотр</button><button${edit ? ' aria-pressed="true"' : ""}>Правка</button></div></div>
+    <div class="grp"><div class="sw"><button class="undo">↶ Отменить</button>${log && state.kind === "bar" ? '<button aria-pressed="true">Журнал · 6</button>' : "<button>Журнал · 6</button>"}</div></div>
+    <div class="grp"><div class="sw"><button>Экспорт .ged</button></div></div>
+  </div>`;
+}
+
+function mapHtml(key) {
+  const s = scene(key);
+  return `<div class="map"><div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div>`;
+}
+
+const head = (extra = "") =>
+  `<div class="por" style="background:var(--por-img) center / cover"></div><h3>${MURDO}</h3><div class="sub">1748 — 1851 · @I1007@</div>${extra}`;
+
+function panelView(open) {
+  const row = (k, v, ed = true) => `<div class="row${ed ? " ed" : ""}"><span>${k}</span><i>${v}</i></div>`;
+  let h = `<div class="sideIn">${head()}<div class="lbl">Сведения</div>`;
+  h += row("Пол", "мужской");
+  h += open
+    ? `<div class="edit"><label>Рождение</label><input class="field" value="около 1748"><div class="parse">понял: <b>около 1748 года</b> · в файл: ABT 1748</div></div>`
+    : row("Рождение", "1748");
+  h += row("Смерть", "1851") + row("Отец", '<span class="kin">Тормод Гленн Уриск</span>', false) + row("Мать", '<span class="kin">Аилса</span>', false);
+  h += `<div class="lbl">Брак</div>${row("Жена", '<span class="kin">Аина Драммонд</span>', false)}${row("Дети", '<span class="kin">Дэрмид</span>, <span class="kin">Мойра</span>', false)}`;
+  return h + "</div>";
+}
+
+function panelForm() {
+  return `<div class="sideIn form">
+    <div class="porEd"><div class="por" style="background:var(--por-img) center / cover"></div>
+      <div class="opts"><span class="on">● заглушка-профиль</span><span>○ свой снимок · загрузить…</span><span>○ без портрета</span></div></div>
+    <label class="fl">Имя</label><input class="field" value="Мурдо">
+    <div class="two"><div><label class="fl">Фамилия</label><input class="field" value="Гленн Уриск"></div>
+      <div><label class="fl">Девичья / по мужу</label><input class="field" placeholder="—"></div></div>
+    <label class="fl">Пол</label><div class="seg"><span class="on">мужской</span><span>женский</span><span>неизвестен</span></div>
+    <div class="two"><div><label class="fl">Рождение</label><input class="field" value="1748"><div class="parse">год · <b>1748</b></div></div>
+      <div><label class="fl">Смерть</label><input class="field" value="1851"><div class="parse">год · <b>1851</b></div></div></div>
+    <label class="fl">Метки</label><div><span class="chip" style="--c:#b98f22"><i></i>Проверить ×</span><span class="chip">+ метка</span></div>
+    <label class="fl">Заметки</label>
+    <div class="noteEd"><span style="color:var(--mut)">новая заметка…</span><small><span>видно: роду · по умолчанию</span><span class="linkish">изменить</span></small></div>
+    <div class="btns"><button class="pri">Сохранить</button><button>Отмена</button></div>
+    <button class="danger">Удалить человека…</button></div>`;
+}
+
+function panelDelete() {
+  return `<div class="sideIn">${head()}
+    <div class="warn"><b>Удалить Мурдо Гленн Уриск?</b>
+      <p>У него двое детей, в ветке — 13 потомков, 10 их супругов, пришедших в род через брак, и 5 пометок «Ветвь». Жена Аина Драммонд останется в роду.</p>
+      <label class="opt"><input type="radio" name="d" checked><span>Только Мурдо<i>дети останутся с матерью, ветка на месте</i></span></label>
+      <label class="opt"><input type="radio" name="d"><span>Мурдо и всю его ветку<i>уйдут 29 записей: Мурдо, 13 потомков, 10 их супругов и 5 пометок «Ветвь»; связки с другими родами снимутся</i></span></label>
+      <div class="btns"><button class="pri" style="background:#c9564a;border-color:#c9564a;color:#fff">Удалить</button><button>Отмена</button></div>
+      <p style="margin:10px 0 0;color:var(--mut);font-size:11px">Удаление пишется в журнал и откатывается, как любая правка.</p></div></div>`;
+}
+
+function panelAdd(stage) {
+  const on = stage === "form";
+  let h = `<div class="sideIn">${head()}<div class="lbl">Добавить</div><div class="addGrid">
+    <button class="done">+ отец<small>есть: Тормод</small></button><button class="done">+ мать<small>есть: Аилса</small></button>
+    <button>+ жена<small>ещё один брак</small></button><button>+ брат или сестра<small>к Тормоду и Аилсе</small></button>
+    <button class="wide${on ? " on" : ""}">+ ребёнок<small>с Аиной Драммонд · сейчас двое</small></button></div>`;
+  if (on) {
+    h += `<div class="edit" style="margin-top:12px"><label>Новый ребёнок Мурдо и Аины</label>
+      <div class="seg" style="margin-bottom:6px"><span class="on">новый человек</span><span>выбрать из рода</span></div>
+      <div class="two"><input class="field" value="Ангус"><input class="field" value="Гленн Уриск"></div>
+      <div class="seg" style="margin-top:6px"><span class="on">сын</span><span>дочь</span></div>
+      <input class="field" style="margin-top:6px" placeholder="рождение: например, около 1785">
+      <div class="btns"><button class="pri">Добавить</button><button>Отмена</button></div></div>`;
+  }
+  return h + "</div>";
+}
+
+function panelFresh() {
+  return `<div class="sideIn form"><span class="lbl" style="margin-top:0">новый человек · заполните</span>
+    <label class="fl">Имя</label><input class="field on" value="Ангус">
+    <div class="two"><div><label class="fl">Фамилия</label><input class="field" value="Гленн Уриск"></div><div><label class="fl">Пол</label>
+    <div class="seg"><span class="on">м</span><span>ж</span></div></div></div>
+    <label class="fl">Рождение</label><input class="field" placeholder="например, около 1785">
+    <div class="parse">отец <b>Мурдо</b> · мать <b>Аина Драммонд</b> · третий ребёнок</div>
+    <div class="btns"><button class="pri">Готово</button><button>Убрать</button></div></div>`;
+}
+
+function journal(kind) {
+  const E = [
+    ["сегодня", [["12:41", "Добавлен сын Мурдо — <b>Ангус</b>", true], ["12:39", "Мурдо: рождение <s>1748</s> → около 1748", true],
+      ["12:30", "Мойра: метка «Проверить»", false], ["12:18", "Дэрмид: добавлена заметка", false]]],
+    ["вчера", [["18:02", "Связка: Сорха ⇄ Уинтерхоуп", false], ["17:55", "Флора: рождение <s>1790</s> → около 1790", false]]],
+  ];
+  let h = "";
+  for (const [day, items] of E) {
+    h += `<div class="day">${day}</div>`;
+    items.forEach(([t, what, last], i) => {
+      h += `<div class="e${kind === "undone" && i === 0 && day === "сегодня" ? " undone" : ""}"><time>${t}</time><span>${what}</span>` +
+        `<button>${last ? "откатить до сюда" : "к человеку"}</button></div>`;
+    });
+  }
+  return h;
+}
+
+function draw() {
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  const variants = PARTS[state.part];
+  if (!variants.some(([k]) => k === state.kind)) state.kind = variants[0][0];
+  document.getElementById("kinds").innerHTML = variants
+    .map(([k, n]) => `<button data-v="${k}"${k === state.kind ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
+  document.getElementById("about").innerHTML = variants.find(([k]) => k === state.kind)[2];
+
+  let map = mapHtml("base"), side = panelView(false), extra = "";
+  if (state.part === "edit") {
+    if (state.kind === "inline") { side = panelView(true); extra = '<div class="toast">Сохранено: пол Мурдо — мужской<button>Отменить</button></div>'; }
+    if (state.kind === "form") side = panelForm();
+    if (state.kind === "delete") side = panelDelete();
+  } else if (state.part === "add") {
+    if (state.kind === "panel") side = panelAdd("form");
+    if (state.kind === "map") side = panelAdd("idle");
+    if (state.kind === "done") { map = mapHtml("added"); side = panelFresh(); }
+  } else if (state.part === "log") {
+    if (state.kind === "bar") extra = `<div class="drop"><div class="e" style="grid-template-columns:1fr auto"><span>Последние правки · 6</span><button>↷ Повторить</button></div>${journal("undone")}</div>`;
+    if (state.kind === "side") side = `<div class="tabs2"><span>Человек</span><span class="on">Журнал · 6</span></div><div class="sideIn jr">${journal("")}</div>`;
+  }
+  const body = state.part === "date"
+    ? `<div class="body" style="height:auto">${datesHtml()}</div>`
+    : `<div class="body">${map}<aside class="side">${side}</aside>${extra}</div>`;
+  document.getElementById("out").innerHTML = barHtml() + body;
+  if (state.part !== "date") place();
+}
+
+function datesHtml() {
+  const rows = [
+    ["12 мар 1748", "12 марта 1748", "точная дата", "12 MAR 1748"],
+    ["мар 1748", "март 1748", "месяц и год", "MAR 1748"],
+    ["около 1750", "около 1750", "приблизительно", "ABT 1750"],
+    ["до 1800", "до 1800", "не позже", "BEF 1800"],
+    ["после 1790", "после 1790", "не раньше", "AFT 1790"],
+    ["между 1740 и 1745", "между 1740 и 1745", "промежуток", "BET 1740 AND 1745"],
+    ["1740-1745", "между 1740 и 1745", "дефис понят как промежуток", "BET 1740 AND 1745"],
+    ["ок 1750", "около 1750", "сокращения тоже", "ABT 1750"],
+    ["", "не указана", "поле пустое — даты нет", "—"],
+    ["32 мар 1748", "не разобрать", "в марте 31 день — не сохранится", "—", true],
+  ];
+  return `<div class="dates" style="flex:1;background:var(--panelbg);color:var(--fg)">
+    <div class="dhead"><span>пишешь</span><span>поле понимает</span><span>уходит в файл</span></div>` +
+    rows.map(([inp, ru, note, ged, err]) =>
+      `<div class="drow${err ? " err" : ""}"><input class="fld${inp === "около 1750" ? " on" : ""}" value="${inp}" placeholder="—">` +
+      `<div class="ru">${ru}<small>${note}</small></div><code>${ged}</code></div>`).join("") +
+    `<div class="parse" style="margin-top:12px">Месяцы — по-русски, полностью или первыми тремя буквами; «ок», «около», «прим.» — приблизительно. Показ везде по-русски, экспорт — по стандарту GEDCOM.</div></div>`;
+}
+
+// навести карту на Мурдо и разложить плюсы / пунктир поверх неё
+function place() {
+  const map = document.querySelector(".map");
+  const key = state.part === "add" && state.kind === "done" ? "added" : "base";
+  const s = scene(key);
+  const k = 0.8;
+  const focus = key === "added" ? s.added : s.murdo;
+  const x = map.clientWidth / 2 - (focus.x + focus.w / 2) * k;
+  const y = map.clientHeight / 2 - (focus.y + focus.h / 2) * k + (key === "added" ? -60 : 0);
+  map.querySelector(".canvas").style.transform = `translate(${x}px,${y}px) scale(${k})`;
+  // портрет Мурдо в панели — тот же, что на его карточке
+  const img = map.querySelector(`.node[data-id="${data.murdo}"] .por`)?.style.getPropertyValue("--img");
+  if (img) document.querySelector(".app").style.setProperty("--por-img", img);
+  if (key === "added") map.querySelector(`.node[data-id="${data.added}"]`)?.classList.add("fresh");
+  if (state.part === "add" && state.kind === "map") {
+    const m = s.murdo;
+    const at = (px, py) => ({ left: `${x + px * k - 11}px`, top: `${y + py * k - 11}px` });
+    for (const [px, py, on] of [[m.x - 26, m.y + m.h / 2], [m.x + m.w / 2, m.y + m.h + 18, true]]) {
+      const p = document.createElement("div");
+      p.className = `plus${on ? " on" : ""}`;
+      p.textContent = "+";
+      Object.assign(p.style, at(px, py));
+      map.append(p);
+    }
+    const pop = document.createElement("div");
+    pop.className = "pop";
+    pop.innerHTML = `<div class="t">ребёнок Мурдо и Аины</div><div class="opt"><span>+ сын</span><i>новый человек</i></div>` +
+      `<div class="opt"><span>+ дочь</span><i>новый человек</i></div><div class="opt"><span>выбрать из рода…</span><i>уже записан</i></div>`;
+    pop.style.left = `${x + (m.x + m.w / 2) * k - 115}px`;
+    pop.style.top = `${y + (m.y + m.h + 34) * k}px`;
+    map.append(pop);
+  }
+}
+
+document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  sw.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  state[sw.dataset.set] = b.dataset.v;
+  draw();
+}));
+fetch("правка.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+addEventListener("resize", () => data && draw());
+</script>
+</body>
+</html>
