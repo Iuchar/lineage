@@ -129,3 +129,16 @@
 .side .flag { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; padding: 4px 0; cursor: pointer; }
 .side .flag input { accent-color: var(--acc); margin: 2px 0 0; }
 .side .flag i { display: block; font-style: normal; color: var(--mut); font-size: 10.5px; margin-top: 1px; }
+
+/* набор меток рода в форме */
+.side .chip.quiet { color: var(--mut); border-style: dashed; }
+.side .tagSet { margin-top: 8px; border: 1px solid var(--edge); border-radius: 4px; padding: 4px 8px; }
+.side .tagRow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 0; border-bottom: 1px solid var(--edge); font-size: 12px; }
+.side .tagRow:last-child { border-bottom: 0; }
+.side .tagRow > i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+.side .tagRow > span { flex: 1 1 calc(100% - 20px); min-width: 0; overflow-wrap: break-word; }
+.side .tagRow > i + span ~ button:first-of-type { margin-left: 14px; }
+.side .tagRow > button { white-space: nowrap; }
+.side .tagRow button:not([data-color]) { border: 0; background: none; color: var(--acc); font: 500 11px 'Golos Text', sans-serif; cursor: pointer; padding: 0; }
+.side .tagRow .field { flex: 1 1 100%; }
+.side .tagRow .swatches { flex: 1 1 100%; margin: 4px 0; }

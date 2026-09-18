@@ -11,7 +11,6 @@ import { relativesOf } from "./relatives";
 
 export interface PanelActions {
   select: (id: number) => void;
-  centre: () => void;
   nudge: (id: number, direction: -1 | 1) => void;
   manualOffset: (id: number) => number;
   toggleFold: (familyId: number) => void;
@@ -71,7 +70,6 @@ export class PersonPanel {
       if (!target) return;
       if (target.dataset.id) this.actions.select(Number(target.dataset.id));
       const id = Number(target.dataset.person);
-      if (target.dataset.act === "centre") this.actions.centre();
       if (target.dataset.act === "left") this.actions.nudge(id, -1);
       if (target.dataset.act === "right") this.actions.nudge(id, 1);
       if (target.dataset.act === "fold") this.actions.toggleFold(Number(target.dataset.family));
@@ -191,7 +189,7 @@ export class PersonPanel {
     }
 
     if (editing) h += this.addHtml(tree, person);
-    if (!person.is_branch_stub) h += this.linksHtml(person);
+    if (!person.is_branch_stub) h += this.linksHtml(person, editing);
 
     if (rel.marriages.length) {
       h += `<div class="lbl">${rel.marriages.length > 1 ? "Браки" : "Брак"}</div>`;
@@ -224,16 +222,15 @@ export class PersonPanel {
       }
     }
 
-    if (rel.siblings.length) {
+    if (editing && rel.siblings.length) {
       const offset = this.actions.manualOffset(person.id);
       h +=
-        '<div class="lbl">Место среди братьев</div>' +
+        '<div class="lbl">Место среди братьев и сестёр</div>' +
         `<div class="nudge"><button data-act="left" data-person="${person.id}">← левее</button>` +
         `<span>${offset ? (offset > 0 ? "+" : "") + offset : "по дате"}</span>` +
         `<button data-act="right" data-person="${person.id}">правее →</button></div>`;
     }
 
-    h += '<div class="actions"><button data-act="centre">В центр</button></div>';
     h += "</div>";
     this.element.innerHTML = h;
   }
@@ -265,8 +262,10 @@ export class PersonPanel {
   }
 
   // «Также в роду»: каждая связка строкой с переходом; по той, что привела сюда, — возврат
-  private linksHtml(person: TreePerson): string {
+  // в просмотре — только переход; связать, снять — в правке
+  private linksHtml(person: TreePerson, editing: boolean): string {
     const links = this.actions.linksOf(person.id);
+    if (!links.length && !editing) return "";
     let h = links.length ? '<div class="lbl">Также в роду</div>' : '<div class="lbl">Связки</div>';
     for (const link of links) {
       const back = this.actions.isReturn(link);
@@ -279,10 +278,10 @@ export class PersonPanel {
           ? `<button data-act="unlink" data-link="${link.link_id}">Снять связку</button>` +
             `<button data-act="unlink-no">Оставить</button>`
           : `<button class="go" data-act="link-go" data-link="${link.link_id}">${back ? `← Вернуться в «${clan}»` : `Перейти в «${clan}»`}</button>` +
-            `<button data-act="unlink" data-link="${link.link_id}" title="Снять связку: люди останутся в своих родах">Снять</button>`) +
+            (editing ? `<button data-act="unlink" data-link="${link.link_id}" title="Снять связку: люди останутся в своих родах">Снять</button>` : "")) +
         `</div></div>`;
     }
-    h += `<button class="linkBtn" data-act="link-with" data-person="${person.id}">Связать с человеком из другого рода…</button>`;
+    if (editing) h += `<button class="linkBtn" data-act="link-with" data-person="${person.id}">Связать с человеком из другого рода…</button>`;
     return h;
   }
 }

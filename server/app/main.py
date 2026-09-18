@@ -19,6 +19,7 @@ from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonF
 from app.db.journal import (ChangeInfo, JournalError, RevertConflictError, clan_changes, person_changes, redo, revert,
                             undo, undo_to)
 from app.db.photos import photo_path, remove_photo, save_photo
+from app.db.tagset import TagChange, TagError, delete_tag, tag_usage, update_tag
 from app.gedcom.export import ExportError, export_clan
 from app.gedcom.ru_dates import DateInputError, parse_input
 from app.db.links import (Candidate, ClanLink, Link, LinkClashError, LinkError, LinkNotFoundError, LinkPerson,
@@ -231,6 +232,28 @@ def post_revert(change_id: int, conn: Database) -> ChangeInfo:
         return revert(conn, change_id)
     except (EditError, JournalError) as error:
         raise _edit_errors(error) from None
+
+
+@app.get("/api/clans/{clan_id}/tags/{name}/usage")
+def get_tag_usage(clan_id: int, name: str, conn: Database) -> int:
+    """Сколько людей носят метку — чтобы перед удалением сказать, с кого она снимется."""
+    return tag_usage(conn, clan_id, name)
+
+
+@app.put("/api/clans/{clan_id}/tags/{name}")
+def put_tag(clan_id: int, name: str, body: TagChange, conn: Database) -> ChangeInfo:
+    try:
+        return update_tag(conn, clan_id, name, body)
+    except TagError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from None
+
+
+@app.delete("/api/clans/{clan_id}/tags/{name}")
+def remove_tag(clan_id: int, name: str, conn: Database) -> ChangeInfo:
+    try:
+        return delete_tag(conn, clan_id, name)
+    except TagError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from None
 
 
 @app.post("/api/persons/{person_id}/photo")

@@ -194,7 +194,6 @@ async function start(root: HTMLElement): Promise<void> {
   };
   const panel = new PersonPanel(stage, {
     select: focus,
-    centre: () => canvas.goToSelected(),
     nudge: (id, direction) => {
       canvas.nudge(id, direction);
       if (tree) void panel.show(tree, id);
@@ -490,7 +489,7 @@ async function start(root: HTMLElement): Promise<void> {
     // выгрузка открытого рода файлом — со всеми правками и всем, что пришло из исходного файла
     const exportLink = document.createElement("a");
     exportLink.className = "swLink";
-    exportLink.textContent = "↓ .ged";
+    exportLink.textContent = "Выгрузить .ged";
     exportLink.title = "Выгрузить этот род файлом GEDCOM";
     exportLink.href = `/api/clans/${current}/export`;
     exportLink.setAttribute("download", "");

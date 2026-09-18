@@ -353,6 +353,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clans/{clan_id}/tags/{name}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Tag Usage
+         * @description Сколько людей носят метку — чтобы перед удалением сказать, с кого она снимется.
+         */
+        get: operations["get_tag_usage_api_clans__clan_id__tags__name__usage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{clan_id}/tags/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Tag */
+        put: operations["put_tag_api_clans__clan_id__tags__name__put"];
+        post?: never;
+        /** Remove Tag */
+        delete: operations["remove_tag_api_clans__clan_id__tags__name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/persons/{person_id}/photo": {
         parameters: {
             query?: never;
@@ -868,6 +906,13 @@ export interface components {
              * @default []
              */
             delete: number[];
+        };
+        /** TagChange */
+        TagChange: {
+            /** Name */
+            name: string;
+            /** Color */
+            color: string;
         };
         /** TagDef */
         TagDef: {
@@ -1638,6 +1683,106 @@ export interface operations {
             header?: never;
             path: {
                 change_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_tag_usage_api_clans__clan_id__tags__name__usage_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": number;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_tag_api_clans__clan_id__tags__name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TagChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_tag_api_clans__clan_id__tags__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+                name: string;
             };
             cookie?: never;
         };

@@ -216,9 +216,9 @@ export class TreeCanvas {
     this.setView(centreOn(view, centre, this.viewportSize()));
   }
 
+  // к выбранному: в центр экрана и, если карта мельче 100 %, — приблизить до 100 %
   goToSelected(): void {
-    const centre = this.selected != null ? this.cardCentre(this.selected) : null;
-    if (centre) this.setView(centreOn(this.view, centre, this.viewportSize()));
+    if (this.selected != null) this.centreOnPerson(this.selected);
   }
 
   render(): void {

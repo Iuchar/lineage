@@ -58,13 +58,14 @@ export class LinkReview {
     host.append(this.pane, this.full);
     window.addEventListener("resize", () => this.reviewing && void this.draw());
     document.addEventListener("keydown", (e) => {
-      // клавиши в очереди: ← разные, → один человек, пробел — отложить
-      if (!this.reviewing || this.full.hidden || this.busy) return;
+      // Esc закрывает проверку всегда; в очереди ещё ← разные, → один человек, пробел — отложить
+      if (!this.reviewing || this.busy) return;
       if ((e.target as HTMLElement).closest("input, textarea")) return;
+      if (e.key === "Escape") return this.close();
+      if (this.full.hidden) return;
       if (e.key === "ArrowLeft") void this.decide("different");
       else if (e.key === "ArrowRight") void this.decide("same");
       else if (e.key === " ") this.go(this.at + 1);
-      else if (e.key === "Escape") this.close();
       else return;
       e.preventDefault();
     });
@@ -154,13 +155,13 @@ export class LinkReview {
       `<div class="kinText"><i>годы:</i> ${span(kin)}<br><i>родители:</i> ${listOf(kin.parents)}` +
       `<br><i>супруги:</i> ${listOf(kin.spouses)}<br><i>дети:</i> ${listOf(kin.children)}</div></div>`;
     this.pane.innerHTML =
+      '<div class="rClose"><button data-act="close" title="Закрыть проверку (Esc)">× Закрыть</button></div>' +
       `<div class="sideIn"><span class="lbl">связка · проверка · ${this.at + 1} из ${this.queue.length}</span>` +
       `<h3>${this.title(pair)}</h3>${card(pair.a, treeA)}${card(pair.b, treeB)}` +
       '<div class="rActs"><button class="pri" data-act="same">Один человек</button>' +
       '<button data-act="different">Разные люди</button><button data-act="later">Отложить</button></div>' +
       '<div class="note">Связка не сливает людей: каждый остаётся в своём роду со своими данными, ' +
-      'добавляется только переход и пометка «также в …». «Разные люди» больше не всплывут.</div>' +
-      '<div class="rActs"><button data-act="close">Закрыть проверку</button></div></div>';
+      'добавляется только переход и пометка «также в …». «Разные люди» больше не всплывут.</div></div>';
   }
 
   // П2: очередь во весь экран
@@ -182,13 +183,13 @@ export class LinkReview {
       `${this.scene(tree, kin.person.id)}</div>`;
     this.full.innerHTML =
       `<div class="qList"><span class="lbl">очередь · ${this.queue.length}</span>${list}</div>` +
-      `<div class="qMain"><div class="qTop"><h3>${this.title(pair)}</h3><span class="lbl">пара ${this.at + 1} из ${this.queue.length}</span></div>` +
+      `<div class="qMain"><div class="qTop"><h3>${this.title(pair)}</h3><span class="lbl">пара ${this.at + 1} из ${this.queue.length}</span>` +
+      '<button class="qClose" data-act="close" title="Закрыть проверку (Esc)">× Закрыть</button></div>' +
       `<div class="qPair">${half(pair.a, treeA)}${half(pair.b, treeB)}</div>` +
       `<div class="qCmp">${rows.map(([k, x, y]) =>
         `<div class="k">${k}</div><div class="v${x === y ? " same" : ""}">${x}</div><div class="v${x === y ? " same" : ""}">${y}</div>`).join("")}</div>` +
       '<div class="qFoot"><button class="pri" data-act="same">Один человек</button><button data-act="different">Разные люди</button>' +
-      '<button data-act="later">Отложить</button><span class="hint">← разные · → один · пробел — позже</span>' +
-      '<button class="close" data-act="close">Закрыть</button></div></div>';
+      '<button data-act="later">Отложить</button><span class="hint">← разные · → один · пробел — позже · Esc — закрыть</span></div></div>';
   }
 
   // маленькое дерево тем же раскладчиком и тем же почерком, что карта; кандидат выделен

@@ -47,7 +47,7 @@ export class PersonEditor {
       `<div class="sideIn form"><span class="lbl" style="margin-top:0">правка</span>` +
       `<h3>${escapeHtml([form.given, form.surname].filter(Boolean).join(" ") || "без имени")}</h3>` +
       this.portraitHtml(form, true) +
-      this.fieldsHtml(form) + this.metaHtml(form, hasParents) +
+      this.fieldsHtml(form) + this.metaHtml(form, hasParents, true) +
       '<div class="err" data-role="err"></div>' +
       '<div class="btns"><button class="pri" data-act="save">Сохранить</button><button data-act="cancel">Отмена</button></div>' +
       '<button class="danger" data-act="delete">Удалить человека…</button></div>';
@@ -59,6 +59,7 @@ export class PersonEditor {
     });
     this.on("delete", () => void this.confirmDelete(personId));
     this.bindPhoto(personId);
+    this.bindTagSet(form.clan_id, personId);
   }
 
   // ── новый человек на выбранном месте ──
@@ -160,7 +161,7 @@ export class PersonEditor {
   }
 
   // ── метки, состояния, главная линия ──
-  private metaHtml(form: PersonForm, hasParents: boolean): string {
+  private metaHtml(form: PersonForm, hasParents: boolean, manage = false): string {
     this.newTags.clear();
     const known = this.tree?.tags ?? [];
     const chip = (name: string, color: string, on: boolean) =>
@@ -171,7 +172,9 @@ export class PersonEditor {
     return `<label class="fl">Метки</label><div class="tagChips" data-role="tags">` +
       known.map((t) => chip(t.name, t.color, form.tags.includes(t.name))).join("") +
       form.tags.filter((t) => !known.some((k) => k.name === t)).map((t) => chip(t, "дымный", true)).join("") +
-      '<button type="button" class="chip" data-act="newtag">+ новая метка</button></div>' +
+      '<button type="button" class="chip" data-act="newtag">+ новая метка</button>' +
+      (manage && known.length ? '<button type="button" class="chip quiet" data-act="tagset">набор меток…</button>' : "") +
+      "</div>" + (manage ? '<div class="tagSet" data-role="tagset" hidden></div>' : "") +
       '<div class="newTag" data-role="newtag" hidden><input class="field" data-role="tagname" placeholder="название метки">' +
       `<div class="swatches">${Object.entries(TAG_COLORS).map(([name, hex], i) =>
         `<button type="button" data-color="${name}" title="${name}" style="--c:${hex}"${i === 0 ? ' class="on"' : ""}></button>`).join("")}</div>` +
@@ -212,6 +215,61 @@ export class PersonEditor {
       }
       box.hidden = true;
       box.querySelector<HTMLInputElement>("[data-role=tagname]")!.value = "";
+    });
+  }
+
+  // ── набор меток рода: переименовать, перекрасить, удалить — каждое действие одной правкой журнала ──
+  private bindTagSet(clanId: number, personId: number): void {
+    const box = this.host.querySelector<HTMLElement>("[data-role=tagset]");
+    if (!box) return;
+    const url = (name: string) => `/api/clans/${clanId}/tags/${encodeURIComponent(name)}`;
+    const swatches = (current: string) => `<div class="swatches">${Object.entries(TAG_COLORS).map(([name, hex]) =>
+      `<button type="button" data-color="${name}" title="${name}" style="--c:${hex}"${name === current ? ' class="on"' : ""}></button>`).join("")}</div>`;
+    const draw = () => {
+      box.innerHTML = (this.tree?.tags ?? []).map((t) =>
+        `<div class="tagRow" data-name="${escapeHtml(t.name)}"><i style="--c:${TAG_COLORS[t.color as TagColor] ?? "#888"}"></i>` +
+        `<span>${escapeHtml(t.name)}</span><button type="button" data-tag-act="edit">изменить</button>` +
+        `<button type="button" data-tag-act="drop">удалить</button></div>`).join("") ||
+        '<div class="note">В наборе рода меток нет.</div>';
+    };
+    this.on("tagset", () => {
+      box.hidden = !box.hidden;
+      draw();
+    });
+    box.addEventListener("click", async (e) => {
+      const target = e.target as HTMLElement;
+      const row = target.closest<HTMLElement>(".tagRow");
+      const name = row?.dataset.name;
+      if (!row || !name) return;
+      const swatch = target.closest<HTMLElement>("[data-color]");
+      if (swatch) {
+        row.querySelectorAll("[data-color]").forEach((b) => b.classList.toggle("on", b === swatch));
+        return;
+      }
+      const act = target.closest<HTMLElement>("[data-tag-act]")?.dataset.tagAct;
+      const tag = this.tree?.tags.find((t) => t.name === name);
+      if (act === "edit" && tag) {
+        row.innerHTML = `<input class="field" data-role="rename" value="${escapeHtml(name)}">${swatches(tag.color)}` +
+          '<button type="button" data-tag-act="save">сохранить</button><button type="button" data-tag-act="back">отмена</button>';
+        row.querySelector<HTMLInputElement>("[data-role=rename]")?.select();
+      } else if (act === "save") {
+        const newName = row.querySelector<HTMLInputElement>("[data-role=rename]")?.value.trim() ?? "";
+        const color = row.querySelector<HTMLElement>("[data-color].on")?.dataset.color ?? tag?.color ?? "синий";
+        const result = await send<ChangeInfo>("PUT", url(name), { name: newName, color });
+        if (!result.ok) return this.error(result.detail);
+        this.actions.saved(result.data, personId);
+      } else if (act === "drop") {
+        const usage = await send<number>("GET", `${url(name)}/usage`);
+        const count = usage.ok ? usage.data : 0;
+        row.innerHTML = `<span>Удалить «${escapeHtml(name)}»?${count ? ` Снимется с ${count} ${count % 10 === 1 && count % 100 !== 11 ? "человека" : "человек"}.` : " Ни на ком не стоит."}</span>` +
+          '<button type="button" data-tag-act="really">удалить</button><button type="button" data-tag-act="back">отмена</button>';
+      } else if (act === "really") {
+        const result = await send<ChangeInfo>("DELETE", url(name));
+        if (!result.ok) return this.error(result.detail);
+        this.actions.saved(result.data, personId);
+      } else if (act === "back") {
+        draw();
+      }
     });
   }
 

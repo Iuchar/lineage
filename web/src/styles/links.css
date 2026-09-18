@@ -119,3 +119,11 @@
 [data-style=polotno] .node.has-tags .also { top: 66px; }
 [data-style=polotno] .node.has-por.badged .also, [data-style=polotno] .node.has-por.has-tags .also { top: 68px; }
 [data-style=polotno] .node.badged.has-tags .also { top: 84px; }
+
+/* «× Закрыть» проверки — наверху, на виду */
+.review .rClose { position: sticky; top: 0; z-index: 2; display: flex; justify-content: flex-end; padding: 8px 12px 0;
+  background: var(--panelbg); }
+.review .rClose button, .queueWrap .qClose { border: 1px solid var(--edge); background: transparent; color: var(--fg);
+  border-radius: 4px; font: 500 12px/1 'Golos Text', sans-serif; padding: 7px 12px; cursor: pointer; }
+.review .rClose button:hover, .queueWrap .qClose:hover { border-color: var(--acc); color: var(--acc); }
+.queueWrap .qClose { margin-left: auto; flex: none !important; }
