@@ -8,6 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
+from app.db.kin import manual_order
 from app.gedcom.meta import read_meta, read_tag_defs
 from app.gedcom.records import Record
 
@@ -58,6 +59,8 @@ class TreeFamily(BaseModel):
     husband: int | None
     wife: int | None
     children: list[int]  # в порядке файла
+    child_pedigree: list[str] = []  # тип родства каждого ребёнка: birth, adopted, foster
+    divorced: bool = False
 
 
 class TagDef(BaseModel):
@@ -110,11 +113,13 @@ def _life_dates(conn: sqlite3.Connection, clan_id: int, tag: str) -> dict[int, L
 
 
 def _marriage_order(conn: sqlite3.Connection, clan_id: int, spouses: dict[int, list[int]],
-                    births: dict[int, LifeDate], deaths: dict[int, LifeDate], children: dict[int, list[int]]) -> None:
+                    births: dict[int, LifeDate], deaths: dict[int, LifeDate], children: dict[int, list[int]],
+                    manual: set[int]) -> None:
     """Очередь браков. Браки сравниваются попарно одинаковыми признаками, от надёжного к слабому:
     у обоих дата венчания — по ней; у обоих дети — по году первого ребёнка; один бездетный, и его супруг умер раньше
     первого ребёнка в другом браке — бездетный раньше (развод этот признак не ловит); иначе — по году рождения супругов.
-    Если хоть одну пару сравнить нечем — порядок файла. В базе остаётся порядок файла, чтобы выгрузка вернула его целым."""
+    Если хоть одну пару сравнить нечем — порядок файла. В базе остаётся порядок файла, чтобы выгрузка вернула его целым.
+    У кого очередь задана вручную (_MORDER), правило не применяется."""
     marr: dict[int, int] = {}
     for row in conn.execute(
         """SELECT e.family_id, e.date_year FROM events e JOIN families f ON f.id = e.family_id
@@ -129,7 +134,7 @@ def _marriage_order(conn: sqlite3.Connection, clan_id: int, spouses: dict[int, l
         return dates[pid].year if pid is not None and pid in dates else None
 
     for person, families in spouses.items():
-        if len(families) < 2:
+        if len(families) < 2 or person in manual:
             continue
         spouse = {f: (couples[f][1] if couples[f][0] == person else couples[f][0]) for f in families}
         first_child = {f: min((y for k in children.get(f, []) if (y := year(births, k)) is not None), default=None)
@@ -187,17 +192,26 @@ def clan_tree(conn: sqlite3.Connection, clan_id: int, file_order: bool = False) 
         spouses.setdefault(row["person_id"], []).append(row["family_id"])
 
     children: dict[int, list[int]] = {}
+    pedigrees: dict[int, list[str]] = {}
     for row in conn.execute(
-        """SELECT fc.family_id, fc.person_id FROM family_children fc
+        """SELECT fc.family_id, fc.person_id, fc.pedigree FROM family_children fc
              JOIN families f ON f.id = fc.family_id WHERE f.clan_id = ? ORDER BY fc.family_id, fc.position""",
         (clan_id,),
     ):
         children.setdefault(row["family_id"], []).append(row["person_id"])
+        kind = (row["pedigree"] or "birth").lower()
+        pedigrees.setdefault(row["family_id"], []).append(kind if kind in ("adopted", "foster") else "birth")
+    divorced = {row[0] for row in conn.execute(
+        "SELECT DISTINCT e.family_id FROM events e JOIN families f ON f.id = e.family_id WHERE f.clan_id = ? AND e.tag = 'DIV'",
+        (clan_id,))}
+    raws = {row["id"]: Record.from_json(json.loads(row["raw"]))
+            for row in conn.execute("SELECT id, raw FROM persons WHERE clan_id = ?", (clan_id,))}
     if not file_order:
-        _marriage_order(conn, clan_id, spouses, births, deaths, children)
+        manual = {pid for pid, record in raws.items() if manual_order(record)}
+        _marriage_order(conn, clan_id, spouses, births, deaths, children, manual)
 
     def person(row: sqlite3.Row) -> TreePerson:
-        meta = read_meta(Record.from_json(json.loads(row["raw"])))
+        meta = read_meta(raws[row["id"]])
         return TreePerson(
             id=row["id"], xref=row["xref"], given=row["given"], surname=row["surname"],
             married_surname=row["married_surname"], sex=row["sex"], is_branch_stub=bool(row["is_branch_stub"]),
@@ -218,7 +232,8 @@ def clan_tree(conn: sqlite3.Connection, clan_id: int, file_order: bool = False) 
     families = [
         TreeFamily(
             id=row["id"], xref=row["xref"], husband=row["husband_id"], wife=row["wife_id"],
-            children=children.get(row["id"], []),
+            children=children.get(row["id"], []), child_pedigree=pedigrees.get(row["id"], []),
+            divorced=row["id"] in divorced,
         )
         for row in conn.execute(
             "SELECT id, xref, husband_id, wife_id FROM families WHERE clan_id = ? ORDER BY id", (clan_id,)

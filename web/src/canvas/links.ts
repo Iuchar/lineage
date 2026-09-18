@@ -2,7 +2,7 @@
 // Функция чистая: раскладка и цвета на входе, разметка на выходе. Сверена со стендом побайтно.
 
 import type { ClanTree, TreeFamily, TreePerson } from "../api/types";
-import type { LayoutResult, Point } from "../layout/layout";
+import { type LayoutResult, parentless, type Point, primaryFamilies } from "../layout/layout";
 import type { StyleName } from "../layout/metrics";
 import { LINK_STYLES, marriageLevel, ROMAN } from "./styles";
 
@@ -13,6 +13,7 @@ export interface LinksSvg {
   marks: string;
   folds: FoldAnchor[];
   descents: Map<number, DescentGeometry>; // по id семьи — для подсветки линии рода
+  unions: Map<number, Point>; // знак союза пары: откуда идёт спуск; по нему щелчком выбирается семья
 }
 
 // спуск к детям одной семьи: ствол от (x, y) до шины, [завиток над стволом], спуски на шине к верху детей
@@ -33,7 +34,8 @@ export interface FoldAnchor {
   up: boolean;
 }
 
-const FOLD_DROP = 30; // от низа карточек до стопки
+const FOLD_DROP = 30;
+const FOSTER_DASH = "5 4"; // спуск к приёмному или под опекой — заметный штрих во всех стилях // от низа карточек до стопки
 
 type Segment = [number, number];
 
@@ -75,10 +77,35 @@ export function drawLinks(
   let marks = "";
   const folds: FoldAnchor[] = [];
   const descents = new Map<number, DescentGeometry>();
+  const unions = new Map<number, Point>();
+  // человек из двух семей (родной и приёмной) стоит под одной — спуск только от неё
+  const primary = primaryFamilies(tree);
+  const PEDI = new Map<number, string>();
 
   for (const family of tree.families) {
     const parents = [family.husband, family.wife].filter((id): id is number => id != null && visible(id));
-    const kids = family.children.filter(visible);
+    const kids = family.children.filter((id) => visible(id) && primary.get(id) === family.id);
+    family.children.forEach((id, i) => {
+      if (primary.get(id) === family.id) PEDI.set(id, family.child_pedigree?.[i] ?? "birth");
+    });
+
+    // братья и сёстры без родителей: шина и над ней пустой узел с подписью
+    if (parentless(family) && kids.length) {
+      const kidsTop = Math.min(...kids.map((id) => pos.get(id)!.y));
+      const bus = kidsTop - 30;
+      const xs = kids.map((id) => pos.get(id)!.x + w / 2);
+      const x = (Math.min(...xs) + Math.max(...xs)) / 2;
+      const knot = bus - 22; // подпись выше плюса «брат или сестра» на шине
+      descents.set(family.id, { x, y: knot, bus, curl: null, kidEnd: S.descentGap });
+      paths += `<path d="M${x} ${knot + 5}V${bus}M${Math.min(...xs)} ${bus}H${Math.max(...xs)}" stroke="${CL}" stroke-width="${S.width}" fill="none"/>`;
+      for (const id of kids) {
+        const p = pos.get(id)!;
+        paths += `<path d="M${p.x + w / 2} ${bus}V${p.y - S.descentGap}" stroke="${CL}" stroke-width="${S.width}" fill="none"${PEDI.get(id) !== "birth" ? ` stroke-dasharray="${FOSTER_DASH}"` : ""}/>`;
+      }
+      marks += `<circle class="knot" cx="${x}" cy="${knot}" r="5" fill="var(--bg)" stroke="${CL}" stroke-width="1.4"/>` +
+        `<text class="knotLbl" x="${x + 11}" y="${knot + 3.5}">родители не записаны</text>`;
+      continue;
+    }
 
     let famLevel: number | null = null;
     let famX: number | null = null;
@@ -97,13 +124,14 @@ export function drawLinks(
       const list = marriagesOf(owner);
       const N = list.length;
       const idx = Math.max(0, list.indexOf(family.id));
-      const past = idx < N - 1;
+      const past = idx < N - 1 || !!family.divorced;
 
       const level = marriageLevel(style, idx, top, N, h);
       famLevel = level;
       famIndex = idx;
       const anchor = gapsAt(x1, x2, level)[0];
       famX = anchor ? (anchor[0] + anchor[1]) / 2 : (x1 + x2) / 2; // спуск идёт с нити союза
+      unions.set(family.id, { x: famX, y: level });
 
       const op = past ? ".72" : "1";
       const segs = gapsAt(x1, x2, level)
@@ -185,6 +213,7 @@ export function drawLinks(
     paths += descent(family, parents, kids, pos, {
       w, h, style, CL, famLevel, famX, famIndex, persons,
       record: (geometry) => descents.set(family.id, geometry),
+      fostered: new Set(kids.filter((id) => PEDI.get(id) !== "birth")),
     });
     if (S.tip) {
       for (const id of kids) {
@@ -194,7 +223,7 @@ export function drawLinks(
     }
   }
 
-  return { paths, marks, folds, descents };
+  return { paths, marks, folds, descents, unions };
 }
 
 interface DescentContext {
@@ -209,6 +238,7 @@ interface DescentContext {
   up?: boolean;
   families?: Map<number, TreeFamily>;
   record?: (geometry: DescentGeometry) => void;
+  fostered?: ReadonlySet<number>; // приёмные и под опекой: спуск к ним пунктиром
 }
 
 // Спуск к стопке свёрнутой ветки: с нити союза или завитком, как к детям, но короче — до стопки.
@@ -297,7 +327,8 @@ function descent(
   out += `<path d="M${px} ${py}V${bus}" stroke="${c.CL}" stroke-width="${S.width}" fill="none"/><path d="M${runL} ${bus}H${runR}" stroke="${c.CL}" stroke-width="${S.width}" fill="none"/>`;
   for (const id of kids) {
     const p = pos.get(id)!;
-    out += `<path d="M${p.x + c.w / 2} ${bus}V${p.y - S.descentGap}" stroke="${c.CL}" stroke-width="${S.width}" fill="none" stroke-linecap="butt" stroke-linejoin="round"/>`;
+    const dash = c.fostered?.has(id) ? ` stroke-dasharray="${FOSTER_DASH}"` : "";
+    out += `<path d="M${p.x + c.w / 2} ${bus}V${p.y - S.descentGap}" stroke="${c.CL}" stroke-width="${S.width}" fill="none" stroke-linecap="butt" stroke-linejoin="round"${dash}/>`;
   }
   return out;
 }

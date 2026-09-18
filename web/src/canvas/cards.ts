@@ -5,7 +5,7 @@ import { cardName, escapeHtml, lifeYears } from "../format";
 import { silhouette } from "./portrait";
 import { MAX_ON_CARD, NO_TAGS, TAG_COLORS, type TagSet } from "./tags";
 import type { FoldInfo } from "../layout/fold";
-import type { LayoutResult } from "../layout/layout";
+import { type LayoutResult, primaryFamilies } from "../layout/layout";
 import type { StyleName } from "../layout/metrics";
 import type { FoldAnchor } from "./links";
 import { LINK_STYLES, ORDINAL_WORDS, ROMAN } from "./styles";
@@ -64,6 +64,7 @@ export function drawCards(
   const color = new Map(tags.list.map((t) => [t.id, TAG_COLORS[t.color]]));
   const ordinal = LINK_STYLES[style].ordinal;
   const order = marriageOrder(tree);
+  const fostered = fosteredKids(tree);
   let html = "";
   for (const person of tree.persons) {
     const point = layout.positions.get(person.id)!;
@@ -125,13 +126,31 @@ export function drawCards(
     const underName = style === "gazeta" ? tagsHtml : "";
     const overCard = style === "gazeta" ? "" : tagsHtml;
     const porStyle = photo ? ` style="--img:${photo}"` : "";
+    // приёмный или под опекой — ярлык над карточкой, спуск к нему пунктиром
+    const kind = fostered.get(person.id);
+    const pedi = kind ? `<span class="pedi">${PEDIGREE_WORD[kind]?.[person.sex === "F" ? 1 : 0] ?? ""}</span>` : "";
     html +=
-      `<div class="${classes.join(" ")}" data-id="${person.id}" style="left:${point.x}px;top:${point.y}px;width:${layout.cardWidth}px;height:${layout.cardHeight}px">` +
+      `<div class="${classes.join(" ")}" data-id="${person.id}" style="left:${point.x}px;top:${point.y}px;width:${layout.cardWidth}px;height:${layout.cardHeight}px">${pedi}` +
       `<div class="box">${ordLine}<div class="por"${porStyle}></div>` +
       `<div class="nm">${escapeHtml(cardName(person))}${sup}</div>${underName}` +
       `<div class="yr">${escapeHtml(lifeYears(person))}</div>${badge}${also}${overCard}</div></div>`;
   }
   return html;
+}
+
+const PEDIGREE_WORD: Record<string, [string, string]> = { adopted: ["приёмный", "приёмная"], foster: ["под опекой", "под опекой"] };
+
+// кто стоит на карте под приёмной или опекунской семьёй
+function fosteredKids(tree: ClanTree): Map<number, string> {
+  const primary = primaryFamilies(tree);
+  const out = new Map<number, string>();
+  for (const family of tree.families) {
+    family.children.forEach((id, i) => {
+      const kind = family.child_pedigree?.[i] ?? "birth";
+      if (kind !== "birth" && primary.get(id) === family.id) out.set(id, kind);
+    });
+  }
+  return out;
 }
 
 const CASCADE = 3; // сколько имён детей показывает каскад полотна

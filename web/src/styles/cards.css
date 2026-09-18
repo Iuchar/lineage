@@ -8,3 +8,10 @@
 .node .por { display: none; }
 .node .ord { display: none; }
 .stub { opacity: .55; }
+
+/* братья и сёстры без родителей: подпись у пустого узла над шиной */
+.links .knotLbl { font: 400 11px 'IBM Plex Mono', monospace; fill: var(--mut); letter-spacing: .02em; }
+/* приёмный или под опекой: ярлык над карточкой, спуск к ней пунктиром */
+.node .pedi { position: absolute; left: calc(50% + 7px); top: -23px; z-index: 2; white-space: nowrap;
+  font: 500 10px/1 'Golos Text', sans-serif; color: var(--acc); background: var(--bg); padding: 2px 6px;
+  border: 1px solid var(--acc); border-radius: 8px; }

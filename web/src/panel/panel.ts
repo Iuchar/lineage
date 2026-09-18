@@ -1,6 +1,6 @@
 // Панель выбранного человека справа: сведения, родня, браки, заметки, место среди братьев.
 
-import type { ChangeInfo, ClanLink, ClanTree, PersonDetails, PersonEvent, TreePerson } from "../api/types";
+import type { ChangeInfo, ClanLink, ClanTree, FamilyForm, PersonDetails, PersonEvent, TreePerson } from "../api/types";
 import type { PlusKind } from "../canvas/canvas";
 import { historyHtml, revertChange } from "../editor/journal";
 import { cardName, escapeHtml, formatDate, lifeYears } from "../format";
@@ -29,6 +29,9 @@ export interface PanelActions {
   startEdit: (personId: number) => void;
   addRelative: (kind: PlusKind, personId: number, at: DOMRect) => void;
   reverted: (change: ChangeInfo) => void;
+  // союз: карточка семьи — щелчком по знаку на карте или строкой «Союз ›» у брака
+  openFamily: (familyId: number) => void;
+  editFamily: (familyId: number) => void;
 }
 
 const EVENT_LABELS: Record<string, string> = {
@@ -58,6 +61,7 @@ export class PersonPanel {
   private last: { tree: ClanTree; person: TreePerson; details: PersonDetails | null } | null = null;
   private confirming: number | null = null; // связка, которую просят снять: второе нажатие подтверждает
   private tab: "person" | "history" = "person";
+  private family: number | null = null; // показан союз, а не человек
 
   constructor(
     host: HTMLElement,
@@ -66,8 +70,10 @@ export class PersonPanel {
     this.element = document.createElement("aside");
     this.element.className = "side";
     this.element.addEventListener("click", (e) => {
-      const target = (e.target as HTMLElement).closest<HTMLElement>("[data-id],[data-act],[data-add],[data-tab],[data-revert]");
+      const target = (e.target as HTMLElement).closest<HTMLElement>("[data-id],[data-act],[data-add],[data-tab],[data-revert],[data-union]");
       if (!target) return;
+      if (target.dataset.union) return this.actions.openFamily(Number(target.dataset.union));
+      if (target.dataset.act === "family-edit" && this.family) return this.actions.editFamily(this.family);
       if (target.dataset.id) this.actions.select(Number(target.dataset.id));
       const id = Number(target.dataset.person);
       if (target.dataset.act === "left") this.actions.nudge(id, -1);
@@ -115,6 +121,7 @@ export class PersonPanel {
 
   clear(): void {
     this.last = null;
+    this.family = null;
     this.confirming = null;
     this.request++;
     this.element.innerHTML = '<div class="empty">никто не выбран</div>';
@@ -127,11 +134,70 @@ export class PersonPanel {
       this.confirming = null;
       this.tab = "person";
     }
+    this.family = null;
     const request = ++this.request;
     this.render(tree, person, null); // сразу из дерева, подробности дорисуются
     const response = await fetch(`/api/persons/${personId}`);
     if (request !== this.request || !response.ok) return;
     this.render(tree, person, (await response.json()) as PersonDetails);
+  }
+
+  // карточка союза: супруги, венчание, развод, дети по порядку; «‹» возвращает к человеку
+  async showFamily(tree: ClanTree, familyId: number): Promise<void> {
+    const family = tree.families.find((f) => f.id === familyId);
+    if (!family) return this.clear();
+    const back = this.last?.person;
+    const request = ++this.request;
+    this.family = familyId;
+    this.drawFamily(tree, familyId, back ?? null, null);
+    const response = await fetch(`/api/families/${familyId}/form`);
+    if (request !== this.request || !response.ok) return;
+    this.drawFamily(tree, familyId, back ?? null, (await response.json()) as FamilyForm);
+  }
+
+  private drawFamily(tree: ClanTree, familyId: number, back: TreePerson | null, form: FamilyForm | null): void {
+    const family = tree.families.find((f) => f.id === familyId)!;
+    const persons = new Map(tree.persons.map((p) => [p.id, p]));
+    const husband = family.husband != null ? persons.get(family.husband) ?? null : null;
+    const wife = family.wife != null ? persons.get(family.wife) ?? null : null;
+    const members = [husband, wife].filter((p): p is TreePerson => p !== null);
+    // вернуться — к тому, от кого пришли, если он в этой семье; иначе к первому из супругов
+    const home = back && (members.includes(back) || family.children.includes(back.id)) ? back : members[0] ?? null;
+    const full = (p: TreePerson) => [p.given, p.surname].filter(Boolean).join(" ") || "без имени";
+    let h = '<div class="sideIn">';
+    if (home) h += `<button class="back" data-id="${home.id}">‹ ${escapeHtml(full(home))}</button>`;
+    h += '<span class="lbl" style="margin-top:0">союз</span>';
+    if (this.actions.editing()) h += '<div class="btns" style="margin:0 0 12px"><button class="pri" data-act="family-edit">Править</button></div>';
+    h += `<div class="unionHead">${members.map((p) => escapeHtml(full(p))).join(" и ") || "Родители не записаны"}</div>`;
+    const order = members.map((p) => {
+      const n = p.spouse_families.length;
+      return n > 1 ? `${ORDINAL[p.spouse_families.indexOf(familyId)]?.toLowerCase() ?? ""} брак у ${escapeHtml(p.given ?? "")}` : "";
+    }).filter(Boolean);
+    h += `<div class="sub">${[...order, escapeHtml(family.xref)].join(" · ")}</div>`;
+    h += '<div class="lbl">Супруги</div>' + row("Муж", husband ? kin(husband) : "не записан") + row("Жена", wife ? kin(wife) : "не записана");
+    const when = (value: { ru: string } | undefined) => (value?.ru ? escapeHtml(value.ru) : "");
+    const marriage = form ? [when(form.marriage), form.place ? escapeHtml(form.place) : ""].filter(Boolean).join(", ") : "…";
+    h += '<div class="lbl">Союз</div>' + row("Венчание", marriage || "не записано") +
+      row("Развод", form ? (form.divorced ? when(form.divorce) || "да" : "нет") : "…");
+    h += '<div class="lbl">Дети</div>';
+    const kids = family.children.map((id) => persons.get(id)).filter((p): p is TreePerson => p !== undefined);
+    if (kids.length) {
+      const pedi = (id: number) => family.child_pedigree?.[family.children.indexOf(id)] ?? "birth";
+      const word = (p: TreePerson) => {
+        const kind = pedi(p.id);
+        if (kind === "foster") return "под опекой";
+        const f = p.sex === "F";
+        return kind === "adopted" ? (f ? "приёмная" : "приёмный") : f ? "родная" : "родной";
+      };
+      h += `<div class="kinList">${kids.map((p, i) => `<div><b class="num">${i + 1}</b><span>${kin(p)}` +
+        `<small>${escapeHtml(lifeYears(p))} · ${word(p)}</small></span></div>`).join("")}</div>`;
+      const folded = this.actions.isFolded(familyId);
+      h += `<div class="foldRow"><button data-act="fold" data-family="${familyId}" aria-pressed="${folded}">` +
+        `${folded ? "Развернуть ветку" : "Свернуть ветку"}</button><span>${descendantsOf(tree, familyId).size} в ветке</span></div>`;
+    } else {
+      h += '<div class="note" style="color:var(--mut)">детей нет</div>';
+    }
+    this.element.innerHTML = h + "</div>";
   }
 
   private render(tree: ClanTree, person: TreePerson, details: PersonDetails | null): void {
@@ -176,10 +242,24 @@ export class PersonPanel {
     if (!person.is_branch_stub) {
       h += row("Пол", person.sex === "M" ? "мужской" : person.sex === "F" ? "женский" : "—");
     }
-    if (rel.father) h += row("Отец", kin(rel.father));
-    if (rel.mother) h += row("Мать", kin(rel.mother));
-    if (!rel.father && !rel.mother) h += row("Родители", "не указаны");
-    for (const parent of rel.otherParents) h += row("Ещё родитель", kin(parent));
+    if (rel.parents.some((p) => p.pedigree !== "birth")) {
+      // приёмный или под опекой: у кого рос и родные — отдельными строками
+      for (const family of rel.parents) {
+        const who = [family.father, family.mother].filter((p): p is TreePerson => p !== null).map(kin).join(" и ");
+        h += row(family.pedigree === "adopted" ? "Приёмные" : family.pedigree === "foster" ? "Опекуны" : "Родные", who || "не записаны");
+      }
+      if (!rel.parents.some((p) => p.pedigree === "birth")) h += row("Родные", "не записаны");
+    } else {
+      if (rel.father) h += row("Отец", kin(rel.father));
+      if (rel.mother) h += row("Мать", kin(rel.mother));
+      if (!rel.father && !rel.mother) h += row("Родители", person.parent_families.length ? "не записаны" : "не указаны");
+      for (const parent of rel.otherParents) h += row("Ещё родитель", kin(parent));
+    }
+    // братья и сёстры без родителей: иначе родство с ними нигде не видно
+    if (!rel.father && !rel.mother && rel.siblings.length) {
+      const label = rel.siblings.length > 1 ? "Братья и сёстры" : rel.siblings[0]!.sex === "F" ? "Сестра" : "Брат";
+      h += row(label, rel.siblings.map(kin).join(", "));
+    }
     for (const event of details?.events ?? []) {
       const label = EVENT_LABELS[event.tag];
       const text = eventText(event);
@@ -203,6 +283,7 @@ export class PersonPanel {
           if (text || EVENT_LABELS[event.tag]) h += row(EVENT_LABELS[event.tag] ?? event.tag, text || "—");
         }
         h += row("Дети", marriage.children.length ? marriage.children.map(kin).join(", ") : "нет");
+        h += `<button class="unionLink" data-union="${marriage.family.id}">Союз: венчание, развод, дети<span>›</span></button>`;
         if (marriage.children.length) {
           const folded = this.actions.isFolded(marriage.family.id);
           const count = descendantsOf(tree, marriage.family.id).size;
@@ -249,7 +330,8 @@ export class PersonPanel {
         : parents === 1 ? `есть: ${full(rel.father ?? rel.mother)}` : "не записаны", parents === 2) +
       cell("spouse", person.sex === "F" ? "муж" : person.sex === "M" ? "жена" : "супруг",
         spouses.length ? `ещё один союз · сейчас ${spouses.length}` : "новый союз") +
-      cell("sibling", "брат или сестра", parents ? `к ${[rel.father, rel.mother].filter(Boolean).map((p) => full(p).split(" ")[0]).join(" и ")}` : "сначала появятся родители", !parents) +
+      cell("sibling", "брат или сестра", parents ? `к ${[rel.father, rel.mother].filter(Boolean).map((p) => full(p).split(" ")[0]).join(" и ")}`
+        : rel.siblings.length ? "в ту же семью без родителей" : "родители не записаны — будет общая семья") +
       cell("child", "сын или дочь", spouses.length ? `с ${full(spouses[0]!).split(" ")[0]} или без второго родителя` : "с другим родителем или без него") +
       "</div>";
   }

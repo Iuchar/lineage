@@ -18,6 +18,7 @@ from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonF
                            delete_person, delete_preview, person_form, update_person)
 from app.db.journal import (ChangeInfo, JournalError, RevertConflictError, clan_changes, person_changes, redo, revert,
                             undo, undo_to)
+from app.db.kin import FamilyFields, FamilyForm, KinError, family_form, update_family
 from app.db.photos import photo_path, remove_photo, save_photo
 from app.db.tagset import TagChange, TagError, delete_tag, tag_usage, update_tag
 from app.gedcom.export import ExportError, export_clan
@@ -179,6 +180,23 @@ def post_person(clan_id: int, body: NewPerson, conn: Database) -> Created:
     try:
         return add_person(conn, clan_id, body)
     except (EditError, JournalError) as error:
+        raise _edit_errors(error) from None
+
+
+@app.get("/api/families/{family_id}/form")
+def get_family_form(family_id: int, conn: Database) -> FamilyForm:
+    """Союз для карточки и формы: венчание, развод, дети по порядку файла."""
+    try:
+        return family_form(conn, family_id)
+    except KinError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from None
+
+
+@app.put("/api/families/{family_id}")
+def put_family(family_id: int, body: FamilyFields, conn: Database) -> ChangeInfo:
+    try:
+        return update_family(conn, family_id, body)
+    except (KinError, JournalError) as error:
         raise _edit_errors(error) from None
 
 

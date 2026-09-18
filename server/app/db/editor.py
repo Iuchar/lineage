@@ -14,6 +14,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from app.db.journal import ChangeInfo, Edit, JournalError
+from app.db.kin import DateValue, KinChanges, KinError, apply_kin, manual_order
 from app.gedcom.convert import _person
 from app.gedcom.dates import parse_date
 from app.gedcom.meta import TAG_COLORS, PersonMeta, add_tag_def, read_meta, write_meta
@@ -22,12 +23,6 @@ from app.gedcom.ru_dates import DateInputError, format_ru, parse_input
 
 Sex = Literal["M", "F", "U"]
 Pedigree = Literal["birth", "adopted", "foster"]
-
-
-class DateValue(BaseModel):
-    gedcom: str | None
-    ru: str
-    input: str  # что поставить в поле: по-русски, если это читается обратно в ту же дату, иначе строка GEDCOM
 
 
 class PersonForm(BaseModel):
@@ -48,6 +43,7 @@ class PersonForm(BaseModel):
     heir: bool
     portrait: Literal["auto", "silhouette", "none"]
     photo: str | None
+    marriage_order_manual: bool = False  # очередь браков задана вручную, а не правилом
 
 
 class PersonFields(BaseModel):
@@ -68,13 +64,14 @@ class PersonFields(BaseModel):
     hidden: bool | None = None
     heir: bool | None = None
     portrait: Literal["auto", "silhouette", "none"] | None = None
+    kin: KinChanges | None = None  # правка родни — той же правкой журнала
 
 
 class Relation(BaseModel):
     """Куда встаёт человек. kind: child, parent, spouse, sibling.
 
     child — к person_id; other_id — второй родитель (None — неизвестен), new_union — отдельный союз.
-    parent — к person_id, роль по полу нового человека.
+    parent — к person_id, роль по полу нового человека; separate — отдельной семьёй (родные при приёмных).
     spouse — новый союз с person_id.
     sibling — к person_id; parents: both, father, mother.
     """
@@ -84,6 +81,7 @@ class Relation(BaseModel):
     other_id: int | None = None
     parents: Literal["both", "father", "mother"] = "both"
     pedigree: Pedigree = "birth"
+    separate: bool = False
 
 
 class NewPerson(BaseModel):
@@ -236,6 +234,22 @@ def _raw(conn: sqlite3.Connection, person_id: int) -> Record:
 
 # ── форма ──
 
+def date_value(raw: str | None) -> DateValue:
+    """Дата для поля формы: по-русски, если это читается обратно в ту же дату, иначе строка GEDCOM."""
+    parsed = parse_date(raw)
+    ru = format_ru(parsed) if parsed else ""
+    try:
+        back = parse_input(ru).gedcom if ru else None
+    except DateInputError:
+        back = None
+    return DateValue(gedcom=raw, ru=ru, input=ru if back == raw else (raw or ""))
+
+
+def _date_ru_value(event: Record | None) -> str:
+    parsed = parse_date(event.value_of("DATE")) if event else None
+    return format_ru(parsed) if parsed else "—"
+
+
 def person_form(conn: sqlite3.Connection, person_id: int) -> PersonForm:
     clan_id = _clan(conn, person_id)
     record = _raw(conn, person_id)
@@ -244,21 +258,14 @@ def person_form(conn: sqlite3.Connection, person_id: int) -> PersonForm:
 
     def date(tag: str) -> DateValue:
         event = record.first(tag)
-        raw = event.value_of("DATE") if event else None
-        parsed = parse_date(raw)
-        ru = format_ru(parsed) if parsed else ""
-        try:
-            back = parse_input(ru).gedcom if ru else None
-        except DateInputError:
-            back = None
-        return DateValue(gedcom=raw, ru=ru, input=ru if back == raw else (raw or ""))
+        return date_value(event.value_of("DATE") if event else None)
 
     return PersonForm(
         id=person_id, clan_id=clan_id, given=person.given, surname=person.surname,
         married_surname=person.married_surname, sex=person.sex,  # type: ignore[arg-type]
         birth=date("BIRT"), death=date("DEAT"), notes=[n.text() for n in _notes(record)],
         tags=meta.tags, burnt=meta.burnt, hidden=meta.hidden, heir=meta.heir, portrait=meta.portrait,
-        photo=f"/api/{meta.photo}" if meta.photo else None,
+        photo=f"/api/{meta.photo}" if meta.photo else None, marriage_order_manual=manual_order(record),
     )
 
 
@@ -268,7 +275,11 @@ def update_person(conn: sqlite3.Connection, person_id: int, fields: PersonFields
     before = Record.from_json(record.to_json())
     _apply_fields(record, fields)
     _new_tags(edit, fields)
-    edit.summary = _describe(before, record)
+    try:
+        kin = apply_kin(edit, conn, person_id, fields.kin) if fields.kin else []
+    except KinError as error:
+        raise EditError(str(error)) from None
+    edit.summary = _describe(before, record, kin)
     try:
         return edit.commit()
     except JournalError as error:
@@ -282,7 +293,7 @@ def _new_tags(edit: Edit, fields: PersonFields) -> None:
             add_tag_def(edit.header(), name.strip(), color if color in TAG_COLORS else TAG_COLORS[0])
 
 
-def _describe(before: Record, after: Record) -> str:
+def _describe(before: Record, after: Record, extra: list[str] | None = None) -> str:
     """«Мурдо: рождение 1748 → около 1748»; несколько полей — перечислением."""
     was, now = _person(before), _person(after)
     parts = []
@@ -310,6 +321,7 @@ def _describe(before: Record, after: Record) -> str:
             parts.append(on if getattr(ma, flag) else off)
     if mb.portrait != ma.portrait:
         parts.append({"auto": "портрет включён", "silhouette": "портрет — заглушка", "none": "портрет выключен"}[ma.portrait])
+    parts += extra or []
     return f"{_first_name(after)}: {', '.join(parts) or 'правка'}"
 
 
@@ -392,7 +404,7 @@ def add_person(conn: sqlite3.Connection, clan_id: int, body: NewPerson) -> Creat
         _union(edit, conn, relation.person_id, new_id)
         edit.summary = f"{anchor_name}: новый союз — {who}"
     elif relation.kind == "parent":
-        families = _families_of(conn, relation.person_id, "child")
+        families = [] if relation.separate else _families_of(conn, relation.person_id, "child")
         slot = _slot(_person(record).sex)
         if families:
             family = edit.family(families[0])
@@ -410,8 +422,14 @@ def add_person(conn: sqlite3.Connection, clan_id: int, body: NewPerson) -> Creat
     else:  # sibling
         families = _families_of(conn, relation.person_id, "child")
         if not families:
-            raise EditError(f"У {anchor_name} не записаны родители — сначала добавьте их")
-        row = conn.execute("SELECT husband_id, wife_id FROM families WHERE id = ?", (families[0],)).fetchone()
+            if relation.parents != "both":
+                raise EditError(f"У {anchor_name} не записаны родители")
+            family_id, _ = edit.new_family()
+            _add_child(edit, family_id, relation.person_id, "birth")
+            families = [family_id]
+            row = (None, None)
+        else:
+            row = conn.execute("SELECT husband_id, wife_id FROM families WHERE id = ?", (families[0],)).fetchone()
         if relation.parents == "both":
             family_id = families[0]
         else:

@@ -145,8 +145,8 @@ describe("поколения", () => {
         tags: [], burnt: false, hidden: false, heir: false, portrait: "auto" as const, photo: null,
       })),
       families: [
-        { id: 10, xref: "@F10@", husband: 1, wife: null, children: [2] },
-        { id: 11, xref: "@F11@", husband: 2, wife: 3, children: [4] },
+        { id: 10, xref: "@F10@", husband: 1, wife: null, children: [2], child_pedigree: ["birth"], divorced: false },
+        { id: 11, xref: "@F11@", husband: 2, wife: 3, children: [4], child_pedigree: ["birth"], divorced: false },
       ],
       tags: [],
     } satisfies ClanTree;

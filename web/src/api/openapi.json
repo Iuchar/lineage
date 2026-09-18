@@ -596,6 +596,95 @@
         }
       }
     },
+    "/api/families/{family_id}/form": {
+      "get": {
+        "summary": "Get Family Form",
+        "description": "Союз для карточки и формы: венчание, развод, дети по порядку файла.",
+        "operationId": "get_family_form_api_families__family_id__form_get",
+        "parameters": [
+          {
+            "name": "family_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Family Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyForm"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/families/{family_id}": {
+      "put": {
+        "summary": "Put Family",
+        "operationId": "put_family_api_families__family_id__put",
+        "parameters": [
+          {
+            "name": "family_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Family Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/persons/{person_id}/delete-preview": {
       "get": {
         "summary": "Get Delete Preview",
@@ -1627,6 +1716,175 @@
         ],
         "title": "DeletePreview"
       },
+      "FamilyChild": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "pedigree": {
+            "type": "string",
+            "enum": [
+              "birth",
+              "adopted",
+              "foster"
+            ],
+            "title": "Pedigree"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "pedigree"
+        ],
+        "title": "FamilyChild"
+      },
+      "FamilyFields": {
+        "properties": {
+          "marriage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marriage"
+          },
+          "place": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Place"
+          },
+          "divorced": {
+            "type": "boolean",
+            "title": "Divorced",
+            "default": false
+          },
+          "divorce": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Divorce"
+          },
+          "children": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Children"
+          },
+          "unlink": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Unlink",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "FamilyFields"
+      },
+      "FamilyForm": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "clan_id": {
+            "type": "integer",
+            "title": "Clan Id"
+          },
+          "xref": {
+            "type": "string",
+            "title": "Xref"
+          },
+          "husband": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Husband"
+          },
+          "wife": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wife"
+          },
+          "marriage": {
+            "$ref": "#/components/schemas/DateValue"
+          },
+          "place": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Place"
+          },
+          "divorced": {
+            "type": "boolean",
+            "title": "Divorced"
+          },
+          "divorce": {
+            "$ref": "#/components/schemas/DateValue"
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/FamilyChild"
+            },
+            "type": "array",
+            "title": "Children"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "clan_id",
+          "xref",
+          "husband",
+          "wife",
+          "marriage",
+          "place",
+          "divorced",
+          "divorce",
+          "children"
+        ],
+        "title": "FamilyForm"
+      },
       "FieldChange": {
         "properties": {
           "label": {
@@ -1699,6 +1957,47 @@
         ],
         "title": "Kin",
         "description": "Окружение кандидата: по нему тёзки из разных семей расходятся сразу."
+      },
+      "KinChanges": {
+        "properties": {
+          "parents": {
+            "items": {
+              "$ref": "#/components/schemas/ParentChange"
+            },
+            "type": "array",
+            "title": "Parents",
+            "default": []
+          },
+          "spouses": {
+            "items": {
+              "$ref": "#/components/schemas/SpouseChange"
+            },
+            "type": "array",
+            "title": "Spouses",
+            "default": []
+          },
+          "marriage_order": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marriage Order"
+          },
+          "marriage_order_auto": {
+            "type": "boolean",
+            "title": "Marriage Order Auto",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "KinChanges"
       },
       "LifeDate": {
         "properties": {
@@ -2021,6 +2320,57 @@
           "b"
         ],
         "title": "PairDecision"
+      },
+      "ParentChange": {
+        "properties": {
+          "family_id": {
+            "type": "integer",
+            "title": "Family Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "keep",
+              "drop",
+              "move"
+            ],
+            "title": "Action",
+            "default": "keep"
+          },
+          "to_family_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Family Id"
+          },
+          "pedigree": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "birth",
+                  "adopted",
+                  "foster"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pedigree"
+          }
+        },
+        "type": "object",
+        "required": [
+          "family_id"
+        ],
+        "title": "ParentChange",
+        "description": "Семья, где человек записан ребёнком: оставить, отвязать или перенести в другую; тип родства."
       },
       "ParsedDate": {
         "properties": {
@@ -2378,6 +2728,16 @@
               }
             ],
             "title": "Portrait"
+          },
+          "kin": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KinChanges"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -2494,6 +2854,11 @@
               }
             ],
             "title": "Photo"
+          },
+          "marriage_order_manual": {
+            "type": "boolean",
+            "title": "Marriage Order Manual",
+            "default": false
           }
         },
         "type": "object",
@@ -2563,6 +2928,11 @@
             ],
             "title": "Pedigree",
             "default": "birth"
+          },
+          "separate": {
+            "type": "boolean",
+            "title": "Separate",
+            "default": false
           }
         },
         "type": "object",
@@ -2571,7 +2941,7 @@
           "person_id"
         ],
         "title": "Relation",
-        "description": "Куда встаёт человек. kind: child, parent, spouse, sibling.\n\nchild — к person_id; other_id — второй родитель (None — неизвестен), new_union — отдельный союз.\nparent — к person_id, роль по полу нового человека.\nspouse — новый союз с person_id.\nsibling — к person_id; parents: both, father, mother."
+        "description": "Куда встаёт человек. kind: child, parent, spouse, sibling.\n\nchild — к person_id; other_id — второй родитель (None — неизвестен), new_union — отдельный союз.\nparent — к person_id, роль по полу нового человека; separate — отдельной семьёй (родные при приёмных).\nspouse — новый союз с person_id.\nsibling — к person_id; parents: both, father, mother."
       },
       "ReloadPreview": {
         "properties": {
@@ -2671,6 +3041,41 @@
         "type": "object",
         "title": "ReloadRequest"
       },
+      "SpouseChange": {
+        "properties": {
+          "family_id": {
+            "type": "integer",
+            "title": "Family Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "keep",
+              "drop",
+              "replace"
+            ],
+            "title": "Action",
+            "default": "keep"
+          },
+          "to_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Person Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "family_id"
+        ],
+        "title": "SpouseChange",
+        "description": "Союз человека: оставить, выйти из него или поставить на своё место другого."
+      },
       "TagChange": {
         "properties": {
           "name": {
@@ -2745,6 +3150,19 @@
             },
             "type": "array",
             "title": "Children"
+          },
+          "child_pedigree": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Child Pedigree",
+            "default": []
+          },
+          "divorced": {
+            "type": "boolean",
+            "title": "Divorced",
+            "default": false
           }
         },
         "type": "object",

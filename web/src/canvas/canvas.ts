@@ -12,6 +12,8 @@ import { drawLinks, type LinksSvg } from "./links";
 import { drawRuler } from "./ruler";
 import { centreOn, fitAll, keepAnchor, type View, zoomAt, ZOOM_BASE, ZOOM_STEP, zoomFromPercent, zoomPercent } from "./view";
 
+const escapeAttr = (text: string) => text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+
 export type PlusKind = "parent" | "spouse" | "sibling" | "child";
 
 export interface CanvasState {
@@ -44,6 +46,8 @@ export class TreeCanvas {
   private drag: { sx: number; sy: number; vx: number; vy: number; moved: number } | null = null;
 
   selected: number | null = null;
+  // выбранный союз — щелчком по его знаку или ссылкой из панели; человек тогда не выбран
+  selectedFamily: number | null = null;
   marks: PersonMarks = NO_MARKS;
   // метки разбора перезалива; пусто — обычная карта
   review: ReadonlyMap<number, ReviewMark> = new Map();
@@ -70,6 +74,7 @@ export class TreeCanvas {
   // режим правки: у выбранного плюсы там, где встанет новый человек
   editing = false;
   onPlus: (kind: PlusKind, personId: number, at: DOMRect) => void = () => {};
+  onFamily: (familyId: number) => void = () => {};
 
   constructor(host: HTMLElement) {
     this.viewport = document.createElement("div");
@@ -100,6 +105,7 @@ export class TreeCanvas {
     this.heirs = heirs;
     this.filter = null;
     this.selected = null;
+    this.selectedFamily = null;
     this.manual.clear();
     this.folded.clear();
     this.render();
@@ -114,10 +120,15 @@ export class TreeCanvas {
     for (const id of this.manual.keys()) if (!alive.has(id)) this.manual.delete(id);
     const families = new Set(tree.families.map((f) => f.id));
     for (const id of this.folded) if (!families.has(id)) this.folded.delete(id);
-    if (select != null && alive.has(select)) this.selected = select;
+    if (this.selectedFamily != null && !families.has(this.selectedFamily)) this.selectedFamily = null;
+    if (select != null && alive.has(select)) {
+      this.selected = select;
+      this.selectedFamily = null;
+    }
     else if (this.selected != null && !alive.has(this.selected)) this.selected = null;
     this.keepView(() => this.render());
-    this.onSelect(this.selected);
+    if (this.selectedFamily != null) this.onFamily(this.selectedFamily);
+    else this.onSelect(this.selected);
   }
 
   setEditing(on: boolean): void {
@@ -177,8 +188,17 @@ export class TreeCanvas {
 
   select(id: number | null): void {
     this.selected = id;
+    this.selectedFamily = null;
     this.render();
     this.onSelect(id);
+  }
+
+  // выбрать союз: знак подсвечен кольцом, человек не выбран
+  selectFamily(id: number): void {
+    this.selected = null;
+    this.selectedFamily = id;
+    this.render();
+    this.onFamily(id);
   }
 
   fit(): void {
@@ -320,6 +340,8 @@ export class TreeCanvas {
     spots.push({ kind: "spouse", x: right >= left ? at.x + w + 26 : at.x - 26, y: at.y + h / 2 });
     const bus = parents ? this.svg?.descents.get(parents.id) : undefined;
     if (bus) spots.push({ kind: "sibling", x: cx - 44, y: bus.bus });
+    // родители не записаны и шины нет — брат встанет рядом, в общую семью без родителей
+    else if (!parents) spots.push({ kind: "sibling", x: at.x + 6, y: down ? at.y + h + 18 : at.y - 18 });
     spots.push({ kind: "child", x: cx, y: down ? at.y - 18 : at.y + h + 18 });
     return spots;
   }
@@ -328,9 +350,33 @@ export class TreeCanvas {
     const spots = this.editing ? this.plusSpots() : [];
     const titles: Record<PlusKind, string> = { parent: "Добавить родителя", spouse: "Добавить супруга",
       sibling: "Добавить брата или сестру", child: "Добавить ребёнка" };
-    this.plusLayer.innerHTML = spots.map((s) =>
-      `<button class="plus" data-plus="${s.kind}" title="${titles[s.kind]}" ` +
-      `style="left:${(this.view.x + s.x * this.view.k).toFixed(1)}px;top:${(this.view.y + s.y * this.view.k).toFixed(1)}px">+</button>`).join("");
+    const at = (x: number, y: number) =>
+      `left:${(this.view.x + x * this.view.k).toFixed(1)}px;top:${(this.view.y + y * this.view.k).toFixed(1)}px`;
+    this.plusLayer.innerHTML = this.unionsHtml(at) + spots.map((s) =>
+      `<button class="plus" data-plus="${s.kind}" title="${titles[s.kind]}" style="${at(s.x, s.y)}">+</button>`).join("");
+  }
+
+  // знаки союзов: при наведении кольцо и подпись, щелчок открывает карточку союза
+  private unionsHtml(at: (x: number, y: number) => string): string {
+    if (!this.svg || !this.tree || !this.layout || this.view.k < 0.25) return "";
+    const names = new Map(this.tree.persons.map((p) => [p.id, p.given || "без имени"]));
+    const { width, height } = this.viewportSize();
+    let html = "";
+    for (const [id, point] of this.svg.unions) {
+      const x = this.view.x + point.x * this.view.k;
+      const y = this.view.y + point.y * this.view.k;
+      if (x < -20 || y < -20 || x > width + 20 || y > height + 20) continue;
+      const family = this.tree.families.find((f) => f.id === id);
+      if (!family) continue;
+      const label = `союз ${names.get(family.husband!) ?? ""} и ${names.get(family.wife!) ?? ""} · открыть`;
+      // подпись — под карточками пары, вдоль спуска к детям, чтобы не лечь на имена
+      const bottom = Math.max(...[family.husband, family.wife].map((pid) => this.layout!.positions.get(pid!)!.y)) +
+        this.layout!.cardHeight;
+      const drop = ((bottom - point.y) * this.view.k + 8).toFixed(0);
+      html += `<button class="union${id === this.selectedFamily ? " on" : ""}" data-union="${id}" data-label="${escapeAttr(label)}" ` +
+        `aria-label="${escapeAttr(label)}" style="${at(point.x, point.y)};--drop:${drop}px"></button>`;
+    }
+    return html;
   }
 
   private apply(): void {
@@ -387,6 +433,8 @@ export class TreeCanvas {
     const vp = this.viewport;
     this.plusLayer.addEventListener("pointerdown", (e) => e.stopPropagation());
     this.plusLayer.addEventListener("click", (e) => {
+      const union = (e.target as HTMLElement).closest<HTMLElement>("[data-union]");
+      if (union) return this.selectFamily(Number(union.dataset.union));
       const plus = (e.target as HTMLElement).closest<HTMLElement>("[data-plus]");
       if (!plus || this.selected == null) return;
       this.plusLayer.querySelectorAll(".plus").forEach((b) => b.classList.toggle("on", b === plus));
@@ -439,7 +487,7 @@ export class TreeCanvas {
         if (fold?.dataset.fold) return this.toggleFold(Number(fold.dataset.fold));
         const node = hits.find((el) => el.closest(".node"))?.closest<HTMLElement>(".node");
         if (node?.dataset.id) this.select(Number(node.dataset.id));
-        else if (this.selected != null) this.select(null); // щелчок по пустому месту снимает выбор
+        else if (this.selected != null || this.selectedFamily != null) this.select(null); // щелчок по пустому месту снимает выбор
       }
     };
     vp.addEventListener("pointerup", endDrag);

@@ -234,6 +234,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/families/{family_id}/form": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Family Form
+         * @description Союз для карточки и формы: венчание, развод, дети по порядку файла.
+         */
+        get: operations["get_family_form_api_families__family_id__form_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/families/{family_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Family */
+        put: operations["put_family_api_families__family_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/persons/{person_id}/delete-preview": {
         parameters: {
             query?: never;
@@ -581,6 +618,58 @@ export interface components {
             /** Branch Total */
             branch_total: number;
         };
+        /** FamilyChild */
+        FamilyChild: {
+            /** Id */
+            id: number;
+            /**
+             * Pedigree
+             * @enum {string}
+             */
+            pedigree: "birth" | "adopted" | "foster";
+        };
+        /** FamilyFields */
+        FamilyFields: {
+            /** Marriage */
+            marriage?: string | null;
+            /** Place */
+            place?: string | null;
+            /**
+             * Divorced
+             * @default false
+             */
+            divorced: boolean;
+            /** Divorce */
+            divorce?: string | null;
+            /** Children */
+            children?: number[] | null;
+            /**
+             * Unlink
+             * @default []
+             */
+            unlink: number[];
+        };
+        /** FamilyForm */
+        FamilyForm: {
+            /** Id */
+            id: number;
+            /** Clan Id */
+            clan_id: number;
+            /** Xref */
+            xref: string;
+            /** Husband */
+            husband: number | null;
+            /** Wife */
+            wife: number | null;
+            marriage: components["schemas"]["DateValue"];
+            /** Place */
+            place: string | null;
+            /** Divorced */
+            divorced: boolean;
+            divorce: components["schemas"]["DateValue"];
+            /** Children */
+            children: components["schemas"]["FamilyChild"][];
+        };
         /** FieldChange */
         FieldChange: {
             /** Label */
@@ -607,6 +696,26 @@ export interface components {
             spouses: string[];
             /** Children */
             children: string[];
+        };
+        /** KinChanges */
+        KinChanges: {
+            /**
+             * Parents
+             * @default []
+             */
+            parents: components["schemas"]["ParentChange"][];
+            /**
+             * Spouses
+             * @default []
+             */
+            spouses: components["schemas"]["SpouseChange"][];
+            /** Marriage Order */
+            marriage_order?: number[] | null;
+            /**
+             * Marriage Order Auto
+             * @default false
+             */
+            marriage_order_auto: boolean;
         };
         /** LifeDate */
         LifeDate: {
@@ -700,6 +809,24 @@ export interface components {
             a: number;
             /** B */
             b: number;
+        };
+        /**
+         * ParentChange
+         * @description Семья, где человек записан ребёнком: оставить, отвязать или перенести в другую; тип родства.
+         */
+        ParentChange: {
+            /** Family Id */
+            family_id: number;
+            /**
+             * Action
+             * @default keep
+             * @enum {string}
+             */
+            action: "keep" | "drop" | "move";
+            /** To Family Id */
+            to_family_id?: number | null;
+            /** Pedigree */
+            pedigree?: ("birth" | "adopted" | "foster") | null;
         };
         /** ParsedDate */
         ParsedDate: {
@@ -800,6 +927,7 @@ export interface components {
             heir?: boolean | null;
             /** Portrait */
             portrait?: ("auto" | "silhouette" | "none") | null;
+            kin?: components["schemas"]["KinChanges"] | null;
         };
         /**
          * PersonForm
@@ -837,13 +965,18 @@ export interface components {
             portrait: "auto" | "silhouette" | "none";
             /** Photo */
             photo: string | null;
+            /**
+             * Marriage Order Manual
+             * @default false
+             */
+            marriage_order_manual: boolean;
         };
         /**
          * Relation
          * @description Куда встаёт человек. kind: child, parent, spouse, sibling.
          *
          *     child — к person_id; other_id — второй родитель (None — неизвестен), new_union — отдельный союз.
-         *     parent — к person_id, роль по полу нового человека.
+         *     parent — к person_id, роль по полу нового человека; separate — отдельной семьёй (родные при приёмных).
          *     spouse — новый союз с person_id.
          *     sibling — к person_id; parents: both, father, mother.
          */
@@ -869,6 +1002,11 @@ export interface components {
              * @enum {string}
              */
             pedigree: "birth" | "adopted" | "foster";
+            /**
+             * Separate
+             * @default false
+             */
+            separate: boolean;
         };
         /** ReloadPreview */
         ReloadPreview: {
@@ -907,6 +1045,22 @@ export interface components {
              */
             delete: number[];
         };
+        /**
+         * SpouseChange
+         * @description Союз человека: оставить, выйти из него или поставить на своё место другого.
+         */
+        SpouseChange: {
+            /** Family Id */
+            family_id: number;
+            /**
+             * Action
+             * @default keep
+             * @enum {string}
+             */
+            action: "keep" | "drop" | "replace";
+            /** To Person Id */
+            to_person_id?: number | null;
+        };
         /** TagChange */
         TagChange: {
             /** Name */
@@ -933,6 +1087,16 @@ export interface components {
             wife: number | null;
             /** Children */
             children: number[];
+            /**
+             * Child Pedigree
+             * @default []
+             */
+            child_pedigree: string[];
+            /**
+             * Divorced
+             * @default false
+             */
+            divorced: boolean;
         };
         /** TreePerson */
         TreePerson: {
@@ -1478,6 +1642,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Created"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_family_form_api_families__family_id__form_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                family_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyForm"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_family_api_families__family_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                family_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyFields"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"];
                 };
             };
             /** @description Validation Error */

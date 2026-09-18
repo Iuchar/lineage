@@ -8,10 +8,12 @@ import { TAG_COLORS, type TagColor } from "../canvas/tags";
 import { silhouette } from "../canvas/portrait";
 import { send } from "./api";
 import { bindDateFields, dateFieldHtml } from "./datefield";
+import { KinSection } from "./kinform";
 
 export interface FormActions {
   saved: (change: ChangeInfo, focus: number | null) => void; // правка записана: перечитать род, показать «Отменить»
   closed: () => void; // вернуться к обычной панели
+  addBirthParents: (personId: number, at: DOMRect) => void; // родные при приёмных — отдельной семьёй
 }
 
 export interface NewPersonPlan {
@@ -33,6 +35,7 @@ const seg = (name: string, options: [string, string][], current: string | null) 
 export class PersonEditor {
   private tree: ClanTree | null = null;
   private newTags = new Map<string, TagColor>(); // метки, которых ещё нет в наборе рода
+  private kin: KinSection | null = null; // раздел «Родня» — только у записанного
 
   constructor(private readonly host: HTMLElement, private readonly actions: FormActions) {}
 
@@ -43,17 +46,19 @@ export class PersonEditor {
     if (!result.ok) return this.actions.closed();
     const form = result.data;
     const hasParents = (tree.persons.find((p) => p.id === personId)?.parent_families.length ?? 0) > 0;
+    this.kin = new KinSection(tree, personId, form.marriage_order_manual, (at) => this.actions.addBirthParents(personId, at));
     this.host.innerHTML =
       `<div class="sideIn form"><span class="lbl" style="margin-top:0">правка</span>` +
       `<h3>${escapeHtml([form.given, form.surname].filter(Boolean).join(" ") || "без имени")}</h3>` +
       this.portraitHtml(form, true) +
-      this.fieldsHtml(form) + this.metaHtml(form, hasParents, true) +
+      this.fieldsHtml(form) + this.kin.html() + this.metaHtml(form, hasParents, true) +
       '<div class="err" data-role="err"></div>' +
       '<div class="btns"><button class="pri" data-act="save">Сохранить</button><button data-act="cancel">Отмена</button></div>' +
       '<button class="danger" data-act="delete">Удалить человека…</button></div>';
     this.bind();
+    this.kin.bind(this.host);
     this.on("save", async () => {
-      const saved = await send<ChangeInfo>("PUT", `/api/persons/${personId}`, this.read());
+      const saved = await send<ChangeInfo>("PUT", `/api/persons/${personId}`, { ...this.read(), kin: this.kin?.read() ?? null });
       if (!saved.ok) return this.error(saved.detail);
       this.actions.saved(saved.data, personId);
     });
@@ -65,9 +70,10 @@ export class PersonEditor {
   // ── новый человек на выбранном месте ──
   create(tree: ClanTree, clanId: number, plan: NewPersonPlan, startExisting = false): void {
     this.tree = tree;
+    this.kin = null;
     const blank: PersonForm = {
       id: 0, clan_id: clanId, given: null, surname: plan.surname, married_surname: null, sex: plan.sex,
-      birth: { gedcom: null, ru: "", input: "" }, death: { gedcom: null, ru: "", input: "" }, notes: [],
+      birth: { gedcom: null, ru: "", input: "" }, death: { gedcom: null, ru: "", input: "" }, notes: [], marriage_order_manual: false,
       tags: [], burnt: false, hidden: false, heir: false, portrait: "auto", photo: null,
     };
     this.host.innerHTML =

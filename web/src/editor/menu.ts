@@ -46,25 +46,26 @@ export class RelativeMenu {
     this.actions.closed();
   }
 
-  open(tree: ClanTree, kind: PlusKind, personId: number, at: DOMRect): void {
+  // separate — родные родители отдельной семьёй, когда человек записан у приёмных
+  open(tree: ClanTree, kind: PlusKind, personId: number, at: DOMRect, separate = false): void {
     const person = tree.persons.find((p) => p.id === personId);
     if (!person) return;
     const rel = relativesOf(tree, personId);
     const name = full(person);
     const sexes: [string, string] = kind === "parent" ? ["отец", "мать"] : kind === "sibling" ? ["брат", "сестра"] : ["сын", "дочь"];
     const word = (sex: "M" | "F") => (sex === "M" ? sexes[0] : sexes[1]);
-    const base = { person_id: personId, other_id: null, parents: "both" as const, pedigree: "birth" as const };
+    const base = { person_id: personId, other_id: null, parents: "both" as const, pedigree: "birth" as const, separate };
     let title = "";
     let options: Option[] = [];
     let askSex = true;
 
     if (kind === "parent") {
-      title = `родитель · ${name}`;
+      title = separate ? `родные родители · ${name}` : `родитель · ${name}`;
       // пол решает место: отец в слот мужа, мать в слот жены; занятый слот не предлагаем
       const plan = (sex: "M" | "F"): NewPersonPlan => ({
         relation: { ...base, kind: "parent" }, sex, pedigree: false,
         surname: sex === "M" ? person.surname : null,
-        bind: `<b>${word(sex)}</b> · ребёнок: ${escapeHtml(name)}`,
+        bind: `<b>${word(sex)}</b> · ребёнок: ${escapeHtml(name)}` + (separate ? " · родная семья, отдельно от приёмной" : ""),
       });
       options = [{ label: "новый человек", hint: "запишется в род", plan }, { label: "выбрать уже записанного…", hint: "из рода", plan, existing: true }];
     } else if (kind === "spouse") {
@@ -85,11 +86,14 @@ export class RelativeMenu {
         return {
           relation: { ...base, kind: "sibling", parents }, sex, pedigree: true,
           surname: parents !== "mother" ? (rel.father?.surname ?? person.surname) : null,
-          bind: `<b>${word(sex)}</b> · ${escapeHtml(name)} · родители: ${who.map((p) => escapeHtml(full(p!))).join(" и ")}` +
+          bind: `<b>${word(sex)}</b> · ${escapeHtml(name)} · ` + (who.length
+            ? `родители: ${who.map((p) => escapeHtml(full(p!))).join(" и ")}`
+            : "родители не записаны — их общая семья появится без родителей; добавите их потом — встанут над всеми") +
             (parents !== "both" ? ` · ${parents === "father" ? "единокровный" : "единоутробный"}` : ""),
         };
       };
       if (both.length) options.push({ label: both.map(full).join(" и "), hint: both.length === 2 ? "родной" : "", plan: plan("both") });
+      else options.push({ label: "родители не записаны", hint: "общая семья без них", plan: plan("both") });
       if (rel.father && rel.mother) {
         options.push({ label: `только ${full(rel.father)}`, hint: "единокровный", plan: plan("father") });
         options.push({ label: `только ${full(rel.mother)}`, hint: "единоутробный", plan: plan("mother") });
@@ -123,7 +127,7 @@ export class RelativeMenu {
       (kind === "child" ? '<div class="t" style="margin-top:8px">второй родитель</div>' : kind === "sibling" ? '<div class="t" style="margin-top:8px">чей ребёнок</div>' : "") +
       options.map((o, i) => `<button type="button" class="opt" data-i="${i}"><span>${escapeHtml(o.label)}</span><i>${escapeHtml(o.hint)}</i></button>`).join("");
     // у родителя занятое место не предлагается: отец записан — остаётся мать, и наоборот
-    if (kind === "parent" && (rel.father || rel.mother)) {
+    if (kind === "parent" && !separate && (rel.father || rel.mother)) {
       const taken = rel.father ? "M" : "F";
       const buttons = this.box.querySelectorAll<HTMLButtonElement>("[data-seg=sex] button");
       buttons.forEach((b) => {

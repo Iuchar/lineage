@@ -63,11 +63,13 @@ const LINK_ROOM = 96; // место под завиток и шину вывод
 const EXTRA_MARRIAGE_ROOM = 34; // разнос шин на каждый следующий брак
 const SHIFT_SHARE = 0.34; // сдвиг внутри яруса — не больше трети карточки
 const CHILD_DROP = 12;
+const PARENTLESS_ROOM = 64; // над братьями без родителей: шина, узел и подпись
 
 const collator = new Intl.Collator("ru", { numeric: true });
 
 interface Index {
   persons: Map<number, TreePerson>;
+  primary: Map<number, number>; // семья, под которой человек стоит на карте
   estimated: Map<number, number>; // оценка года у тех, у кого его нет; линейка по ней не строится
   families: Map<number, TreeFamily>;
   order: TreePerson[];
@@ -77,11 +79,37 @@ interface Index {
 function index(tree: ClanTree): Index {
   return {
     persons: new Map(tree.persons.map((p) => [p.id, p])),
+    primary: primaryFamilies(tree),
     estimated: estimateBirthYears(tree),
     families: new Map(tree.families.map((f) => [f.id, f])),
     order: tree.persons,
     familyOrder: tree.families,
   };
+}
+
+// Где человек стоит на карте, если он записан ребёнком в нескольких семьях: под той, где рос, —
+// приёмной или опекунской; иначе под первой. В остальных семьях он только строкой в панели.
+export function primaryFamilies(tree: ClanTree): Map<number, number> {
+  const out = new Map<number, number>();
+  const raised = new Set<number>();
+  for (const family of tree.families) {
+    family.children.forEach((child, i) => {
+      const fostered = (family.child_pedigree?.[i] ?? "birth") !== "birth";
+      if (!out.has(child) || (fostered && !raised.has(child))) out.set(child, family.id);
+      if (fostered) raised.add(child);
+    });
+  }
+  // при равных — первая семья в записи человека, как было
+  for (const person of tree.persons) {
+    const first = person.parent_families[0];
+    if (first != null && !raised.has(person.id) && out.has(person.id)) out.set(person.id, first);
+  }
+  return out;
+}
+
+// семьи, где записаны одни дети: братья и сёстры с неизвестными родителями
+export function parentless(family: TreeFamily): boolean {
+  return family.husband == null && family.wife == null && family.children.length > 0;
 }
 
 function birthYear(person: TreePerson | undefined): number | null {
@@ -98,7 +126,7 @@ export function generations(tree: ClanTree): Map<number, number> {
     changed = false;
     for (const family of tree.families) {
       const parents = [family.husband, family.wife].filter((id): id is number => id != null);
-      const top = Math.max(0, ...parents.map(at));
+      const top = parents.length ? Math.max(0, ...parents.map(at)) : -1;
       for (const id of parents) {
         if (at(id) < top) {
           gen.set(id, top);
@@ -190,7 +218,8 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOpti
   const pairStep = metrics.width + metrics.pairGap;
 
   const buildNode = (unit: number[], nodes: TreeNode[], id: number): TreeNode => {
-    const unitWidth = unit.length * metrics.width + (unit.length - 1) * metrics.pairGap;
+    // пустой ряд — семья без родителей: над детьми только узел
+    const unitWidth = unit.length ? unit.length * metrics.width + (unit.length - 1) * metrics.pairGap : 0;
     const self: Span[] = [{ l: -unitWidth / 2, r: unitWidth / 2 }];
     if (!nodes.length) return { id, unit, unitWidth, kids: [], contour: self, leaf: unit.length === 1 };
 
@@ -236,7 +265,7 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOpti
     const kids: number[] = [];
     for (const family of families) {
       // выводки идут группами по очереди союзов, внутри выводка — по старшинству
-      const brood = family.children.filter((c) => !seen.has(c) && idx.persons.has(c));
+      const brood = family.children.filter((c) => !seen.has(c) && idx.persons.has(c) && idx.primary.get(c) === family.id);
       brood.sort(byAge(idx, family.children));
       kids.push(...brood);
     }
@@ -252,6 +281,14 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOpti
     return node;
   };
 
+  // семья без родителей: узел без карточек, под ним братья и сёстры
+  const measureBrood = (family: TreeFamily, seen: Set<number>): TreeNode | null => {
+    const brood = family.children.filter((c) => !seen.has(c) && idx.persons.has(c) && idx.primary.get(c) === family.id);
+    brood.sort(byAge(idx, family.children));
+    const nodes = brood.map((c) => measure(c, seen)).filter((n): n is TreeNode => n !== null);
+    return nodes.length ? buildNode([], applyManual(nodes, manual), -family.id) : null;
+  };
+
   const put = (node: TreeNode, centre: number) => {
     const left = centre - node.unitWidth / 2;
     node.unit.forEach((id, i) => positions.set(id, left + i * pairStep));
@@ -265,10 +302,19 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOpti
   );
   roots.sort((a, b) => (birthYear(a) || 9999) - (birthYear(b) || 9999));
 
+  // сначала семьи без родителей: иначе пришлый супруг одного из братьев заберёт его в свою ветку
+  const broods = idx.familyOrder.filter(parentless);
+  const eldest = (f: TreeFamily) => Math.min(9999, ...f.children.map((c) => birthYear(idx.persons.get(c)) || 9999));
+  broods.sort((a, b) => eldest(a) - eldest(b));
+
   const seen = new Set<number>();
   let edge = 0;
-  for (const root of roots) {
-    const node = measure(root.id, seen);
+  const tops: (() => TreeNode | null)[] = [
+    ...broods.map((f) => () => measureBrood(f, seen)),
+    ...roots.map((root) => () => measure(root.id, seen)),
+  ];
+  for (const top of tops) {
+    const node = top();
     if (!node) continue;
     let l = 0;
     let r = 0;
@@ -461,6 +507,17 @@ export function layoutTree(tree: ClanTree, metrics: CardMetrics, options: Layout
     const total = Math.max(...rows, ...y.values()) + height;
     for (const [id, value] of y) y.set(id, total - value - height);
     if (ruler) for (const [g, value] of ruler.rowY) ruler.rowY.set(g, total - value - height);
+  }
+
+  const kidsTop = Math.min(...tree.families.filter(parentless)
+    .flatMap((f) => f.children.filter((c) => y.has(c)).map((c) => y.get(c)!)));
+  const lift = Number.isFinite(kidsTop) ? Math.max(0, PARENTLESS_ROOM - kidsTop) : 0;
+  if (lift) {
+    for (const [id, value] of y) y.set(id, value + lift);
+    if (ruler) {
+      for (const [g, value] of ruler.rowY) ruler.rowY.set(g, value + lift);
+      ruler.top += lift;
+    }
   }
 
   const positions = new Map<number, Point>();

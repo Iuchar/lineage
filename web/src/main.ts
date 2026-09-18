@@ -23,6 +23,7 @@ import { demoHeirs, demoMarks, demoTags } from "./demo";
 import { LinkNav } from "./links/nav";
 import { ManualLink } from "./links/manual";
 import { LinkReview } from "./links/review";
+import { FamilyEditor } from "./editor/family";
 import { PersonEditor } from "./editor/form";
 import { Journal } from "./editor/journal";
 import { RelativeMenu } from "./editor/menu";
@@ -227,7 +228,21 @@ async function start(root: HTMLElement): Promise<void> {
       journal.toast(change);
       void afterEdit(change.persons[0] ?? null);
     },
+    openFamily: (familyId) => canvas.selectFamily(familyId),
+    editFamily: (familyId) => {
+      if (tree) void familyEditor.edit(tree, familyId);
+    },
   });
+  // что сейчас в панели: союз или человек
+  const showCurrent = () => {
+    if (!tree) return panel.clear();
+    if (canvas.selectedFamily != null) void panel.showFamily(tree, canvas.selectedFamily);
+    else if (canvas.selected != null) void panel.show(tree, canvas.selected);
+    else panel.clear();
+  };
+  canvas.onFamily = (familyId) => {
+    if (tree) void panel.showFamily(tree, familyId);
+  };
 
   // ── режим правки: форма В2 в панели, плюсы на карте, журнал с откатом ──
   let editing = false;
@@ -236,9 +251,24 @@ async function start(root: HTMLElement): Promise<void> {
       journal.toast(change);
       void afterEdit(focusId);
     },
-    closed: () => {
-      if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
-      else panel.clear();
+    closed: showCurrent,
+    addBirthParents: (id, at) => {
+      if (tree) menu.open(tree, "parent", id, at, true);
+    },
+  });
+  const familyEditor = new FamilyEditor(panel.element, {
+    saved: (change) => {
+      journal.toast(change);
+      void afterEdit(null);
+    },
+    closed: showCurrent,
+    // ребёнок союза — через тот же список у плюса; у семьи без родителей — брат или сестра
+    addChild: (familyId, at) => {
+      const family = tree?.families.find((f) => f.id === familyId);
+      if (!tree || !family) return;
+      const parent = family.husband ?? family.wife;
+      if (parent != null) menu.open(tree, "child", parent, at);
+      else if (family.children[0] != null) menu.open(tree, "sibling", family.children[0], at);
     },
   });
   const menu = new RelativeMenu({
@@ -292,12 +322,10 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.setEditing(editing);
     menu.close();
     if (editing) void journal.refresh();
-    if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
+    showCurrent();
   });
   // панель показывает, свёрнута ли ветка, — перерисовать после щелчка по стопке на карте
-  canvas.onFoldChange = () => {
-    if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
-  };
+  canvas.onFoldChange = showCurrent;
   canvas.onSelect = (id) => {
     if (upload.reviewing) return upload.highlight(id); // в разборе панель занята сводкой
     if (tree && id != null) void panel.show(tree, id);

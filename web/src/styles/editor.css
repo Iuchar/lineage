@@ -142,3 +142,43 @@
 .side .tagRow button:not([data-color]) { border: 0; background: none; color: var(--acc); font: 500 11px 'Golos Text', sans-serif; cursor: pointer; padding: 0; }
 .side .tagRow .field { flex: 1 1 100%; }
 .side .tagRow .swatches { flex: 1 1 100%; margin: 4px 0; }
+
+/* знак союза: невидим, пока не наведёшь; щелчок открывает карточку союза */
+.plusLayer .union { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; width: 26px; height: 26px; padding: 0;
+  border-radius: 50%; border: 2px dashed transparent; background: transparent; cursor: pointer; }
+.plusLayer .union:hover { border-color: var(--acc); }
+.plusLayer .union.on { border: 2px solid var(--acc); box-shadow: 0 0 0 4px color-mix(in srgb, var(--acc) 25%, transparent); }
+.plusLayer .union:hover::after { content: attr(data-label); position: absolute; left: 50%; top: calc(50% + var(--drop, 30px)); transform: translateX(-50%);
+  white-space: nowrap; font: 500 11px/1 'Golos Text', sans-serif; color: var(--fg); background: var(--panelbg);
+  border: 1px solid var(--edge); border-radius: 4px; padding: 5px 7px; box-shadow: 0 4px 14px rgba(0,0,0,.3); pointer-events: none; }
+
+/* союз: строка у брака в панели человека и карточка союза */
+.side .unionLink { display: flex; justify-content: space-between; align-items: center; width: 100%; margin: 8px 0 6px; padding: 8px 10px;
+  border: 1px solid var(--edge); border-radius: 4px; background: transparent; color: var(--acc); cursor: pointer; text-align: left;
+  font: 500 12px 'Golos Text', sans-serif; }
+.side .unionLink span { font-size: 15px; line-height: 1; }
+.side .unionLink:hover { border-color: var(--acc); }
+.side .back { display: block; border: 0; background: none; padding: 0; margin: 0 0 12px; color: var(--acc); cursor: pointer;
+  font: 500 11.5px 'Golos Text', sans-serif; text-align: left; }
+.side .unionHead { font: 400 19px/1.25 'Cormorant Garamond', serif; margin: 2px 0; }
+.side .note2 { font-size: 11px; color: var(--mut); line-height: 1.45; margin-top: 6px; }
+.side .linkish { border: 0; background: none; padding: 0; color: var(--acc); font: 500 11px 'Golos Text', sans-serif; cursor: pointer; }
+
+/* списки родни: родители, браки, дети союза — строка, стрелки, ×; помеченное к отвязке зачёркнуто */
+.side .kinList { border: 1px solid var(--edge); border-radius: 4px; margin-top: 4px; }
+.side .kinList > div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 7px 8px; border-top: 1px solid var(--edge); font-size: 12px; }
+.side .kinList > div:first-child { border-top: 0; }
+.side .kinList > div > span { flex: 1 1 calc(100% - 40px); min-width: 0; }
+/* действия — второй строкой по правому краю: имя и годы не сжимаются */
+.side .kinList > div > span + button { margin-left: auto; }
+.side .kinList small { display: block; color: var(--mut); font-size: 10.5px; margin-top: 1px; }
+.side .kinList .off > span { text-decoration: line-through; opacity: .55; }
+.side .kinList .moved { background: color-mix(in srgb, var(--acc) 12%, transparent); }
+.side .kinList > div > button { border: 0; background: none; color: var(--acc); font: 500 12px 'Golos Text', sans-serif; cursor: pointer; padding: 0 2px; white-space: nowrap; }
+.side .kinList > div > button:disabled { color: var(--mut); opacity: .4; cursor: default; }
+.side .kinList .num { width: 14px; color: var(--acc); font: 500 12px 'IBM Plex Mono', monospace; }
+.side .kinList .kin { font-size: 12px; text-align: left; display: inline; }
+.side .seg.mini { flex: 1 1 100%; }
+.side .seg.mini button { padding: 4px 2px; font-size: 10.5px; }
+.side .kinPick { border: 1px solid var(--acc); border-radius: 4px; padding: 8px; margin: 4px 0 8px; }
+.side .kinPick .pickList { max-height: 180px; overflow: auto; margin: 6px 0; }
