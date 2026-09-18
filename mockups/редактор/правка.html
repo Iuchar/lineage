@@ -40,6 +40,8 @@ h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
 .side .row.ed { cursor: text; }
 .side .row.pen i::after { content: ' ✎'; color: var(--acc); font-style: normal; font-size: 12px; opacity: .8; }
 .side h3 .pen { color: var(--acc); font: 400 12px 'Golos Text', sans-serif; opacity: .8; }
+.bind { font-size: 12px; line-height: 1.45; padding: 8px 9px; margin: 6px 0 10px; border: 1px solid var(--acc); border-radius: 4px; }
+.bind b { font-weight: 500; color: var(--acc); }
 .porHint { font-size: 10.5px; color: var(--acc); margin-top: 6px; opacity: .85; }
 .side .edit { border-bottom: 1px solid var(--acc); padding: 6px 0 8px; }
 .side .edit label { display: block; font-size: 12.5px; margin-bottom: 4px; }
@@ -164,10 +166,9 @@ const PARTS = {
     ["delete", "удаление", "<b>Удаление человека</b> — общее для обоих вариантов. Не молча: панель показывает, кого это затронет, и даёт выбрать — убрать только его (дети остаются в роду, семья остаётся с одним родителем) или вместе со всей веткой. Числа настоящие. Удаление пишется в журнал и откатывается."],
   ],
   add: [
-    ["combo", "Д1 + Д2", "<b>Д1 + Д2 · плюсы на карте, форма в панели.</b> У выбранной в режиме правки карточки кружки «+» стоят там, где встанет новый человек: сбоку — супруг, снизу — ребёнок, сверху — родитель, если место свободно. Щелчок по плюсу ничего не раскрывает на карте — в панели загорается та же кнопка раздела «Добавить» и под ней форма. Карта не перекрывается, а начать можно и с карты, и из панели."],
+    ["combo", "Д1 + Д2", "<b>Д1 + Д2 · плюс на карте → список → форма нового человека.</b> У выбранной в режиме правки карточки кружки «+» стоят там, где встанет новый человек: сбоку — супруг, снизу — ребёнок, сверху — родитель, если место свободно. Щелчок по плюсу раскрывает у карточки короткий список: сын, дочь или кто-то уже записанный в роду. Выбрал — в панели открывается форма нового человека (как В2), уже привязанного к родителям, а на карте на его месте стоит пустая карточка в пунктире. «Создать» — и он в роду. Те же места есть кнопками в панели, раздел «Добавить»."],
     ["panel", "Д1 · из панели", "<b>Д1 · кнопки в панели</b> — для сравнения. В режиме правки у человека раздел «Добавить»: отец, мать, супруг, брат или сестра, ребёнок в конкретном браке; занятые места приглушены."],
     ["map", "Д2 · плюсы на карте", "<b>Д2 · плюсы на карте</b> — для сравнения. Список раскрывается прямо у карточки и перекрывает соседей."],
-    ["done", "после добавления", "<b>После добавления.</b> Сын Мурдо и Аины уже стоит на карте третьим ребёнком — раскладка пересчитана настоящая. Пунктир вокруг карточки держится, пока новый человек не заполнен; в панели он сразу открыт на правку."],
   ],
   log: [
     ["bar", "общий журнал", "<b>Общий журнал рода — в верхней панели.</b> «↶ Отменить» отменяет последнее действие в роду, рядом «Журнал · N» — все правки подряд: что, у кого, когда. Откат идёт с конца: «откатить до сюда» отменяет всё после этой точки. Отменённое остаётся зачёркнутым и возвращается «Повторить». Щелчок по строке ведёт к человеку."],
@@ -200,6 +201,7 @@ function mapHtml(key) {
 }
 
 const saved = () => state.part === "edit" && state.step === "saved";
+const adding = () => state.part === "add" && state.kind === "combo";
 const born = () => (saved() ? "около 1748" : "1748");
 const head = (pen = false) =>
   `<div class="por" style="background:var(--por-img) center / cover"></div>` +
@@ -266,6 +268,32 @@ function panelAdd(stage) {
   return h + "</div>";
 }
 
+function panelNew() {
+  return `<div class="sideIn form"><span class="lbl" style="margin-top:0">новый человек</span>
+    <div class="bind">сын <b>Мурдо Гленн Уриск</b> и <b>Аины Драммонд</b> · третий ребёнок</div>
+    <div class="porEd"><div class="por" style="background:var(--new-img) center / cover"></div>
+      <div class="opts"><span class="on">● заглушка-профиль</span><span>○ свой снимок · загрузить…</span><span>○ без портрета</span></div></div>
+    <label class="fl">Имя</label><input class="field on" placeholder="имя">
+    <div class="two"><div><label class="fl">Фамилия</label><input class="field" value="Гленн Уриск"><div class="parse">по отцу</div></div>
+      <div><label class="fl">Девичья / по мужу</label><input class="field" placeholder="—"></div></div>
+    <label class="fl">Пол</label><div class="seg"><span class="on">мужской</span><span>женский</span><span>неизвестен</span></div>
+    <div class="two"><div><label class="fl">Рождение</label><input class="field" placeholder="около 1785"></div>
+      <div><label class="fl">Смерть</label><input class="field" placeholder="—"></div></div>
+    <label class="fl">Родство с родителями</label><div class="seg"><span class="on">родной</span><span>приёмный</span><span>под опекой</span></div>
+    <label class="fl">Метки</label><div><span class="chip">+ метка</span></div>
+    <label class="fl">Заметки</label><div><span class="chip">+ заметка</span></div>
+    <div class="btns"><button class="pri">Создать</button><button>Отмена</button></div>
+    <div class="parse" style="margin-top:8px">«Отмена» убирает пустую карточку с карты — в журнал ничего не пишется.</div></div>`;
+}
+
+function panelAngus() {
+  const row = (k, v) => `<div class="row"><span>${k}</span><i>${v}</i></div>`;
+  return `<div class="sideIn"><div class="btns" style="margin:0 0 12px"><button class="pri">Править</button></div>
+    <div class="por" style="background:var(--new-img) center / cover"></div><h3>Ангус Гленн Уриск</h3><div class="sub">год неизвестен · новый</div>
+    <div class="lbl">Сведения</div>${row("Пол", "мужской")}${row("Отец", '<span class="kin">Мурдо Гленн Уриск</span>')}${row("Мать", '<span class="kin">Аина Драммонд</span>')}
+    ${row("Родство", "родной")}</div>`;
+}
+
 function panelFresh() {
   return `<div class="sideIn form"><span class="lbl" style="margin-top:0">новый человек · заполните</span>
     <label class="fl">Имя</label><input class="field on" value="Ангус">
@@ -315,8 +343,10 @@ function draw() {
   document.getElementById("kinds").innerHTML = variants
     .map(([k, n]) => `<button data-v="${k}"${k === state.kind ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
   document.getElementById("about").innerHTML = variants.find(([k]) => k === state.kind)[2];
-  const stepped = state.part === "edit" && state.kind !== "delete";
+  const stepped = (state.part === "edit" && state.kind !== "delete") || (state.part === "add" && state.kind === "combo");
   document.getElementById("stepGrp").hidden = !stepped;
+  const names = state.part === "add" ? ["1 · плюс и список", "2 · новый человек", "3 · создан"] : ["1 · до правки", "2 · правлю", "3 · сохранено"];
+  document.querySelectorAll("#stepGrp button").forEach((b, i) => { b.textContent = names[i]; });
 
   let map = mapHtml("base"), side = panelView("inline"), extra = "";
   if (state.part === "edit") {
@@ -325,9 +355,16 @@ function draw() {
     if (state.kind === "delete") side = panelDelete();
     if (stepped && state.step === "saved") extra = '<div class="toast">Сохранено: рождение Мурдо — около 1748<button>Отменить</button></div>';
   } else if (state.part === "add") {
-    if (state.kind === "combo" || state.kind === "panel") side = panelAdd("form");
+    if (state.kind === "panel") side = panelAdd("form");
     if (state.kind === "map") side = panelAdd("idle");
-    if (state.kind === "done") { map = mapHtml("added"); side = panelFresh(); }
+    if (state.kind === "combo") {
+      if (state.step === "view") side = panelAdd("idle");
+      if (state.step === "edit") { map = mapHtml("added"); side = panelNew(); }
+      if (state.step === "saved") {
+        map = mapHtml("added"); side = panelAngus();
+        extra = '<div class="toast">Добавлен сын Мурдо — Ангус<button>Отменить</button></div>';
+      }
+    }
   } else if (state.part === "log") {
     if (state.kind === "bar") extra = `<div class="drop"><div class="e" style="grid-template-columns:1fr auto"><span>Все правки рода · 6</span><button>↷ Повторить</button></div>${journal("undone")}</div>`;
     if (state.kind === "side") side = `<div class="tabs2"><span>Человек</span><span class="on">История · 3</span></div><div class="sideIn jr">${history()}</div>`;
@@ -363,23 +400,36 @@ function datesHtml() {
 // навести карту на Мурдо и разложить плюсы / пунктир поверх неё
 function place() {
   const map = document.querySelector(".map");
-  const key = state.part === "add" && state.kind === "done" ? "added" : "base";
+  const key = adding() && state.step !== "view" ? "added" : "base";
   const s = scene(key);
   const k = 0.8;
-  const focus = key === "added" ? s.added : s.murdo;
-  const x = map.clientWidth / 2 - (focus.x + focus.w / 2) * k;
-  const y = map.clientHeight / 2 - (focus.y + focus.h / 2) * k + (key === "added" ? -60 : 0);
+  // с новым человеком в кадре и он, и родитель: середина между ними
+  const a = s.murdo, b = key === "added" ? s.added : s.murdo;
+  const cx = (a.x + b.x + a.w) / 2, cy = (a.y + b.y + a.h) / 2;
+  const x = map.clientWidth / 2 - cx * k;
+  const y = map.clientHeight / 2 - cy * k;
   map.querySelector(".canvas").style.transform = `translate(${x}px,${y}px) scale(${k})`;
   // портрет Мурдо в панели — тот же, что на его карточке
   const img = map.querySelector(`.node[data-id="${data.murdo}"] .por`)?.style.getPropertyValue("--img");
   if (img) document.querySelector(".app").style.setProperty("--por-img", img);
-  if (key === "added") map.querySelector(`.node[data-id="${data.added}"]`)?.classList.add("fresh");
+  const fresh = map.querySelector(`.node[data-id="${data.added}"]`);
+  if (fresh) {
+    const img = fresh.querySelector(".por")?.style.getPropertyValue("--img");
+    if (img) document.querySelector(".app").style.setProperty("--new-img", img);
+    if (!(adding() && state.step === "saved")) {
+      fresh.classList.add("fresh");
+      fresh.querySelector(".nm").textContent = "новый сын";
+    } else {
+      fresh.classList.add("sel");
+      map.querySelector(`.node[data-id="${data.murdo}"]`)?.classList.remove("sel");
+    }
+  }
   // сохранённая правка видна и на карточке карты
   if (saved()) {
     const yr = map.querySelector(`.node[data-id="${data.murdo}"] .yr`);
     if (yr) yr.textContent = "около 1748 — 1851";
   }
-  if (state.part === "add" && (state.kind === "map" || state.kind === "combo")) {
+  if (state.part === "add" && (state.kind === "map" || (state.kind === "combo" && state.step === "view"))) {
     const m = s.murdo;
     const at = (px, py) => ({ left: `${x + px * k - 11}px`, top: `${y + py * k - 11}px` });
     for (const [px, py, on] of [[m.x - 26, m.y + m.h / 2], [m.x + m.w / 2, m.y + m.h + 18, true]]) {
@@ -389,7 +439,6 @@ function place() {
       Object.assign(p.style, at(px, py));
       map.append(p);
     }
-    if (state.kind === "combo") return; // в комбо список не всплывает: форма открыта в панели
     const pop = document.createElement("div");
     pop.className = "pop";
     pop.innerHTML = `<div class="t">ребёнок Мурдо и Аины</div><div class="opt"><span>+ сын</span><i>новый человек</i></div>` +
