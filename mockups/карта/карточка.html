@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Карточка и карта — варианты</title>
+<!-- этап 6: шрифты и стили приложения, карта настоящая — род Монад Кройве из вашей базы -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<link rel="stylesheet" href="../../web/src/styles/fold.css">
+<link rel="stylesheet" href="../../web/src/styles/panel.css">
+<link rel="stylesheet" href="../../web/src/styles/portrait.css">
+<link rel="stylesheet" href="../../web/src/styles/links.css">
+<link rel="stylesheet" href="../../web/src/styles/editor.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 100ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.about { padding: 6px 2px 12px; color: #8a8f98; font-size: 12.5px; max-width: 100ch; line-height: 1.5; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; color: #e6e2d8; }
+.app { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; }
+.body { display: flex; height: 600px; position: relative; }
+.map { position: relative; flex: 1; overflow: hidden; background: var(--bg); }
+.map .canvas { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+.app .side { width: 280px; overflow: auto; }
+
+/* 1 · фамилия второй строкой под именем */
+.node .sn { font: 400 10.5px/1.25 'Golos Text', sans-serif; color: var(--mut); margin-top: 1px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+[data-style=gazeta] .node .sn, [data-style=kabinet] .node .sn { font-size: 10px; }
+[data-style=polotno] .node .sn { font-size: 11px; letter-spacing: .01em; }
+
+/* 2 · продолжатель на карточке в любом виде */
+body.h-mark .node.hr .nm::before { content: '◆'; color: var(--acc); font-size: .62em; vertical-align: .22em; margin-right: 4px; }
+body.h-name .node.hr .nm { color: var(--acc); }
+body.h-name .node.hr .nm::after { content: ''; display: block; width: 18px; height: 1.5px; background: var(--acc); margin: 2px auto 0; opacity: .8; }
+[data-style=gazeta] body.h-name .node.hr .nm::after, body.h-name[data-style=gazeta] .node.hr .nm::after,
+body.h-name[data-style=kabinet] .node.hr .nm::after, body.h-name[data-style=polotno] .node.hr .nm::after { margin: 2px 0 0; }
+/* выжжен: маска и на портрет */
+body.m-ash .node.burnt .por { filter: grayscale(1) brightness(.42) contrast(1.15); }
+body.m-ash .node.burnt .por::after { content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(circle at 50% 55%, transparent 35%, rgba(60,12,6,.75) 100%); }
+body.m-cross .node.burnt .por::after { content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: linear-gradient(to top right, transparent calc(50% - 1px), #c9564a calc(50% - 1px), #c9564a calc(50% + 1px), transparent calc(50% + 1px)),
+              rgba(0,0,0,.35); }
+.node .por { position: relative; }
+
+/* 3 · ствол главной ветви в обычном виде — тоньше, чем в «главной ветви» */
+.canvas svg.line.soft path { stroke-width: 1.6; opacity: .75; }
+.legend { position: absolute; left: 14px; bottom: 14px; z-index: 6; max-width: 300px; background: var(--panelbg); color: var(--fg);
+  border: 1px solid var(--edge); border-radius: 5px; padding: 9px 12px 10px; font: 400 12px/1.45 'Golos Text', sans-serif;
+  box-shadow: 0 6px 20px rgba(0,0,0,.28); }
+.legend b { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.legend i { display: inline-block; width: 26px; height: 0; border-top: 2px solid var(--acc); }
+.legend .dia { width: auto; border: 0; color: var(--acc); font-style: normal; font-size: 10px; }
+.legend small { display: block; color: var(--mut); font-size: 11px; margin-top: 3px; }
+.legend button { border: 0; background: none; color: var(--acc); font: 500 11px 'Golos Text', sans-serif; padding: 0; margin-top: 4px; cursor: pointer; }
+
+/* 4 · фон и упор протяжки */
+/* «сейчас» — как в приложении: узор стиля только на холсте древа, окно — ровный цвет */
+.guide { position: absolute; top: 0; bottom: 0; border-left: 1.5px dashed var(--acc); z-index: 5; }
+.guideLbl { position: absolute; top: 10px; transform: translateX(8px); z-index: 5; font: 500 11px 'Golos Text', sans-serif; color: var(--acc);
+  background: var(--panelbg); padding: 3px 6px; border-radius: 3px; border: 1px solid var(--edge); }
+
+/* 5 · ветки */
+.bar .sw .on { background: #e9e4d8; color: #14161a; }
+
+/* 6 · родня кандидата в очереди */
+.qk { display: inline-block; font: 500 10px/1 'Golos Text', sans-serif; padding: 2px 6px; border-radius: 8px; margin-left: 4px;
+  vertical-align: 1px; border: 1px solid var(--acc); color: var(--acc); white-space: nowrap; }
+.qk.act { cursor: pointer; background: transparent; }
+.qk.act.hot, .qk.act:hover { background: var(--acc); color: var(--bg); }
+.qk.link { border-style: solid; background: color-mix(in srgb, var(--acc) 14%, transparent); }
+.qjump { color: var(--acc); font: 500 11px 'Golos Text', sans-serif; margin-left: 4px; white-space: nowrap; text-decoration: underline;
+  text-decoration-style: dotted; text-underline-offset: 2px; }
+.pane6 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; background: var(--panelbg); color: var(--fg); width: 100%; }
+.pane6 .rCard { border: 1px solid var(--edge); border-radius: 5px; padding: 10px 12px; }
+.pane6 .who b { font: 400 18px 'Cormorant Garamond', serif; display: block; }
+.pane6 .who span { color: var(--mut); font-size: 11px; }
+.pane6 .kinText { font-size: 12.5px; line-height: 1.9; margin-top: 8px; }
+.pane6 .kinText i { color: var(--mut); font-style: normal; }
+.pane6 .miniNote { grid-column: 1 / -1; color: var(--mut); font-size: 11.5px; }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+<h1>Карточка, главная ветвь и карта: шесть пунктов этапа 6</h1>
+<p class="lede">Карта настоящая — род Монад Кройве из вашей базы: основатель Дункан, семь продолжателей главной ветви (Хэмиш → Юэн → Кайл → Иэйн → Роберт → Малькольм → Кеннет),
+выжженный Лаклан, 24 жены с фамилией по мужу. Каждый пункт — в пяти стилях и обеих темах.</p>
+<div class="ctl">
+  <div class="grp"><b>Пункт</b><div class="sw" data-set="part">
+    <button data-v="sur" aria-pressed="true">1 · фамилия</button><button data-v="mark">2 · продолжатель и выжжен</button>
+    <button data-v="line">3 · главная ветвь</button><button data-v="edge">4 · фон и протяжка</button>
+    <button data-v="fold">5 · ветки</button><button data-v="queue">6 · проверка связок</button>
+  </div></div>
+  <div class="grp"><b>Вариант</b><div class="sw" data-set="kind" id="kinds"></div></div>
+  <div class="grp" id="stepGrp"><b id="stepName">Шаг</b><div class="sw" data-set="step" id="steps"></div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="app" id="out"></div>
+<script>
+const PARTS = {
+  sur: {
+    stepName: "Фамилии", steps: [["off", "выкл."], ["maiden", "девичья"], ["married", "после брака"]],
+    kinds: [
+      ["all", "Ф1 · у всех", "<b>Ф1 · фамилия второй строкой у всех.</b> Переключатель в шапке «Фамилии: выкл. · девичья · после брака». «Девичья» — фамилия при рождении: у жён своя (Изабелла — Стюарт), у кровных — родовая. «После брака» — фамилия по мужу, если записана, иначе та же; так же покажется и мужчина, взявший фамилию жены. Строка мелкая, под именем. Минус: у кровных родовая фамилия повторяется на каждой карточке."],
+      ["other", "Ф2 · только не родовая", "<b>Ф2 · фамилия, только если она не родовая.</b> Тот же переключатель. Родовая фамилия («Монад Кройве») на карточке не пишется — это и так карта рода; видны только чужие: девичьи фамилии жён и пришлых мужей. В режиме «после брака» жёны становятся «Монад Кройве» — и строка у них пропадает, зато остаётся у тех, кто сохранил свою. Карта заметно тише."],
+    ],
+  },
+  mark: {
+    stepName: "Портрет выжженного", steps: [["ash", "тень"], ["cross", "перечёркнут"]],
+    kinds: [
+      ["dia", "Н1 · ромб у имени", "<b>Н1 · продолжатель — ромб перед именем, в любом виде карты.</b> Маленький знак цвета акцента: Хэмиш, Юэн и другие продолжатели отмечены и в обычном виде, а не только в «главной ветви». Выжженный Лаклан — прежняя плашка стиля, плюс маска на портрете (шаг «Портрет выжженного»): «тень» — портрет обесцвечен и затемнён с опалённым краем, «перечёркнут» — затемнён и перечёркнут красной чертой."],
+      ["name", "Н2 · имя цветом", "<b>Н2 · продолжатель — имя цветом акцента и короткая черта под ним.</b> Как сейчас в «главной ветви», но всегда. Знак не добавляет символов, зато цветное имя спорит с выбранным и с линией рода. Маска выжженного — те же два варианта."],
+    ],
+  },
+  line: {
+    stepName: "Вид древа", steps: [["std", "стандарт"], ["main", "главная ветвь"]],
+    kinds: [
+      ["trunk", "Г1 · ствол и в стандарте", "<b>Г1 · главная ветвь видна всегда.</b> Переключатель «Линия» становится «Вид древа: стандарт · главная ветвь». В стандарте ствол от Дункана через продолжателей идёт тонкой линией акцента, раскладка обычная; в «главной ветви» — как сейчас: пары встают над продолжателями, ствол прямой и толще. Внизу слева легенда — что это за линия; её можно свернуть. Продолжатели отмечены знаком из пункта 2."],
+      ["marks", "Г2 · только знаки", "<b>Г2 · в стандарте — только знаки продолжателей, ствол — в «главной ветви».</b> Линия в стандарте не рисуется, карта спокойнее; легенда объясняет ромб. Переключатель тот же."],
+    ],
+  },
+  edge: {
+    stepName: "Показать", steps: [["now", "сейчас"], ["fill", "фон до краёв"], ["stop", "упор протяжки"]],
+    kinds: [
+      ["half", "З1 · край до середины", "<b>З1 · фон стиля заливает всё окно, протяжка упирается, когда край древа доходит до середины экрана.</b> Сейчас узор стиля (узелки гобелена, полосы кабинета; пыльца викторианского — так же, в макете её нет) лежит только под древом, вокруг — ровный цвет: древо выглядит вырезанным и вставленным. Шаг «фон до краёв» — узор на всё окно, в масштабе древа, без шва. Упор: древо можно отвести в сторону, но крайняя карточка не уходит дальше середины экрана — древо не теряется в пустоте. Линия на шаге «упор» — где древо остановится."],
+      ["edge", "З2 · край до края", "<b>З2 · фон тот же, упор мягче: крайняя карточка остаётся в кадре с полем 60 пикселей.</b> Больше свободы рассматривать край древа, но экран может почти целиком опустеть."],
+    ],
+  },
+  fold: {
+    stepName: "Шаг", steps: [["all", "1 · свернуть все"], ["one", "2 · щелчок по стопке"], ["open", "3 · развернуть все"]],
+    kinds: [
+      ["gen", "по одному поколению", "<b>Свернуть все, развернуть все, разворот по поколению.</b> В шапке, в группе «Вид», — «Ветки: свернуть все · развернуть все». «Свернуть все» оставляет основателя и одну стопку. Щелчок по стопке открывает одно поколение: дети Дункана встают на место, а их собственные ветки — снова стопками со счётом. Так древо раскрывается шаг за шагом. «Развернуть все» — всё сразу, как сейчас."],
+    ],
+  },
+  queue: {
+    stepName: "Пара", steps: [["kormak", "Кормак, 1934"], ["niall", "Ниалл, 1683"]],
+    kinds: [
+      ["active", "М1 · активная пометка", "<b>М1 · пометка «ждёт проверки» — кнопка.</b> Та же пометка у имени родственника, который сам ждёт проверки, но на неё можно нажать: откроется проверка этого человека (у Кормака — проверка его матери Ниав). Решили по ней — вернётесь к Кормаку кнопкой «← назад к Кормаку» над карточками, а пометка станет «связан · род» или исчезнет, если это разные люди. У первой пометки в примере показано, как она выглядит под курсором."],
+      ["chip", "М1 · пометка", "<b>М1 · у родни в проверке — пометка.</b> В карточках пары (и в сравнении в полной очереди) рядом с именем родственника, который сам ждёт проверки, — пометка «ждёт проверки»; уже связанный — «связан · род». Пары настоящие, из вашей очереди: у Кормака Уинтерхоупа мать Ниав О'Дувейн сама в очереди, у Ниалла — жена Мор Кинкейд и сын Эоган."],
+      ["jump", "М2 · переход к паре", "<b>М2 · пометка — ссылка на ту пару.</b> Вместо слов «ждёт проверки» — «пара 4 →»: щелчок открывает проверку Ниав, а решение по ней подсказывает решение по Кормаку. Связанный — «связан →», ведёт в другой род."],
+    ],
+  },
+};
+const state = { part: "sur", kind: "all", step: "maiden", style: "gobelen", theme: "dark" };
+let data;
+const scene = (key) => data.scenes[`${state.style}|${key}`];
+const P = (id) => data.persons[id];
+const CENTRE = { sur: 120, mark: 145, line: 128, edge: null, fold: null };
+
+function barHtml(extra = "") {
+  return `<div class="bar"><div class="grp"><b>Род</b><div class="sw"><button>Гленн Уриск · 38</button><button aria-pressed="true">Монад Кройве · 84</button></div></div>
+    <div class="grp"><b>Режим</b><div class="sw"><button aria-pressed="true">Просмотр</button><button>Правка</button></div></div>${extra}</div>`;
+}
+function surnameOf(p) {
+  if (state.step === "off" || p.stub) return null;
+  const s = state.step === "married" ? (p.married || p.surname) : p.surname;
+  if (!s) return null;
+  if (state.kind === "other" && s === data.clan) return null;
+  return s;
+}
+function mapHtml(key, cls = "") {
+  const s = scene(key);
+  let cards = s.cards;
+  const soft = state.part === "line" && state.step === "std" && state.kind === "trunk";
+  const trunk = (state.part === "line" && (state.step === "main" || soft)) ? s.trunk : "";
+  return `<div class="map ${cls}"><div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>` +
+    (trunk ? `<svg class="line main${soft ? " soft" : ""}" width="${s.width}" height="${s.height}"><path d="${trunk}"/></svg>` : "") +
+    `${cards}${s.folds}</div></div>`;
+}
+function draw() {
+  const part = PARTS[state.part];
+  if (!part.kinds.some(([k]) => k === state.kind)) state.kind = part.kinds[0][0];
+  if (!part.steps.some(([k]) => k === state.step)) state.step = part.steps[state.part === "sur" ? 1 : 0][0];
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  // знак продолжателя и маска — из пункта 2; в пункте 3 знак Н1
+  const heirKind = state.part === "mark" ? state.kind : "dia";
+  document.body.className = ["mark", "line"].includes(state.part) ? `h-${heirKind === "dia" ? "mark" : "name"} m-${state.part === "mark" ? state.step : "ash"}` : "";
+  document.getElementById("kinds").innerHTML = part.kinds.map(([k, n]) => `<button data-v="${k}"${k === state.kind ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
+  document.getElementById("steps").innerHTML = part.steps.map(([k, n]) => `<button data-v="${k}"${k === state.step ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
+  document.getElementById("stepName").textContent = part.stepName;
+  document.getElementById("about").innerHTML = part.kinds.find(([k]) => k === state.kind)[2];
+  document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.querySelectorAll("button")
+    .forEach((b) => b.setAttribute("aria-pressed", String(state[sw.dataset.set] === b.dataset.v))));
+
+  const out = document.getElementById("out");
+  if (state.part === "queue") return drawQueue(out);
+  let key = "base", bar = "", cls = "";
+  if (state.part === "sur") bar = `<div class="grp"><b>Фамилии</b><div class="sw">${PARTS.sur.steps.map(([k, n]) => `<button${k === state.step ? ' aria-pressed="true"' : ""}>${n}</button>`).join("")}</div></div>`;
+  if (state.part === "line") {
+    key = state.step === "main" ? "main" : state.kind === "trunk" ? "trunk" : "base";
+    bar = `<div class="grp"><b>Вид древа</b><div class="sw"><button${state.step === "std" ? ' aria-pressed="true"' : ""}>стандарт</button><button${state.step === "main" ? ' aria-pressed="true"' : ""}>главная ветвь</button></div></div>`;
+  }
+  if (state.part === "fold") {
+    key = { all: "fold0", one: "fold1", open: "base" }[state.step];
+    bar = `<div class="grp"><b>Вид</b><div class="sw"><button>−</button><button>${state.step === "all" ? 100 : state.step === "one" ? 75 : 18}%</button><button>+</button></div><div class="sw"><button>Целиком</button><button>К выбранному</button></div></div>` +
+      `<div class="grp"><b>Ветки</b><div class="sw"><button${state.step === "all" ? ' aria-pressed="true"' : ""}>свернуть все</button><button${state.step === "open" ? ' aria-pressed="true"' : ""}>развернуть все</button></div></div>`;
+  }
+  if (state.part === "edge") cls = state.step === "now" ? "" : "fill";
+  out.innerHTML = barHtml(bar) + `<div class="body">${mapHtml(key, cls)}<aside class="side"><div class="empty">никто не выбран</div></aside></div>`;
+  place(key);
+}
+
+function place(key) {
+  const map = document.querySelector(".map");
+  const canvas = map.querySelector(".canvas");
+  const s = scene(key);
+  const W = map.clientWidth, H = map.clientHeight;
+  // фамилии, знаки продолжателей
+  for (const node of canvas.querySelectorAll(".node")) {
+    const p = P(node.dataset.id);
+    if (!p) continue;
+    if (state.part === "sur") {
+      const sn = surnameOf(p);
+      if (sn) node.querySelector(".nm")?.insertAdjacentHTML("afterend", `<div class="sn">${sn}</div>`);
+    }
+    const marks = state.part === "mark" || (state.part === "line" && !(state.step === "main"));
+    if (marks && p.heir) node.classList.add("hr");
+  }
+  let k = 0.8, cx, cy;
+  if (state.part === "edge" || state.part === "fold") {
+    k = state.part === "fold" ? 0.35 : 0.3;
+    if (state.part === "fold" && state.step === "open") k = 0.14;
+    if (state.part === "fold" && state.step === "all") k = 0.8;
+    if (state.part === "fold" && state.step === "one") k = 0.6;
+    const d = s.at[data.ids.duncan];
+    cx = state.part === "fold" && state.step !== "open" ? d[0] + s.w / 2 : state.part === "edge" ? 250 : s.width / 2;
+    cy = state.part === "fold" && state.step !== "open" ? d[1] + (state.step === "all" ? 120 : 260) : s.height / 2;
+    if (state.part === "edge" && state.step === "stop") {
+      // древо отведено вправо до упора: левый край — у середины (З1) или у края с полем (З2)
+      const x = state.kind === "half" ? W / 2 : W - 60;
+      canvas.style.transform = `translate(${x}px,${H / 2 - s.height * k / 2}px) scale(${k})`;
+      extend(map, canvas, x, H / 2 - s.height * k / 2, k);
+      map.insertAdjacentHTML("beforeend", `<div class="guide" style="left:${x}px"></div><div class="guideLbl" style="left:${x}px">${state.kind === "half" ? "дальше не тянется: край древа — у середины экрана" : "дальше не тянется: край древа — в 60 px от края"}</div>`);
+      return;
+    }
+  } else {
+    const a = s.at[CENTRE[state.part]];
+    cx = a[0] + s.w / 2; cy = a[1] + s.h / 2;
+  }
+  canvas.style.transform = `translate(${W / 2 - cx * k}px,${H / 2 - cy * k}px) scale(${k})`;
+  if (map.classList.contains("fill")) extend(map, canvas, W / 2 - cx * k, H / 2 - cy * k, k);
+  if (state.part === "line") {
+    const trunk = state.kind === "trunk" || state.step === "main";
+    map.insertAdjacentHTML("beforeend", `<div class="legend"><b>${trunk ? "<i></i>" : '<i class="dia">◆</i>'} главная ветвь рода</b>` +
+      `<small>${trunk ? "От основателя Дункана через продолжателей: 8 поколений, до Кеннета." : "◆ — продолжатель: через него идёт главная ветвь от Дункана."} ` +
+      `${state.step === "main" ? "Пары стоят над продолжателями." : "Раскладка обычная."}</small><button>скрыть легенду</button></div>`);
+  }
+}
+
+// фон до краёв: тот же узор стиля на всё окно, в масштабе и со сдвигом древа — шов не виден
+function extend(map, canvas, x, y, k) {
+  const cs = getComputedStyle(canvas);
+  map.style.backgroundImage = cs.backgroundImage;
+  map.style.backgroundColor = cs.backgroundColor;
+  const size = cs.backgroundSize.split(",").map((part) => part.trim().split(" ").map((v) => v.endsWith("px") ? `${parseFloat(v) * k}px` : v).join(" "));
+  map.style.backgroundSize = size.join(", ");
+  map.style.backgroundPosition = `${x}px ${y}px`;
+  canvas.style.background = "transparent"; // узор один — на окне, двигается и масштабируется с древом
+}
+
+// 6 · карточки пары в проверке: родня, которая сама ждёт проверки или связана
+const PAIRS = {
+  kormak: { title: "Кормак, 1934", back: "Кормаку", n: 5, sides: [
+    { name: "Кормак Уинтерхоуп", clan: "Уинтерхоуп", years: "1934 — 2018", parents: ["Родерик Уинтерхоуп", ["Ниав О'Дувейн", 4]], spouses: [], children: ["Ветвь О'Дувейн"] },
+    { name: "Кормак О'Дувейн", clan: "О'Дувейн", years: "1934 — 2018", parents: ["Фергус О'Дувейн", "Эйнер Кэссиди"], spouses: [], children: ["Гранья О'Дувейн"] }] },
+  niall: { title: "Ниалл, 1683", back: "Ниаллу", n: 1, sides: [
+    { name: "Ниалл Гленн Уриск", clan: "Гленн Уриск", years: "1683 — 1791", parents: [], spouses: [["Мор Кинкейд", 2]], children: ["Тормод Гленн Уриск", ["Эоган Гленн Уриск", 3]] },
+    { name: "Ниалл Гленн Уриск", clan: "Уинтерхоуп", years: "1683 — 1791", parents: [], spouses: [["Мор Кинкейд", 2]], children: ["Ветвь Гленн Уриск", ["Эоган Уинтерхоуп", 3]] }] },
+};
+function drawQueue(out) {
+  const pair = PAIRS[state.step];
+  let hot = 0;
+  const who = (x) => {
+    if (typeof x === "string") return x;
+    const [name, n] = x;
+    if (state.kind === "active") return `${name}<button class="qk act${hot++ === 0 ? " hot" : ""}" title="Открыть проверку: ${name}">ждёт проверки →</button>`;
+    return state.kind === "chip" ? `${name}<span class="qk">ждёт проверки</span>` : `${name}<span class="qjump">пара ${n} →</span>`;
+  };
+  const list = (xs) => xs.length ? xs.map(who).join(", ") : "—";
+  const card = (s) => `<div class="rCard"><div class="who"><b>${s.name}</b><span>${s.clan}</span></div>` +
+    `<div class="kinText"><i>годы:</i> ${s.years}<br><i>родители:</i> ${list(s.parents)}<br><i>супруги:</i> ${list(s.spouses)}<br><i>дети:</i> ${list(s.children)}</div></div>`;
+  out.innerHTML = barHtml('<div class="grp"><b>Связки</b><div class="sw"><button aria-pressed="true">Проверить 7</button></div></div>') +
+    `<div class="body" style="height:auto"><div class="pane6"><div class="miniNote">связка · проверка · ${pair.n} из 7 — <b style="color:var(--fg)">${pair.title}</b>. ` +
+    `Мини-карты пары остаются как есть, меняются строки родни под ними.</div>${pair.sides.map(card).join("")}` +
+    `<div class="miniNote">${state.kind === "active" ? "После перехода над карточками — кнопка «← назад к " + pair.back + "». Связанный родственник — такая же кнопка: " + '<button class="qk act link">связан · О&#39;Дувейн →</button>' + ", ведёт к нему в другой род; в вашей базе связок пока нет." : state.kind === "chip" ? "Связанный родственник помечается так: " + '<span class="qk link">связан · О\'Дувейн</span> — в вашей базе связок пока нет, поэтому в парах его нет.' : "Связанный — «связан →», ведёт к нему в другой род; в вашей базе связок пока нет."}</div></div></div>`;
+}
+
+document.querySelector(".ctl").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); const sw = b?.closest(".sw[data-set]"); if (!sw) return;
+  state[sw.dataset.set] = b.dataset.v;
+  draw();
+});
+fetch("карточка.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+</script>
+</body>
+</html>
