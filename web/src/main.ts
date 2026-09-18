@@ -12,11 +12,15 @@ import "./styles/panel.css";
 import "./styles/upload.css";
 import "./styles/portrait.css";
 import "./styles/tags.css";
+import "./styles/links.css";
 
-import type { ClanSummary, ClanTree } from "./api/types";
+import type { ClanSummary, ClanTree, LinkPerson, TreePerson } from "./api/types";
 import { NO_MARKS } from "./canvas/cards";
 import { TreeCanvas } from "./canvas/canvas";
 import { demoHeirs, demoMarks, demoTags } from "./demo";
+import { LinkNav } from "./links/nav";
+import { ManualLink } from "./links/manual";
+import { LinkReview } from "./links/review";
 import { PersonPanel } from "./panel/panel";
 import { SearchBox } from "./panel/search";
 import { UploadFlow } from "./upload/upload";
@@ -92,7 +96,88 @@ async function start(root: HTMLElement): Promise<void> {
 
   const canvas = new TreeCanvas(stage);
   let tree: ClanTree | null = null;
+  let currentClan = clans[0]!.id;
+  const clanName = (id: number) => clans.find((c) => c.id === id)?.name ?? "";
+  const fullName = (p: TreePerson) => [p.given, p.surname].filter(Boolean).join(" ") || "без имени";
+  const brief = (p: TreePerson): LinkPerson => ({
+    id: p.id, clan_id: currentClan, clan_name: clanName(currentClan), name: fullName(p),
+    born: p.birth?.year ?? null, died: p.death?.year ?? null,
+  });
 
+  // связки: сноска на карте и строка в панели ведут в другой род, лента над картой — обратно
+  const nav = new LinkNav(stage, {
+    goTo: async (clanId, personId) => {
+      drawClanTabs(clanId);
+      await loadClan(clanId);
+      arrive(personId);
+    },
+    changed: () => void refreshLinks(),
+  });
+  const refreshLinks = async () => {
+    canvas.setLinks(await nav.load(currentClan));
+    if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
+    void countQueue();
+  };
+  const manual = new ManualLink(stage, { linked: () => void refreshLinks() });
+
+  // очередь связок: пары с одинаковым именем и годом рождения ждут решения человека
+  const trees = new Map<number, Promise<ClanTree>>();
+  const treeOf = (clanId: number) => {
+    if (!trees.has(clanId)) trees.set(clanId, getJson<ClanTree>(`/api/clans/${clanId}/tree`));
+    return trees.get(clanId)!;
+  };
+  const review = new LinkReview(stage, {
+    tree: treeOf,
+    show: async (clanId, personId) => {
+      if (clanId !== currentClan) {
+        drawClanTabs(clanId);
+        await loadClan(clanId);
+      }
+      arrive(personId);
+    },
+    style: () => canvas.state.style,
+    portraits: () => canvas.portraits,
+    opened: () => {
+      panel.element.hidden = true;
+    },
+    closed: () => {
+      panel.element.hidden = false;
+      if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
+    },
+    decided: () => void refreshLinks(),
+  });
+  const queueBtn = document.createElement("button");
+  queueBtn.className = "queueBtn";
+  queueBtn.title = "Проверить пары с одинаковым именем и годом рождения";
+  queueBtn.addEventListener("click", () => void review.open());
+  const queueGroup = document.createElement("div");
+  queueGroup.className = "grp";
+  queueGroup.innerHTML = '<b>Связки</b><div class="sw"></div>';
+  queueGroup.querySelector(".sw")!.append(queueBtn);
+  queueGroup.hidden = true;
+  const countQueue = async () => {
+    const count = await review.count();
+    queueGroup.hidden = count === 0 && !review.reviewing;
+    queueBtn.innerHTML = count ? `Проверить<b>${count}</b>` : "Очередь пуста";
+  };
+  const openLink = (personId: number, index = 0) => {
+    const link = nav.linksOf(personId)[index];
+    const person = tree?.persons.find((p) => p.id === personId);
+    if (!link || !person) return;
+    void nav.open(link, { clanId: currentClan, clanName: clanName(currentClan), personName: fullName(person) });
+  };
+  // сноска на карте: одна связка — сразу туда, несколько — выбрать человека, строки связок в панели
+  canvas.onLinkOpen = (personId) => {
+    if (nav.linksOf(personId).length > 1) focus(personId);
+    else openLink(personId);
+  };
+
+  // прийти к человеку из другого рода: карта открылась целиком, её надо приблизить, иначе его не найти
+  const arrive = (id: number) => {
+    canvas.reveal(id);
+    canvas.select(id);
+    canvas.centreOnPerson(id);
+  };
   const focus = (id: number) => {
     canvas.reveal(id);
     canvas.select(id);
@@ -114,6 +199,14 @@ async function start(root: HTMLElement): Promise<void> {
     },
     toggleFold: (familyId) => canvas.toggleFold(familyId),
     isFolded: (familyId) => canvas.folded.has(familyId),
+    linksOf: (id) => nav.linksOf(id),
+    isReturn: (link) => nav.isReturn(link),
+    openLink: (link) => openLink(link.person_id, nav.linksOf(link.person_id).indexOf(link)),
+    unlink: (link) => void nav.unlink(link),
+    linkWith: (id) => {
+      const person = tree?.persons.find((p) => p.id === id);
+      if (person) manual.open(brief(person));
+    },
   });
   // панель показывает, свёрнута ли ветка, — перерисовать после щелчка по стопке на карте
   canvas.onFoldChange = () => {
@@ -126,14 +219,15 @@ async function start(root: HTMLElement): Promise<void> {
   };
   const search = new SearchBox(focus);
 
-  let currentClan = clans[0]!.id;
   let beforeReview = currentClan; // куда вернуться, если разбор отменён
   const loadClan = async (id: number) => {
     currentClan = id;
-    tree = await getJson<ClanTree>(`/api/clans/${id}/tree`);
+    const [loaded, links] = await Promise.all([getJson<ClanTree>(`/api/clans/${id}/tree`), nav.load(id)]);
+    tree = loaded;
     search.setTree(tree);
     const tags = demoTags(tree);
     const heirs = demoHeirs(tree);
+    canvas.links = links;
     canvas.setTree(tree, demoMarks(tree), new Map(), tags, heirs);
     lineSwitch.hidden = !heirs.size;
     drawTagFilter(tags);
@@ -142,9 +236,11 @@ async function start(root: HTMLElement): Promise<void> {
 
   const upload = new UploadFlow(stage, {
     created: async (clan) => {
+      trees.clear();
       clans = await getJson<ClanSummary[]>("/api/clans");
       drawClanTabs(clan.id);
       await loadClan(clan.id);
+      void countQueue();
     },
     review: (preview, marks) => {
       beforeReview = currentClan;
@@ -165,6 +261,8 @@ async function start(root: HTMLElement): Promise<void> {
       if (report) {
         stat.textContent += ` · перезалито: добавлено ${report.added}, изменено ${report.changed}, удалено ${report.deleted}`;
       }
+      trees.clear();
+      void countQueue();
     },
     focus: (id) => canvas.centreOnPerson(id),
   });
@@ -266,6 +364,7 @@ async function start(root: HTMLElement): Promise<void> {
   portraitLabel.innerHTML = '<input type="checkbox" checked> портреты';
   portraitLabel.querySelector("input")!.addEventListener("change", (e) => {
     canvas.showPortraits((e.target as HTMLInputElement).checked);
+    review.refresh();
     if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
   });
 
@@ -292,6 +391,7 @@ async function start(root: HTMLElement): Promise<void> {
         upload.cancel(false);
         panel.element.hidden = false;
       }
+      nav.forget(); // сменил род сам — дорога назад по связке больше не нужна
       void loadClan(id);
     });
     const add = document.createElement("button");
@@ -305,10 +405,12 @@ async function start(root: HTMLElement): Promise<void> {
 
   bar.append(
     clanTabs,
+    queueGroup,
     search.element,
     switcher("Стиль", STYLES, "gobelen", (style) => {
       document.body.dataset.style = style;
       canvas.update({ style });
+      review.refresh();
     }),
     switcher("Тема", [["dark", "Тёмная"], ["light", "Светлая"]], "dark", (theme) => {
       document.body.dataset.theme = theme;
@@ -326,6 +428,7 @@ async function start(root: HTMLElement): Promise<void> {
   );
 
   await loadClan(clans[0]!.id);
+  void countQueue();
 }
 
 const root = document.getElementById("app");

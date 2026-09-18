@@ -1,6 +1,6 @@
 // Панель выбранного человека справа: сведения, родня, браки, заметки, место среди братьев.
 
-import type { ClanTree, PersonDetails, PersonEvent, TreePerson } from "../api/types";
+import type { ClanLink, ClanTree, PersonDetails, PersonEvent, TreePerson } from "../api/types";
 import { cardName, escapeHtml, formatDate, lifeYears } from "../format";
 import { silhouette } from "../canvas/portrait";
 import { TAG_COLORS, type Tag } from "../canvas/tags";
@@ -17,6 +17,12 @@ export interface PanelActions {
   // портрет человека: снимок, заглушка или ничего, когда портреты выключены
   portrait: (person: TreePerson) => string | null;
   tagsOf: (personId: number) => Tag[];
+  // связки с другими родами: переход, возврат, снятие и ручная связка
+  linksOf: (personId: number) => readonly ClanLink[];
+  isReturn: (link: ClanLink) => boolean; // по этой связке человек сюда и пришёл
+  openLink: (link: ClanLink) => void;
+  unlink: (link: ClanLink) => void;
+  linkWith: (personId: number) => void;
 }
 
 const EVENT_LABELS: Record<string, string> = {
@@ -37,9 +43,14 @@ function eventText(event: PersonEvent): string {
   return [event.value, formatDate(event.date), event.place].filter(Boolean).map((t) => escapeHtml(t!)).join(", ");
 }
 
+const lifeSpan = (born: number | null, died: number | null) =>
+  born == null && died == null ? "годы неизвестны" : `${born ?? "?"} — ${died ?? "…"}`;
+
 export class PersonPanel {
   readonly element: HTMLElement;
   private request = 0;
+  private last: { tree: ClanTree; person: TreePerson; details: PersonDetails | null } | null = null;
+  private confirming: number | null = null; // связка, которую просят снять: второе нажатие подтверждает
 
   constructor(
     host: HTMLElement,
@@ -56,12 +67,40 @@ export class PersonPanel {
       if (target.dataset.act === "left") this.actions.nudge(id, -1);
       if (target.dataset.act === "right") this.actions.nudge(id, 1);
       if (target.dataset.act === "fold") this.actions.toggleFold(Number(target.dataset.family));
+      const link = this.linkFor(Number(target.dataset.link));
+      if (target.dataset.act === "link-go" && link) this.actions.openLink(link);
+      if (target.dataset.act === "link-with") this.actions.linkWith(Number(target.dataset.person));
+      if (target.dataset.act === "unlink" && link) {
+        if (this.confirming === link.link_id) {
+          this.confirming = null;
+          this.actions.unlink(link);
+        } else {
+          this.confirming = link.link_id;
+          this.redraw();
+        }
+      }
+      if (target.dataset.act === "unlink-no") {
+        this.confirming = null;
+        this.redraw();
+      }
     });
     host.append(this.element);
     this.clear();
   }
 
+  private linkFor(id: number): ClanLink | undefined {
+    if (!this.last || !id) return undefined;
+    return this.actions.linksOf(this.last.person.id).find((l) => l.link_id === id);
+  }
+
+  // перерисовать то же самое: после снятия связки или смены подтверждения
+  redraw(): void {
+    if (this.last) this.render(this.last.tree, this.last.person, this.last.details);
+  }
+
   clear(): void {
+    this.last = null;
+    this.confirming = null;
     this.request++;
     this.element.innerHTML = '<div class="empty">никто не выбран</div>';
   }
@@ -69,6 +108,7 @@ export class PersonPanel {
   async show(tree: ClanTree, personId: number): Promise<void> {
     const person = tree.persons.find((p) => p.id === personId);
     if (!person) return this.clear();
+    if (this.last?.person.id !== personId) this.confirming = null;
     const request = ++this.request;
     this.render(tree, person, null); // сразу из дерева, подробности дорисуются
     const response = await fetch(`/api/persons/${personId}`);
@@ -77,6 +117,7 @@ export class PersonPanel {
   }
 
   private render(tree: ClanTree, person: TreePerson, details: PersonDetails | null): void {
+    this.last = { tree, person, details };
     const rel = relativesOf(tree, person.id);
     let h = '<div class="sideIn">';
 
@@ -113,6 +154,8 @@ export class PersonPanel {
       if (!label || !text || ((event.tag === "BIRT" || event.tag === "DEAT") && !event.place)) continue;
       h += row(label, text);
     }
+
+    if (!person.is_branch_stub) h += this.linksHtml(person);
 
     if (rel.marriages.length) {
       h += `<div class="lbl">${rel.marriages.length > 1 ? "Браки" : "Брак"}</div>`;
@@ -157,5 +200,27 @@ export class PersonPanel {
     h += '<div class="actions"><button data-act="centre">В центр</button></div>';
     h += "</div>";
     this.element.innerHTML = h;
+  }
+
+  // «Также в роду»: каждая связка строкой с переходом; по той, что привела сюда, — возврат
+  private linksHtml(person: TreePerson): string {
+    const links = this.actions.linksOf(person.id);
+    let h = links.length ? '<div class="lbl">Также в роду</div>' : '<div class="lbl">Связки</div>';
+    for (const link of links) {
+      const back = this.actions.isReturn(link);
+      const clan = escapeHtml(link.other.clan_name);
+      const sure = this.confirming === link.link_id;
+      h +=
+        `<div class="twin"><b>${clan}</b><small>${escapeHtml(link.other.name)} · ${lifeSpan(link.other.born, link.other.died)}</small>` +
+        `<div class="acts">` +
+        (sure
+          ? `<button data-act="unlink" data-link="${link.link_id}">Снять связку</button>` +
+            `<button data-act="unlink-no">Оставить</button>`
+          : `<button class="go" data-act="link-go" data-link="${link.link_id}">${back ? `← Вернуться в «${clan}»` : `Перейти в «${clan}»`}</button>` +
+            `<button data-act="unlink" data-link="${link.link_id}" title="Снять связку: люди останутся в своих родах">Снять</button>`) +
+        `</div></div>`;
+    }
+    h += `<button class="linkBtn" data-act="link-with" data-person="${person.id}">Связать с человеком из другого рода…</button>`;
+    return h;
   }
 }

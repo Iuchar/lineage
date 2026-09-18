@@ -1,6 +1,6 @@
 // Карточки людей в HTML. Оформление целиком в CSS стиля, здесь только разметка и состояния.
 
-import type { ClanTree } from "../api/types";
+import type { ClanLink, ClanTree } from "../api/types";
 import { cardName, escapeHtml, lifeYears } from "../format";
 import { silhouette } from "./portrait";
 import { MAX_ON_CARD, NO_TAGS, TAG_COLORS, type TagSet } from "./tags";
@@ -13,10 +13,9 @@ import { LINK_STYLES, ORDINAL_WORDS, ROMAN } from "./styles";
 export interface PersonMarks {
   burnt: ReadonlySet<number>; // выжжен из рода
   hidden: ReadonlySet<number>; // скрыт от зрителей — редактор видит с пометкой
-  linked: ReadonlySet<number>; // также в другом роду
 }
 
-export const NO_MARKS: PersonMarks = { burnt: new Set(), hidden: new Set(), linked: new Set() };
+export const NO_MARKS: PersonMarks = { burnt: new Set(), hidden: new Set() };
 
 export interface CardExtras {
   portraits: boolean; // портреты включены; снимка нет — рисуется заглушка
@@ -25,6 +24,7 @@ export interface CardExtras {
   filter?: string | null; // выбранная метка: её люди в полную силу, остальные в тени
   heirs?: ReadonlySet<number>; // люди на главной линии рода — имя акцентом
   broken?: number | null; // последний на линии, если детей у него нет: линия пресеклась
+  links?: ReadonlyMap<number, readonly ClanLink[]>; // двойники в других родах — сноска «также в …» под именем
 }
 
 export const NO_EXTRAS: CardExtras = { portraits: false };
@@ -107,9 +107,15 @@ export function drawCards(
       badge = '<span class="badge calm"><i>линия пресеклась</i></span>';
     } else if (marks.hidden.has(person.id)) {
       badge = '<span class="badge calm"><i>скрыт от зрителей</i></span>';
-    } else if (marks.linked.has(person.id)) {
-      badge = '<span class="badge calm"><i>также в другом роду</i></span>';
     }
+    if (badge) classes.push("badged");
+
+    // связка — не плашка, а отсылка набором текста: состояния рисуются заливкой, дверь — только буквами
+    const twins = extras.links?.get(person.id) ?? [];
+    const also = twins.length
+      ? `<span class="also" data-person="${person.id}"><i>также в</i> ${escapeHtml(twins[0]!.other.clan_name)}` +
+        `${twins.length > 1 ? `<b> +${twins.length - 1}</b>` : ""}</span>`
+      : "";
 
     // у газеты метки стоят отдельной строкой под именем, у остальных стилей — своим знаком поверх карточки
     const underName = style === "gazeta" ? tagsHtml : "";
@@ -119,7 +125,7 @@ export function drawCards(
       `<div class="${classes.join(" ")}" data-id="${person.id}" style="left:${point.x}px;top:${point.y}px;width:${layout.cardWidth}px;height:${layout.cardHeight}px">` +
       `<div class="box">${ordLine}<div class="por"${porStyle}></div>` +
       `<div class="nm">${escapeHtml(cardName(person))}${sup}</div>${underName}` +
-      `<div class="yr">${escapeHtml(lifeYears(person))}</div>${badge}${overCard}</div></div>`;
+      `<div class="yr">${escapeHtml(lifeYears(person))}</div>${badge}${also}${overCard}</div></div>`;
   }
   return html;
 }

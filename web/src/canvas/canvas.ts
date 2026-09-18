@@ -1,6 +1,6 @@
 // Холст рода: раскладка → карточки и связи → карта с протяжкой и зумом, линейка поверх.
 
-import type { ClanTree } from "../api/types";
+import type { ClanLink, ClanTree } from "../api/types";
 import { foldsHiding, foldTree } from "../layout/fold";
 import { layoutTree, type LayoutResult } from "../layout/layout";
 import { STYLE_METRICS, type StyleName } from "../layout/metrics";
@@ -48,6 +48,8 @@ export class TreeCanvas {
   photos: ReadonlyMap<number, string> = new Map();
   tags: TagSet = NO_TAGS;
   filter: string | null = null; // выбранная метка — её люди в полную силу, остальные в тени
+  // двойники людей рода в других родах: сноска «также в …» под именем ведёт туда
+  links: ReadonlyMap<number, readonly ClanLink[]> = new Map();
   // отмеченные продолжатели главной линии; поля в данных пока нет, отметки приходят из демо-набора
   heirs: ReadonlySet<number> = new Set();
   // ручной сдвиг среди братьев: id → на сколько мест; живёт до смены рода, в базу не пишется
@@ -59,6 +61,7 @@ export class TreeCanvas {
   onViewChange: (view: View) => void = () => {};
   onSelect: (id: number | null) => void = () => {};
   onFoldChange: () => void = () => {};
+  onLinkOpen: (personId: number) => void = () => {};
 
   constructor(host: HTMLElement) {
     this.viewport = document.createElement("div");
@@ -96,6 +99,12 @@ export class TreeCanvas {
   // сдвинуть человека среди братьев; вид остаётся на месте
   nudge(id: number, direction: -1 | 1): void {
     this.manual.set(id, (this.manual.get(id) ?? 0) + direction);
+    this.keepView(() => this.render());
+  }
+
+  // связки рода пришли или поменялись; вид остаётся на месте
+  setLinks(links: ReadonlyMap<number, readonly ClanLink[]>): void {
+    this.links = links;
     this.keepView(() => this.render());
   }
 
@@ -230,7 +239,7 @@ export class TreeCanvas {
       (trunk ? `<svg class="line main" width="${width}" height="${height}"><path d="${trunk}"/></svg>` : "") +
       drawCards(tree, layout, style, this.selected, this.marks, lit?.persons, this.review,
         { portraits: this.portraits, photos: this.photos, tags: this.tags, filter: this.filter,
-          heirs: line.persons, broken: line.broken && shown ? line.last : null }) +
+          heirs: line.persons, broken: line.broken && shown ? line.last : null, links: this.links }) +
       drawFolds(links.folds, folds, style);
 
     // лампа «Ночного кабинета» ездит за выбранным
@@ -347,6 +356,9 @@ export class TreeCanvas {
       // короткое касание без протяжки — выбор человека
       if (drag && drag.moved <= 4 && e.type === "pointerup") {
         const hits = document.elementsFromPoint(e.clientX, e.clientY);
+        // сноска связки — дверь в другой род, а не выбор человека
+        const also = hits.find((el) => el.closest(".also"))?.closest<HTMLElement>(".also");
+        if (also?.dataset.person) return this.onLinkOpen(Number(also.dataset.person));
         const fold = hits.find((el) => el.closest(".fold"))?.closest<HTMLElement>(".fold");
         if (fold?.dataset.fold) return this.toggleFold(Number(fold.dataset.fold));
         const node = hits.find((el) => el.closest(".node"))?.closest<HTMLElement>(".node");
