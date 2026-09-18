@@ -38,7 +38,9 @@ h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
 
 /* ── правка на месте ── */
 .side .row.ed { cursor: text; }
-.side .row.ed:hover i::after { content: ' ✎'; color: var(--acc); font-style: normal; }
+.side .row.pen i::after { content: ' ✎'; color: var(--acc); font-style: normal; font-size: 12px; opacity: .8; }
+.side h3 .pen { color: var(--acc); font: 400 12px 'Golos Text', sans-serif; opacity: .8; }
+.porHint { font-size: 10.5px; color: var(--acc); margin-top: 6px; opacity: .85; }
 .side .edit { border-bottom: 1px solid var(--acc); padding: 6px 0 8px; }
 .side .edit label { display: block; font-size: 12.5px; margin-bottom: 4px; }
 .side .field, .fld { width: 100%; background: transparent; color: var(--fg); border: 1px solid var(--edge); border-radius: 4px;
@@ -141,6 +143,9 @@ h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
     <button data-v="log">3 · журнал и откат</button><button data-v="date">4 · ввод даты</button>
   </div></div>
   <div class="grp"><b>Вариант</b><div class="sw" data-set="kind" id="kinds"></div></div>
+  <div class="grp" id="stepGrp"><b>Шаг</b><div class="sw" data-set="step">
+    <button data-v="view" aria-pressed="true">1 · до правки</button><button data-v="edit">2 · правлю</button><button data-v="saved">3 · сохранено</button>
+  </div></div>
   <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
     <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
     <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
@@ -154,35 +159,35 @@ h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
 <script>
 const PARTS = {
   edit: [
-    ["inline", "В1 · на месте", "<b>В1 · правка на месте.</b> Панель выглядит как при просмотре, но в режиме «Правка» каждая строка откликается на щелчок: превращается в поле, Enter сохраняет. Сохраняется сразу, внизу карты — «Сохранено · Отменить». Ничего не надо «открывать на правку»; одно действие — одна запись в журнале."],
-    ["form", "В2 · форма", "<b>В2 · форма.</b> «Править» превращает панель в форму со всеми полями человека: имя, фамилии, пол, даты, портрет, метки, заметки со своими уровнями видимости. «Сохранить» пишет всё разом одной записью журнала, «Отмена» возвращает как было. Удаление — внизу, отдельной красной кнопкой."],
-    ["delete", "удаление", "<b>Удаление человека.</b> Не молча: панель показывает, кого это затронет, и даёт выбрать — убрать только его (дети остаются в роду, семья остаётся с одним родителем) или вместе со всей ветвью. Число потомков считается честно, по всем поколениям. Удаление тоже откатывается журналом."],
+    ["inline", "В1 · на месте", "<b>В1 · правка на месте.</b> Сценарий в обоих вариантах один: уточнить год рождения Мурдо — «1748» становится «около 1748». Здесь в режиме «Правка» панель остаётся панелью, у каждой строки, которую можно менять, стоит ✎. Щелчок по строке — поле, Enter — сохранено, сразу одной записью журнала. Два действия. Несколько полей подряд — несколько сохранений, каждое откатывается отдельно."],
+    ["form", "В2 · форма", "<b>В2 · форма.</b> Тот же сценарий: «1748» → «около 1748». Панель в режиме «Правка» не меняется, пока не нажмёшь «Править»; тогда вся панель становится формой с теми же полями, что у В1. Поправил год — «Сохранить». Три действия, зато можно поправить несколько полей и сохранить их разом одной записью журнала, а «Отмена» вернёт всё как было."],
+    ["delete", "удаление", "<b>Удаление человека</b> — общее для обоих вариантов. Не молча: панель показывает, кого это затронет, и даёт выбрать — убрать только его (дети остаются в роду, семья остаётся с одним родителем) или вместе со всей веткой. Числа настоящие. Удаление пишется в журнал и откатывается."],
   ],
   add: [
-    ["panel", "Д1 · из панели", "<b>Д1 · кнопки в панели.</b> В режиме правки у человека раздел «Добавить»: отец, мать, супруг, ребёнок — по кнопке на каждое место; занятые места приглушены. Ребёнок добавляется в конкретный брак. Нажал — в панели короткая форма: новый человек или выбрать из рода. Новая карточка сразу встаёт на карту на своё место, с пунктиром, пока не заполнена."],
-    ["map", "Д2 · плюсы на карте", "<b>Д2 · плюсы на карте.</b> У выбранной в режиме правки карточки появляются кружки «+» там, где встанет новый человек: сверху — родитель (если места есть), сбоку — супруг, снизу — ребёнок. Щелчок раскрывает маленький список прямо у карточки. Нагляднее, но плюсы лезут в соседние карточки на плотной карте."],
-    ["done", "после добавления", "<b>После добавления.</b> Сын Мурдо и Аины уже стоит на карте третьим ребёнком — раскладка пересчитана настоящая. Пунктир вокруг карточки держится, пока у нового человека нет ни даты, ни пола; в панели он сразу открыт на правку."],
+    ["combo", "Д1 + Д2", "<b>Д1 + Д2 · плюсы на карте, форма в панели.</b> У выбранной в режиме правки карточки кружки «+» стоят там, где встанет новый человек: сбоку — супруг, снизу — ребёнок, сверху — родитель, если место свободно. Щелчок по плюсу ничего не раскрывает на карте — в панели загорается та же кнопка раздела «Добавить» и под ней форма. Карта не перекрывается, а начать можно и с карты, и из панели."],
+    ["panel", "Д1 · из панели", "<b>Д1 · кнопки в панели</b> — для сравнения. В режиме правки у человека раздел «Добавить»: отец, мать, супруг, брат или сестра, ребёнок в конкретном браке; занятые места приглушены."],
+    ["map", "Д2 · плюсы на карте", "<b>Д2 · плюсы на карте</b> — для сравнения. Список раскрывается прямо у карточки и перекрывает соседей."],
+    ["done", "после добавления", "<b>После добавления.</b> Сын Мурдо и Аины уже стоит на карте третьим ребёнком — раскладка пересчитана настоящая. Пунктир вокруг карточки держится, пока новый человек не заполнен; в панели он сразу открыт на правку."],
   ],
   log: [
-    ["bar", "Ж1 · в верхней панели", "<b>Ж1 · журнал в верхней панели.</b> Кнопка «↶ Отменить» отменяет последнее действие, рядом «Журнал» с числом правок: выпадающий список последних изменений — что, у кого, когда. Щелчок по строке ведёт к человеку, «откатить до сюда» отменяет всё после этой точки. Отменённое остаётся в списке зачёркнутым и возвращается «Повторить»."],
-    ["side", "Ж2 · вкладка в панели", "<b>Ж2 · вкладка в панели.</b> У панели справа две вкладки: «Человек» и «Журнал». Журнал сгруппирован по дням и шире выпадающего списка, но пока он открыт, человека не видно. Кнопка «↶ Отменить» всё равно стоит наверху — на частую отмену не надо переключаться."],
+    ["bar", "общий журнал", "<b>Общий журнал рода — в верхней панели.</b> «↶ Отменить» отменяет последнее действие в роду, рядом «Журнал · N» — все правки подряд: что, у кого, когда. Откат идёт с конца: «откатить до сюда» отменяет всё после этой точки. Отменённое остаётся зачёркнутым и возвращается «Повторить». Щелчок по строке ведёт к человеку."],
+    ["side", "история человека", "<b>История карточки — вкладка в панели человека.</b> Только правки этого человека, от новых к старым. Здесь не откат по порядку, а «вернуть» у отдельной правки: старое значение ставится обратно новой правкой, и она сама попадает в общий журнал. Так можно вернуть год рождения Мурдо, не трогая того, что сделано позже у других."],
   ],
   date: [
     ["field", "одно поле", "<b>Ввод даты одним полем.</b> Пишешь как говоришь — «около 1750», «до 1800», «между 1740 и 1745», «12 мар 1748» — поле тут же показывает, как поняло: по-русски и что уйдёт в файл. Неточное остаётся неточным, приложение не додумывает. Непонятное не сохраняется и говорит, почему."],
   ],
 };
-const state = { part: "edit", kind: "inline", style: "gobelen", theme: "dark" };
+const state = { part: "edit", kind: "inline", step: "view", style: "gobelen", theme: "dark" };
 let data;
 
 const MURDO = "Мурдо Гленн Уриск";
 const scene = (key) => data.scenes[`${state.style}|${key}`];
 
 function barHtml() {
-  const edit = !(state.part === "edit" && state.kind === "none");
   const log = state.part === "log";
   return `<div class="bar">
     <div class="grp"><b>Род</b><div class="sw"><button aria-pressed="true">Гленн Уриск · 38</button><button>Уинтерхоуп · 62</button></div></div>
-    <div class="grp"><b>Режим</b><div class="sw"><button${edit ? "" : ' aria-pressed="true"'}>Просмотр</button><button${edit ? ' aria-pressed="true"' : ""}>Правка</button></div></div>
+    <div class="grp"><b>Режим</b><div class="sw"><button>Просмотр</button><button aria-pressed="true">Правка</button></div></div>
     <div class="grp"><div class="sw"><button class="undo">↶ Отменить</button>${log && state.kind === "bar" ? '<button aria-pressed="true">Журнал · 6</button>' : "<button>Журнал · 6</button>"}</div></div>
     <div class="grp"><div class="sw"><button>Экспорт .ged</button></div></div>
   </div>`;
@@ -194,17 +199,26 @@ function mapHtml(key) {
     `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div>`;
 }
 
-const head = (extra = "") =>
-  `<div class="por" style="background:var(--por-img) center / cover"></div><h3>${MURDO}</h3><div class="sub">1748 — 1851 · @I1007@</div>${extra}`;
+const saved = () => state.part === "edit" && state.step === "saved";
+const born = () => (saved() ? "около 1748" : "1748");
+const head = (pen = false) =>
+  `<div class="por" style="background:var(--por-img) center / cover"></div>` +
+  `<h3>${MURDO}${pen ? ' <span class="pen">✎</span>' : ""}</h3><div class="sub">${born()} — 1851 · @I1007@</div>`;
 
-function panelView(open) {
-  const row = (k, v, ed = true) => `<div class="row${ed ? " ed" : ""}"><span>${k}</span><i>${v}</i></div>`;
-  let h = `<div class="sideIn">${head()}<div class="lbl">Сведения</div>`;
-  h += row("Пол", "мужской");
-  h += open
-    ? `<div class="edit"><label>Рождение</label><input class="field" value="около 1748"><div class="parse">понял: <b>около 1748 года</b> · в файл: ABT 1748</div></div>`
-    : row("Рождение", "1748");
+// одинаковый набор полей в обоих вариантах: портрет, имя, пол, даты, метки, заметки; родня — ссылками
+function panelView(variant) {
+  const pens = variant === "inline";
+  const row = (k, v, ed = true) => `<div class="row${ed && pens ? " pen" : ""}"><span>${k}</span><i>${v}</i></div>`;
+  let h = '<div class="sideIn">';
+  if (variant === "form") h += '<div class="btns" style="margin:0 0 12px"><button class="pri">Править</button></div>';
+  h += head(pens) + (pens ? '<div class="porHint">✎ портрет: заглушка · заменить</div>' : "");
+  h += '<div class="lbl">Сведения</div>' + row("Пол", "мужской");
+  h += variant === "inline" && state.part === "edit" && state.step === "edit"
+    ? `<div class="edit"><label>Рождение</label><input class="field" value="около 1748"><div class="parse">понял: <b>около 1748 года</b> · в файл: ABT 1748 · Enter — сохранить</div></div>`
+    : row("Рождение", born());
   h += row("Смерть", "1851") + row("Отец", '<span class="kin">Тормод Гленн Уриск</span>', false) + row("Мать", '<span class="kin">Аилса</span>', false);
+  h += '<div class="lbl">Метки</div>' + (pens ? '<span class="chip">+ метка</span>' : '<div class="note" style="color:var(--mut)">нет</div>');
+  h += '<div class="lbl">Заметки</div>' + (pens ? '<span class="chip">+ заметка</span>' : '<div class="note" style="color:var(--mut)">нет</div>');
   h += `<div class="lbl">Брак</div>${row("Жена", '<span class="kin">Аина Драммонд</span>', false)}${row("Дети", '<span class="kin">Дэрмид</span>, <span class="kin">Мойра</span>', false)}`;
   return h + "</div>";
 }
@@ -217,11 +231,10 @@ function panelForm() {
     <div class="two"><div><label class="fl">Фамилия</label><input class="field" value="Гленн Уриск"></div>
       <div><label class="fl">Девичья / по мужу</label><input class="field" placeholder="—"></div></div>
     <label class="fl">Пол</label><div class="seg"><span class="on">мужской</span><span>женский</span><span>неизвестен</span></div>
-    <div class="two"><div><label class="fl">Рождение</label><input class="field" value="1748"><div class="parse">год · <b>1748</b></div></div>
+    <div class="two"><div><label class="fl">Рождение</label><input class="field on" value="около 1748"><div class="parse">около · <b>ABT 1748</b></div></div>
       <div><label class="fl">Смерть</label><input class="field" value="1851"><div class="parse">год · <b>1851</b></div></div></div>
-    <label class="fl">Метки</label><div><span class="chip" style="--c:#b98f22"><i></i>Проверить ×</span><span class="chip">+ метка</span></div>
-    <label class="fl">Заметки</label>
-    <div class="noteEd"><span style="color:var(--mut)">новая заметка…</span><small><span>видно: роду · по умолчанию</span><span class="linkish">изменить</span></small></div>
+    <label class="fl">Метки</label><div><span class="chip">+ метка</span></div>
+    <label class="fl">Заметки</label><div><span class="chip">+ заметка</span></div>
     <div class="btns"><button class="pri">Сохранить</button><button>Отмена</button></div>
     <button class="danger">Удалить человека…</button></div>`;
 }
@@ -280,6 +293,20 @@ function journal(kind) {
   return h;
 }
 
+// история одной карточки: только её правки, у каждой — «вернуть»
+function history() {
+  const E = [
+    ["сегодня", [["12:41", "Добавлен сын — <b>Ангус</b>", "убрать Ангуса"], ["12:39", "Рождение <s>1748</s> → около 1748", "вернуть 1748"]]],
+    ["вчера", [["18:10", "Портрет: <s>нет</s> → заглушка-профиль", "вернуть как было"]]],
+  ];
+  let h = "";
+  for (const [day, items] of E) {
+    h += `<div class="day">${day}</div>`;
+    for (const [t, what, back] of items) h += `<div class="e"><time>${t}</time><span>${what}</span><button>${back}</button></div>`;
+  }
+  return h + '<div class="parse" style="margin-top:10px">«Вернуть» ставит старое значение новой правкой — она тоже попадёт в общий журнал.</div>';
+}
+
 function draw() {
   document.body.dataset.style = state.style;
   document.body.dataset.theme = state.theme;
@@ -288,19 +315,22 @@ function draw() {
   document.getElementById("kinds").innerHTML = variants
     .map(([k, n]) => `<button data-v="${k}"${k === state.kind ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
   document.getElementById("about").innerHTML = variants.find(([k]) => k === state.kind)[2];
+  const stepped = state.part === "edit" && state.kind !== "delete";
+  document.getElementById("stepGrp").hidden = !stepped;
 
-  let map = mapHtml("base"), side = panelView(false), extra = "";
+  let map = mapHtml("base"), side = panelView("inline"), extra = "";
   if (state.part === "edit") {
-    if (state.kind === "inline") { side = panelView(true); extra = '<div class="toast">Сохранено: пол Мурдо — мужской<button>Отменить</button></div>'; }
-    if (state.kind === "form") side = panelForm();
+    if (state.kind === "inline") side = panelView("inline");
+    if (state.kind === "form") side = state.step === "edit" ? panelForm() : panelView("form");
     if (state.kind === "delete") side = panelDelete();
+    if (stepped && state.step === "saved") extra = '<div class="toast">Сохранено: рождение Мурдо — около 1748<button>Отменить</button></div>';
   } else if (state.part === "add") {
-    if (state.kind === "panel") side = panelAdd("form");
+    if (state.kind === "combo" || state.kind === "panel") side = panelAdd("form");
     if (state.kind === "map") side = panelAdd("idle");
     if (state.kind === "done") { map = mapHtml("added"); side = panelFresh(); }
   } else if (state.part === "log") {
-    if (state.kind === "bar") extra = `<div class="drop"><div class="e" style="grid-template-columns:1fr auto"><span>Последние правки · 6</span><button>↷ Повторить</button></div>${journal("undone")}</div>`;
-    if (state.kind === "side") side = `<div class="tabs2"><span>Человек</span><span class="on">Журнал · 6</span></div><div class="sideIn jr">${journal("")}</div>`;
+    if (state.kind === "bar") extra = `<div class="drop"><div class="e" style="grid-template-columns:1fr auto"><span>Все правки рода · 6</span><button>↷ Повторить</button></div>${journal("undone")}</div>`;
+    if (state.kind === "side") side = `<div class="tabs2"><span>Человек</span><span class="on">История · 3</span></div><div class="sideIn jr">${history()}</div>`;
   }
   const body = state.part === "date"
     ? `<div class="body" style="height:auto">${datesHtml()}</div>`
@@ -344,7 +374,12 @@ function place() {
   const img = map.querySelector(`.node[data-id="${data.murdo}"] .por`)?.style.getPropertyValue("--img");
   if (img) document.querySelector(".app").style.setProperty("--por-img", img);
   if (key === "added") map.querySelector(`.node[data-id="${data.added}"]`)?.classList.add("fresh");
-  if (state.part === "add" && state.kind === "map") {
+  // сохранённая правка видна и на карточке карты
+  if (saved()) {
+    const yr = map.querySelector(`.node[data-id="${data.murdo}"] .yr`);
+    if (yr) yr.textContent = "около 1748 — 1851";
+  }
+  if (state.part === "add" && (state.kind === "map" || state.kind === "combo")) {
     const m = s.murdo;
     const at = (px, py) => ({ left: `${x + px * k - 11}px`, top: `${y + py * k - 11}px` });
     for (const [px, py, on] of [[m.x - 26, m.y + m.h / 2], [m.x + m.w / 2, m.y + m.h + 18, true]]) {
@@ -354,6 +389,7 @@ function place() {
       Object.assign(p.style, at(px, py));
       map.append(p);
     }
+    if (state.kind === "combo") return; // в комбо список не всплывает: форма открыта в панели
     const pop = document.createElement("div");
     pop.className = "pop";
     pop.innerHTML = `<div class="t">ребёнок Мурдо и Аины</div><div class="opt"><span>+ сын</span><i>новый человек</i></div>` +
