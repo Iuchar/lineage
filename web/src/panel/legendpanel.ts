@@ -8,9 +8,9 @@ import { escapeHtml } from "../format";
 import type { StyleName } from "../layout/metrics";
 
 const KEY = "rodoslovnye.legend";
-const LINE = 60; // ширина рисованного знака — линии, спуска, ромба
-const COLUMN_MAX = 320; // дальше длинное пояснение переносится, а не растягивает всю сетку
-const COLUMN_MIN = 120;
+const TEXT_MAX = 230; // дальше длинное пояснение переносится, а не растягивает запись
+const TEXT_MIN = 60;
+const SPACE = 9; // просвет между знаком и подписью
 const GAP = 18; // просвет между колонками
 const FRAME = 26; // поля плашки вместе с рамкой
 
@@ -29,6 +29,12 @@ export interface LegendActions {
 
 type Tab = "signs" | "tags";
 
+interface Row {
+  node: HTMLElement;
+  sign: number; // ширина самого знака
+  text: number; // ширина подписи со счётом
+}
+
 export class LegendPanel {
   readonly element: HTMLElement;
   private open = false;
@@ -36,7 +42,7 @@ export class LegendPanel {
   private state: LegendState | null = null;
 
   private readonly host: HTMLElement;
-  private rows: number[] = []; // ширины строк набора, по ним раскладываются колонки
+  private rows: Row[] = []; // замеры записей: по ним и раскладывается легенда
 
   constructor(host: HTMLElement, private readonly actions: LegendActions) {
     this.host = host;
@@ -73,53 +79,63 @@ export class LegendPanel {
     new ResizeObserver(() => this.fit()).observe(host);
   }
 
-  // колонки не равны между собой: каждая шириной со свою самую длинную строку. Берётся
-  // наибольшее число колонок, при котором сумма их ширин ещё помещается в карту, —
-  // поэтому короткие строки («Дети») не занимают место под длинные («щелчок — карточка семьи»)
+  // Всё влезает в строку — каждая запись своей ширины, окошко знака по её собственному знаку.
+  // Не влезает — записи встают колонками: берётся наибольшее число колонок, при котором
+  // раскладка помещается в карту, и внутри колонки знаки равняются по самому широкому из них
   private fit(): void {
     const room = this.host.clientWidth - 28 - FRAME;
     const rows = this.rows;
     if (!rows.length) return;
-    let widths = [Math.max(...rows)];
-    for (let cols = rows.length; cols > 1; cols--) {
-      const take: number[] = [];
+    const width = (r: Row) => r.sign + SPACE + r.text;
+    const oneLine = rows.reduce((sum, r) => sum + width(r), 0) + GAP * (rows.length - 1);
+    if (oneLine <= room) {
+      rows.forEach((r) => this.lay(r, r.sign, width(r)));
+      return this.element.style.setProperty("--body", `${oneLine}px`);
+    }
+    for (let cols = rows.length - 1; cols >= 1; cols--) {
+      const signs: number[] = [];
+      const widths: number[] = [];
       for (let k = 0; k < cols; k++) {
-        let wide = 0;
-        for (let i = k; i < rows.length; i += cols) wide = Math.max(wide, rows[i]!);
-        take.push(wide);
+        let sign = 0;
+        let text = 0;
+        for (let i = k; i < rows.length; i += cols) {
+          sign = Math.max(sign, rows[i]!.sign);
+          text = Math.max(text, rows[i]!.text);
+        }
+        signs.push(sign);
+        widths.push(sign + SPACE + text);
       }
-      const total = take.reduce((sum, w) => sum + w, 0) + GAP * (cols - 1);
-      if (total <= room) {
-        widths = take;
-        break;
+      const total = widths.reduce((sum, w) => sum + w, 0) + GAP * (cols - 1);
+      if (total <= room || cols === 1) {
+        rows.forEach((r, i) => this.lay(r, signs[i % cols]!, widths[i % cols]!));
+        return this.element.style.setProperty("--body", `${total}px`);
       }
     }
-    this.element.style.setProperty("--tpl", widths.map((w) => `${w}px`).join(" "));
-    this.element.style.setProperty("--body", `${widths.reduce((sum, w) => sum + w, 0) + GAP * (widths.length - 1)}px`);
   }
 
-  // всё меряется по тому, что стоит в строках: окошко знака — по самому широкому знаку набора,
-  // ширина каждой строки — по её собственному тексту. Фиксированных размеров в легенде нет
+  private lay(row: Row, sign: number, width: number): void {
+    row.node.style.setProperty("--sw", `${sign}px`);
+    row.node.style.setProperty("--w", `${width}px`);
+  }
+
+  // фиксированных размеров в легенде нет: окошко каждого знака — по нему самому
+  // (это делает placeGlyphs), ширина записи — по её собственному тексту
   private measure(): void {
-    let sign = LINE;
-    // два прохода: первый ставит окошко по знакам, второй уточняет его
-    for (let pass = 0; pass < 2; pass++) {
-      // минимум в ширину рисованного знака нужен только там, где такие знаки есть:
-      // у меток рода знак бывает с ноготок, и окошко под линию оставляло бы пустое поле
-      const lines = this.element.querySelector(".sym") ? LINE : 16;
-      sign = Math.max(lines, Math.ceil(placeGlyphs(this.element)) + 6);
-      this.element.style.setProperty("--sign", `${sign}px`);
-    }
+    placeGlyphs(this.element); // первый проход ставит окошки под знаки
     this.measureRows();
-    placeGlyphs(this.element);
+    placeGlyphs(this.element); // второй — ставит знаки в середину уже верных окошек
   }
 
-  // строки на миг разворачиваются в одну линию: видно их настоящую ширину — со знаком,
-  // подписью и счётом. Заодно меряется шапка: плашка не бывает уже собственного заголовка
+  // записи на миг разворачиваются в одну линию: видно настоящую ширину знака и текста
+  // по отдельности. Заодно меряется шапка: плашка не бывает уже собственного заголовка
   private measureRows(): void {
     this.element.classList.add("measuring");
-    this.rows = [...this.element.querySelectorAll<HTMLElement>(".lgItem")]
-      .map((row) => Math.min(COLUMN_MAX, Math.max(COLUMN_MIN, Math.ceil(row.getBoundingClientRect().width) + 4)));
+    this.rows = [...this.element.querySelectorAll<HTMLElement>(".lgItem")].map((node) => {
+      const sign = node.querySelector<HTMLElement>(".lgSign");
+      const signW = Math.ceil(sign?.getBoundingClientRect().width ?? 0);
+      const text = Math.ceil(node.getBoundingClientRect().width) - signW - SPACE;
+      return { node, sign: signW, text: Math.min(TEXT_MAX, Math.max(TEXT_MIN, text + 4)) };
+    });
     const top = this.element.querySelector<HTMLElement>(".lgTop");
     this.element.style.setProperty("--head", `${Math.ceil(top?.getBoundingClientRect().width ?? 0) + 2}px`);
     this.element.classList.remove("measuring");
@@ -183,6 +199,6 @@ export class LegendPanel {
         `<span class="lgSign">${tagGlyph(s.style, TAG_COLORS[tag.color])}</span>` +
         `<div><b>${escapeHtml(tag.name)}</b></div><small>${counts.get(tag.id) ?? 0}</small></div>`;
     }).join("")}</div>` +
-      '<div class="lgNote">Метки ставят человеку в правке; щелчок по метке отбирает помеченных на карте.</div>';
+      '<div class="lgNote">Выбранная метка выделяет людей на карте.</div>';
   }
 }

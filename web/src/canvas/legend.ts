@@ -176,6 +176,9 @@ export function placeGlyphs(root: HTMLElement): number {
     const outer = box.getBoundingClientRect();
     const at = mark.getBoundingClientRect();
     widest = Math.max(widest, at.width);
+    // окошко под знак ровно по нему самому: в потоке колонок нет, и общая ширина только
+    // отодвигала бы подпись от мелких знаков
+    box.style.setProperty("--gw", `${Math.ceil(at.width) + 6}px`);
     // сдвиг накапливается: знак уже стоит со старым сдвигом, считается только поправка
     const dx = Number(canvas.dataset.dx ?? 0) + (outer.left + outer.width / 2 - (at.left + at.width / 2)) / scale;
     const dy = Number(canvas.dataset.dy ?? 0) + (outer.top + outer.height / 2 - (at.top + at.height / 2)) / scale;
