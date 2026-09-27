@@ -90,7 +90,8 @@ export class LegendPanel {
     this.element.style.setProperty("--cols", String(Math.max(1, Math.min(3, Math.ceil(count / 3)))));
     const body = this.tab === "signs"
       ? `<div class="lgGrid">${signs.map((sign) =>
-        `<div class="lgItem">${sign.symbol}<div><b>${sign.title}</b>${sign.note ? `<i>${sign.note}</i>` : ""}</div></div>`).join("")}</div>`
+        `<div class="lgItem"><span class="lgSign">${sign.symbol}</span>` +
+        `<div><b>${sign.title}</b>${sign.note ? `<i>${sign.note}</i>` : ""}</div></div>`).join("")}</div>`
       : this.tagsHtml(s);
     this.element.innerHTML = head + tabs + body;
     placeGlyphs(this.element);
@@ -102,7 +103,8 @@ export class LegendPanel {
     }
     return `<div class="lgGrid">${s.tags.list.map((tag) =>
       `<div class="lgItem tag" data-tag="${escapeHtml(tag.id)}" aria-pressed="${s.filter === tag.id}">` +
-      `${tagGlyph(s.style, TAG_COLORS[tag.color])}<div><b>${escapeHtml(tag.name)}</b></div></div>`).join("")}</div>` +
+      `<span class="lgSign">${tagGlyph(s.style, TAG_COLORS[tag.color])}</span>` +
+      `<div><b>${escapeHtml(tag.name)}</b></div></div>`).join("")}</div>` +
       '<div class="lgNote">Выбранная метка оставляет своих людей в полную силу, остальных уводит в тень.</div>';
   }
 }

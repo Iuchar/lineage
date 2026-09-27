@@ -24,11 +24,11 @@ export interface LegendFacts {
 
 const svg = (inner: string) => `<svg class="sym" viewBox="0 0 60 24">${inner}</svg>`;
 
-// карточка под знаком нужна только как подложка разметки: видно один знак, остальное спрятано
-const glyph = (style: StyleName, inner: string, extra: string) => {
+// карточка под знаком нужна только как подложка разметки: видно один знак, остальное спрятано.
+// Знак рисуется в полный размер — иначе шрифт, цвет и толщина линий расходятся с картой
+const glyph = (style: StyleName, inner: string, extra: string, scale = 1) => {
   const metrics = STYLE_METRICS[style];
   const height = cardHeight(metrics, 1);
-  const scale = style === "gobelen" ? 0.62 : 0.72;
   return `<span class="glyph"><span class="gcanvas canvas" style="transform:scale(${scale})">` +
     `<div class="node has-por ${extra}" style="left:0;top:0;width:${metrics.width}px;height:${height}px">` +
     `<div class="box"><div class="por"></div><div class="nm">Дункан</div><div class="yr">1740 — 1842</div>${inner}</div></div></span></span>`;
@@ -103,7 +103,7 @@ const fold = (style: StyleName) => {
     ? "<span>Ангус</span><span>Колин</span><small>ещё 10 · 12 в ветке</small>"
     : style === "gazeta" ? '<i></i><i></i><i></i><span>12 в ветке</span><small>свёрнуто</small>'
       : '<i></i><i></i><span>12 в ветке</span>';
-  return '<span class="glyph tall"><span class="gcanvas canvas" style="transform:scale(.62)">' +
+  return '<span class="glyph tall"><span class="gcanvas canvas" style="transform:scale(.8)">' +
     `<div class="fold" data-mark style="left:0;top:0">${inner}</div></span></span>`;
 };
 

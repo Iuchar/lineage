@@ -119,6 +119,11 @@
 [data-style=polotno] .node.has-tags .also { top: 66px; }
 [data-style=polotno] .node.has-por.badged .also, [data-style=polotno] .node.has-por.has-tags .also { top: 68px; }
 [data-style=polotno] .node.badged.has-tags .also { top: 84px; }
+/* у полотна знаки стоят на своих местах от верха карточки; строка фамилии опускает годы,
+   поэтому вместе с ними опускаются знак состояния, метки и сноска — иначе они лягут на годы */
+[data-style=polotno] .node:has(.sn) .badge,
+[data-style=polotno] .node:has(.sn) .tags,
+[data-style=polotno] .node:has(.sn) .also { margin-top: 15px; }
 
 /* «× Закрыть» проверки — наверху, на виду */
 .review .rClose { position: sticky; top: 0; z-index: 2; display: flex; justify-content: flex-end; padding: 8px 12px 0;
