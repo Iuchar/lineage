@@ -135,7 +135,7 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
   border: 1px solid var(--ch-edge); border-radius: 6px; box-shadow: 0 8px 26px rgba(0, 0, 0, .32); }
 /* раскрытая — по содержимому: колонок столько, сколько знаков, но не больше, чем влезает в карту */
 .viewport .legend.open { width: min(calc(100% - 28px),
-  max(var(--head, 0px), calc(var(--cols, 1) * var(--col, 225px) + (var(--cols, 1) - 1) * 18px + 26px))); }
+  max(var(--head, 0px), calc(var(--body, 225px) + 26px))); }
 .legend .lgTop { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 9px; padding: 8px 12px; cursor: pointer; }
 .legend .lgTop b { font: 500 12px 'Golos Text', sans-serif; white-space: nowrap; }
 .legend .lgTop > span { color: var(--ch-mut); font-size: 11px; }
@@ -146,8 +146,7 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
   padding: 4px 9px; border-radius: 5px; cursor: pointer; }
 .legend .lgTabs button[aria-pressed=true] { background: var(--ch-btn); color: var(--ch-fg); }
 /* знаки ложатся по ширине в столько колонок, сколько влезает */
-.legend .lgGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(var(--col, 225px), 100%), 1fr));
-  gap: 0 18px; padding: 0 12px 10px; }
+.legend .lgGrid { display: grid; grid-template-columns: var(--tpl, 1fr); gap: 0 18px; padding: 0 12px 10px; }
 .legend .lgItem { display: flex; align-items: center; gap: 9px; padding: 3px 0; min-height: 38px; }
 /* окошко знака — по самому широкому знаку набора, знак в нём по центру: подписи стоят
    по одной линии, а пустого поля вокруг узких знаков почти нет */
@@ -161,8 +160,10 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 .legend .lgItem > small { margin-left: auto; padding-left: 10px; font: 400 10px 'IBM Plex Mono', monospace; color: var(--ch-mut); }
 .legend .lgItem.tag[aria-pressed=true] > div > b { color: var(--ch-acc); }
 .legend .lgNote { color: var(--ch-mut); font-size: 10.5px; line-height: 1.4; padding: 0 12px 11px; }
-/* на время замера подписи разворачиваются в одну строку — так видна их настоящая ширина */
+/* на время замера каждая строка разворачивается в одну линию по своему содержимому —
+   так видна настоящая ширина каждой, а не общая по самой длинной */
 .legend.measuring .lgGrid { grid-template-columns: max-content; }
+.legend.measuring .lgItem { width: max-content; }
 .legend.measuring .lgItem > div { width: max-content; }
 .legend.measuring .lgItem > small { margin-left: 10px; padding-left: 0; }
 .legend.measuring .lgTop { flex-wrap: nowrap; width: max-content; }

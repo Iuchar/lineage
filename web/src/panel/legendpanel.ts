@@ -36,7 +36,7 @@ export class LegendPanel {
   private state: LegendState | null = null;
 
   private readonly host: HTMLElement;
-  private column = COLUMN_MIN;
+  private rows: number[] = []; // ширины строк набора, по ним раскладываются колонки
 
   constructor(host: HTMLElement, private readonly actions: LegendActions) {
     this.host = host;
@@ -73,16 +73,33 @@ export class LegendPanel {
     new ResizeObserver(() => this.fit()).observe(host);
   }
 
-  // колонок столько, сколько есть чем занять, но не больше, чем помещается в карту
+  // колонки не равны между собой: каждая шириной со свою самую длинную строку. Берётся
+  // наибольшее число колонок, при котором сумма их ширин ещё помещается в карту, —
+  // поэтому короткие строки («Дети») не занимают место под длинные («щелчок — карточка семьи»)
   private fit(): void {
-    const count = Number(this.element.dataset.count ?? 0);
     const room = this.host.clientWidth - 28 - FRAME;
-    const wide = Math.max(1, Math.floor((room + GAP) / (this.column + GAP)));
-    this.element.style.setProperty("--cols", String(Math.max(1, Math.min(count, wide))));
+    const rows = this.rows;
+    if (!rows.length) return;
+    let widths = [Math.max(...rows)];
+    for (let cols = rows.length; cols > 1; cols--) {
+      const take: number[] = [];
+      for (let k = 0; k < cols; k++) {
+        let wide = 0;
+        for (let i = k; i < rows.length; i += cols) wide = Math.max(wide, rows[i]!);
+        take.push(wide);
+      }
+      const total = take.reduce((sum, w) => sum + w, 0) + GAP * (cols - 1);
+      if (total <= room) {
+        widths = take;
+        break;
+      }
+    }
+    this.element.style.setProperty("--tpl", widths.map((w) => `${w}px`).join(" "));
+    this.element.style.setProperty("--body", `${widths.reduce((sum, w) => sum + w, 0) + GAP * (widths.length - 1)}px`);
   }
 
   // всё меряется по тому, что стоит в строках: окошко знака — по самому широкому знаку набора,
-  // колонка — по самой длинной строке. Фиксированного места ни под знак, ни под текст нет
+  // ширина каждой строки — по её собственному тексту. Фиксированных размеров в легенде нет
   private measure(): void {
     let sign = LINE;
     // два прохода: первый ставит окошко по знакам, второй уточняет его
@@ -93,24 +110,19 @@ export class LegendPanel {
       sign = Math.max(lines, Math.ceil(placeGlyphs(this.element)) + 6);
       this.element.style.setProperty("--sign", `${sign}px`);
     }
-    this.column = this.widestRow();
-    this.element.style.setProperty("--col", `${this.column}px`);
+    this.measureRows();
     placeGlyphs(this.element);
   }
 
   // строки на миг разворачиваются в одну линию: видно их настоящую ширину — со знаком,
-  // подписью и счётом, — и колонку задаёт самая длинная из них. Заодно меряется шапка:
-  // плашка не бывает уже собственного заголовка
-  private widestRow(): number {
+  // подписью и счётом. Заодно меряется шапка: плашка не бывает уже собственного заголовка
+  private measureRows(): void {
     this.element.classList.add("measuring");
-    let widest = 0;
-    for (const row of this.element.querySelectorAll<HTMLElement>(".lgItem")) {
-      widest = Math.max(widest, row.getBoundingClientRect().width);
-    }
+    this.rows = [...this.element.querySelectorAll<HTMLElement>(".lgItem")]
+      .map((row) => Math.min(COLUMN_MAX, Math.max(COLUMN_MIN, Math.ceil(row.getBoundingClientRect().width) + 4)));
     const top = this.element.querySelector<HTMLElement>(".lgTop");
     this.element.style.setProperty("--head", `${Math.ceil(top?.getBoundingClientRect().width ?? 0) + 2}px`);
     this.element.classList.remove("measuring");
-    return Math.min(COLUMN_MAX, Math.max(COLUMN_MIN, Math.ceil(widest) + 4));
   }
 
   show(state: LegendState): void {
@@ -137,8 +149,6 @@ export class LegendPanel {
     const tabs = '<div class="lgTabs">' +
       `<button type="button" data-tab="signs"${this.tab === "signs" ? ' aria-pressed="true"' : ""}>знаки</button>` +
       `<button type="button" data-tab="tags"${this.tab === "tags" ? ' aria-pressed="true"' : ""}>метки рода</button></div>`;
-    this.element.dataset.count = String(this.tab === "signs" ? signs.length : s.tags.list.length);
-    this.fit();
     const body = this.tab === "signs"
       ? `<div class="lgGrid">${signs.map((sign) =>
         `<div class="lgItem"><span class="lgSign">${sign.symbol}</span>` +
@@ -161,8 +171,7 @@ export class LegendPanel {
     if (!s.tags.list.length) {
       return '<div class="lgNote">Меток в этом дереве нет — их ставят человеку в правке.</div>';
     }
-    // у метки стоит счёт её людей, как у дерева в столбце; что метка ещё и отбирает людей
-    // на карте, говорит подсказка — объяснять это строкой под списком не нужно
+    // у метки стоит счёт её людей, как у дерева в столбце
     const counts = new Map<string, number>();
     for (const ids of s.tags.of.values()) {
       for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
@@ -173,6 +182,7 @@ export class LegendPanel {
         `title="${on ? "Вернуть всех" : "Оставить на виду только этих"}">` +
         `<span class="lgSign">${tagGlyph(s.style, TAG_COLORS[tag.color])}</span>` +
         `<div><b>${escapeHtml(tag.name)}</b></div><small>${counts.get(tag.id) ?? 0}</small></div>`;
-    }).join("")}</div>`;
+    }).join("")}</div>` +
+      '<div class="lgNote">Метки ставят человеку в правке; щелчок по метке отбирает помеченных на карте.</div>';
   }
 }
