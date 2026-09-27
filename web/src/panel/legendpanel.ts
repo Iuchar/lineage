@@ -8,6 +8,9 @@ import { escapeHtml } from "../format";
 import type { StyleName } from "../layout/metrics";
 
 const KEY = "rodoslovnye.legend";
+const COLUMN = 268; // колонка «знак и подпись»
+const GAP = 18; // просвет между колонками
+const FRAME = 26; // поля плашки вместе с рамкой
 
 export interface LegendState {
   tree: ClanTree | null;
@@ -30,7 +33,10 @@ export class LegendPanel {
   private tab: Tab = "signs";
   private state: LegendState | null = null;
 
+  private readonly host: HTMLElement;
+
   constructor(host: HTMLElement, private readonly actions: LegendActions) {
+    this.host = host;
     try {
       this.open = localStorage.getItem(KEY) === "open";
     } catch {
@@ -60,6 +66,16 @@ export class LegendPanel {
       }
     });
     host.append(this.element);
+    // карта меняет ширину, когда открывают панели и столбец — колонки пересчитываются
+    new ResizeObserver(() => this.fit()).observe(host);
+  }
+
+  // колонок столько, сколько есть чем занять, но не больше, чем помещается в карту
+  private fit(): void {
+    const count = Number(this.element.dataset.count ?? 0);
+    const room = this.host.clientWidth - 28 - FRAME;
+    const wide = Math.max(1, Math.floor((room + GAP) / (COLUMN + GAP)));
+    this.element.style.setProperty("--cols", String(Math.max(1, Math.min(count, wide))));
   }
 
   show(state: LegendState): void {
@@ -85,6 +101,8 @@ export class LegendPanel {
     const tabs = '<div class="lgTabs">' +
       `<button type="button" data-tab="signs"${this.tab === "signs" ? ' aria-pressed="true"' : ""}>знаки</button>` +
       `<button type="button" data-tab="tags"${this.tab === "tags" ? ' aria-pressed="true"' : ""}>метки рода</button></div>`;
+    this.element.dataset.count = String(this.tab === "signs" ? signs.length : s.tags.list.length);
+    this.fit();
     const body = this.tab === "signs"
       ? `<div class="lgGrid">${signs.map((sign) =>
         `<div class="lgItem"><span class="lgSign">${sign.symbol}</span>` +
