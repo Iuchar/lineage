@@ -133,11 +133,11 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 .viewport .legend { position: absolute; left: 14px; bottom: 14px; z-index: 8; max-width: calc(100% - 28px);
   max-height: calc(100% - 28px); overflow: hidden auto; background: var(--ch-bg); color: var(--ch-fg);
   border: 1px solid var(--ch-edge); border-radius: 6px; box-shadow: 0 8px 26px rgba(0, 0, 0, .32); }
-/* раскрытая раскидывается по ширине листа: знаки встают в столько колонок, сколько влезает */
-.viewport .legend.open { width: min(calc(100% - 28px), calc(var(--cols, 3) * 292px)); }
-.legend .lgTop { display: flex; align-items: center; gap: 9px; padding: 8px 12px; cursor: pointer; }
+/* раскрытая занимает всю ширину карты: знаки встают в столько колонок, сколько влезает */
+.viewport .legend.open { width: calc(100% - 28px); }
+.legend .lgTop { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 9px; padding: 8px 12px; cursor: pointer; }
 .legend .lgTop b { font: 500 12px 'Golos Text', sans-serif; white-space: nowrap; }
-.legend .lgTop > span { color: var(--ch-mut); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.legend .lgTop > span { color: var(--ch-mut); font-size: 11px; }
 .legend .lgTop .chev { margin-left: 4px; font-size: 9px; }
 .legend .lgBadge { flex: none; }
 .legend .lgTabs { display: flex; gap: 4px; padding: 0 12px 6px; }
@@ -170,7 +170,7 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 
 /* тесная карта — панели съели место: знак остаётся в полный размер, подпись уходит под него,
    так ничего не обрезается и не появляется прокрутка поперёк */
-@container (max-width: 430px) {
+@container (max-width: 250px) {
   .legend .lgItem { flex-direction: column; align-items: flex-start; gap: 1px; min-height: 0; padding: 5px 0; }
   .legend .lgSign { justify-content: flex-start; width: 128px; }
   .legend .lgGrid { gap: 0 10px; padding: 0 10px 10px; }

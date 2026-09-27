@@ -85,9 +85,6 @@ export class LegendPanel {
     const tabs = '<div class="lgTabs">' +
       `<button type="button" data-tab="signs"${this.tab === "signs" ? ' aria-pressed="true"' : ""}>знаки</button>` +
       `<button type="button" data-tab="tags"${this.tab === "tags" ? ' aria-pressed="true"' : ""}>метки рода</button></div>`;
-    const count = this.tab === "signs" ? signs.length : s.tags.list.length;
-    // плашка шире там, где знаков много: колонок столько, сколько есть чем занять, но не больше трёх
-    this.element.style.setProperty("--cols", String(Math.max(1, Math.min(3, Math.ceil(count / 3)))));
     const body = this.tab === "signs"
       ? `<div class="lgGrid">${signs.map((sign) =>
         `<div class="lgItem"><span class="lgSign">${sign.symbol}</span>` +
