@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Шапка и роды — варианты</title>
+<!-- этап 7: шрифты и стили приложения; карта под шапкой настоящая — род Монад Кройве -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<link rel="stylesheet" href="../../web/src/styles/fold.css">
+<link rel="stylesheet" href="../../web/src/styles/panel.css">
+<link rel="stylesheet" href="../../web/src/styles/portrait.css">
+<link rel="stylesheet" href="../../web/src/styles/tags.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 100ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.about { padding: 6px 2px 12px; color: #8a8f98; font-size: 12.5px; max-width: 100ch; line-height: 1.5; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; color: #e6e2d8; }
+.app { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; position: relative; }
+.body { display: flex; height: 470px; position: relative; }
+.map { position: relative; flex: 1; overflow: hidden; background: var(--bg); }
+.map .canvas { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+.app .side { width: 280px; background: var(--panelbg); color: var(--mut); font-size: 12px; padding: 16px; }
+
+/* ── общее для новых шапок ── */
+.top { display: flex; align-items: center; flex-wrap: wrap; row-gap: 8px; gap: 14px; padding: 9px 14px; background: #16181b; border-bottom: 1px solid #2a2d32; }
+.top.second { background: #131518; padding: 7px 14px; gap: 12px; }
+.top > * { flex: none; }
+.top .sp { flex: 1; }
+.top .find { flex: 0 1 260px; min-width: 150px; }
+.top.second .sp { flex: 1 0 100%; }
+.top .ttl { font: 400 15px/1 'Cormorant Garamond', serif; color: #e6e2d8; letter-spacing: .02em; }
+.top .divider { width: 1px; height: 20px; background: #2a2d32; }
+.btn { white-space: nowrap; border: 1px solid #333941; background: #1d2126; color: #cfd5de; border-radius: 6px; padding: 6px 10px;
+  font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+.btn.plain { border-color: transparent; background: transparent; color: #aeb6c2; }
+.btn.on { background: #e9e4d8; color: #14161a; border-color: #e9e4d8; }
+.btn b { font-weight: 500; color: #e9e4d8; }
+.btn small { color: #7c8492; font-size: 10.5px; }
+.btn.on small, .btn.on b { color: #14161a; }
+.seg2 { display: flex; border: 1px solid #333941; border-radius: 6px; overflow: hidden; }
+.seg2 button { white-space: nowrap; border: 0; border-right: 1px solid #333941; background: #1d2126; color: #aeb6c2;
+  font: 500 11.5px/1 'Golos Text', sans-serif; padding: 6px 11px; cursor: pointer; }
+.seg2 button:last-child { border-right: 0; }
+.seg2 button[aria-pressed=true] { background: #e9e4d8; color: #14161a; }
+.find { display: flex; align-items: center; gap: 7px; border: 1px solid #333941; border-radius: 6px; background: #1d2126; padding: 5px 10px; min-width: 220px; }
+.find input { border: 0; background: none; color: #e6e2d8; font: 400 12px 'Golos Text', sans-serif; outline: none; width: 100%; }
+.find i { color: #7c8492; font-style: normal; font-size: 12px; }
+.count { font: 400 11px/1.4 'IBM Plex Mono', monospace; color: #6f7783; white-space: nowrap; }
+.lbl2 { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #7c8492; }
+
+/* список родов */
+.pop2 { position: absolute; z-index: 30; background: #1b1e22; border: 1px solid #333941; border-radius: 8px; box-shadow: 0 16px 40px rgba(0,0,0,.5);
+  width: 320px; padding: 8px; }
+.pop2 .find { margin-bottom: 6px; }
+.pop2 .rows { max-height: 260px; overflow: auto; }
+.pop2 .row { display: flex; align-items: baseline; gap: 8px; padding: 7px 8px; border-radius: 5px; cursor: pointer; }
+.pop2 .row:hover { background: #24282e; }
+.pop2 .row.on { background: #2b3038; }
+.pop2 .row b { font: 500 12.5px 'Golos Text', sans-serif; color: #e6e2d8; flex: 1; }
+.pop2 .row small { font: 400 10.5px 'IBM Plex Mono', monospace; color: #7c8492; }
+.pop2 .row.fake b { color: #7c8492; font-weight: 400; }
+.pop2 .add { width: 100%; margin-top: 6px; border-top: 1px solid #2a2d32; padding-top: 8px; color: #e9c46a; background: none; border-left: 0; border-right: 0; border-bottom: 0;
+  font: 500 11.5px 'Golos Text', sans-serif; cursor: pointer; text-align: left; }
+.rail { width: 208px; display: flex; flex-direction: column; }
+.rail .railTop { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.rail .railTop .find { min-width: 0; flex: 1; padding: 4px 8px; }
+.rail .rows { flex: 1; overflow: auto; }
+.rail .add { width: 100%; margin-top: 8px; border: 0; border-top: 1px solid #2a2d32; background: none; color: #e9c46a;
+  font: 500 11.5px 'Golos Text', sans-serif; padding: 8px 8px 2px; text-align: left; cursor: pointer; }
+.rail .note3 { color: #6f7783; font-size: 11px; padding: 6px 8px; }
+.railMini { width: 34px; background: #131518; border-right: 1px solid #2a2d32; padding: 8px 4px; display: flex;
+  flex-direction: column; align-items: center; gap: 10px; }
+.railMini .vert { writing-mode: vertical-rl; font: 500 11px 'Golos Text', sans-serif; color: #7c8492; letter-spacing: .04em; }
+.railOld { width: 208px; background: #131518; border-right: 1px solid #2a2d32; padding: 10px 8px; overflow: auto; }
+.railOld .row, .rail .row { display: flex; align-items: baseline; gap: 8px; padding: 6px 8px; border-radius: 5px; cursor: pointer; }
+.railOld .row.on, .rail .row.on { background: #24282e; }
+.railOld .row b, .rail .row b { font: 500 12px 'Golos Text', sans-serif; color: #e6e2d8; flex: 1; }
+.railOld .row small, .rail .row small { font: 400 10px 'IBM Plex Mono', monospace; color: #7c8492; }
+.railOld .row.fake b, .rail .row.fake b { color: #7c8492; font-weight: 400; }
+
+/* панель вида */
+.viewPop { position: absolute; right: 14px; top: 52px; z-index: 30; width: 360px; background: #1b1e22; border: 1px solid #333941;
+  border-radius: 8px; box-shadow: 0 16px 40px rgba(0,0,0,.5); padding: 12px 14px 14px; }
+.viewPop .sec { margin-top: 12px; }
+.viewPop .sec:first-child { margin-top: 0; }
+.viewPop .sec > .lbl2 { display: block; margin-bottom: 6px; }
+.viewPop .line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.viewPop .styles, .settings .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.viewPop .styles .btn, .settings .styles .btn { justify-content: center; }
+.viewPop .chk2, .settings .chk2 { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #cfd5de; }
+.settings { position: absolute; right: 0; top: 0; bottom: 0; width: 300px; background: #16181b; border-left: 1px solid #2a2d32; padding: 14px; z-index: 12; overflow: auto; }
+.settings h4 { font: 500 12px 'Golos Text', sans-serif; margin: 14px 0 6px; color: #e6e2d8; }
+.settings h4:first-child { margin-top: 0; }
+
+/* легенда */
+.legendPane .legRows { margin-top: 8px; }
+.legRow { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; }
+.legRow span b { display: block; font: 500 12px 'Golos Text', sans-serif; color: #e6e2d8; }
+.legRow span i { display: block; font-style: normal; font-size: 11px; color: #7c8492; line-height: 1.35; }
+.legSample { flex: none; width: 34px; height: 18px; margin-top: 2px; position: relative; }
+.legSample.line::before, .legSample.past::before, .legSample.trunk::before { content: ''; position: absolute; left: 0; right: 0; top: 9px; border-top: 1.4px solid var(--acc); }
+.legSample.past::before { border-top-style: dashed; opacity: .55; }
+.legSample.trunk::before { border-top-width: 2.4px; }
+.legSample.ord::before { content: 'первый'; position: absolute; inset: 0; font: 400 10px/18px 'Cormorant Garamond', serif; color: var(--acc); text-align: center; }
+.legSample.drop::before, .legSample.foster::before { content: ''; position: absolute; left: 16px; top: 0; bottom: 0; border-left: 1.4px solid var(--link, #888); }
+.legSample.foster::before { border-left-style: dashed; }
+.legSample.knot::before { content: ''; position: absolute; left: 11px; top: 2px; width: 10px; height: 10px; border: 1.4px solid var(--link, #888); border-radius: 50%; }
+.legSample.knot::after { content: ''; position: absolute; left: 4px; right: 4px; top: 15px; border-top: 1.4px solid var(--link, #888); }
+.legSample.dia::before { content: '◆'; position: absolute; inset: 0; color: var(--acc); font-size: 11px; line-height: 18px; text-align: center; }
+.legSample.burnt::before { content: ''; position: absolute; inset: 1px 6px; border-radius: 3px; background: #2a1a16; box-shadow: inset 0 0 6px 2px rgba(60,12,6,.8); }
+.legSample.hidden::before { content: ''; position: absolute; inset: 1px 6px; border-radius: 3px; border: 1px dashed #5d6470; opacity: .7; }
+.legSample.fold::before { content: ''; position: absolute; inset: 3px 4px; border-radius: 2px; border: 1px solid #4a515c; background: #22262c; box-shadow: 2px 2px 0 #1a1d22; }
+.legSample.also::before { content: 'также в'; position: absolute; inset: 0; font: italic 400 9px/18px 'Cormorant Garamond', serif; color: var(--acc); text-align: center; }
+
+/* названия стилей */
+.names { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; padding: 16px; background: #131518; }
+.names .cell { border: 1px solid #2a2d32; border-radius: 6px; overflow: hidden; }
+.names .sample { height: 150px; position: relative; overflow: hidden; background: var(--bg); }
+.names .sample .canvas { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+.names .cap { padding: 8px 10px 10px; }
+.names .cap b { display: block; font: 500 13px 'Golos Text', sans-serif; color: #e6e2d8; }
+.names .cap small { display: block; color: #7c8492; font-size: 11px; margin-top: 2px; }
+.names .cap s { display: block; color: #5d6470; font-size: 10.5px; margin-top: 4px; text-decoration: none; }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+<h1>Шапка и роды: три вопроса этапа 7</h1>
+<p class="lede">В шапке сейчас четырнадцать групп: род, режим, журнал, связки, поиск, стиль, тема, масштаб, ветки, основатель, вид древа, фамилии,
+портреты, линейка и метки. Карта под шапкой настоящая — род Монад Кройве из вашей базы. Каждый вариант — в пяти стилях и обеих темах.</p>
+<div class="ctl">
+  <div class="grp"><b>Вопрос</b><div class="sw" data-set="part">
+    <button data-v="clans" aria-pressed="true">1 · список родов</button><button data-v="bar">2 · шапка целиком</button>
+    <button data-v="names">3 · названия стилей</button>
+  </div></div>
+  <div class="grp"><b>Вариант</b><div class="sw" data-set="kind" id="kinds"></div></div>
+  <div class="grp" id="stepGrp"><b id="stepName">Шаг</b><div class="sw" data-set="step" id="steps"></div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Гобелен</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Газета</button><button data-v="kabinet">Кабинет</button><button data-v="polotno">Полотно II</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="app" id="out"></div>
+<script>
+const CLANS = [["Гленн Уриск", 38], ["Уинтерхоуп", 62], ["О'Дувейн", 17], ["Монад Кройве", 84]];
+const PARTS = {
+  clans: {
+    stepName: "Шаг", steps: [["four", "4 рода"], ["forty", "40 родов"], ["find", "поиск: «мо»"], ["hidden", "столбец скрыт"]],
+    kinds: [
+      ["drop", "Р1 · список кнопкой", "<b>Р1 · род выбирается в списке под кнопкой.</b> В шапке одна кнопка: «Монад Кройве · 84». Щелчок открывает список с поиском, счётом людей и кнопкой «+ загрузить .ged» внизу. Четыре рода видны целиком, сорок — прокруткой, нужный находится набором двух букв. Шапка не растёт от числа родов."],
+      ["rail2", "Р2 + · столбец с поиском", "<b>Р2 с поиском и кнопкой «спрятать».</b> Столбец родов слева от карты: сверху поле поиска, ниже роды со счётом людей, внизу «+ загрузить .ged». Кнопка «‹» прячет столбец — от него остаётся узкая полоска с «›» и названием рода боком, карта получает свои 208 пикселей обратно. Выбор помнит браузер. Шаг «скрыт» показывает свёрнутое состояние, шаг «поиск» — набранные две буквы."],
+      ["rail", "Р2 · столбец слева", "<b>Р2 · роды столбцом слева от карты.</b> Всегда на виду, переход в один щелчок, видно, какие роды вообще есть. Съедает 208 пикселей ширины карты; на сорока родах столбец прокручивается."],
+      ["tabs", "Р3 · вкладки и «ещё»", "<b>Р3 · как сейчас, но с «ещё».</b> Первые три рода вкладками, остальные — в списке за кнопкой «ещё 37». Привычно, но при сорока родах вкладки показывают случайную тройку, а нужный род почти всегда за «ещё»."],
+    ],
+  },
+  bar: {
+    stepName: "Режим", steps: [["view", "просмотр"], ["edit", "правка"]],
+    kinds: [
+      ["now", "как сейчас", "<b>Как сейчас.</b> Всё в один ряд с переносом: четырнадцать групп, у каждой своя подпись. На узком окне шапка занимает три-четыре строки и оттесняет карту вниз."],
+      ["two", "Ш1 · две строки", "<b>Ш1 · две строки: дело и вид.</b> Первая строка — то, что делаешь: род, поиск, режим, журнал, связки, загрузка и выгрузка. Вторая, приглушённая, — как смотришь: стиль, тема, масштаб, вид древа, ветки, карточки, метки. В правке во второй строке ничего не меняется, а в первой добавляются «Отменить» и «Журнал»."],
+      ["pop", "Ш2 · одна строка и «Вид»", "<b>Ш2 · одна строка, настройки вида — под кнопкой «Вид».</b> В шапке остаётся только дело: род, поиск, режим, журнал, связки, масштаб. Всё остальное — в панели под кнопкой «Вид», разделами: древо, карточки, метки. Шапка в одну строку на любом окне, но стиль и тему меняешь в два щелчка."],
+      ["side2", "Ш3 + · настройки и легенда", "<b>Ш3 с легендой.</b> Тонкая шапка и правая панель настроек, как в Ш3. Тема — значками ☾ и ☀. Метки рода ушли из настроек в отдельную группу «Легенда»: там же расписано, что значат линии, знаки и пометки на карте — брак и прошлый брак, спуск к приёмному, узел «родители не записаны», ромб продолжателя, ствол главной ветви, выжженный и скрытый, стопка свёрнутой ветки, сноска «также в роду». Метки рода стоят в той же панели последним разделом: они тоже легенда, только своя у каждого рода."],
+      ["side", "Ш3 · панель настроек", "<b>Ш3 · тонкая шапка и боковая панель настроек.</b> Та же мысль, что Ш2, но настройки не всплывают, а живут в правой панели: открыл — и меняй сколько нужно, карта рядом. Панель занимает место панели человека, поэтому одновременно с карточкой человека её не посмотреть."],
+    ],
+  },
+  names: {
+    stepName: "Набор имён", steps: [["material", "по материалу"], ["place", "по месту"], ["short", "коротко"]],
+    kinds: [
+      ["sets", "три набора", "<b>Названия стилей.</b> Сейчас: Гобелен, Викторианский, Газета, Ночной кабинет, Полотно II. Вопрос был про «Полотно II», но имена лучше выбирать набором — они стоят рядом в шапке. Под каждым образцом: новое имя, старое и по чему стиль узнаётся. Наборы переключаются шагом."],
+    ],
+  },
+};
+const NAMES = {
+  material: {
+    gobelen: ["Гобелен", "шерсть, узелки, вышитые имена"],
+    viktorian: ["Альбом", "бумага с пыльцой, рамки, ленты"],
+    gazeta: ["Газета", "колонки, линейки, растр на снимках"],
+    kabinet: ["Кабинет", "картотека, латунь, лампа"],
+    polotno: ["Тушь", "крупные имена, тонкие линии, красный"],
+  },
+  place: {
+    gobelen: ["Зал предков", "шерсть, узелки, вышитые имена"],
+    viktorian: ["Викторианский", "бумага с пыльцой, рамки, ленты"],
+    gazeta: ["Хроника", "колонки, линейки, растр на снимках"],
+    kabinet: ["Ночной кабинет", "картотека, латунь, лампа"],
+    polotno: ["Афиша", "крупные имена, тонкие линии, красный"],
+  },
+  short: {
+    gobelen: ["Гобелен", "шерсть, узелки, вышитые имена"],
+    viktorian: ["Пыльца", "бумага с пыльцой, рамки, ленты"],
+    gazeta: ["Газета", "колонки, линейки, растр на снимках"],
+    kabinet: ["Лампа", "картотека, латунь, лампа"],
+    polotno: ["Полотно", "крупные имена, тонкие линии, красный"],
+  },
+};
+const OLD = { gobelen: "Гобелен", viktorian: "Викторианский", gazeta: "Газета", kabinet: "Ночной кабинет", polotno: "Полотно II" };
+const STYLES = ["gobelen", "viktorian", "gazeta", "kabinet", "polotno"];
+const state = { part: "clans", kind: "drop", step: "four", style: "gobelen", theme: "dark" };
+let data;
+
+const clanRows = (cls) => {
+  if (state.step === "find") {
+    return `<div class="${cls}"><div class="row on"><b>Монад Кройве</b><small>84</small></div>` +
+      '<div class="row fake"><b>условный род 12</b><small>—</small></div>' +
+      '<div class="note3">два рода из 40</div></div>';
+  }
+  const real = CLANS.map(([name, n], i) => `<div class="row${i === 3 ? " on" : ""}"><b>${name}</b><small>${n}</small></div>`).join("");
+  const fake = state.step === "forty"
+    ? Array.from({ length: 36 }, (_, i) => `<div class="row fake"><b>условный род ${i + 5}</b><small>—</small></div>`).join("") : "";
+  return `<div class="${cls === "rail" ? "railOld" : cls}">${real}${fake}</div>`;
+};
+
+function railHtml() {
+  if (state.step === "hidden") {
+    return '<div class="railMini"><button class="btn plain" title="Показать роды">›</button><span class="vert">Монад Кройве</span></div>';
+  }
+  return '<div class="rail"><div class="railTop"><div class="find"><i>⌕</i><input placeholder="найти род"' +
+    (state.step === "find" ? ' value="мо"' : "") + '></div><button class="btn plain" title="Спрятать столбец">‹</button></div>' +
+    clanRows("rows") + '<button class="add">+ загрузить .ged</button></div>';
+}
+
+function mapHtml(withRail) {
+  const s = data.scenes[`${state.style}|base`];
+  return `<div class="body">${withRail ? railHtml() : ""}<div class="map"><div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div></div>` +
+    '<aside class="side">никто не выбран</aside></div>';
+}
+
+// ── шапки ──
+const now = () => {
+  const edit = state.step === "edit";
+  const grp = (label, inner) => `<div class="grp"><b>${label}</b>${inner}</div>`;
+  const sw = (...b) => `<div class="sw">${b.join("")}</div>`;
+  const on = (t) => `<button aria-pressed="true">${t}</button>`;
+  const off = (t) => `<button>${t}</button>`;
+  return '<div class="bar">' +
+    grp("Род", sw(off("Гленн Уриск · 38"), off("Уинтерхоуп · 62"), off("О'Дувейн · 17"), on("Монад Кройве · 84"),
+      '<button class="add">+ Загрузить .ged</button><a class="swLink">Выгрузить .ged</a>')) +
+    grp("Режим", sw(edit ? off("Просмотр") : on("Просмотр"), edit ? on("Правка") : off("Правка"))) +
+    (edit ? grp("", sw(off("↶ Отменить"), off("↷"), off("Журнал · 4"))) : "") +
+    grp("Связки", sw(off("Проверить 7"))) +
+    grp("Поиск", '<div class="find"><input placeholder="имя или фамилия"></div>') +
+    grp("Стиль", sw(on("Гобелен"), off("Викторианский"), off("Газета"), off("Ночной кабинет"), off("Полотно II"))) +
+    grp("Тема", sw(on("Тёмная"), off("Светлая"))) +
+    grp("Вид", sw(off("−"), on("100%"), off("+")) + sw(off("Целиком"), off("К выбранному"))) +
+    grp("Ветки", sw(off("свернуть все"), off("развернуть все"))) +
+    grp("Основатель", sw(on("сверху"), off("снизу"))) +
+    grp("Вид древа", sw(on("стандарт"), off("главная ветвь"))) +
+    grp("Фамилии", sw(off("выкл."), on("девичья"), off("после брака"))) +
+    '<label class="chk"><input type="checkbox" checked> портреты</label>' +
+    '<label class="chk"><input type="checkbox"> линейка дат</label>' +
+    grp("Метки", '<div class="tagFilter"><button class="chip" style="--c:#c9564a"><i></i>Воин</button><button class="chip" style="--c:#c9564a"><i></i>Что-то там</button></div>') +
+    '<div class="hint">84 человека · 36 семей</div></div>';
+};
+
+const clanButton = () => `<button class="btn" data-pop="clans"><b>Монад Кройве</b><small>84</small> ▾</button>`;
+const findBox = '<div class="find"><i>⌕</i><input placeholder="имя или фамилия"></div>';
+const modeSeg = () => `<div class="seg2"><button${state.step === "view" ? ' aria-pressed="true"' : ""}>Просмотр</button>` +
+  `<button${state.step === "edit" ? ' aria-pressed="true"' : ""}>Правка</button></div>`;
+const journal = () => (state.step === "edit" ? '<button class="btn plain">↶ Отменить</button><button class="btn plain">Журнал · 4</button><div class="divider"></div>' : "");
+const zoom = () => '<div class="seg2"><button>−</button><button aria-pressed="true">100%</button><button>+</button></div><button class="btn plain">Целиком</button>';
+
+const viewRow = () => '<div class="top second">' +
+  '<span class="lbl2">древо</span><div class="seg2"><button aria-pressed="true">стандарт</button><button>главная ветвь</button></div>' +
+  '<div class="seg2"><button aria-pressed="true">основатель сверху</button><button>снизу</button></div>' +
+  '<button class="btn plain">свернуть все</button><button class="btn plain">развернуть все</button>' +
+  '<div class="divider"></div><span class="lbl2">карточки</span>' +
+  '<div class="seg2"><button>без фамилий</button><button aria-pressed="true">девичья</button><button>после брака</button></div>' +
+  '<label class="chk"><input type="checkbox" checked> портреты</label><label class="chk"><input type="checkbox"> линейка дат</label>' +
+  '<div class="sp"></div><div class="tagFilter"><button class="chip" style="--c:#c9564a"><i></i>Воин</button>' +
+  '<button class="chip" style="--c:#c9564a"><i></i>Что-то там</button></div></div>';
+
+const styleSeg = () => `<div class="seg2">${STYLES.map((s) => `<button${s === state.style ? ' aria-pressed="true"' : ""}>${OLD[s]}</button>`).join("")}</div>` +
+  '<div class="seg2"><button aria-pressed="true">☾</button><button>☀</button></div>';
+
+const barTwo = () => '<div class="top">' + clanButton() + findBox + '<div class="divider"></div>' + modeSeg() + journal() +
+  '<button class="btn plain">Связки · 7</button><div class="sp"></div>' + zoom() +
+  '<div class="divider"></div><button class="btn plain">+ Загрузить .ged</button><button class="btn plain">Выгрузить .ged</button>' +
+  '<span class="count">84 человека · 36 семей</span></div>' + '<div class="top second">' + styleSeg() +
+  viewRow().replace('<div class="top second">', "").replace("</div>", "") + "</div>";
+
+const barPop = () => '<div class="top">' + clanButton() + findBox + '<div class="divider"></div>' + modeSeg() + journal() +
+  '<button class="btn plain">Связки · 7</button><div class="sp"></div>' + zoom() +
+  '<button class="btn on" data-pop="view">Вид ▾</button><div class="divider"></div>' +
+  '<button class="btn plain">+ Загрузить .ged</button><button class="btn plain">Выгрузить .ged</button>' +
+  '<span class="count">84 · 36</span></div>';
+
+const viewPanel = (wrap) => `<div class="${wrap}">` +
+  '<div class="sec"><span class="lbl2">стиль</span><div class="styles">' +
+  STYLES.map((x) => `<button class="btn${x === state.style ? " on" : ""}">${OLD[x]}</button>`).join("") + "</div></div>" +
+  '<div class="sec"><span class="lbl2">тема</span><div class="line"><div class="seg2"><button aria-pressed="true" title="Тёмная">☾ тёмная</button><button title="Светлая">☀ светлая</button></div></div></div>' +
+  '<div class="sec"><span class="lbl2">древо</span><div class="line"><div class="seg2"><button aria-pressed="true">стандарт</button><button>главная ветвь</button></div>' +
+  '<div class="seg2"><button aria-pressed="true">основатель сверху</button><button>снизу</button></div></div>' +
+  '<div class="line" style="margin-top:8px"><button class="btn plain">свернуть все ветки</button><button class="btn plain">развернуть все</button></div></div>' +
+  '<div class="sec"><span class="lbl2">карточки</span><div class="line"><div class="seg2"><button>без фамилий</button><button aria-pressed="true">девичья</button><button>после брака</button></div></div>' +
+  '<div class="line" style="margin-top:8px"><label class="chk2"><input type="checkbox" checked> портреты</label><label class="chk2"><input type="checkbox"> линейка дат</label></div></div>' +
+  '<div class="sec"><span class="lbl2">метки</span><div class="line"><div class="tagFilter"><button class="chip" style="--c:#c9564a"><i></i>Воин</button>' +
+  '<button class="chip" style="--c:#c9564a"><i></i>Что-то там</button></div></div></div></div>';
+
+const barSide = (legend = false) => '<div class="top">' + clanButton() + findBox + '<div class="divider"></div>' + modeSeg() + journal() +
+  '<button class="btn plain">Связки · 7</button><div class="sp"></div>' + zoom() +
+  (legend ? '<button class="btn plain">⚙ Вид</button><button class="btn on">Легенда</button>' : '<button class="btn on">⚙ Настройки вида</button>') +
+  '<div class="divider"></div>' +
+  '<button class="btn plain">+ Загрузить .ged</button><button class="btn plain">Выгрузить .ged</button>' +
+  '<span class="count">84 · 36</span></div>';
+
+// легенда: что значат линии, знаки и пометки на карте, и метки этого рода
+const LEGEND = [
+  ["line", "нить брака", "пара стоит рядом, нить между ними"],
+  ["past", "прошлый брак", "приглушённая и пунктиром; так же рисуется развод"],
+  ["ord", "первый, второй…", "очередь браков у многобрачного"],
+  ["drop", "спуск к детям", "от нити союза вниз, к шине выводка"],
+  ["foster", "спуск пунктиром", "приёмный или под опекой; у карточки ярлык"],
+  ["knot", "узел без пары", "родители не записаны: братья и сёстры одной семьи"],
+  ["dia", "◆ продолжатель", "через него идёт главная ветвь рода"],
+  ["trunk", "ствол", "главная ветвь: от основателя через продолжателей"],
+  ["burnt", "выжжен из рода", "карточка приглушена, портрет затемнён, знак под именем"],
+  ["hidden", "скрыт от зрителей", "виден только в правке, с пометкой"],
+  ["fold", "стопка «N в ветке»", "ветка свёрнута; щелчок открывает одно поколение"],
+  ["also", "также в роду", "тот же человек есть в другом роду — переход"],
+];
+const legendPanel = () => '<div class="settings legendPane"><span class="lbl2">знаки карты</span><div class="legRows">' +
+  LEGEND.map(([key, title, note]) => `<div class="legRow"><span class="legSample ${key}"></span><span><b>${title}</b><i>${note}</i></span></div>`).join("") +
+  '</div><span class="lbl2" style="display:block;margin-top:14px">метки рода</span>' +
+  '<div class="line" style="margin-top:6px"><div class="tagFilter"><button class="chip" style="--c:#c9564a"><i></i>Воин</button>' +
+  '<button class="chip" style="--c:#c9564a"><i></i>Что-то там</button></div></div>' +
+  '<div class="note3" style="padding-left:0">Метка оставляет своих людей в полную силу, остальных уводит в тень.</div></div>';
+
+function namesHtml() {
+  const set = NAMES[state.step];
+  return `<div class="names">${STYLES.map((s) => {
+    const scene = data.scenes[`${s}|base`];
+    const [name, why] = set[s];
+    return `<div class="cell" data-style="${s}"><div class="sample"><div class="canvas" style="width:${scene.width}px;height:${scene.height}px">` +
+      `<svg class="links" width="${scene.width}" height="${scene.height}">${scene.links}</svg>${scene.cards}</div></div>` +
+      `<div class="cap"><b>${name}</b><small>${why}</small>${name === OLD[s] ? "<s>имя не меняется</s>" : `<s>было: ${OLD[s]}</s>`}</div></div>`;
+  }).join("")}</div>`;
+}
+
+function draw() {
+  const part = PARTS[state.part];
+  if (!part.kinds.some(([k]) => k === state.kind)) state.kind = part.kinds[0][0];
+  if (!part.steps.some(([k]) => k === state.step)) state.step = part.steps[0][0];
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("kinds").innerHTML = part.kinds.map(([k, n]) => `<button data-v="${k}"${k === state.kind ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
+  document.getElementById("steps").innerHTML = part.steps.map(([k, n]) => `<button data-v="${k}"${k === state.step ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
+  document.getElementById("stepName").textContent = part.stepName;
+  document.getElementById("about").innerHTML = part.kinds.find(([k]) => k === state.kind)[2];
+  document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.querySelectorAll("button")
+    .forEach((b) => b.setAttribute("aria-pressed", String(state[sw.dataset.set] === b.dataset.v))));
+
+  const out = document.getElementById("out");
+  if (state.part === "names") {
+    out.innerHTML = namesHtml();
+    return placeNames();
+  }
+  if (state.part === "clans") {
+    const head = '<div class="top">' + (state.kind === "tabs"
+      ? `<span class="lbl2">род</span><div class="seg2">${CLANS.slice(0, 3).map(([n, c]) => `<button>${n} · ${c}</button>`).join("")}` +
+        `<button aria-pressed="true">Монад Кройве · 84</button></div>` +
+        (state.step === "forty" ? '<button class="btn" data-pop="clans">ещё 37 ▾</button>' : "")
+      : state.kind === "rail" || state.kind === "rail2" ? '<span class="lbl2">род</span><span class="ttl">Монад Кройве</span><span class="count">84 человека · 36 семей</span>'
+      : clanButton()) +
+      findBox + '<div class="divider"></div>' + modeSeg() + '<button class="btn plain">Связки · 7</button><div class="sp"></div>' +
+      '<button class="btn plain">+ Загрузить .ged</button><button class="btn plain">Выгрузить .ged</button></div>';
+    out.innerHTML = head + mapHtml(state.kind === "rail" || state.kind === "rail2");
+    if (state.kind !== "rail" && state.kind !== "rail2") {
+      const anchor = out.querySelector("[data-pop=clans]");
+      const box = document.createElement("div");
+      box.className = "pop2";
+      box.innerHTML = '<div class="find"><i>⌕</i><input placeholder="найти род"></div>' + clanRows("rows") +
+        '<button class="add">+ загрузить .ged</button>';
+      out.append(box);
+      box.style.left = `${anchor.offsetLeft}px`;
+      box.style.top = `${anchor.offsetTop + anchor.offsetHeight + 6}px`;
+    }
+    return place();
+  }
+  const bar = { now, two: barTwo, pop: barPop, side: () => barSide(false), side2: () => barSide(true) }[state.kind]();
+  out.innerHTML = bar + mapHtml(false);
+  if (state.kind === "pop") out.insertAdjacentHTML("beforeend", viewPanel("viewPop"));
+  if (state.kind === "side") out.querySelector(".body").insertAdjacentHTML("beforeend", viewPanel("settings"));
+  if (state.kind === "side2") out.querySelector(".body").insertAdjacentHTML("beforeend", legendPanel());
+  place();
+}
+
+function place() {
+  const map = document.querySelector(".map");
+  const s = data.scenes[`${state.style}|base`];
+  const k = 0.5;
+  const at = s.at[data.ids.duncan];
+  const cx = at[0] + s.w / 2, cy = at[1] + s.h / 2 + 260;
+  map.querySelector(".canvas").style.transform =
+    `translate(${map.clientWidth / 2 - cx * k}px,${map.clientHeight / 2 - cy * k}px) scale(${k})`;
+}
+
+function placeNames() {
+  for (const cell of document.querySelectorAll(".names .cell")) {
+    const style = cell.dataset.style;
+    const s = data.scenes[`${style}|base`];
+    const box = cell.querySelector(".sample");
+    const canvas = cell.querySelector(".canvas");
+    const k = 0.5;
+    const at = s.at[data.ids.duncan];
+    // образец: основатель с женой по центру плашки
+    canvas.style.transform = `translate(${box.clientWidth / 2 - (at[0] + s.w) * k}px,${box.clientHeight / 2 - (at[1] + s.h / 2) * k}px) scale(${k})`;
+    cell.dataset.theme = state.theme;
+  }
+}
+
+document.querySelector(".ctl").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); const sw = b?.closest(".sw[data-set]"); if (!sw) return;
+  state[sw.dataset.set] = b.dataset.v;
+  draw();
+});
+fetch("../карта/карточка.data.json").then((r) => r.json()).then((d) => { data = d; draw(); });
+</script>
+</body>
+</html>
