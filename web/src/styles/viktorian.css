@@ -23,11 +23,11 @@
 [data-style=viktorian] .node .badge i { display: block; position: relative; font-style: normal;
   padding: 3px 15px; background: var(--mark);
   clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%, 7px 50%); }
-[data-style=viktorian] .node .badge i::before,
-[data-style=viktorian] .node .badge i::after { content: ''; position: absolute; left: 10px; right: 10px;
-  height: 1px; background: currentColor; opacity: .42; }
-[data-style=viktorian] .node .badge i::before { top: 1.5px; }
-[data-style=viktorian] .node .badge i::after { bottom: 1.5px; }
+/* обе линейки канта — границы одного вложенного слоя: порознь верхняя на дробном масштабе
+   округлялась в лишний пиксель и выходила толще нижней */
+[data-style=viktorian] .node .badge i::before { content: ''; position: absolute; left: 10px; right: 10px;
+  top: 1.5px; bottom: 1.5px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor;
+  opacity: .42; }
 [data-style=viktorian] .node .badge.calm { color: var(--card); }
 [data-style=viktorian] .node .badge.calm i { background: var(--link); }
 
