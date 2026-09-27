@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Легенда, цвет шапки и столбец деревьев — варианты</title>
+<!-- этап 7, второй заход: легенда символами стиля, цвет шапки по стилю, столбец родовых деревьев -->
+<link rel="stylesheet" href="../../web/src/fonts/fonts.css">
+<link rel="stylesheet" href="../../web/src/styles/app.css">
+<link rel="stylesheet" href="../../web/src/styles/cards.css">
+<link rel="stylesheet" href="../../web/src/styles/gobelen.css">
+<link rel="stylesheet" href="../../web/src/styles/viktorian.css">
+<link rel="stylesheet" href="../../web/src/styles/gazeta.css">
+<link rel="stylesheet" href="../../web/src/styles/kabinet.css">
+<link rel="stylesheet" href="../../web/src/styles/polotno.css">
+<link rel="stylesheet" href="../../web/src/styles/fold.css">
+<link rel="stylesheet" href="../../web/src/styles/panel.css">
+<link rel="stylesheet" href="../../web/src/styles/portrait.css">
+<link rel="stylesheet" href="../../web/src/styles/tags.css">
+<style>
+html, body { height: auto; }
+body { padding: 22px 26px 60px; }
+h1 { font: 400 28px/1.2 'Cormorant Garamond', serif; margin: 0 0 6px; }
+.lede { color: #8a8f98; max-width: 100ch; margin: 0 0 12px; font-size: 13.5px; }
+.ctl { position: sticky; top: 0; z-index: 40; background: #101113; padding: 8px 0 10px; margin-bottom: 12px;
+  border-bottom: 1px solid #2a2d32; display: flex; gap: 16px; flex-wrap: wrap; }
+.about { padding: 6px 2px 12px; color: #8a8f98; font-size: 12.5px; max-width: 100ch; line-height: 1.5; }
+.about b { font: 500 14.5px/1.3 'Golos Text', sans-serif; color: #e6e2d8; }
+.app { border: 1px solid #2a2d32; border-radius: 3px; overflow: hidden; position: relative; min-width: 1180px; }
+body { overflow-x: auto; }
+.body { display: flex; height: 560px; position: relative; }
+.map { position: relative; flex: 1; overflow: hidden; background: var(--bg); }
+.map .canvas { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+.app .side { width: 260px; flex: none; background: var(--panelbg); color: var(--mut); font-size: 12px; padding: 16px; }
+.sideMini b { display: block; font-family: var(--font); font-size: 17px; color: var(--fg); }
+.sideMini span { display: block; font: 400 10px 'IBM Plex Mono', monospace; color: var(--mut); margin: 2px 0 10px; }
+.sideRow { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--edge); padding: 6px 0;
+  color: var(--fg); font-size: 12px; }
+.sideRow i { font-style: normal; color: var(--mut); }
+/* панель «Вид» — своей колонкой, карточка человека остаётся видна */
+.viewCol { width: 260px; flex: none; order: 9; background: var(--ch-bg); color: var(--ch-fg); border-left: 1px solid var(--ch-edge);
+  padding: 12px 14px; overflow: auto; }
+.viewCol .vpTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.viewCol .vpTop b { font: 400 17px 'Cormorant Garamond', serif; }
+.viewCol .lbl2 { display: block; margin: 12px 0 6px; }
+.viewCol .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.viewCol .seg2 { margin-bottom: 6px; }
+.viewCol .seg2 button { flex: 1; }
+.viewCol .line { display: flex; gap: 6px; }
+.viewCol .line .btn { flex: 1; justify-content: center; }
+.viewCol .chk2 { display: flex; align-items: center; gap: 7px; font-size: 12px; margin-top: 7px; color: var(--ch-fg); }
+
+/* ── хром: в цветах стиля или тёмный, как сейчас ── */
+.app { --ch-bg: #16181b; --ch-bg2: #131518; --ch-fg: #e6e2d8; --ch-mut: #7c8492; --ch-edge: #2a2d32; --ch-line: #333941;
+  --ch-btn: #1d2126; --ch-acc: #e9c46a; --ch-on: #e9e4d8; --ch-onfg: #14161a; }
+.app.styled { --ch-bg: var(--panelbg); --ch-bg2: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--mut); --ch-edge: var(--edge);
+  --ch-line: var(--edge); --ch-btn: color-mix(in srgb, var(--fg) 7%, transparent); --ch-acc: var(--acc);
+  --ch-on: var(--acc); --ch-onfg: var(--bg); }
+.top { display: flex; align-items: center; flex-wrap: wrap; row-gap: 8px; gap: 14px; padding: 9px 14px;
+  background: var(--ch-bg); color: var(--ch-fg); border-bottom: 1px solid var(--ch-edge); }
+.top > * { flex: none; }
+.top .sp { flex: 1; }
+/* имя рода — тем же шрифтом, каким набраны имена на карточках стиля */
+.top .ttl { font-family: var(--font); font-size: 17px; line-height: 1; color: var(--ch-fg); }
+.top .divider { width: 1px; height: 20px; background: var(--ch-edge); }
+.top .clan { display: flex; flex-direction: column; gap: 2px; }
+.top .clanStatus { font: 400 10px/1 'IBM Plex Mono', monospace; color: var(--ch-mut); letter-spacing: .04em; }
+.top .statusPick { background: var(--ch-btn); color: var(--ch-fg); border: 1px solid var(--ch-line); border-radius: 5px;
+  font: 400 10.5px 'Golos Text', sans-serif; padding: 2px 4px; max-width: 260px; }
+.btn { white-space: nowrap; border: 1px solid var(--ch-line); background: var(--ch-btn); color: var(--ch-fg); border-radius: 6px;
+  padding: 6px 10px; font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+.btn.plain { border-color: transparent; background: transparent; color: var(--ch-mut); }
+.seg2 { display: flex; border: 1px solid var(--ch-line); border-radius: 6px; overflow: hidden; }
+.seg2 button { white-space: nowrap; border: 0; border-right: 1px solid var(--ch-line); background: var(--ch-btn); color: var(--ch-mut);
+  font: 500 11.5px/1 'Golos Text', sans-serif; padding: 6px 11px; cursor: pointer; }
+.seg2 button:last-child { border-right: 0; }
+.seg2 button[aria-pressed=true] { background: var(--ch-on); color: var(--ch-onfg); }
+.find { display: flex; align-items: center; gap: 7px; border: 1px solid var(--ch-line); border-radius: 6px; background: var(--ch-btn);
+  padding: 5px 10px; min-width: 200px; }
+.find input { border: 0; background: none; color: var(--ch-fg); font: 400 12px 'Golos Text', sans-serif; outline: none; width: 100%; }
+.find i { color: var(--ch-mut); font-style: normal; font-size: 12px; }
+.count { font: 400 11px/1.4 'IBM Plex Mono', monospace; color: var(--ch-mut); white-space: nowrap; }
+.lbl2 { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ch-mut); }
+
+/* ── столбец родовых деревьев ── */
+.rail { width: 216px; flex: none; background: var(--ch-bg2); color: var(--ch-fg); border-right: 1px solid var(--ch-edge);
+  padding: 10px 8px; display: flex; flex-direction: column; min-height: 0; }
+.rail.mini { width: 36px; padding: 8px 4px; align-items: center; gap: 10px; }
+.rail .railTop { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.rail .railTop .find { min-width: 0; flex: 1; padding: 4px 8px; }
+.rail .sortRow { display: flex; margin-bottom: 8px; }
+.rail .sortRow .seg2 { flex: 1; }
+.rail .sortRow .seg2 button { flex: 1; padding: 5px 4px; font-size: 11px; }
+.rail .rows { flex: 1; overflow: auto; min-height: 0; }
+.rail .group { font: 500 9px/1.3 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ch-mut);
+  padding: 10px 8px 4px; }
+.rail .row { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 6px 8px; border: 0; border-radius: 5px;
+  background: none; text-align: left; cursor: pointer; color: var(--ch-fg); }
+.rail .row:hover { background: var(--ch-btn); }
+.rail .row.on { background: color-mix(in srgb, var(--ch-acc) 22%, transparent); }
+.rail .row b { flex: 1; font: 500 12px 'Golos Text', sans-serif; }
+.rail .row small { font: 400 10px 'IBM Plex Mono', monospace; color: var(--ch-mut); }
+.rail .row .star { color: var(--ch-acc); font-size: 10px; letter-spacing: -1px; }
+.rail .statusRow { display: flex; align-items: center; gap: 6px; padding: 2px 8px 8px; }
+.rail .statusRow select { flex: 1; min-width: 0; background: var(--ch-btn); color: var(--ch-fg); border: 1px solid var(--ch-line);
+  border-radius: 5px; font: 400 11px 'Golos Text', sans-serif; padding: 4px 6px; }
+.rail .railBtn { flex: none; border: 1px solid var(--ch-line); background: var(--ch-btn); color: var(--ch-mut); border-radius: 6px;
+  padding: 5px 8px; font: 500 12px/1 'Golos Text', sans-serif; cursor: pointer; }
+.rail .railAdd { margin-top: 8px; border: 0; border-top: 1px solid var(--ch-edge); background: none; color: var(--ch-acc);
+  font: 500 11.5px 'Golos Text', sans-serif; padding: 8px 8px 2px; text-align: left; cursor: pointer; }
+.rail .vert { writing-mode: vertical-rl; font: 500 11px 'Golos Text', sans-serif; color: var(--ch-mut); letter-spacing: .04em; }
+
+/* ── легенда внизу слева: значок стиля, вкладки, знаки в несколько колонок ── */
+.legend { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 8; max-height: 74%; overflow: auto;
+  background: var(--ch-bg); color: var(--ch-fg); border: 1px solid var(--ch-edge); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.legend .lgTop { display: flex; align-items: center; gap: 9px; padding: 8px 12px; cursor: pointer; }
+.legend .lgTop b { font: 500 12px 'Golos Text', sans-serif; white-space: nowrap; }
+.legend .lgTop span { white-space: nowrap; }
+.legend .lgTop span { color: var(--ch-mut); font-size: 11px; }
+.legend .lgTop .chev { margin-left: 6px; color: var(--ch-mut); font-size: 10px; }
+.legend .tabs { display: flex; gap: 4px; padding: 0 12px 6px; }
+.legend .tabs button { border: 0; background: none; color: var(--ch-mut); font: 500 11.5px 'Golos Text', sans-serif;
+  padding: 4px 9px; border-radius: 5px; cursor: pointer; }
+.legend .tabs button[aria-pressed=true] { background: var(--ch-btn); color: var(--ch-fg); }
+.legend .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 0 16px; padding: 0 12px 12px; }
+/* знаки карточек — настоящей разметкой стиля, в уменьшенном виде */
+.glyph { flex: none; width: 118px; height: 28px; position: relative; overflow: hidden; }
+/* в окошке виден только сам знак: карточка под ним прозрачная, имя и портрет скрыты */
+.glyph .node .box { background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
+.glyph .node .box::before, .glyph .node .box::after { display: none !important; }
+.glyph .node .por, .glyph .node .nm, .glyph .node .yr, .glyph .node .ord { visibility: hidden !important; }
+.glyph .canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.glyph .node { position: absolute; }
+.legend .item { display: flex; align-items: center; gap: 9px; padding: 4px 0; }
+.legend .item b { font: 500 11.5px/1.25 'Golos Text', sans-serif; display: block; }
+.legend .item i { font-style: normal; font-size: 10.5px; color: var(--ch-mut); }
+.legend .sym { flex: none; width: 60px; height: 24px; }
+.legend .tagsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 0 16px; padding: 0 12px 6px; }
+.legend .tagItem { display: flex; align-items: center; gap: 9px; padding: 4px 0; cursor: pointer; }
+.legend .tagItem b { font: 500 11.5px 'Golos Text', sans-serif; }
+.legend .tagItem[aria-pressed=true] b { color: var(--ch-acc); }
+.legend .chip2 { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--ch-line); border-radius: 12px;
+  padding: 3px 9px; font: 500 11px 'Golos Text', sans-serif; color: var(--ch-fg); background: var(--ch-btn); cursor: pointer; }
+.legend .chip2 i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.legend .chip2[aria-pressed=true] { border-color: var(--ch-acc); color: var(--ch-acc); }
+.legend .note { color: var(--ch-mut); font-size: 10.5px; padding: 0 12px 12px; }
+</style>
+</head>
+<body data-style="gobelen" data-theme="dark">
+<h1>Легенда символами, цвет шапки и столбец родовых деревьев</h1>
+<p class="lede">Знаки в легенде нарисованы правилами стиля: у «Зала предков» нить в стежках с узелком, у «Типографии» — знак равенства
+и римская цифра у имени, у «Викторианского» — ромб, у «Ночного кабинета» — заклёпка, у «Афиши» — точка и номер союза.
+Значок самой легенды — тот же знак стиля.</p>
+<div class="ctl">
+  <div class="grp"><b>Вопрос</b><div class="sw" data-set="part">
+    <button data-v="legend" aria-pressed="true">1 · легенда</button><button data-v="chrome">2 · цвет шапки</button>
+    <button data-v="rail">3 · столбец деревьев</button>
+  </div></div>
+  <div class="grp" id="stepGrp"><b id="stepName">Шаг</b><div class="sw" data-set="step" id="steps"></div></div>
+  <div class="grp"><b>Стиль</b><div class="sw" data-set="style">
+    <button data-v="gobelen" aria-pressed="true">Зал предков</button><button data-v="viktorian">Викторианский</button>
+    <button data-v="gazeta">Типография</button><button data-v="kabinet">Ночной кабинет</button><button data-v="polotno">Афиша</button>
+  </div></div>
+  <div class="grp"><b>Тема</b><div class="sw" data-set="theme">
+    <button data-v="dark" aria-pressed="true">Тёмная</button><button data-v="light">Светлая</button>
+  </div></div>
+</div>
+<p class="about" id="about"></p>
+<div class="app" id="out"></div>
+<script>
+const CLANS = [
+  { id: 1, name: "Гленн Уриск", persons: 38, status: "old" },
+  { id: 2, name: "Уинтерхоуп", persons: 62, status: "titled" },
+  { id: 3, name: "О'Дувейн", persons: 17, status: "plain" },
+  { id: 4, name: "Монад Кройве", persons: 84, status: "titled" },
+];
+const STATUS = {
+  titled: ["★★", "титулованный древний благородный род"],
+  old: ["★", "древний благородный род"],
+  plain: ["·", "род без титула"],
+};
+const PARTS = {
+  legend: {
+    stepName: "Легенда", steps: [["closed", "свёрнута"], ["signs", "знаки"], ["tags", "метки"], ["edit", "знаки · правка"]],
+    about: "<b>Л2 · легенда внизу слева, две вкладки.</b> Свёрнутая — плашка со значком стиля и приметой рода. Раскрытая идёт " +
+      "в несколько колонок по ширине окна. Знаки нарисованы правилами стиля, подписи короткие. «Скрыт от зрителей» есть только в правке.",
+  },
+  chrome: {
+    stepName: "Хром", steps: [["styled", "в цвете стиля"], ["dark", "как сейчас"], ["view", "панель «Вид» открыта"]],
+    about: "<b>Шапка, столбец и панели — в цветах стиля.</b> Берутся те же переменные, что у карты. Имя дерева набрано шрифтом имён " +
+      "этого стиля, под ним статус. Шаг «панель „Вид“ открыта» показывает: панель встаёт своей колонкой слева от карточки человека " +
+      "и ничего не перекрывает — сужается карта.",
+  },
+  rail: {
+    stepName: "Столбец", steps: [["name", "по имени"], ["size", "по людям"], ["status", "по статусу"], ["edit", "правка: статус в шапке"], ["mini", "свёрнут"]],
+    about: "<b>Столбец родовых деревьев.</b> Статус: ★★ титулованный древний благородный, ★ древний благородный, · род без титула. " +
+      "Сортировка по имени, по людям, по статусу — тогда деревья идут группами. Статус написан и в шапке под именем дерева, " +
+      "а меняется он в правке там же, в шапке. Свёрнутый столбец подписан «Родовые деревья».",
+  },
+};
+const state = { part: "legend", step: "signs", style: "gobelen", theme: "dark" };
+let map;
+
+// ── знаки легенды: те же правила, что у связей на карте (canvas/styles.ts) ──
+const S = {
+  gobelen: { width: 1.2, past: "1 6", tip: 0 },
+  viktorian: { width: 1.2, past: "6 5", tip: 0 },
+  gazeta: { width: 1, past: "4 4", tip: 0 },
+  kabinet: { width: 1.4, past: "1 5", tip: 0 },
+  polotno: { width: 1, past: "2 5", tip: 2 },
+};
+const svg = (inner, w = 60) => `<svg class="sym" viewBox="0 0 ${w} 24">${inner}</svg>`;
+const CARD = {
+  gobelen: { w: 104, h: 126, scale: 0.62, shift: 56 },
+  viktorian: { w: 150, h: 64, scale: 0.72, shift: 0 },
+  gazeta: { w: 150, h: 58, scale: 0.72, shift: 0 },
+  kabinet: { w: 150, h: 60, scale: 0.72, shift: 0 },
+  polotno: { w: 150, h: 68, scale: 0.72, shift: 0 },
+};
+// уменьшенная карточка настоящей разметкой: классы те же, что на карте
+const glyph = (style, inner, extra = "") => {
+  const c = CARD[style];
+  return `<span class="glyph"><span class="canvas" style="transform:scale(${c.scale})">` +
+    `<div class="node has-por ${extra}" style="left:0;top:0;width:${c.w}px;height:${c.h}px">${inner}</div></span></span>`;
+};
+// знак в окошке ставится по месту: после отрисовки двигаем подложку так, чтобы знак оказался в центре
+function placeGlyphs(root) {
+  for (const glyph of root.querySelectorAll(".glyph")) {
+    const mark = glyph.querySelector("[data-mark]");
+    const canvas = glyph.querySelector(".canvas");
+    if (!mark || !canvas) continue;
+    const box = glyph.getBoundingClientRect();
+    const at = mark.getBoundingClientRect();
+    const scale = Number(canvas.style.transform.match(/scale\(([\d.]+)\)/)?.[1] ?? 1);
+    const dx = (box.left + box.width / 2 - (at.left + at.width / 2)) / scale;
+    const dy = (box.top + box.height / 2 - (at.top + at.height / 2)) / scale;
+    canvas.style.transform = `scale(${scale}) translate(${dx}px,${dy}px)`;
+  }
+}
+const box = (style, inner) => `<div class="box"><div class="por"></div><div class="nm">Дункан</div>` +
+  `<div class="yr">1740 — 1842</div>${inner}</div>`;
+const burntWord = (style) => (style === "gazeta" ? "сведения изъяты" : "выжжен из рода");
+
+const thread = (style, past) => {
+  const st = S[style];
+  const stroke = style === "gobelen" || style === "polotno" ? "var(--acc)" : "var(--link)";
+  const dash = past ? ` stroke-dasharray="${st.past}"` : "";
+  const op = past ? ' opacity=".6"' : "";
+  let out = `<path d="M4 12H56" stroke="${past ? "var(--link)" : stroke}" stroke-width="${past ? st.width : st.width + 0.5}" fill="none"${dash}${op}/>`;
+  if (style === "gobelen") {
+    for (let x = 9; x <= 48; x += 12) {
+      out += `<path d="M${x} 16l6 -8" stroke="${past ? "#7c8a76" : "var(--acc)"}" stroke-width="${past ? 1.6 : 2.3}" stroke-linecap="round" fill="none"${op}/>`;
+    }
+    if (!past) out += '<circle cx="30" cy="12" r="3" fill="#e8dcb8"/>';
+  } else if (style === "gazeta") {
+    out += `<path d="M23 9h14M23 15h14" stroke="var(--link)" stroke-width="1.3" fill="none"${op}/>`;
+  } else if (style === "viktorian") {
+    out += `<path d="M30 6.5l5.5 5.5-5.5 5.5-5.5-5.5z" fill="var(--acc)"${past ? ' opacity=".85"' : ""}/>`;
+  } else if (style === "kabinet") {
+    out += `<circle cx="30" cy="12" r="${past ? 3 : 3.4}" fill="${past ? "var(--label-past)" : "var(--acc)"}"${op}/>`;
+  } else {
+    out += `<circle cx="30" cy="12" r="2" fill="${past ? "var(--mut)" : "var(--acc)"}"${op}/>`;
+  }
+  return svg(out);
+};
+// знак союза: по нему щелчком открывается карточка семьи
+const unionSym = (style) => svg(threadLine(style) +
+  '<circle cx="30" cy="12" r="9" fill="none" stroke="var(--acc)" stroke-width="1.5" stroke-dasharray="3 3"/>');
+const threadLine = (style) => `<path d="M4 12H56" stroke="${style === "gobelen" || style === "polotno" ? "var(--acc)" : "var(--link)"}" ` +
+  `stroke-width="${S[style].width + 0.5}" fill="none"/>`;
+const ordinalSym = (style) => {
+  if (style === "gobelen") {
+    return svg('<text x="30" y="10" text-anchor="middle" fill="#a9b5a0" font-family="Caveat, cursive" font-size="12">второй</text>' +
+      '<path d="M4 17H56" stroke="var(--acc)" stroke-width="1.7" fill="none"/>');
+  }
+  if (style === "gazeta") {
+    return svg('<text x="30" y="17" text-anchor="middle" fill="var(--fg)" font-family="Playfair Display, serif" font-weight="700" font-size="13">Имя' +
+      '<tspan font-size="8" fill="var(--acc)" dy="-5">II</tspan></text>');
+  }
+  if (style === "polotno") {
+    return svg('<text x="30" y="9" text-anchor="middle" fill="var(--acc)" font-family="IBM Plex Mono, monospace" font-size="9">02</text>' +
+      '<path d="M4 16H56" stroke="var(--acc)" stroke-width="1.5" fill="none"/>');
+  }
+  return svg('<rect x="22" y="2" width="16" height="12" rx="2" fill="var(--acc)"/>' +
+    '<text x="30" y="11" text-anchor="middle" fill="var(--bg)" font-family="IBM Plex Mono, monospace" font-size="8.5">II</text>' +
+    `<path d="M4 20H56" stroke="var(--link)" stroke-width="${S[style].width}" fill="none"/>`);
+};
+const descent = (style, dashed) => svg(
+  `<path d="M14 4H46M30 4v16" stroke="var(--link)" stroke-width="${S[style].width}" fill="none"${dashed ? ' stroke-dasharray="5 4"' : ""}/>` +
+  (S[style].tip ? `<circle cx="30" cy="20" r="${S[style].tip}" fill="var(--link)"/>` : ""));
+// завиток: известен один родитель — спуск уходит вбок из-под карточки и возвращается на ось
+const curlSym = (style) => svg(
+  `<path d="M30 2c8 0 8 7 0 7c-8 0-8 7 0 7v6" stroke="var(--link)" stroke-width="${S[style].width}" fill="none" stroke-linecap="round"/>`);
+// узел без пары: маленькое кольцо над шиной, рядом подпись «родители не записаны»
+const knotSym = (style) => svg(
+  '<circle cx="30" cy="5" r="4.5" fill="var(--bg)" stroke="var(--link)" stroke-width="1.4"/>' +
+  `<path d="M30 10v5M14 15H46M18 15v6M42 15v6" stroke="var(--link)" stroke-width="${S[style].width}" fill="none"/>`);
+const heirSym = () => svg('<text x="30" y="17" text-anchor="middle" fill="var(--acc)" font-size="14">◆</text>');
+const trunkSym = () => svg('<path d="M30 2v20" stroke="var(--acc)" stroke-width="2.4" fill="none"/>');
+const burntSym = (style) => glyph(style, box(style, `<span class="badge" data-mark><i>${burntWord(style)}</i></span>`), "burnt badged");
+const hiddenSym = (style) => glyph(style, box(style, '<span class="badge calm" data-mark><i>скрыт от зрителей</i></span>'), "badged");
+const alsoSym = (style) => glyph(style, box(style, '<span class="also" data-mark><i>также в</i> Гленн Уриск</span>'), "linked");
+const tagSym = (style, color) => glyph(style, box(style, `<span class="tags" data-mark><i style="--c:${color}"></i></span>`), "has-tags");
+const foldSym = (style) => {
+  const inner = style === "polotno"
+    ? '<span>Ангус</span><span>Колин</span><small>ещё 10 · 12 в ветке</small>'
+    : style === "gazeta" ? '<i></i><i></i><i></i><span>12 в ветке</span><small>свёрнуто</small>'
+      : '<i></i><i></i><span>12 в ветке</span>';
+  return '<span class="glyph" style="height:40px"><span class="canvas" style="transform:scale(.62)">' +
+    `<div class="fold" data-mark style="left:0;top:0">${inner}</div></span></span>`;
+};
+
+// значок легенды — знак нити этого стиля
+const badge = (style) => {
+  const inner = {
+    gobelen: '<circle cx="9" cy="9" r="4" fill="#e8dcb8"/>',
+    viktorian: '<path d="M9 4l5 5-5 5-5-5z" fill="var(--ch-acc)"/>',
+    gazeta: '<path d="M3 6.5h12M3 11.5h12" stroke="var(--ch-acc)" stroke-width="1.6"/>',
+    kabinet: '<circle cx="9" cy="9" r="4.2" fill="var(--ch-acc)"/>',
+    polotno: '<circle cx="9" cy="9" r="2.6" fill="var(--ch-acc)"/>',
+  }[style];
+  return `<svg width="18" height="18" viewBox="0 0 18 18">${inner}</svg>`;
+};
+
+const SIGNS = (style, edit) => [
+  [thread(style, false), "Брак", ""],
+  [thread(style, true), "Прошлый брак", "или развод"],
+  [ordinalSym(style), "Очередь браков", ""],
+  [unionSym(style), "Знак союза", "щелчок — карточка семьи"],
+  [descent(style, false), "Дети", ""],
+  [curlSym(style), "Один родитель", "второй неизвестен"],
+  [descent(style, true), "Приёмный", "или под опекой"],
+  [knotSym(style), "Родители неизвестны", "братья одной семьи"],
+  [heirSym(), "Продолжатель", ""],
+  [trunkSym(), "Главная ветвь", ""],
+  [burntSym(style), "Выжжен из рода", ""],
+  ...(edit ? [[hiddenSym(style), "Скрыт от зрителей", "только в правке"]] : []),
+  [foldSym(style), "Свёрнутая ветка", "число потомков"],
+  [alsoSym(style), "Также в роду", "переход"],
+];
+
+function legendHtml() {
+  const open = state.step !== "closed";
+  const tab = state.step === "tags" ? "tags" : "signs";
+  const head = `<div class="lgTop">${badge(state.style)}<b>Легенда</b><span>8 поколений: Дункан — Кеннет</span>` +
+    `<span class="chev">${open ? "▾" : "▴"}</span></div>`;
+  if (!open) return `<div class="legend">${head}</div>`;
+  const tabs = `<div class="tabs"><button${tab === "signs" ? ' aria-pressed="true"' : ""}>знаки</button>` +
+    `<button${tab === "tags" ? ' aria-pressed="true"' : ""}>метки рода</button></div>`;
+  const body = tab === "signs"
+    ? `<div class="grid">${SIGNS(state.style, state.step === "edit").map(([sym, title, note]) =>
+      `<div class="item">${sym}<div><b>${title}</b>${note ? `<i>${note}</i>` : ""}</div></div>`).join("")}</div>`
+    : '<div class="tagsGrid">' +
+      `<div class="tagItem" aria-pressed="true">${tagSym(state.style, "#c9564a")}<b>Воин</b></div>` +
+      `<div class="tagItem">${tagSym(state.style, "#4f7a5a")}<b>Переселенец</b></div></div>` +
+      '<div class="note">Метка на карточке выглядит по-своему в каждом стиле. Выбранная оставляет своих людей ' +
+      'в полную силу, остальных уводит в тень.</div>';
+  return `<div class="legend">${head}${tabs}${body}</div>`;
+}
+
+// ── столбец ──
+function railHtml() {
+  if (state.part === "rail" && state.step === "mini") {
+    return '<div class="rail mini"><button class="railBtn" title="Показать список">›</button><span class="vert">Родовые деревья</span></div>';
+  }
+  const sorted = [...CLANS];
+  const order = { titled: 0, old: 1, plain: 2 };
+  if (state.step === "size") sorted.sort((a, b) => b.persons - a.persons);
+  else if (state.step === "status") sorted.sort((a, b) => order[a.status] - order[b.status] || a.name.localeCompare(b.name, "ru"));
+  else sorted.sort((a, b) => a.name.localeCompare(b.name, "ru"));
+  const edit = state.part === "rail" && state.step === "edit";
+  const row = (c) => `<button class="row${c.id === 4 ? " on" : ""}"><b>${c.name}</b><small>${c.persons}</small></button>`;
+  let rows = "";
+  if (state.step === "status") {
+    for (const key of ["titled", "old", "plain"]) {
+      const group = sorted.filter((c) => c.status === key);
+      if (group.length) rows += `<div class="group">${STATUS[key][1]}</div>` + group.map(row).join("");
+    }
+  } else {
+    rows = sorted.map(row).join("");
+  }
+  const sortRow = state.part === "rail"
+    ? '<div class="sortRow"><div class="seg2">' +
+      `<button${state.step === "name" || state.step === "edit" ? ' aria-pressed="true"' : ""}>имени</button>` +
+      `<button${state.step === "size" ? ' aria-pressed="true"' : ""}>людям</button>` +
+      `<button${state.step === "status" ? ' aria-pressed="true"' : ""}>статусу</button></div></div>`
+    : "";
+  return '<div class="rail"><div class="railTop"><div class="find"><i>⌕</i><input placeholder="найти дерево"></div>' +
+    '<button class="railBtn" title="Спрятать список">‹</button></div>' + sortRow +
+    `<div class="rows">${rows}</div><button class="railAdd">+ загрузить .ged</button></div>`;
+}
+
+const bar = () => {
+  const edit = state.part === "rail" && state.step === "edit";
+  return '<div class="top"><span class="lbl2">род</span><div class="clan"><span class="ttl">Монад Кройве</span>' +
+    (edit
+      ? '<select class="statusPick">' + Object.values(STATUS).map(([, name], i) =>
+        `<option${i === 0 ? " selected" : ""}>${name}</option>`).join("") + "</select>"
+      : '<span class="clanStatus">титулованный древний благородный род</span>') + "</div>" +
+    '<span class="lbl2">поиск</span><div class="find"><i>⌕</i><input placeholder="имя или фамилия"></div>' +
+    `<span class="lbl2">режим</span><div class="seg2"><button${edit ? "" : ' aria-pressed="true"'}>Просмотр</button>` +
+    `<button${edit ? ' aria-pressed="true"' : ""}>Правка</button></div>` +
+    (edit ? '<button class="btn plain">↶ Отменить</button><button class="btn plain">Журнал · 4</button>' : "") +
+    '<span class="lbl2">связки</span><button class="btn plain">Проверить 7</button><div class="sp"></div>' +
+    '<span class="lbl2">вид</span><div class="seg2"><button>−</button><button aria-pressed="true">100%</button><button>+</button></div>' +
+    '<button class="btn plain">Целиком</button><button class="btn plain">К выбранному</button>' +
+    '<button class="btn">⚙ Вид</button>' +
+    '<button class="btn plain">+ Загрузить .ged</button><button class="btn plain">Выгрузить .ged</button>' +
+    '<span class="count">84 человека · 36 семей</span></div>';
+};
+
+const viewPanelHtml = () => '<aside class="viewCol"><div class="vpTop"><b>Вид</b><button class="railBtn">×</button></div>' +
+  '<span class="lbl2">стиль</span><div class="styles">' +
+  [["gobelen", "Зал предков"], ["viktorian", "Викторианский"], ["gazeta", "Типография"], ["kabinet", "Ночной кабинет"], ["polotno", "Афиша"]]
+    .map(([id, name]) => `<button class="btn${id === state.style ? " on" : ""}">${name}</button>`).join("") + "</div>" +
+  '<span class="lbl2">тема</span><div class="seg2"><button aria-pressed="true">☾ тёмная</button><button>☀ светлая</button></div>' +
+  '<span class="lbl2">древо</span><div class="seg2"><button aria-pressed="true">стандарт</button><button>главная ветвь</button></div>' +
+  '<div class="seg2"><button aria-pressed="true">основатель сверху</button><button>снизу</button></div>' +
+  '<div class="line"><button class="btn">свернуть все</button><button class="btn">развернуть все</button></div>' +
+  '<span class="lbl2">карточки</span><div class="seg2"><button>без фамилий</button><button aria-pressed="true">девичья</button>' +
+  '<button>после брака</button></div>' +
+  '<label class="chk2"><input type="checkbox" checked> портреты</label>' +
+  '<label class="chk2"><input type="checkbox"> линейка дат</label></aside>';
+
+const sideHtml = () => '<div class="sideMini"><b>Кайл Монад Кройве</b><span>1855 — 1924</span>' +
+  '<div class="sideRow"><i>отец</i>Юэн Монад Кройве</div><div class="sideRow"><i>мать</i>Хелен МакМиллан</div>' +
+  '<div class="sideRow"><i>браки</i>Мюриэль Сазерленд, Иннис МакЛарен</div></div>';
+
+function draw() {
+  // знаки в легенде ставятся по месту после отрисовки
+  const part = PARTS[state.part];
+  if (!part.steps.some(([k]) => k === state.step)) state.step = part.steps[0][0];
+  document.body.dataset.style = state.style;
+  document.body.dataset.theme = state.theme;
+  document.getElementById("steps").innerHTML = part.steps
+    .map(([k, n]) => `<button data-v="${k}"${k === state.step ? ' aria-pressed="true"' : ""}>${n}</button>`).join("");
+  document.getElementById("stepName").textContent = part.stepName;
+  document.getElementById("about").innerHTML = part.about;
+  document.querySelectorAll(".ctl .sw[data-set]").forEach((sw) => sw.querySelectorAll("button")
+    .forEach((b) => b.setAttribute("aria-pressed", String(state[sw.dataset.set] === b.dataset.v))));
+
+  const app = document.getElementById("out");
+  app.className = state.part === "chrome" && state.step === "dark" ? "app" : "app styled";
+  const s = map.scenes[`${state.style}|base`];
+  app.innerHTML = bar() + `<div class="body">${railHtml()}<div class="map"><div class="canvas" style="width:${s.width}px;height:${s.height}px">` +
+    `<svg class="links" width="${s.width}" height="${s.height}">${s.links}</svg>${s.cards}</div>` +
+    (state.part === "legend" ? legendHtml() : "") + "</div>" +
+    '<aside class="side">' + sideHtml() + "</aside>" +
+    (state.part === "chrome" && state.step === "view" ? viewPanelHtml() : "") + "</div>";
+  const box = app.querySelector(".map");
+  const k = 0.5;
+  const at = s.at[map.ids.duncan];
+  box.querySelector(".canvas").style.transform =
+    `translate(${box.clientWidth / 2 - (at[0] + s.w / 2) * k}px,${box.clientHeight / 2 - (at[1] + s.h / 2 + 160) * k}px) scale(${k})`;
+  placeGlyphs(app);
+}
+
+document.querySelector(".ctl").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); const sw = b?.closest(".sw[data-set]"); if (!sw) return;
+  state[sw.dataset.set] = b.dataset.v;
+  draw();
+});
+fetch("../карта/карточка.data.json").then((r) => r.json()).then((d) => { map = d; draw(); });
+</script>
+</body>
+</html>
