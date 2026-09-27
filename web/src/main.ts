@@ -27,25 +27,23 @@ import { FamilyEditor } from "./editor/family";
 import { PersonEditor } from "./editor/form";
 import { Journal } from "./editor/journal";
 import { RelativeMenu } from "./editor/menu";
+import { ClanRail } from "./panel/clans";
 import { PersonPanel } from "./panel/panel";
+import { ViewPanel, type ViewMode } from "./panel/viewpanel";
 import { SearchBox } from "./panel/search";
 import { UploadFlow } from "./upload/upload";
-import type { StyleName } from "./layout/metrics";
 import { silhouette } from "./canvas/portrait";
-import { TAG_COLORS, type TagSet } from "./canvas/tags";
-
-const STYLES: [StyleName, string][] = [
-  ["gobelen", "Гобелен"],
-  ["viktorian", "Викторианский"],
-  ["gazeta", "Газета"],
-  ["kabinet", "Ночной кабинет"],
-  ["polotno", "Полотно II"],
-];
 
 async function getJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`${url}: ${response.status}`);
   return (await response.json()) as T;
+}
+
+function spacer(): HTMLElement {
+  const gap = document.createElement("div");
+  gap.className = "topGap";
+  return gap;
 }
 
 function switcher<T extends string | number>(
@@ -100,6 +98,20 @@ async function start(root: HTMLElement): Promise<void> {
     return;
   }
 
+  // столбец родов слева от карты, панели «Вид» и «Легенда» — справа поверх панели человека
+  const rail = new ClanRail({
+    pick: (id) => {
+      if (id === currentClan) return;
+      if (upload.reviewing) {
+        upload.cancel(false);
+        panel.element.hidden = false;
+      }
+      nav.forget(); // сменил род сам — дорога назад по связке больше не нужна
+      void loadClan(id);
+    },
+    add: () => upload.choose(),
+  });
+  stage.append(rail.element);
   const canvas = new TreeCanvas(stage);
   let tree: ClanTree | null = null;
   let currentClan = clans[0]!.id;
@@ -113,7 +125,7 @@ async function start(root: HTMLElement): Promise<void> {
   // связки: сноска на карте и строка в панели ведут в другой род, лента над картой — обратно
   const nav = new LinkNav(stage, {
     goTo: async (clanId, personId) => {
-      drawClanTabs(clanId);
+      showClan(clanId);
       await loadClan(clanId);
       arrive(personId);
     },
@@ -136,7 +148,7 @@ async function start(root: HTMLElement): Promise<void> {
     tree: treeOf,
     show: async (clanId, personId) => {
       if (clanId !== currentClan) {
-        drawClanTabs(clanId);
+        showClan(clanId);
         await loadClan(clanId);
       }
       arrive(personId);
@@ -193,6 +205,70 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.select(id);
     canvas.goToSelected();
   };
+  let viewMode: ViewMode = null;
+  const viewPanel = new ViewPanel(stage, {
+    style: (style) => {
+      document.body.dataset.style = style;
+      canvas.update({ style });
+      review.refresh();
+      drawViewPanel();
+    },
+    theme: (theme) => {
+      document.body.dataset.theme = theme;
+      canvas.render();
+      drawViewPanel();
+    },
+    mainLine: (on) => {
+      canvas.update({ mainLine: on });
+      drawViewPanel();
+    },
+    rootAtBottom: (on) => {
+      canvas.update({ rootAtBottom: on });
+      drawViewPanel();
+    },
+    surnames: (mode) => {
+      canvas.setSurnames(mode === "off" ? null : mode);
+      drawViewPanel();
+    },
+    portraits: (on) => {
+      canvas.showPortraits(on);
+      review.refresh();
+      if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
+    },
+    ruler: (on) => canvas.update({ ruler: on }),
+    foldAll: () => canvas.foldAll(),
+    unfoldAll: () => canvas.unfoldAll(),
+    filter: (tag) => {
+      canvas.filterByTag(tag);
+      drawViewPanel();
+    },
+    closed: () => setViewMode(null),
+  });
+  const drawViewPanel = () => {
+    viewPanel.show(viewMode, {
+      style: canvas.state.style,
+      theme: (document.body.dataset.theme as "dark" | "light") ?? "dark",
+      mainLine: canvas.state.mainLine,
+      hasHeirs: canvas.heirs.size > 0,
+      rootAtBottom: canvas.state.rootAtBottom,
+      surnames: canvas.surnames ?? "off",
+      portraits: canvas.portraits,
+      ruler: canvas.state.ruler,
+      tags: canvas.tags,
+      filter: canvas.filter,
+    });
+  };
+  const setViewMode = (mode: ViewMode) => {
+    viewMode = viewMode === mode ? null : mode;
+    drawViewPanel();
+    for (const [name, button] of [["view", viewBtn], ["legend", legendBtn]] as const) {
+      button.setAttribute("aria-pressed", String(viewMode === name));
+    }
+  };
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && viewMode) setViewMode(null);
+  });
+
   const panel = new PersonPanel(stage, {
     select: focus,
     nudge: (id, direction) => {
@@ -298,7 +374,7 @@ async function start(root: HTMLElement): Promise<void> {
     ]);
     tree = loaded;
     clans = summaries;
-    drawClanTabs(currentClan);
+    showClan(currentClan);
     search.setTree(tree);
     canvas.links = links;
     // метки, состояния, линия и снимки тоже могли поменяться этой правкой
@@ -308,8 +384,7 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.heirs = data.heirs;
     canvas.photos = data.photos;
     canvas.noPortrait = data.noPortrait;
-    lineSwitch.hidden = !data.heirs.size;
-    drawTagFilter(data.tags);
+    drawViewPanel(); // в панели «Вид» мог появиться переключатель главной ветви, в легенде — метки
     canvas.refreshTree(tree, focusId);
     if (focusId != null) canvas.centreOnPerson(focusId);
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
@@ -336,6 +411,7 @@ async function start(root: HTMLElement): Promise<void> {
   let beforeReview = currentClan; // куда вернуться, если разбор отменён
   const loadClan = async (id: number) => {
     currentClan = id;
+    showClan(id);
     const [loaded, links] = await Promise.all([getJson<ClanTree>(`/api/clans/${id}/tree`), nav.load(id)]);
     tree = loaded;
     search.setTree(tree);
@@ -344,8 +420,7 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.photos = data.photos;
     canvas.noPortrait = data.noPortrait;
     canvas.setTree(tree, data.marks, new Map(), data.tags, data.heirs);
-    lineSwitch.hidden = !data.heirs.size;
-    drawTagFilter(data.tags);
+    drawViewPanel(); // в панели «Вид» мог появиться переключатель главной ветви, в легенде — метки
     void journal.refresh();
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
@@ -354,7 +429,7 @@ async function start(root: HTMLElement): Promise<void> {
     created: async (clan) => {
       trees.clear();
       clans = await getJson<ClanSummary[]>("/api/clans");
-      drawClanTabs(clan.id);
+      showClan(clan.id);
       await loadClan(clan.id);
       void countQueue();
     },
@@ -372,7 +447,7 @@ async function start(root: HTMLElement): Promise<void> {
       panel.element.hidden = false;
       const target = report ? clanId : beforeReview;
       clans = await getJson<ClanSummary[]>("/api/clans");
-      drawClanTabs(target);
+      showClan(target);
       await loadClan(target);
       if (report) {
         stat.textContent += ` · перезалито: добавлено ${report.added}, изменено ${report.changed}, удалено ${report.deleted}`;
@@ -382,6 +457,36 @@ async function start(root: HTMLElement): Promise<void> {
     },
     focus: (id) => canvas.centreOnPerson(id),
   });
+
+  // род в шапке: название и счёт; сам список — в столбце слева
+  const clanTitle = document.createElement("div");
+  clanTitle.className = "clanTitle";
+  const exportLink = document.createElement("a");
+  exportLink.className = "topLink";
+  exportLink.textContent = "Выгрузить .ged";
+  exportLink.title = "Выгрузить этот род файлом GEDCOM";
+  exportLink.setAttribute("download", "");
+  const addLink = document.createElement("button");
+  addLink.className = "topLink";
+  addLink.textContent = "+ Загрузить .ged";
+  addLink.addEventListener("click", () => upload.choose());
+  const showClan = (id: number) => {
+    const clan = clans.find((c) => c.id === id);
+    rail.setClans(clans, id);
+    clanTitle.innerHTML = `<span class="lbl2">род</span><b>${clan?.name ?? ""}</b>`;
+    exportLink.href = `/api/clans/${id}/export`;
+  };
+
+  const viewBtn = document.createElement("button");
+  viewBtn.className = "topBtn";
+  viewBtn.textContent = "⚙ Вид";
+  viewBtn.title = "Стиль, тема, древо, карточки";
+  viewBtn.addEventListener("click", () => setViewMode("view"));
+  const legendBtn = document.createElement("button");
+  legendBtn.className = "topBtn";
+  legendBtn.textContent = "Легенда";
+  legendBtn.title = "Что значат линии и знаки на карте; метки рода";
+  legendBtn.addEventListener("click", () => setViewMode("legend"));
 
   // масштаб: щелчок по числу открывает ввод, Delete в нём возвращает к 100 %
   const zoomValue = document.createElement("button");
@@ -428,7 +533,6 @@ async function start(root: HTMLElement): Promise<void> {
 
   const viewGroup = document.createElement("div");
   viewGroup.className = "grp";
-  viewGroup.innerHTML = "<b>Вид</b>";
   const zoomRow = document.createElement("div");
   zoomRow.className = "sw";
   const button = (text: string, title: string, action: () => void) => {
@@ -449,127 +553,24 @@ async function start(root: HTMLElement): Promise<void> {
   placeRow.append(button("Целиком", "Показать род целиком", () => canvas.fit()), button("К выбранному", "Центр на выбранном", () => canvas.goToSelected()));
   viewGroup.append(zoomRow, placeRow);
 
-  // кнопки меток: выбранная оставляет своих людей в полную силу, остальных уводит в тень
-  const tagFilter = document.createElement("div");
-  tagFilter.className = "grp";
-  const drawTagFilter = (tags: TagSet) => {
-    if (!tags.list.length) {
-      tagFilter.hidden = true;
-      return;
-    }
-    tagFilter.hidden = false;
-    tagFilter.innerHTML = '<b>Метки</b><div class="tagFilter"></div>';
-    const row = tagFilter.querySelector(".tagFilter")!;
-    for (const tag of tags.list) {
-      const chip = document.createElement("button");
-      chip.className = "chip";
-      chip.style.setProperty("--c", TAG_COLORS[tag.color]);
-      chip.innerHTML = `<i></i>${tag.name}`;
-      chip.setAttribute("aria-pressed", "false");
-      chip.addEventListener("click", () => {
-        const on = chip.getAttribute("aria-pressed") !== "true";
-        row.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === chip && on)));
-        canvas.filterByTag(on ? tag.id : null);
-      });
-      row.append(chip);
-    }
-  };
-
-  const portraitLabel = document.createElement("label");
-  portraitLabel.className = "chk";
-  portraitLabel.innerHTML = '<input type="checkbox" checked> портреты';
-  portraitLabel.querySelector("input")!.addEventListener("change", (e) => {
-    canvas.showPortraits((e.target as HTMLInputElement).checked);
-    review.refresh();
-    if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
-  });
-
-  // вид древа: стандарт — раскладка обычная, главная ветвь тонким стволом; «главная ветвь» — пары над продолжателями.
-  // Без отмеченных продолжателей переключателя нет
-  const lineSwitch = switcher("Вид древа", [["plain", "стандарт"], ["main", "главная ветвь"]] as [string, string][], "plain",
-    (mode) => canvas.update({ mainLine: mode === "main" }));
-
-  // фамилия второй строкой на карточке: при рождении (у жён — девичья) или после брака
-  const surnameSwitch = switcher("Фамилии", [["off", "выкл."], ["maiden", "девичья"], ["married", "после брака"]] as [string, string][],
-    "maiden", (mode) => {
-      canvas.setSurnames(mode === "off" ? null : (mode as "maiden" | "married"));
-    });
-
-  // ветки: свернуть все — остаются основатели и стопки, щелчок по стопке раскрывает по поколению
-  const branchGroup = document.createElement("div");
-  branchGroup.className = "grp";
-  branchGroup.innerHTML = "<b>Ветки</b>";
-  const branchRow = document.createElement("div");
-  branchRow.className = "sw";
-  branchRow.append(
-    button("свернуть все", "Свернуть все ветки: останутся основатели и стопки", () => canvas.foldAll()),
-    button("развернуть все", "Развернуть все ветки сразу", () => canvas.unfoldAll()),
-  );
-  branchGroup.append(branchRow);
-  lineSwitch.hidden = true;
-
-  const rulerLabel = document.createElement("label");
-  rulerLabel.className = "chk";
-  rulerLabel.innerHTML = '<input type="checkbox"> линейка дат';
-  rulerLabel.querySelector("input")!.addEventListener("change", (e) => {
-    canvas.update({ ruler: (e.target as HTMLInputElement).checked });
-  });
-
   const stat = document.createElement("div");
   stat.className = "hint";
 
-  // вкладки родов и кнопка загрузки; перерисовываются, когда родов или людей в них становится больше
-  const clanTabs = document.createElement("div");
-  const drawClanTabs = (current: number) => {
-    const group = switcher("Род", clans.map((c) => [c.id, `${c.name} · ${c.persons}`]), current, (id) => {
-      if (upload.reviewing) {
-        upload.cancel(false);
-        panel.element.hidden = false;
-      }
-      nav.forget(); // сменил род сам — дорога назад по связке больше не нужна
-      void loadClan(id);
-    });
-    const add = document.createElement("button");
-    add.className = "add";
-    add.textContent = "+ Загрузить .ged";
-    add.addEventListener("click", () => upload.choose());
-    // выгрузка открытого рода файлом — со всеми правками и всем, что пришло из исходного файла
-    const exportLink = document.createElement("a");
-    exportLink.className = "swLink";
-    exportLink.textContent = "Выгрузить .ged";
-    exportLink.title = "Выгрузить этот род файлом GEDCOM";
-    exportLink.href = `/api/clans/${current}/export`;
-    exportLink.setAttribute("download", "");
-    group.querySelector(".sw")!.append(add, exportLink);
-    clanTabs.replaceChildren(group);
-  };
-  drawClanTabs(currentClan);
+  showClan(currentClan);
 
+  // шапка: слева род и поиск, посередине режим и журнал, справа масштаб, панели и файлы
   bar.append(
-    clanTabs,
+    clanTitle,
+    search.element,
     modeSwitch,
     journal.group,
     queueGroup,
-    search.element,
-    switcher("Стиль", STYLES, "gobelen", (style) => {
-      document.body.dataset.style = style;
-      canvas.update({ style });
-      review.refresh();
-    }),
-    switcher("Тема", [["dark", "Тёмная"], ["light", "Светлая"]], "dark", (theme) => {
-      document.body.dataset.theme = theme;
-      canvas.render();
-    }),
+    spacer(),
     viewGroup,
-    branchGroup,
-    switcher("Основатель", [["top", "сверху"], ["bottom", "снизу"]], "top", (side) => {
-      canvas.update({ rootAtBottom: side === "bottom" });
-    }),
-    lineSwitch,
-    surnameSwitch,
-    portraitLabel,
-    rulerLabel,
-    tagFilter,
+    viewBtn,
+    legendBtn,
+    addLink,
+    exportLink,
     stat,
   );
 

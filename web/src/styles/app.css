@@ -58,3 +58,89 @@ body { margin: 0; font-family: 'Golos Text', system-ui, sans-serif; background: 
 .viewport .legend button { border: 0; background: none; color: var(--acc); font: 500 11px 'Golos Text', sans-serif; padding: 0; margin-top: 4px; cursor: pointer; }
 .viewport .legend.closed { padding: 5px 9px; }
 .viewport .legend.closed button { margin: 0; }
+
+/* ── шапка: слева род и поиск, справа масштаб, панели и файлы ── */
+.bar .clanTitle { display: flex; align-items: baseline; gap: 8px; }
+.bar .clanTitle b { font: 400 16px/1 'Cormorant Garamond', serif; color: #e6e2d8; letter-spacing: .02em; }
+.bar .lbl2 { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #7c8492; }
+.bar .topGap { flex: 1; }
+.bar .topBtn { border: 1px solid #333941; background: #1d2126; color: #cfd5de; border-radius: 6px; padding: 6px 11px;
+  font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; white-space: nowrap; }
+.bar .topBtn[aria-pressed=true] { background: #e9e4d8; color: #14161a; border-color: #e9e4d8; }
+.bar .topLink { border: 0; background: none; color: #aeb6c2; font: 500 11.5px/1 'Golos Text', sans-serif;
+  cursor: pointer; text-decoration: none; white-space: nowrap; padding: 6px 2px; }
+.bar .topLink:hover { color: #e9c46a; }
+.bar .hint { margin-left: 0; }
+
+/* ── столбец родов слева ── */
+.rail { width: 208px; flex: none; background: #131518; border-right: 1px solid #2a2d32; padding: 10px 8px;
+  display: flex; flex-direction: column; min-height: 0; }
+.rail.mini { width: 34px; padding: 8px 4px; align-items: center; gap: 10px; }
+.rail .railTop { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.rail .find { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; border: 1px solid #333941; border-radius: 6px;
+  background: #1d2126; padding: 4px 8px; }
+.rail .find i { color: #7c8492; font-style: normal; font-size: 12px; }
+.rail .find input { border: 0; background: none; color: #e6e2d8; font: 400 12px 'Golos Text', sans-serif; outline: none; width: 100%; }
+.rail .railBtn { flex: none; border: 1px solid #333941; background: #1d2126; color: #aeb6c2; border-radius: 6px;
+  padding: 5px 8px; font: 500 12px/1 'Golos Text', sans-serif; cursor: pointer; }
+.rail .rows { flex: 1; overflow: auto; min-height: 0; }
+.rail .row { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 6px 8px; border: 0; border-radius: 5px;
+  background: none; text-align: left; cursor: pointer; }
+.rail .row:hover { background: #1d2126; }
+.rail .row.on { background: #24282e; }
+.rail .row b { flex: 1; font: 500 12px 'Golos Text', sans-serif; color: #e6e2d8; }
+.rail .row small { font: 400 10px 'IBM Plex Mono', monospace; color: #7c8492; }
+.rail .railAdd { margin-top: 8px; border: 0; border-top: 1px solid #2a2d32; background: none; color: #e9c46a;
+  font: 500 11.5px 'Golos Text', sans-serif; padding: 8px 8px 2px; text-align: left; cursor: pointer; }
+.rail .railNote { color: #6f7783; font-size: 11px; padding: 6px 8px; }
+.rail .vert { writing-mode: vertical-rl; font: 500 11px 'Golos Text', sans-serif; color: #7c8492; letter-spacing: .04em; }
+
+/* ── панели «Вид» и «Легенда» справа ── */
+.viewPanel { position: absolute; right: 0; top: 0; bottom: 0; width: 300px; z-index: 14; overflow: auto;
+  background: #16181b; border-left: 1px solid #2a2d32; padding: 12px 14px 18px; }
+.viewPanel .vpTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.viewPanel .vpTop b { font: 400 17px/1 'Cormorant Garamond', serif; color: #e6e2d8; }
+.viewPanel .vpClose { border: 0; background: none; color: #aeb6c2; font-size: 16px; cursor: pointer; padding: 0 2px; }
+.viewPanel .sec { margin-top: 14px; }
+.viewPanel .sec:first-of-type { margin-top: 0; }
+.viewPanel .lbl2 { display: block; font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+  color: #7c8492; margin-bottom: 7px; }
+.viewPanel .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.viewPanel .vpBtn { border: 1px solid #333941; background: #1d2126; color: #cfd5de; border-radius: 6px; padding: 7px 8px;
+  font: 500 11.5px/1.1 'Golos Text', sans-serif; cursor: pointer; }
+.viewPanel .vpBtn.on { background: #e9e4d8; color: #14161a; border-color: #e9e4d8; }
+.viewPanel .seg2 { display: flex; border: 1px solid #333941; border-radius: 6px; overflow: hidden; margin-bottom: 7px; }
+.viewPanel .seg2 button { flex: 1; border: 0; border-right: 1px solid #333941; background: #1d2126; color: #aeb6c2;
+  font: 500 11.5px/1 'Golos Text', sans-serif; padding: 7px 6px; cursor: pointer; white-space: nowrap; }
+.viewPanel .seg2 button:last-child { border-right: 0; }
+.viewPanel .seg2 button[aria-pressed=true] { background: #e9e4d8; color: #14161a; }
+.viewPanel .line { display: flex; gap: 6px; }
+.viewPanel .line .vpBtn { flex: 1; }
+.viewPanel .chk2 { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #cfd5de; margin-top: 6px; }
+.viewPanel .vpNote { color: #6f7783; font-size: 11px; line-height: 1.45; margin-top: 8px; }
+
+/* легенда: образец слева, объяснение справа */
+.viewPanel .legRow { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; }
+.viewPanel .legRow span b { display: block; font: 500 12px 'Golos Text', sans-serif; color: #e6e2d8; }
+.viewPanel .legRow span i { display: block; font-style: normal; font-size: 11px; color: #7c8492; line-height: 1.35; }
+.legSample { flex: none; width: 34px; height: 18px; margin-top: 2px; position: relative; }
+.legSample.lg-line::before, .legSample.lg-past::before, .legSample.lg-trunk::before { content: ''; position: absolute; left: 0; right: 0; top: 9px;
+  border-top: 1.4px solid var(--acc, #c90); }
+.legSample.lg-past::before { border-top-style: dashed; opacity: .55; }
+.legSample.lg-trunk::before { border-top-width: 2.4px; }
+.legSample.lg-ord::before { content: 'первый'; position: absolute; inset: 0; font: 400 10px/18px 'Cormorant Garamond', serif;
+  color: var(--acc, #c90); text-align: center; }
+.legSample.lg-drop::before, .legSample.lg-foster::before { content: ''; position: absolute; left: 16px; top: 0; bottom: 0;
+  border-left: 1.4px solid var(--link, #888); }
+.legSample.lg-foster::before { border-left-style: dashed; }
+.legSample.lg-knot::before { content: ''; position: absolute; left: 11px; top: 2px; width: 10px; height: 10px;
+  border: 1.4px solid var(--link, #888); border-radius: 50%; }
+.legSample.lg-knot::after { content: ''; position: absolute; left: 4px; right: 4px; top: 15px; border-top: 1.4px solid var(--link, #888); }
+.legSample.lg-dia::before { content: '◆'; position: absolute; inset: 0; color: var(--acc, #c90); font-size: 11px; line-height: 18px; text-align: center; }
+.legSample.lg-burnt::before { content: ''; position: absolute; inset: 1px 6px; border-radius: 3px; background: #2a1a16;
+  box-shadow: inset 0 0 6px 2px rgba(60, 12, 6, .8); }
+.legSample.lg-hidden::before { content: ''; position: absolute; inset: 1px 6px; border-radius: 3px; border: 1px dashed #5d6470; opacity: .7; }
+.legSample.lg-fold::before { content: ''; position: absolute; inset: 3px 4px; border-radius: 2px; border: 1px solid #4a515c;
+  background: #22262c; box-shadow: 2px 2px 0 #1a1d22; }
+.legSample.lg-also::before { content: 'также в'; position: absolute; inset: 0; font: italic 400 9px/18px 'Cormorant Garamond', serif;
+  color: var(--acc, #c90); text-align: center; }
