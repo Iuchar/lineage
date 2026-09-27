@@ -9,7 +9,8 @@ import type { StyleName } from "../layout/metrics";
 
 const KEY = "rodoslovnye.legend";
 const LINE = 60; // ширина рисованного знака — линии, спуска, ромба
-const LABEL = 156; // место под подпись с пояснением
+const COLUMN_MAX = 320; // дальше длинное пояснение переносится, а не растягивает всю сетку
+const COLUMN_MIN = 120;
 const GAP = 18; // просвет между колонками
 const FRAME = 26; // поля плашки вместе с рамкой
 
@@ -35,7 +36,7 @@ export class LegendPanel {
   private state: LegendState | null = null;
 
   private readonly host: HTMLElement;
-  private column = LINE + 9 + LABEL;
+  private column = COLUMN_MIN;
 
   constructor(host: HTMLElement, private readonly actions: LegendActions) {
     this.host = host;
@@ -80,20 +81,36 @@ export class LegendPanel {
     this.element.style.setProperty("--cols", String(Math.max(1, Math.min(count, wide))));
   }
 
-  // окошко знака — по самому широкому знаку набора: у одних линий оно узкое,
-  // с плашкой «выжжен из рода» — шире, и пустого поля рядом со знаком не остаётся
+  // всё меряется по тому, что стоит в строках: окошко знака — по самому широкому знаку набора,
+  // колонка — по самой длинной строке. Фиксированного места ни под знак, ни под текст нет
   private measure(): void {
-    // два прохода: первый ставит окошко по знакам, второй уточняет его и ставит знаки в середину
+    let sign = LINE;
+    // два прохода: первый ставит окошко по знакам, второй уточняет его
     for (let pass = 0; pass < 2; pass++) {
       // минимум в ширину рисованного знака нужен только там, где такие знаки есть:
       // у меток рода знак бывает с ноготок, и окошко под линию оставляло бы пустое поле
       const lines = this.element.querySelector(".sym") ? LINE : 16;
-      const sign = Math.max(lines, Math.ceil(placeGlyphs(this.element)) + 6);
-      this.column = sign + 9 + LABEL;
+      sign = Math.max(lines, Math.ceil(placeGlyphs(this.element)) + 6);
       this.element.style.setProperty("--sign", `${sign}px`);
-      this.element.style.setProperty("--col", `${this.column}px`);
     }
+    this.column = this.widestRow();
+    this.element.style.setProperty("--col", `${this.column}px`);
     placeGlyphs(this.element);
+  }
+
+  // строки на миг разворачиваются в одну линию: видно их настоящую ширину — со знаком,
+  // подписью и счётом, — и колонку задаёт самая длинная из них. Заодно меряется шапка:
+  // плашка не бывает уже собственного заголовка
+  private widestRow(): number {
+    this.element.classList.add("measuring");
+    let widest = 0;
+    for (const row of this.element.querySelectorAll<HTMLElement>(".lgItem")) {
+      widest = Math.max(widest, row.getBoundingClientRect().width);
+    }
+    const top = this.element.querySelector<HTMLElement>(".lgTop");
+    this.element.style.setProperty("--head", `${Math.ceil(top?.getBoundingClientRect().width ?? 0) + 2}px`);
+    this.element.classList.remove("measuring");
+    return Math.min(COLUMN_MAX, Math.max(COLUMN_MIN, Math.ceil(widest) + 4));
   }
 
   show(state: LegendState): void {
@@ -111,7 +128,8 @@ export class LegendPanel {
     this.element.hidden = !signs.length && !s.tags.list.length;
     this.element.classList.toggle("open", this.open);
     const head = `<div class="lgTop">${legendBadge(s.style)}<b>Легенда</b>` +
-      `${s.line ? `<span>${escapeHtml(s.line)}</span>` : ""}<span class="chev">${this.open ? "▾" : "▴"}</span></div>`;
+      `<span class="chev">${this.open ? "▾" : "▴"}</span>` +
+      `${s.line ? `<span>${escapeHtml(s.line)}</span>` : ""}</div>`;
     if (!this.open) {
       this.element.innerHTML = head;
       return;
@@ -141,12 +159,20 @@ export class LegendPanel {
 
   private tagsHtml(s: LegendState): string {
     if (!s.tags.list.length) {
-      return '<div class="lgNote">В этом дереве меток нет. Метку ставят человеку в правке.</div>';
+      return '<div class="lgNote">Меток в этом дереве нет — их ставят человеку в правке.</div>';
     }
-    return `<div class="lgGrid">${s.tags.list.map((tag) =>
-      `<div class="lgItem tag" data-tag="${escapeHtml(tag.id)}" aria-pressed="${s.filter === tag.id}">` +
-      `<span class="lgSign">${tagGlyph(s.style, TAG_COLORS[tag.color])}</span>` +
-      `<div><b>${escapeHtml(tag.name)}</b></div></div>`).join("")}</div>` +
-      '<div class="lgNote">Выбранная метка оставляет своих людей в полную силу, остальных уводит в тень.</div>';
+    // у метки стоит счёт её людей, как у дерева в столбце; что метка ещё и отбирает людей
+    // на карте, говорит подсказка — объяснять это строкой под списком не нужно
+    const counts = new Map<string, number>();
+    for (const ids of s.tags.of.values()) {
+      for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    return `<div class="lgGrid">${s.tags.list.map((tag) => {
+      const on = s.filter === tag.id;
+      return `<div class="lgItem tag" data-tag="${escapeHtml(tag.id)}" aria-pressed="${on}" ` +
+        `title="${on ? "Вернуть всех" : "Оставить на виду только этих"}">` +
+        `<span class="lgSign">${tagGlyph(s.style, TAG_COLORS[tag.color])}</span>` +
+        `<div><b>${escapeHtml(tag.name)}</b></div><small>${counts.get(tag.id) ?? 0}</small></div>`;
+    }).join("")}</div>`;
   }
 }

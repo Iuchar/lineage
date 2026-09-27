@@ -135,7 +135,7 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
   border: 1px solid var(--ch-edge); border-radius: 6px; box-shadow: 0 8px 26px rgba(0, 0, 0, .32); }
 /* раскрытая — по содержимому: колонок столько, сколько знаков, но не больше, чем влезает в карту */
 .viewport .legend.open { width: min(calc(100% - 28px),
-  calc(var(--cols, 1) * var(--col, 225px) + (var(--cols, 1) - 1) * 18px + 26px)); }
+  max(var(--head, 0px), calc(var(--cols, 1) * var(--col, 225px) + (var(--cols, 1) - 1) * 18px + 26px))); }
 .legend .lgTop { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 9px; padding: 8px 12px; cursor: pointer; }
 .legend .lgTop b { font: 500 12px 'Golos Text', sans-serif; white-space: nowrap; }
 .legend .lgTop > span { color: var(--ch-mut); font-size: 11px; }
@@ -158,8 +158,14 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 .legend .lgItem > div > b { display: block; font: 500 11.5px/1.25 'Golos Text', sans-serif; }
 .legend .lgItem > div > i { display: block; font-style: normal; font-size: 10.5px; line-height: 1.3; color: var(--ch-mut); }
 .legend .lgItem.tag { border: 0; background: none; color: inherit; text-align: left; width: 100%; cursor: pointer; }
+.legend .lgItem > small { margin-left: auto; padding-left: 10px; font: 400 10px 'IBM Plex Mono', monospace; color: var(--ch-mut); }
 .legend .lgItem.tag[aria-pressed=true] > div > b { color: var(--ch-acc); }
 .legend .lgNote { color: var(--ch-mut); font-size: 10.5px; line-height: 1.4; padding: 0 12px 11px; }
+/* на время замера подписи разворачиваются в одну строку — так видна их настоящая ширина */
+.legend.measuring .lgGrid { grid-template-columns: max-content; }
+.legend.measuring .lgItem > div { width: max-content; }
+.legend.measuring .lgItem > small { margin-left: 10px; padding-left: 0; }
+.legend.measuring .lgTop { flex-wrap: nowrap; width: max-content; }
 .legend .sym { flex: none; width: 60px; height: 24px; }
 /* окошко знака: карточка под ним — только подложка разметки стиля, видно один знак */
 .legend .glyph { flex: none; width: var(--sign, 60px); height: 32px; position: relative; overflow: hidden; }
