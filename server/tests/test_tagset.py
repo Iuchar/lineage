@@ -62,3 +62,16 @@ def test_unused_tag_can_be_deleted_too(conn: sqlite3.Connection) -> None:
     assert [t.name for t in clan_tree(conn, 1).tags] == ["Тест"]
     assert delete_tag(conn, 1, "Тест").summary == "Удалена метка «Тест»"
     assert clan_tree(conn, 1).tags == []
+
+
+def test_clan_status_lives_in_the_header(conn: sqlite3.Connection) -> None:
+    from app.db.tagset import set_status
+    from app.gedcom.export import export_clan
+
+    assert clan_tree(conn, 1).clan.status == "plain"
+    change = set_status(conn, 1, "titled")
+    assert change.summary == "Статус рода: титулованный древний благородный род"
+    assert clan_tree(conn, 1).clan.status == "titled"
+    assert "1 _STATUS titled" in export_clan(conn, 1)
+    undo(conn, 1)
+    assert clan_tree(conn, 1).clan.status == "plain"

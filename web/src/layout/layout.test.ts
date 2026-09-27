@@ -138,7 +138,7 @@ describe("правила порядка", () => {
 describe("поколения", () => {
   it("супруг-пришлый встаёт на ярус мужа, дети ярусом ниже", () => {
     const tree = {
-      clan: { id: 1, name: "проба", persons: 4, families: 2 },
+      clan: { id: 1, name: "проба", persons: 4, families: 2, status: "plain" },
       persons: [1, 2, 3, 4].map((id) => ({
         id, xref: `@I${id}@`, given: null, surname: null, married_surname: null, sex: null,
         is_branch_stub: false, birth: null, death: null, parent_families: [], spouse_families: [],

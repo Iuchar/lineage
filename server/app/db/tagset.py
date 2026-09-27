@@ -9,7 +9,7 @@ import sqlite3
 from pydantic import BaseModel
 
 from app.db.journal import ChangeInfo, Edit, JournalError
-from app.gedcom.meta import TAG_COLORS, add_tag_def, read_meta, read_tag_defs
+from app.gedcom.meta import STATUS_NAMES, TAG_COLORS, add_tag_def, read_meta, read_status, read_tag_defs, write_status
 from app.gedcom.records import Record
 
 
@@ -29,6 +29,22 @@ def _holders(conn: sqlite3.Connection, clan_id: int, name: str) -> list[int]:
 
 def tag_usage(conn: sqlite3.Connection, clan_id: int, name: str) -> int:
     return len(_holders(conn, clan_id, name))
+
+
+def set_status(conn: sqlite3.Connection, clan_id: int, status: str) -> ChangeInfo:
+    """Статус рода — в заголовке файла, правкой через журнал: откат вернёт прежний."""
+    if status not in STATUS_NAMES:
+        raise TagError("Такого статуса нет")
+    edit = Edit(conn, clan_id)
+    header = edit.header()
+    if read_status(header) == status:
+        raise TagError("Статус тот же")
+    write_status(header, status)
+    edit.summary = f"Статус рода: {STATUS_NAMES[status]}"
+    try:
+        return edit.commit()
+    except JournalError as error:
+        raise TagError(str(error)) from None
 
 
 def update_tag(conn: sqlite3.Connection, clan_id: int, old: str, change: TagChange) -> ChangeInfo:

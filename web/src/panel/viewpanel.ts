@@ -1,11 +1,9 @@
 // Две панели справа: «Вид» — стиль, тема и всё про показ древа; «Легенда» — что значат линии,
 // знаки и пометки на карте, и метки этого рода. Открыты по одной, поверх панели человека.
 
-import { TAG_COLORS, type TagSet } from "../canvas/tags";
 import type { StyleName } from "../layout/metrics";
-import { escapeHtml } from "../format";
 
-export type ViewMode = "view" | "legend" | null;
+export type ViewMode = "view" | null;
 
 export interface ViewState {
   style: StyleName;
@@ -16,8 +14,6 @@ export interface ViewState {
   surnames: "off" | "maiden" | "married";
   portraits: boolean;
   ruler: boolean;
-  tags: TagSet;
-  filter: string | null;
 }
 
 export interface ViewActions {
@@ -30,7 +26,6 @@ export interface ViewActions {
   ruler: (on: boolean) => void;
   foldAll: () => void;
   unfoldAll: () => void;
-  filter: (tag: string | null) => void;
   closed: () => void;
 }
 
@@ -40,22 +35,6 @@ export const STYLE_NAMES: [StyleName, string][] = [
   ["gazeta", "Типография"],
   ["kabinet", "Ночной кабинет"],
   ["polotno", "Афиша"],
-];
-
-// знаки карты: образец слева, объяснение справа
-const LEGEND: [string, string, string][] = [
-  ["line", "нить брака", "пара стоит рядом, нить между ними"],
-  ["past", "прошлый брак", "приглушённая и пунктиром; так же рисуется развод"],
-  ["ord", "первый, второй…", "очередь браков у многобрачного"],
-  ["drop", "спуск к детям", "от нити союза вниз, к шине выводка"],
-  ["foster", "спуск пунктиром", "приёмный или под опекой; у карточки ярлык"],
-  ["knot", "узел без пары", "родители не записаны: братья и сёстры одной семьи"],
-  ["dia", "◆ продолжатель", "через него идёт главная ветвь рода"],
-  ["trunk", "ствол", "главная ветвь: от основателя через продолжателей"],
-  ["burnt", "выжжен из рода", "карточка приглушена, портрет затемнён, знак под именем"],
-  ["hidden", "скрыт от зрителей", "виден только в правке, с пометкой"],
-  ["fold", "стопка «N в ветке»", "ветка свёрнута; щелчок открывает одно поколение"],
-  ["also", "также в роду", "тот же человек есть в другом роду — переход"],
 ];
 
 export class ViewPanel {
@@ -77,7 +56,6 @@ export class ViewPanel {
         case "line": return this.actions.mainLine(value === "main");
         case "root": return this.actions.rootAtBottom(value === "bottom");
         case "surnames": return this.actions.surnames(value as "off" | "maiden" | "married");
-        case "tag": return this.actions.filter(this.state?.filter === value ? null : value);
         default: break;
       }
       if (target.dataset.act === "fold") return this.actions.foldAll();
@@ -97,7 +75,7 @@ export class ViewPanel {
     this.state = state;
     this.element.hidden = mode === null;
     if (mode === null) return;
-    this.element.innerHTML = mode === "view" ? this.viewHtml(state) : this.legendHtml(state);
+    this.element.innerHTML = this.viewHtml(state);
   }
 
   private seg(name: string, options: [string, string][], current: string): string {
@@ -117,7 +95,11 @@ export class ViewPanel {
       "</div></div>" +
       `<div class="sec"><span class="lbl2">тема</span>${this.seg("theme", [["dark", "☾ тёмная"], ["light", "☀ светлая"]], s.theme)}</div>` +
       '<div class="sec"><span class="lbl2">древо</span>' +
-      (s.hasHeirs ? this.seg("line", [["plain", "стандарт"], ["main", "главная ветвь"]], s.mainLine ? "main" : "plain") : "") +
+      // «главная ветвь» видна всегда: без отмеченных продолжателей — приглушённой, с подсказкой
+      `<div class="seg2${s.hasHeirs ? "" : " off"}"${s.hasHeirs ? "" : ' title="Отметьте продолжателей в правке"'}>` +
+      `<button type="button" data-set="line" data-v="plain"${s.mainLine ? "" : ' aria-pressed="true"'}>стандарт</button>` +
+      `<button type="button" data-set="line" data-v="main"${s.mainLine ? ' aria-pressed="true"' : ""}` +
+      `${s.hasHeirs ? "" : " disabled"}>главная ветвь</button></div>` +
       this.seg("root", [["top", "основатель сверху"], ["bottom", "снизу"]], s.rootAtBottom ? "bottom" : "top") +
       '<div class="line"><button type="button" class="vpBtn" data-act="fold">свернуть все ветки</button>' +
       '<button type="button" class="vpBtn" data-act="unfold">развернуть все</button></div></div>' +
@@ -127,18 +109,4 @@ export class ViewPanel {
       `<label class="chk2"><input type="checkbox" data-flag="ruler"${s.ruler ? " checked" : ""}> линейка дат</label></div>`;
   }
 
-  private legendHtml(s: ViewState): string {
-    const tags = s.tags.list.length
-      ? `<div class="tagFilter">${s.tags.list.map((t) =>
-        `<button class="chip" data-set="tag" data-v="${escapeHtml(t.id)}" style="--c:${TAG_COLORS[t.color]}" ` +
-        `aria-pressed="${s.filter === t.id}"><i></i>${escapeHtml(t.name)}</button>`).join("")}</div>` +
-        '<div class="vpNote">Метка оставляет своих людей в полную силу, остальных уводит в тень.</div>'
-      : '<div class="vpNote">В этом роду меток пока нет. Метку ставят человеку в правке.</div>';
-    return this.head("Легенда") +
-      '<div class="sec"><span class="lbl2">знаки карты</span><div class="legRows">' +
-      LEGEND.map(([key, title, note]) =>
-        `<div class="legRow"><span class="legSample lg-${key}"></span><span><b>${title}</b><i>${note}</i></span></div>`).join("") +
-      '</div></div>' +
-      `<div class="sec"><span class="lbl2">метки рода</span>${tags}</div>`;
-  }
 }

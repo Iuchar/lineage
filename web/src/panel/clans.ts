@@ -1,10 +1,13 @@
-// Столбец родов слева от карты: поиск, список со счётом людей, загрузка нового файла.
-// Кнопка «‹» прячет столбец — остаётся полоска с названием рода; выбор помнит браузер.
+// Столбец родовых деревьев слева от карты: поиск, порядок (имя, люди, статус), счёт людей, загрузка файла.
+// Кнопка «‹» прячет столбец — остаётся полоска «Родовые деревья»; выбор и порядок помнит браузер.
 
 import type { ClanSummary } from "../api/types";
+import { STATUS_NAMES, STATUS_ORDER } from "../canvas/status";
 import { escapeHtml } from "../format";
 
 const HIDDEN_KEY = "rodoslovnye.clans";
+const SORT_KEY = "rodoslovnye.clansSort";
+type Sort = "name" | "size" | "status";
 
 export interface ClanRailActions {
   pick: (clanId: number) => void;
@@ -17,12 +20,15 @@ export class ClanRail {
   private current = 0;
   private query = "";
   private hidden = false;
+  private sort: Sort = "name";
 
   constructor(private readonly actions: ClanRailActions) {
     this.element = document.createElement("aside");
     this.element.className = "rail";
     try {
       this.hidden = localStorage.getItem(HIDDEN_KEY) === "off";
+      const sort = localStorage.getItem(SORT_KEY);
+      if (sort === "size" || sort === "status") this.sort = sort;
     } catch {
       this.hidden = false;
     }
@@ -30,6 +36,16 @@ export class ClanRail {
       const target = e.target as HTMLElement;
       if (target.closest("[data-rail=toggle]")) return this.toggle();
       if (target.closest("[data-rail=add]")) return this.actions.add();
+      const sort = target.closest<HTMLElement>("[data-sort]");
+      if (sort) {
+        this.sort = sort.dataset.sort as Sort;
+        try {
+          localStorage.setItem(SORT_KEY, this.sort);
+        } catch {
+          // без хранилища порядок вернётся к имени
+        }
+        return this.draw();
+      }
       const row = target.closest<HTMLElement>("[data-clan]");
       if (row) this.actions.pick(Number(row.dataset.clan));
     });
@@ -59,15 +75,18 @@ export class ClanRail {
 
   private draw(): void {
     this.element.classList.toggle("mini", this.hidden);
-    const name = this.clans.find((c) => c.id === this.current)?.name ?? "";
     if (this.hidden) {
-      this.element.innerHTML = '<button class="railBtn" data-rail="toggle" title="Показать роды">›</button>' +
-        `<span class="vert">${escapeHtml(name)}</span>`;
+      this.element.innerHTML = '<button class="railBtn" data-rail="toggle" title="Показать родовые деревья">›</button>' +
+        '<span class="vert">Родовые деревья</span>';
       return;
     }
     this.element.innerHTML =
-      '<div class="railTop"><div class="find"><i>⌕</i><input data-rail="q" placeholder="найти род"></div>' +
+      '<div class="railTop"><div class="find"><i>⌕</i><input data-rail="q" placeholder="найти дерево"></div>' +
       '<button class="railBtn" data-rail="toggle" title="Спрятать столбец">‹</button></div>' +
+      '<div class="sortRow"><div class="sw">' +
+      ([["name", "имени"], ["size", "людям"], ["status", "статусу"]] as [Sort, string][])
+        .map(([key, title]) => `<button data-sort="${key}"${this.sort === key ? ' aria-pressed="true"' : ""}>${title}</button>`).join("") +
+      "</div></div>" +
       '<div class="rows" data-role="rows"></div>' +
       '<button class="railAdd" data-rail="add">+ загрузить .ged</button>';
     const input = this.element.querySelector<HTMLInputElement>("[data-rail=q]");
@@ -80,9 +99,19 @@ export class ClanRail {
     if (!rows) return;
     const words = this.query.split(/\s+/).filter(Boolean);
     const found = this.clans.filter((c) => words.every((w) => c.name.toLowerCase().includes(w)));
-    rows.innerHTML = found.map((c) =>
-      `<button class="row${c.id === this.current ? " on" : ""}" data-clan="${c.id}">` +
-      `<b>${escapeHtml(c.name)}</b><small>${c.persons}</small></button>`).join("") ||
-      `<div class="railNote">Ни одного рода на «${escapeHtml(this.query)}»</div>`;
+    const order = (c: ClanSummary) => STATUS_ORDER.indexOf(c.status);
+    found.sort((a, b) => this.sort === "size" ? b.persons - a.persons
+      : this.sort === "status" ? order(a) - order(b) || a.name.localeCompare(b.name, "ru")
+        : a.name.localeCompare(b.name, "ru"));
+    const row = (c: ClanSummary) => `<button class="row${c.id === this.current ? " on" : ""}" data-clan="${c.id}">` +
+      `<b>${escapeHtml(c.name)}</b><small>${c.persons}</small></button>`;
+    // по статусу — группами с подписью, в остальных порядках подписей нет
+    const html = this.sort === "status"
+      ? STATUS_ORDER.map((key) => {
+        const group = found.filter((c) => c.status === key);
+        return group.length ? `<div class="railGroup">${STATUS_NAMES[key]}</div>${group.map(row).join("")}` : "";
+      }).join("")
+      : found.map(row).join("");
+    rows.innerHTML = html || `<div class="railNote">Ни одного дерева на «${escapeHtml(this.query)}»</div>`;
   }
 }

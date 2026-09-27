@@ -390,6 +390,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clans/{clan_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Put Clan Status
+         * @description Титул рода: пишется в заголовок файла, поэтому переживает выгрузку и перезалив.
+         */
+        put: operations["put_clan_status_api_clans__clan_id__status_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clans/{clan_id}/tags/{name}/usage": {
         parameters: {
             query?: never;
@@ -564,6 +584,11 @@ export interface components {
             /** Matched */
             matched: number;
         };
+        /** ClanStatus */
+        ClanStatus: {
+            /** Status */
+            status: string;
+        };
         /** ClanSummary */
         ClanSummary: {
             /** Id */
@@ -574,6 +599,11 @@ export interface components {
             persons: number;
             /** Families */
             families: number;
+            /**
+             * Status
+             * @default plain
+             */
+            status: string;
         };
         /** ClanTree */
         ClanTree: {
@@ -1929,6 +1959,41 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_clan_status_api_clans__clan_id__status_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClanStatus"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

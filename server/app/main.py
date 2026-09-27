@@ -20,7 +20,7 @@ from app.db.journal import (ChangeInfo, JournalError, RevertConflictError, clan_
                             undo, undo_to)
 from app.db.kin import FamilyFields, FamilyForm, KinError, family_form, update_family
 from app.db.photos import photo_path, remove_photo, save_photo
-from app.db.tagset import TagChange, TagError, delete_tag, tag_usage, update_tag
+from app.db.tagset import TagChange, TagError, delete_tag, set_status, tag_usage, update_tag
 from app.gedcom.export import ExportError, export_clan
 from app.gedcom.ru_dates import DateInputError, parse_input
 from app.db.links import (Candidate, ClanLink, Link, LinkClashError, LinkError, LinkNotFoundError, LinkPerson,
@@ -249,6 +249,19 @@ def post_revert(change_id: int, conn: Database) -> ChangeInfo:
     try:
         return revert(conn, change_id)
     except (EditError, JournalError) as error:
+        raise _edit_errors(error) from None
+
+
+class ClanStatus(BaseModel):
+    status: str
+
+
+@app.put("/api/clans/{clan_id}/status")
+def put_clan_status(clan_id: int, body: ClanStatus, conn: Database) -> ChangeInfo:
+    """Титул рода: пишется в заголовок файла, поэтому переживает выгрузку и перезалив."""
+    try:
+        return set_status(conn, clan_id, body.status)
+    except (TagError, JournalError) as error:
         raise _edit_errors(error) from None
 
 

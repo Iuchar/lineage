@@ -9,7 +9,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from app.db.kin import manual_order
-from app.gedcom.meta import read_meta, read_tag_defs
+from app.gedcom.meta import read_meta, read_status, read_tag_defs
 from app.gedcom.records import Record
 
 
@@ -18,6 +18,7 @@ class ClanSummary(BaseModel):
     name: str
     persons: int
     families: int
+    status: str = "plain"  # титул рода: titled, old, plain (app/gedcom/meta.py)
 
 
 class LifeDate(BaseModel):
@@ -79,14 +80,20 @@ class ClanNotFoundError(LookupError):
     pass
 
 
-_SUMMARY = """SELECT c.id, c.name,
+_SUMMARY = """SELECT c.id, c.name, c.header_raw,
                   (SELECT COUNT(*) FROM persons p WHERE p.clan_id = c.id) AS persons,
                   (SELECT COUNT(*) FROM families f WHERE f.clan_id = c.id) AS families
              FROM clans c"""
 
 
+def _summary(row: sqlite3.Row) -> ClanSummary:
+    data = dict(row)
+    header = data.pop("header_raw", None)
+    return ClanSummary(**data, status=read_status(Record.from_json(json.loads(header)) if header else None))
+
+
 def list_clans(conn: sqlite3.Connection) -> list[ClanSummary]:
-    return [ClanSummary(**dict(row)) for row in conn.execute(_SUMMARY + " ORDER BY c.id")]
+    return [_summary(row) for row in conn.execute(_SUMMARY + " ORDER BY c.id")]
 
 
 def _life_dates(conn: sqlite3.Connection, clan_id: int, tag: str) -> dict[int, LifeDate]:
@@ -241,5 +248,5 @@ def clan_tree(conn: sqlite3.Connection, clan_id: int, file_order: bool = False) 
     ]
     header = conn.execute("SELECT header_raw FROM clans WHERE id = ?", (clan_id,)).fetchone()[0]
     tags = read_tag_defs(Record.from_json(json.loads(header)) if header else None)
-    return ClanTree(clan=ClanSummary(**dict(summary)), persons=persons, families=families,
+    return ClanTree(clan=_summary(summary), persons=persons, families=families,
                     tags=[TagDef(name=t.name, color=t.color) for t in tags])

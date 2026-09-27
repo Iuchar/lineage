@@ -15,20 +15,24 @@ import "./styles/tags.css";
 import "./styles/links.css";
 import "./styles/editor.css";
 
-import type { ClanSummary, ClanTree, LinkPerson, TreePerson } from "./api/types";
+import type { ChangeInfo, ClanSummary, ClanTree, LinkPerson, TreePerson } from "./api/types";
 import { NO_MARKS } from "./canvas/cards";
+import { escapeHtml } from "./format";
 import { TreeCanvas } from "./canvas/canvas";
+import { STATUS_NAMES } from "./canvas/status";
 import { mergeData, treeData } from "./canvas/treedata";
 import { demoHeirs, demoMarks, demoTags } from "./demo";
 import { LinkNav } from "./links/nav";
 import { ManualLink } from "./links/manual";
 import { LinkReview } from "./links/review";
 import { FamilyEditor } from "./editor/family";
+import { send } from "./editor/api";
 import { PersonEditor } from "./editor/form";
 import { Journal } from "./editor/journal";
 import { RelativeMenu } from "./editor/menu";
 import { ClanRail } from "./panel/clans";
 import { PersonPanel } from "./panel/panel";
+import { LegendPanel } from "./panel/legendpanel";
 import { ViewPanel, type ViewMode } from "./panel/viewpanel";
 import { SearchBox } from "./panel/search";
 import { UploadFlow } from "./upload/upload";
@@ -212,15 +216,18 @@ async function start(root: HTMLElement): Promise<void> {
       canvas.update({ style });
       review.refresh();
       drawViewPanel();
+      drawLegend();
     },
     theme: (theme) => {
       document.body.dataset.theme = theme;
       canvas.render();
       drawViewPanel();
+      drawLegend();
     },
     mainLine: (on) => {
       canvas.update({ mainLine: on });
       drawViewPanel();
+      drawLegend();
     },
     rootAtBottom: (on) => {
       canvas.update({ rootAtBottom: on });
@@ -236,14 +243,45 @@ async function start(root: HTMLElement): Promise<void> {
       if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
     },
     ruler: (on) => canvas.update({ ruler: on }),
-    foldAll: () => canvas.foldAll(),
-    unfoldAll: () => canvas.unfoldAll(),
-    filter: (tag) => {
-      canvas.filterByTag(tag);
-      drawViewPanel();
+    foldAll: () => {
+      canvas.foldAll();
+      drawLegend();
+    },
+    unfoldAll: () => {
+      canvas.unfoldAll();
+      drawLegend();
     },
     closed: () => setViewMode(null),
   });
+  const legend = new LegendPanel(canvas.viewport, {
+    filter: (tag) => {
+      canvas.filterByTag(tag);
+      drawLegend();
+    },
+  });
+  const drawLegend = () => {
+    const persons = [...canvas.mainPersons];
+    const byId = new Map((tree?.persons ?? []).map((p) => [p.id, p]));
+    const name = (id: number | undefined) => (id != null ? byId.get(id)?.given ?? "" : "");
+    const n = persons.length;
+    const word = n % 10 === 1 && n % 100 !== 11 ? "поколение"
+      : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "поколения" : "поколений";
+    legend.show({
+      tree,
+      style: canvas.state.style,
+      line: n > 1 ? `${n} ${word}: ${name(persons[persons.length - 1])} — ${name(persons[0])}` : "",
+      facts: {
+        heirs: canvas.heirs.size > 0,
+        burnt: canvas.marks.burnt.size > 0,
+        hidden: canvas.marks.hidden.size > 0,
+        folded: canvas.folded.size > 0,
+        links: canvas.links.size > 0,
+        editing,
+      },
+      tags: canvas.tags,
+      filter: canvas.filter,
+    });
+  };
   const drawViewPanel = () => {
     viewPanel.show(viewMode, {
       style: canvas.state.style,
@@ -254,16 +292,12 @@ async function start(root: HTMLElement): Promise<void> {
       surnames: canvas.surnames ?? "off",
       portraits: canvas.portraits,
       ruler: canvas.state.ruler,
-      tags: canvas.tags,
-      filter: canvas.filter,
     });
   };
   const setViewMode = (mode: ViewMode) => {
     viewMode = viewMode === mode ? null : mode;
     drawViewPanel();
-    for (const [name, button] of [["view", viewBtn], ["legend", legendBtn]] as const) {
-      button.setAttribute("aria-pressed", String(viewMode === name));
-    }
+    viewBtn.setAttribute("aria-pressed", String(viewMode === "view"));
   };
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && viewMode) setViewMode(null);
@@ -384,7 +418,8 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.heirs = data.heirs;
     canvas.photos = data.photos;
     canvas.noPortrait = data.noPortrait;
-    drawViewPanel(); // в панели «Вид» мог появиться переключатель главной ветви, в легенде — метки
+    drawViewPanel(); // в панели «Вид» мог появиться переключатель главной ветви
+    drawLegend();
     canvas.refreshTree(tree, focusId);
     if (focusId != null) canvas.centreOnPerson(focusId);
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
@@ -397,6 +432,8 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.setEditing(editing);
     menu.close();
     if (editing) void journal.refresh();
+    showClan(currentClan);
+    drawLegend();
     showCurrent();
   });
   // панель показывает, свёрнута ли ветка, — перерисовать после щелчка по стопке на карте
@@ -420,7 +457,8 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.photos = data.photos;
     canvas.noPortrait = data.noPortrait;
     canvas.setTree(tree, data.marks, new Map(), data.tags, data.heirs);
-    drawViewPanel(); // в панели «Вид» мог появиться переключатель главной ветви, в легенде — метки
+    drawViewPanel(); // в панели «Вид» мог появиться переключатель главной ветви
+    drawLegend();
     void journal.refresh();
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
@@ -459,8 +497,12 @@ async function start(root: HTMLElement): Promise<void> {
   });
 
   // род в шапке: название и счёт; сам список — в столбце слева
+  const clanTitleGroup = document.createElement("div");
+  clanTitleGroup.className = "grp";
+  clanTitleGroup.innerHTML = '<b>Род</b>';
   const clanTitle = document.createElement("div");
   clanTitle.className = "clanTitle";
+  clanTitleGroup.append(clanTitle);
   const exportLink = document.createElement("a");
   exportLink.className = "topLink";
   exportLink.textContent = "Выгрузить .ged";
@@ -473,8 +515,24 @@ async function start(root: HTMLElement): Promise<void> {
   const showClan = (id: number) => {
     const clan = clans.find((c) => c.id === id);
     rail.setClans(clans, id);
-    clanTitle.innerHTML = `<span class="lbl2">род</span><b>${clan?.name ?? ""}</b>`;
+    const status = clan?.status ?? "plain";
+    clanTitle.innerHTML = `<b>${escapeHtml(clan?.name ?? "")}</b>` + (editing
+      ? `<select class="statusPick" title="Титул рода">${Object.entries(STATUS_NAMES).map(([key, name]) =>
+        `<option value="${key}"${key === status ? " selected" : ""}>${name}</option>`).join("")}</select>`
+      : `<span class="clanStatus">${STATUS_NAMES[status] ?? ""}</span>`);
+    clanTitle.querySelector("select")?.addEventListener("change", (e) => {
+      void setClanStatus(id, (e.target as HTMLSelectElement).value);
+    });
     exportLink.href = `/api/clans/${id}/export`;
+  };
+  // титул рода пишется в заголовок файла и откатывается журналом
+  const setClanStatus = async (id: number, status: string) => {
+    const result = await send<ChangeInfo>("PUT", `/api/clans/${id}/status`, { status });
+    if (!result.ok) return;
+    journal.toast(result.data);
+    clans = await getJson<ClanSummary[]>("/api/clans");
+    showClan(id);
+    void journal.refresh();
   };
 
   const viewBtn = document.createElement("button");
@@ -482,12 +540,6 @@ async function start(root: HTMLElement): Promise<void> {
   viewBtn.textContent = "⚙ Вид";
   viewBtn.title = "Стиль, тема, древо, карточки";
   viewBtn.addEventListener("click", () => setViewMode("view"));
-  const legendBtn = document.createElement("button");
-  legendBtn.className = "topBtn";
-  legendBtn.textContent = "Легенда";
-  legendBtn.title = "Что значат линии и знаки на карте; метки рода";
-  legendBtn.addEventListener("click", () => setViewMode("legend"));
-
   // масштаб: щелчок по числу открывает ввод, Delete в нём возвращает к 100 %
   const zoomValue = document.createElement("button");
   zoomValue.title = "Задать масштаб";
@@ -533,6 +585,7 @@ async function start(root: HTMLElement): Promise<void> {
 
   const viewGroup = document.createElement("div");
   viewGroup.className = "grp";
+  viewGroup.innerHTML = "<b>Вид</b>";
   const zoomRow = document.createElement("div");
   zoomRow.className = "sw";
   const button = (text: string, title: string, action: () => void) => {
@@ -560,7 +613,7 @@ async function start(root: HTMLElement): Promise<void> {
 
   // шапка: слева род и поиск, посередине режим и журнал, справа масштаб, панели и файлы
   bar.append(
-    clanTitle,
+    clanTitleGroup,
     search.element,
     modeSwitch,
     journal.group,
@@ -568,7 +621,6 @@ async function start(root: HTMLElement): Promise<void> {
     spacer(),
     viewGroup,
     viewBtn,
-    legendBtn,
     addLink,
     exportLink,
     stat,

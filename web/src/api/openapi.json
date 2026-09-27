@@ -986,6 +986,56 @@
         }
       }
     },
+    "/api/clans/{clan_id}/status": {
+      "put": {
+        "summary": "Put Clan Status",
+        "description": "Титул рода: пишется в заголовок файла, поэтому переживает выгрузку и перезалив.",
+        "operationId": "put_clan_status_api_clans__clan_id__status_put",
+        "parameters": [
+          {
+            "name": "clan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Clan Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClanStatus"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/clans/{clan_id}/tags/{name}/usage": {
       "get": {
         "summary": "Get Tag Usage",
@@ -1567,6 +1617,19 @@
         ],
         "title": "ClanMatch"
       },
+      "ClanStatus": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ClanStatus"
+      },
       "ClanSummary": {
         "properties": {
           "id": {
@@ -1584,6 +1647,11 @@
           "families": {
             "type": "integer",
             "title": "Families"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "plain"
           }
         },
         "type": "object",

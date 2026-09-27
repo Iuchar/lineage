@@ -12,6 +12,7 @@
     1 OBJE / 2 FILE photos/…    снимок, лежит в папке photos рядом с базой
 
 Набор меток рода с цветами — в заголовке файла: 1 _TAGDEF Переселенец / 2 _COLOR синий.
+Там же статус рода: 1 _STATUS titled (ключи — в STATUS_NAMES).
 """
 
 from __future__ import annotations
@@ -22,6 +23,13 @@ from typing import Literal
 from app.gedcom.records import Record
 
 TAG_COLORS = ("синий", "винный", "зелёный", "охра", "лиловый", "морской", "кирпичный", "дымный")
+# статус рода: чем древнее и титулованнее, тем выше при сортировке по статусу
+STATUS_NAMES = {
+    "titled": "титулованный древний благородный род",
+    "old": "древний благородный род",
+    "plain": "род без титула",
+}
+DEFAULT_STATUS = "plain"
 Portrait = Literal["auto", "silhouette", "none"]
 PHOTO_PREFIX = "photos/"
 
@@ -85,6 +93,17 @@ def set_photo(record: Record, path: str | None) -> None:
 class TagDef:
     name: str
     color: str
+
+
+def read_status(header: Record | None) -> str:
+    value = (header.value_of("_STATUS") or "").strip() if header else ""
+    return value if value in STATUS_NAMES else DEFAULT_STATUS
+
+
+def write_status(header: Record, status: str) -> None:
+    header.children = [c for c in header.children if c.tag != "_STATUS"]
+    if status != DEFAULT_STATUS:
+        header.children.append(Record(level=1, tag="_STATUS", value=status))
 
 
 def read_tag_defs(header: Record | None) -> list[TagDef]:

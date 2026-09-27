@@ -26,8 +26,6 @@ export interface CanvasState {
 
 // общее кратное шагов всех узоров (14 у гобелена и кабинета, 58 у пыльцы): фон выравнивается по этой сетке
 const TILE = 406;
-const LEGEND_KEY = "rodoslovnye.legend";
-
 const generationsWord = (n: number) =>
   n % 10 === 1 && n % 100 !== 11 ? "поколение" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "поколения" : "поколений";
 
@@ -47,8 +45,8 @@ export class TreeCanvas {
   // фон стиля до краёв окна: отдельный слой под древом, движется и масштабируется вместе с ним
   private readonly backdrop: HTMLElement;
   private backdropKey = "";
-  private readonly legend: HTMLElement;
-  private legendText = "";
+  // кто стоит на главной ветви — для приметы в легенде
+  mainPersons: ReadonlySet<number> = new Set();
   private svg: LinksSvg | null = null;
 
   private tree: ClanTree | null = null;
@@ -103,22 +101,7 @@ export class TreeCanvas {
     // плюсы режима правки: в пикселях экрана, чтобы не мельчали при отдалении
     this.plusLayer = document.createElement("div");
     this.plusLayer.className = "plusLayer";
-    // легенда главной ветви — внизу слева, её можно скрыть; выбор помнит браузер
-    this.legend = document.createElement("div");
-    this.legend.className = "legend";
-    this.legend.hidden = true;
-    this.legend.addEventListener("pointerdown", (e) => e.stopPropagation());
-    this.legend.addEventListener("click", (e) => {
-      const act = (e.target as HTMLElement).closest<HTMLElement>("[data-legend]")?.dataset.legend;
-      if (!act) return;
-      try {
-        localStorage.setItem(LEGEND_KEY, act === "hide" ? "off" : "on");
-      } catch {
-        // без хранилища легенда просто вернётся при следующем открытии
-      }
-      this.drawLegend();
-    });
-    this.viewport.append(this.backdrop, this.surface, this.rulerLayer, this.plusLayer, this.legend);
+    this.viewport.append(this.backdrop, this.surface, this.rulerLayer, this.plusLayer);
     host.append(this.viewport);
     this.bindEvents();
   }
@@ -368,9 +351,8 @@ export class TreeCanvas {
           heirs: main ? line.persons : undefined, marked: this.heirs, surnames: this.surnames,
           broken: main && line.broken && shown ? line.last : null, links: this.links }) +
       drawFolds(links.folds, folds, style);
-    this.legendText = this.legendHtml(line.persons, main);
+    this.mainPersons = line.persons;
     this.backdropKey = "";
-    this.drawLegend();
 
     // лампа «Ночного кабинета» ездит за выбранным
     const lamp = this.selected != null ? this.cardCentre(this.selected) : null;
@@ -382,31 +364,6 @@ export class TreeCanvas {
   }
 
   private pollen: string | null = null;
-
-  // легенда главной ветви: основатель и последний продолжатель по именам, без склонений
-  private legendHtml(persons: ReadonlySet<number>, main: boolean): string {
-    if (!this.tree || persons.size < 2) return "";
-    const byId = new Map(this.tree.persons.map((p) => [p.id, p]));
-    const order = [...persons];
-    const name = (id: number | undefined) => (id != null ? byId.get(id)?.given ?? "" : "");
-    const n = persons.size;
-    return `<b><i></i>главная ветвь рода</b><small>${n} ${generationsWord(n)}: ${name(order[order.length - 1])} — ${name(order[0])}. ` +
-      `◆ — продолжатель${main ? "; пары стоят над продолжателями" : ""}.</small>`;
-  }
-
-  private drawLegend(): void {
-    let off = false;
-    try {
-      off = localStorage.getItem(LEGEND_KEY) === "off";
-    } catch {
-      off = false;
-    }
-    this.legend.hidden = !this.legendText;
-    this.legend.classList.toggle("closed", off);
-    this.legend.innerHTML = off
-      ? '<button data-legend="show" title="Показать легенду главной ветви">◆ легенда</button>'
-      : `${this.legendText}<button data-legend="hide">скрыть легенду</button>`;
-  }
 
   // фон стиля под всем окном: слой в координатах древа, привязанный к сетке узора, — шва нет ни при сдвиге, ни при зуме
   private drawBackdrop(): void {
