@@ -164,8 +164,10 @@ export function legendBadge(style: StyleName): string {
   return `<svg class="lgBadge" width="18" height="18" viewBox="0 0 18 18">${inner}</svg>`;
 }
 
-// знак в окошке ставится по месту: подложка двигается так, чтобы знак оказался в середине
-export function placeGlyphs(root: HTMLElement): void {
+// знак в окошке ставится по месту: подложка двигается так, чтобы знак оказался в середине.
+// Заодно меряется самый широкий знак — по нему панель задаёт ширину окошка
+export function placeGlyphs(root: HTMLElement): number {
+  let widest = 0;
   for (const box of root.querySelectorAll<HTMLElement>(".glyph")) {
     const mark = box.querySelector<HTMLElement>("[data-mark]");
     const canvas = box.querySelector<HTMLElement>(".gcanvas");
@@ -173,8 +175,13 @@ export function placeGlyphs(root: HTMLElement): void {
     const scale = Number(/scale\(([\d.]+)\)/.exec(canvas.style.transform)?.[1] ?? 1);
     const outer = box.getBoundingClientRect();
     const at = mark.getBoundingClientRect();
-    const dx = (outer.left + outer.width / 2 - (at.left + at.width / 2)) / scale;
-    const dy = (outer.top + outer.height / 2 - (at.top + at.height / 2)) / scale;
+    widest = Math.max(widest, at.width);
+    // сдвиг накапливается: знак уже стоит со старым сдвигом, считается только поправка
+    const dx = Number(canvas.dataset.dx ?? 0) + (outer.left + outer.width / 2 - (at.left + at.width / 2)) / scale;
+    const dy = Number(canvas.dataset.dy ?? 0) + (outer.top + outer.height / 2 - (at.top + at.height / 2)) / scale;
+    canvas.dataset.dx = String(dx);
+    canvas.dataset.dy = String(dy);
     canvas.style.transform = `scale(${scale}) translate(${dx}px,${dy}px)`;
   }
+  return widest;
 }

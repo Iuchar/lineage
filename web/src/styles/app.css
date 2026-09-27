@@ -135,7 +135,7 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
   border: 1px solid var(--ch-edge); border-radius: 6px; box-shadow: 0 8px 26px rgba(0, 0, 0, .32); }
 /* раскрытая — по содержимому: колонок столько, сколько знаков, но не больше, чем влезает в карту */
 .viewport .legend.open { width: min(calc(100% - 28px),
-  calc(var(--cols, 1) * 268px + (var(--cols, 1) - 1) * 18px + 26px)); }
+  calc(var(--cols, 1) * var(--col, 225px) + (var(--cols, 1) - 1) * 18px + 26px)); }
 .legend .lgTop { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 9px; padding: 8px 12px; cursor: pointer; }
 .legend .lgTop b { font: 500 12px 'Golos Text', sans-serif; white-space: nowrap; }
 .legend .lgTop > span { color: var(--ch-mut); font-size: 11px; }
@@ -146,12 +146,13 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
   padding: 4px 9px; border-radius: 5px; cursor: pointer; }
 .legend .lgTabs button[aria-pressed=true] { background: var(--ch-btn); color: var(--ch-fg); }
 /* знаки ложатся по ширине в столько колонок, сколько влезает */
-.legend .lgGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(268px, 100%), 1fr));
+.legend .lgGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(var(--col, 225px), 100%), 1fr));
   gap: 0 18px; padding: 0 12px 10px; }
 .legend .lgItem { display: flex; align-items: center; gap: 9px; padding: 3px 0; min-height: 38px; }
-/* окошко знака у всех строк одной ширины, знак прижат к подписи: подписи стоят по одной линии,
-   а между знаком и словом не остаётся пустого поля */
-.legend .lgSign { flex: none; display: flex; align-items: center; justify-content: flex-end; width: 120px; height: 32px; }
+/* окошко знака — по самому широкому знаку набора, знак в нём по центру: подписи стоят
+   по одной линии, а пустого поля вокруг узких знаков почти нет */
+.legend .lgSign { flex: none; display: flex; align-items: center; justify-content: center;
+  width: var(--sign, 60px); height: 32px; }
 /* только подпись строки: знак пишет свой текст тоже в <i>, и правила подписи его портили */
 .legend .lgItem > div { min-width: 0; }
 .legend .lgItem > div > b { display: block; font: 500 11.5px/1.25 'Golos Text', sans-serif; }
@@ -161,7 +162,7 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 .legend .lgNote { color: var(--ch-mut); font-size: 10.5px; line-height: 1.4; padding: 0 12px 11px; }
 .legend .sym { flex: none; width: 60px; height: 24px; }
 /* окошко знака: карточка под ним — только подложка разметки стиля, видно один знак */
-.legend .glyph { flex: none; width: 128px; height: 32px; position: relative; overflow: hidden; }
+.legend .glyph { flex: none; width: var(--sign, 60px); height: 32px; position: relative; overflow: hidden; }
 .legend .glyph.tall { height: 36px; }
 .legend .glyph .gcanvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .legend .glyph .node { position: absolute; }
@@ -174,6 +175,6 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
    так ничего не обрезается и не появляется прокрутка поперёк */
 @container (max-width: 250px) {
   .legend .lgItem { flex-direction: column; align-items: flex-start; gap: 1px; min-height: 0; padding: 5px 0; }
-  .legend .lgSign { justify-content: flex-start; width: 120px; }
+  .legend .lgSign { justify-content: flex-start; }
   .legend .lgGrid { gap: 0 10px; padding: 0 10px 10px; }
 }
