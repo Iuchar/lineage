@@ -55,6 +55,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clans/{clan_id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Share Link */
+        get: operations["get_share_link_api_clans__clan_id__link_get"];
+        put?: never;
+        /**
+         * Post Share Link
+         * @description Выпускает ссылку заново: прежняя перестаёт работать.
+         */
+        post: operations["post_share_link_api_clans__clan_id__link_post"];
+        /**
+         * Delete Share Link
+         * @description Отзывает ссылку: род закрывается и для тех, кто по ней уже приходил.
+         */
+        delete: operations["delete_share_link_api_clans__clan_id__link_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -877,6 +902,11 @@ export interface components {
             name?: string | null;
             /** Guarded */
             guarded: boolean;
+            /**
+             * Clans
+             * @default []
+             */
+            clans: number[];
         };
         /** NewClan */
         NewClan: {
@@ -1153,6 +1183,20 @@ export interface components {
             delete: number[];
         };
         /**
+         * ShareInfo
+         * @description Ссылка зрителям на род: адрес показывается редактору целиком, чтобы его можно было отдать.
+         */
+        ShareInfo: {
+            /** Url */
+            url: string;
+            /** Created At */
+            created_at: string;
+            /** Opened */
+            opened: number;
+            /** Opened At */
+            opened_at?: string | null;
+        };
+        /**
          * SpouseChange
          * @description Союз человека: оставить, выйти из него или поставить на своё место другого.
          */
@@ -1366,6 +1410,101 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    get_share_link_api_clans__clan_id__link_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShareInfo"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_share_link_api_clans__clan_id__link_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShareInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_share_link_api_clans__clan_id__link_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

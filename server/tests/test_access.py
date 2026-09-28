@@ -76,7 +76,7 @@ def test_api_without_editors_lets_edit(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(app.main, "DB_PATH", tmp_path / "base.sqlite3")
     client = TestClient(app.main.app)
     me = client.get("/api/me").json()
-    assert me == {"name": None, "guarded": False}
+    assert me == {"name": None, "guarded": False, "clans": []}
     # рода нет, но ответ приходит от самого обработчика, а не от заслона
     assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 400
 
@@ -94,13 +94,13 @@ def test_api_with_editor_demands_login(tmp_path, monkeypatch) -> None:
     base.close()
 
     client = TestClient(app.main.app)
-    assert client.get("/api/me").json() == {"name": None, "guarded": True}
+    assert client.get("/api/me").json() == {"name": None, "guarded": True, "clans": []}
     assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 401
 
     assert client.post("/api/login", json={"name": "Tyr", "password": "не тот"}).status_code == 401
     entered = client.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
     assert entered.status_code == 200 and entered.json()["name"] == "Tyr"
-    assert client.get("/api/me").json() == {"name": "Tyr", "guarded": True}
+    assert client.get("/api/me").json() == {"name": "Tyr", "guarded": True, "clans": []}
     # вошли: заслон пропускает, дальше отвечает сам обработчик
     assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 400
 

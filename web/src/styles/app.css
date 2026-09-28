@@ -236,3 +236,23 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 86%,
   padding: 7px 12px; font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; }
 /* пока не вошли, «Правка» выглядит доступной, но сначала спросит имя и пароль */
 .bar .grp.locked .sw button[data-value=edit] { opacity: .7; }
+
+/* строка дерева: «⋯» открывает ссылку зрителям, появляется только в правке */
+.rail .row { position: relative; }
+.rail .railShare { flex: none; font-style: normal; color: var(--ch-mut); padding: 0 2px; cursor: pointer; }
+.rail .railShare:hover { color: var(--ch-acc); }
+
+/* ── ссылка зрителям: то же окно поверх карты, что и вход ── */
+.shareBox { width: 430px; background: var(--ch-bg); color: var(--ch-fg); border: 1px solid var(--ch-edge);
+  border-radius: 8px; padding: 16px; box-shadow: 0 18px 40px rgba(0, 0, 0, .45); }
+.shareBox > b { display: block; font-family: var(--font, 'Cormorant Garamond', serif); font-size: 17px;
+  font-weight: 500; margin-bottom: 8px; }
+.shareBox > p { color: var(--ch-mut); font-size: 12px; line-height: 1.5; margin: 10px 0 0; }
+.shareUrl { display: flex; align-items: center; gap: 8px; border: 1px solid var(--ch-edge); border-radius: 6px;
+  background: var(--ch-btn); padding: 8px 10px; }
+.shareUrl code { flex: 1; min-width: 0; font: 400 11.5px 'IBM Plex Mono', monospace; color: var(--ch-fg);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shareWhen { font: 400 10.5px 'IBM Plex Mono', monospace; color: var(--ch-mut); margin-top: 8px; }
+.shareRow { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.shareGap { flex: 1; }
+.shareOff { color: var(--warn, #b9552f); border-color: color-mix(in srgb, var(--warn, #b9552f) 45%, transparent); }

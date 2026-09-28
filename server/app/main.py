@@ -6,7 +6,7 @@ from collections.abc import Iterator
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -14,6 +14,7 @@ from app import uploads
 from app.config import DB_PATH, DIST
 from app.db.access import AccessError, Editor, editor_by_key, editors_exist, login, logout
 from app.db.clans import ClanExistsError, import_clan
+from app.db.share import ShareError, ShareLink, enter, issue, link_of, revoke, viewer_clans
 from app.db.connection import connect
 from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonFields, PersonForm, add_person,
                            delete_person, delete_preview, person_form, update_person)
@@ -51,7 +52,9 @@ def database() -> Iterator[sqlite3.Connection]:
 Database = Annotated[sqlite3.Connection, Depends(database)]
 
 SESSION_COOKIE = "rodoslovnye_editor"
+VIEWER_COOKIE = "rodoslovnye_viewer"
 SESSION_DAYS = 30
+VIEWER_DAYS = 365
 # вход и проверка себя открыты всем: иначе войти было бы нечем
 OPEN_PATHS = {"/api/login", "/api/logout", "/api/me"}
 
@@ -77,6 +80,7 @@ async def guard_edits(request: Request, call_next):  # type: ignore[no-untyped-d
 class Me(BaseModel):
     name: str | None = None  # имя вошедшего редактора; null — не вошёл
     guarded: bool  # заведён ли хоть один редактор: пока нет, правка открыта всем
+    clans: list[int] = []  # роды, для которых предъявитель ссылки свой
 
 
 class LoginForm(BaseModel):
@@ -87,7 +91,11 @@ class LoginForm(BaseModel):
 @app.get("/api/me")
 def get_me(conn: Database, request: Request) -> Me:
     editor = _current_editor(conn, request)
-    return Me(name=editor.name if editor else None, guarded=editors_exist(conn))
+    return Me(
+        name=editor.name if editor else None,
+        guarded=editors_exist(conn),
+        clans=viewer_clans(conn, request.cookies.get(VIEWER_COOKIE)),
+    )
 
 
 @app.post("/api/login")
@@ -109,7 +117,59 @@ def post_logout(conn: Database, request: Request, response: Response) -> Me:
     if key:
         logout(conn, key)
     response.delete_cookie(SESSION_COOKIE, path="/")
-    return Me(name=None, guarded=editors_exist(conn))
+    return Me(name=None, guarded=editors_exist(conn), clans=viewer_clans(conn, request.cookies.get(VIEWER_COOKIE)))
+
+
+class ShareInfo(BaseModel):
+    """Ссылка зрителям на род: адрес показывается редактору целиком, чтобы его можно было отдать."""
+
+    url: str
+    created_at: str
+    opened: int
+    opened_at: str | None = None
+
+
+def _share(request: Request, link: ShareLink) -> ShareInfo:
+    base = str(request.base_url).rstrip("/")
+    return ShareInfo(url=f"{base}/r/{link.key}", created_at=link.created_at,
+                     opened=link.opened, opened_at=link.opened_at)
+
+
+@app.get("/api/clans/{clan_id}/link")
+def get_share_link(clan_id: int, conn: Database, request: Request) -> ShareInfo | None:
+    link = link_of(conn, clan_id)
+    return _share(request, link) if link else None
+
+
+@app.post("/api/clans/{clan_id}/link")
+def post_share_link(clan_id: int, conn: Database, request: Request) -> ShareInfo:
+    """Выпускает ссылку заново: прежняя перестаёт работать."""
+    try:
+        return _share(request, issue(conn, clan_id))
+    except ShareError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from None
+
+
+@app.delete("/api/clans/{clan_id}/link")
+def delete_share_link(clan_id: int, conn: Database) -> dict[str, bool]:
+    """Отзывает ссылку: род закрывается и для тех, кто по ней уже приходил."""
+    revoke(conn, clan_id)
+    return {"ok": True}
+
+
+@app.get("/r/{key}", include_in_schema=False)
+def open_share_link(key: str, conn: Database, request: Request) -> RedirectResponse:
+    """Зритель открыл ссылку: род становится для него своим, дальше он видит обычную страницу."""
+    try:
+        session, _clan_id = enter(conn, key, request.cookies.get(VIEWER_COOKIE))
+    except ShareError:
+        return RedirectResponse("/?ссылка=нет", status_code=303)
+    answer = RedirectResponse("/", status_code=303)
+    answer.set_cookie(
+        VIEWER_COOKIE, session, max_age=VIEWER_DAYS * 24 * 3600,
+        httponly=True, samesite="lax", path="/",
+    )
+    return answer
 
 
 @app.get("/api/health")

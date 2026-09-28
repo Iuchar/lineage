@@ -12,6 +12,7 @@ type Sort = "name" | "size" | "status";
 export interface ClanRailActions {
   pick: (clanId: number) => void;
   add: () => void; // загрузить новый род файлом
+  share: (clanId: number, name: string) => void; // ссылка зрителям на это дерево
 }
 
 export class ClanRail {
@@ -21,6 +22,7 @@ export class ClanRail {
   private query = "";
   private hidden = false;
   private sort: Sort = "name";
+  private editing = false; // ссылку зрителям выдаёт только редактор
 
   constructor(private readonly actions: ClanRailActions) {
     this.element = document.createElement("aside");
@@ -46,6 +48,11 @@ export class ClanRail {
         }
         return this.draw();
       }
+      const share = target.closest<HTMLElement>("[data-share]");
+      if (share) {
+        const id = Number(share.dataset.share);
+        return this.actions.share(id, this.clans.find((c) => c.id === id)?.name ?? "");
+      }
       const row = target.closest<HTMLElement>("[data-clan]");
       if (row) this.actions.pick(Number(row.dataset.clan));
     });
@@ -60,6 +67,12 @@ export class ClanRail {
   setClans(clans: ClanSummary[], current: number): void {
     this.clans = clans;
     this.current = current;
+    this.draw();
+  }
+
+  setEditing(editing: boolean): void {
+    if (this.editing === editing) return;
+    this.editing = editing;
     this.draw();
   }
 
@@ -103,8 +116,10 @@ export class ClanRail {
     found.sort((a, b) => this.sort === "size" ? b.persons - a.persons
       : this.sort === "status" ? order(a) - order(b) || a.name.localeCompare(b.name, "ru")
         : a.name.localeCompare(b.name, "ru"));
-    const row = (c: ClanSummary) => `<button class="row${c.id === this.current ? " on" : ""}" data-clan="${c.id}">` +
-      `<b>${escapeHtml(c.name)}</b><small>${c.persons}</small></button>`;
+    const row = (c: ClanSummary) => `<div class="row${c.id === this.current ? " on" : ""}" data-clan="${c.id}">` +
+      `<b>${escapeHtml(c.name)}</b><small>${c.persons}</small>` +
+      (this.editing ? `<i class="railShare" data-share="${c.id}" title="Ссылка зрителям на это дерево">⋯</i>` : "") +
+      "</div>";
     // по статусу — группами с подписью, в остальных порядках подписей нет
     const html = this.sort === "status"
       ? STATUS_ORDER.map((key) => {

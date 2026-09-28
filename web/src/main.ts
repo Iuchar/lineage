@@ -29,6 +29,7 @@ import { FamilyEditor } from "./editor/family";
 import { send } from "./editor/api";
 import { PersonEditor } from "./editor/form";
 import { Gate, whoami, type Me } from "./panel/gate";
+import { ShareBox } from "./panel/sharebox";
 import { Journal } from "./editor/journal";
 import { RelativeMenu } from "./editor/menu";
 import { ClanRail } from "./panel/clans";
@@ -130,8 +131,10 @@ async function start(root: HTMLElement): Promise<void> {
       void loadClan(id);
     },
     add: () => upload.choose(),
+    share: (id, name) => void shareBox.open(id, name),
   });
   stage.append(rail.element);
+  const shareBox = new ShareBox(stage);
   const canvas = new TreeCanvas(stage);
   let tree: ClanTree | null = null;
   let currentClan = clans[0]!.id;
@@ -461,6 +464,7 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.setEditing(editing);
     menu.close();
     if (editing) void journal.refresh();
+    rail.setEditing(editing);
     showClan(currentClan);
     drawLegend();
     showCurrent();
