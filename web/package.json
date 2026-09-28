@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "pack": "node scripts/pack-core.mjs",
+    "build:pages": "node scripts/build-pages.mjs",
     "test": "vitest run",
     "api": "uv run --project ../server python -m app.dev openapi src/api/openapi.json && openapi-typescript src/api/openapi.json -o src/api/schema.d.ts",
     "fixtures": "uv run --project ../server python -m app.dev fixtures src/layout/fixtures"

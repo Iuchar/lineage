@@ -722,7 +722,22 @@ async function start(root: HTMLElement): Promise<void> {
 
 const root = document.getElementById("app");
 if (root) {
-  start(root).catch((error: unknown) => {
-    root.innerHTML = `<div class="empty">Не удалось загрузить роды: ${String(error)}</div>`;
-  });
+  // витрина: сервера нет, ядро работает прямо в браузере. На настоящем сервере мост не нужен
+  const witness = document.documentElement.dataset.mode === "browser";
+  const ready = witness
+    ? import("./api/bridge").then(async ({ startBridge, seedClans }) => {
+      await startBridge((text) => {
+        root.innerHTML = `<div class="empty">${text}…</div>`;
+      });
+      await seedClans((text) => {
+        root.innerHTML = `<div class="empty">${text}…</div>`;
+      });
+      root.innerHTML = "";
+    })
+    : Promise.resolve();
+  ready
+    .then(() => start(root))
+    .catch((error: unknown) => {
+      root.innerHTML = `<div class="empty">Не удалось загрузить роды: ${String(error)}</div>`;
+    });
 }

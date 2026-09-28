@@ -16,3 +16,7 @@ data/*
 .superpowers/
 .impeccable/
 .claude/settings.local.json
+
+# собранная витрина: пересобирается командой npm run build:pages
+docs/витрина/
+web/public/core.zip
