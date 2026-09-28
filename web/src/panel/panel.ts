@@ -367,7 +367,8 @@ export class PersonPanel {
       const clan = escapeHtml(link.other.clan_name);
       const sure = this.confirming === link.link_id;
       h +=
-        `<div class="twin"><b>${clan}</b><small>${escapeHtml(link.other.name)} · ${lifeSpan(link.other.born, link.other.died)}</small>` +
+        `<div class="twin"><b>${clan}</b><small>${escapeHtml(link.other.name)} · ${lifeSpan(link.other.born, link.other.died)}` +
+        (link.created_by ? `<i class="who">связал ${escapeHtml(link.created_by)}</i>` : "") + "</small>" +
         (editing ? `<select class="lockPick ${link.see ?? "all"}" data-link-see="${link.link_id}" title="Кому видна эта связка">` +
           (Object.entries(SEE_NAMES) as [See, string][]).map(([key, text]) =>
             `<option value="${key}"${key === (link.see ?? "all") ? " selected" : ""}>${SEE_SIGNS[key]} ${text}</option>`).join("") +
