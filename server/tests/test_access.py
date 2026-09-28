@@ -107,3 +107,51 @@ def test_api_with_editor_demands_login(tmp_path, monkeypatch) -> None:
     client.post("/api/logout")
     assert client.get("/api/me").json()["name"] is None
     assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 401
+
+
+def test_password_works_without_scrypt(conn: sqlite3.Connection, monkeypatch) -> None:
+    """В браузерной сборке Python нет scrypt — пароль считается pbkdf2, и вход всё равно работает."""
+    import app.db.access as access
+
+    monkeypatch.setattr(access, "HAS_SCRYPT", False)
+    add_editor(conn, "Эйлин", "длинный пароль")
+    secret = conn.execute("SELECT secret FROM editors WHERE name = 'Эйлин'").fetchone()["secret"]
+    assert secret.startswith("pbkdf2$")
+    assert login(conn, "Эйлин", "длинный пароль")
+    with pytest.raises(AccessError):
+        login(conn, "Эйлин", "не тот пароль")
+
+
+def test_scrypt_password_still_opens_when_scrypt_is_there(conn: sqlite3.Connection) -> None:
+    add_editor(conn, "Tyr", "длинный пароль")
+    secret = conn.execute("SELECT secret FROM editors WHERE name = 'Tyr'").fetchone()["secret"]
+    assert secret.startswith("scrypt$")
+    assert login(conn, "Tyr", "длинный пароль")
+
+
+def test_password_works_on_bare_hashlib(conn: sqlite3.Connection, monkeypatch) -> None:
+    """Совсем урезанный hashlib: ни scrypt, ни pbkdf2 — счёт идёт вручную через hmac."""
+    import app.db.access as access
+
+    monkeypatch.setattr(access, "HAS_SCRYPT", False)
+    monkeypatch.setattr(access, "HAS_PBKDF2", False)
+    add_editor(conn, "Мойра", "длинный пароль")
+    assert login(conn, "Мойра", "длинный пароль")
+    with pytest.raises(AccessError):
+        login(conn, "Мойра", "не тот пароль")
+
+
+def test_hand_counted_pbkdf2_matches_the_library_one() -> None:
+    """Ручной счёт должен совпадать с библиотечным, иначе пароли с сервера не откроются в браузере."""
+    import hashlib
+
+    import app.db.access as access
+
+    password, salt = "пароль".encode("utf-8"), "соль".encode("utf-8")
+    library = hashlib.pbkdf2_hmac("sha256", password, salt, 1000, 32)
+    monkey = access.HAS_PBKDF2
+    try:
+        access.HAS_PBKDF2 = False
+        assert access._pbkdf2(password, salt, 1000, 32) == library
+    finally:
+        access.HAS_PBKDF2 = monkey

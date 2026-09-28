@@ -4,6 +4,8 @@
 
 const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/";
 const CORE = "core.zip"; // ядро и эталонные роды, собирает scripts/pack-core.mjs
+// на витрине заводим редактора с простым паролем: иначе гость не увидит, как устроена правка
+export const DEMO_EDITOR = { name: "редактор", password: "родословные" };
 
 // Обёртка вокруг нашего приложения: зовёт его по ASGI без всякой сети.
 const HANDLER = `
@@ -125,7 +127,18 @@ os.environ["RODOSLOVNYE_DB"] = "/data/rodoslovnye.sqlite3"
   await py.runPythonAsync(HANDLER);
   handler = py.globals.get("handle") as typeof handler;
   python = py;
+  loadJar();
   catchFetch();
+  // уходя со страницы, пишем сразу: иначе правка, сделанная за миг до закрытия, пропадёт
+  const now = () => {
+    if (saving) clearTimeout(saving);
+    saving = null;
+    py.FS.syncfs(false, () => {});
+  };
+  addEventListener("pagehide", now);
+  addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") now();
+  });
 }
 
 /** Роды, которых ещё нет в базе гостя, разворачиваются из эталонных файлов рядом со страницей. */
@@ -143,6 +156,7 @@ n
   say("разворачиваю роды");
   await python.runPythonAsync(`
 import os, pathlib
+from app.db.access import add_editor, editors_exist
 from app.db.clans import import_clan
 from app.db.connection import connect
 from app.gedcom.load import load_file
@@ -151,9 +165,50 @@ conn = connect(os.environ["RODOSLOVNYE_DB"])
 for name, file in [("Гленн Уриск", "Gleann_Uruisg_tree.ged"), ("Уинтерхоуп", "Winterhope_tree.ged"),
                    ("О'Дувейн", "O_Dubhain_tree.ged"), ("Монад Кройве", "Monadh_Croibhe_tree.ged")]:
     import_clan(conn, name, load_file(pathlib.Path("/core/clans") / file), source_file=file)
+if not editors_exist(conn):
+    add_editor(conn, ${JSON.stringify(DEMO_EDITOR.name)}, ${JSON.stringify(DEMO_EDITOR.password)})
 conn.close()
 `);
   await new Promise<void>((done) => python?.FS.syncfs(false, () => done()));
+}
+
+/** Ответ из ядра приходит не по сети, поэтому браузер не берёт из него cookie и не шлёт их обратно.
+ *  Мост держит их сам: вход и сессия работают так же, как с настоящим сервером. */
+const JAR = "rodoslovnye.jar";
+const jar = new Map<string, string>();
+
+function loadJar(): void {
+  try {
+    for (const [name, value] of Object.entries(JSON.parse(localStorage.getItem(JAR) ?? "{}") as Record<string, string>)) {
+      jar.set(name, value);
+    }
+  } catch {
+    // без хранилища вход просто не переживёт перезагрузку
+  }
+}
+
+function saveJar(): void {
+  try {
+    localStorage.setItem(JAR, JSON.stringify(Object.fromEntries(jar)));
+  } catch {
+    // и здесь то же самое
+  }
+}
+
+function takeCookies(headers: [string, string][]): void {
+  let changed = false;
+  for (const [name, value] of headers) {
+    if (name.toLowerCase() !== "set-cookie") continue;
+    const [pair = "", ...rest] = value.split(";");
+    const at = pair.indexOf("=");
+    if (at < 0) continue;
+    const key = pair.slice(0, at).trim();
+    const dead = rest.some((part) => /max-age\s*=\s*0/i.test(part) || /expires=Thu, 01 Jan 1970/i.test(part));
+    if (dead) jar.delete(key);
+    else jar.set(key, pair.slice(at + 1).trim());
+    changed = true;
+  }
+  if (changed) saveJar();
 }
 
 /** Сброс в хранилище браузера: копим мелкие правки и пишем разом, чтобы не дёргать диск на каждый щелчок. */
@@ -179,6 +234,7 @@ function catchFetch(): void {
 
     const body = new Uint8Array(await request.clone().arrayBuffer());
     const headers: [string, string][] = [...request.headers.entries()];
+    if (jar.size) headers.push(["cookie", [...jar].map(([k, v]) => `${k}=${v}`).join("; ")]);
     const answer = (await handler(request.method, url.pathname, url.search.replace(/^\?/, ""),
                                   body, JSON.stringify(headers))) as {
       toJs: (options: { dict_converter: unknown }) => Map<string, unknown>;
@@ -187,6 +243,7 @@ function catchFetch(): void {
       status: number; headers: [string, string][]; body: Uint8Array;
     };
     const bytes = new Uint8Array(plain.body);
+    takeCookies(plain.headers);
     if (request.method !== "GET" && request.method !== "HEAD" && plain.status < 400) keep();
     return new Response(bytes.buffer as ArrayBuffer, { status: plain.status, headers: plain.headers });
   };

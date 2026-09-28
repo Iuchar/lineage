@@ -6,6 +6,7 @@
 """
 
 import hashlib
+import hmac
 import secrets
 import sqlite3
 from dataclasses import dataclass
@@ -15,6 +16,29 @@ SCRYPT_N = 2 ** 14
 SCRYPT_R = 8
 SCRYPT_P = 1
 KEY_BYTES = 32
+# В сборке Python для браузера hashlib урезан: нет ни scrypt, ни pbkdf2 — только sha256 и hmac.
+# Поэтому способ выбирается по тому, что есть под рукой, а сам отпечаток говорит, чем он сделан.
+HAS_SCRYPT = hasattr(hashlib, "scrypt")
+HAS_PBKDF2 = hasattr(hashlib, "pbkdf2_hmac")
+PBKDF2_ROUNDS = 200_000  # быстрая реализация на месте
+SLOW_ROUNDS = 20_000  # счёт вручную, иначе вход в браузере занимал бы секунды
+
+
+def _pbkdf2(password: bytes, salt: bytes, rounds: int, length: int) -> bytes:
+    """Тот же pbkdf2, но руками: нужен там, где hashlib собран без него."""
+    if HAS_PBKDF2:
+        return hashlib.pbkdf2_hmac("sha256", password, salt, rounds, length)
+    out = b""
+    block = 1
+    while len(out) < length:
+        piece = hmac.new(password, salt + block.to_bytes(4, "big"), hashlib.sha256).digest()
+        mixed = piece
+        for _ in range(rounds - 1):
+            piece = hmac.new(password, piece, hashlib.sha256).digest()
+            mixed = bytes(a ^ b for a, b in zip(mixed, piece, strict=True))
+        out += mixed
+        block += 1
+    return out[:length]
 
 
 class AccessError(Exception):
@@ -33,17 +57,28 @@ def _now() -> str:
 
 def _secret(password: str) -> str:
     salt = secrets.token_bytes(16)
-    key = hashlib.scrypt(password.encode("utf-8"), salt=salt, n=SCRYPT_N, r=SCRYPT_R, p=SCRYPT_P, dklen=KEY_BYTES)
-    return f"scrypt${SCRYPT_N}${SCRYPT_R}${SCRYPT_P}${salt.hex()}${key.hex()}"
+    if HAS_SCRYPT:
+        key = hashlib.scrypt(password.encode("utf-8"), salt=salt, n=SCRYPT_N, r=SCRYPT_R, p=SCRYPT_P,
+                             dklen=KEY_BYTES)
+        return f"scrypt${SCRYPT_N}${SCRYPT_R}${SCRYPT_P}${salt.hex()}${key.hex()}"
+    rounds = PBKDF2_ROUNDS if HAS_PBKDF2 else SLOW_ROUNDS
+    key = _pbkdf2(password.encode("utf-8"), salt, rounds, KEY_BYTES)
+    return f"pbkdf2${rounds}${salt.hex()}${key.hex()}"
 
 
 def _matches(secret: str, password: str) -> bool:
+    """Отпечаток сам говорит, чем он сделан: так пароли, заведённые на сервере, работают и в браузере."""
     try:
-        kind, n, r, p, salt, key = secret.split("$")
-        if kind != "scrypt":
+        parts = secret.split("$")
+        if parts[0] == "scrypt":
+            _, n, r, p, salt, key = parts
+            made = hashlib.scrypt(password.encode("utf-8"), salt=bytes.fromhex(salt),
+                                  n=int(n), r=int(r), p=int(p), dklen=len(bytes.fromhex(key)))
+        elif parts[0] == "pbkdf2":
+            _, rounds, salt, key = parts
+            made = _pbkdf2(password.encode("utf-8"), bytes.fromhex(salt), int(rounds), len(bytes.fromhex(key)))
+        else:
             return False
-        made = hashlib.scrypt(password.encode("utf-8"), salt=bytes.fromhex(salt),
-                              n=int(n), r=int(r), p=int(p), dklen=len(bytes.fromhex(key)))
     except (ValueError, TypeError):
         return False
     return secrets.compare_digest(made.hex(), key)
