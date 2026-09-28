@@ -157,10 +157,12 @@ export class LegendPanel {
     this.element.classList.toggle("open", this.open);
     // свёрнутая — короткая кнопка со значком стиля; раскрытая добавляет примету дерева,
     // а знак сворачивания стоит в правом краю, как у всякой сворачиваемой плашки
-    const head = `<div class="lgTop" title="${this.open ? "Свернуть легенду" : "Развернуть легенду"}">` +
+    // подсказка висит на самом знаке, а не на шапке: у шапки она вставала поверх вкладок
+    const head = `<div class="lgTop"${this.open ? "" : ' title="Развернуть легенду"'}>` +
       `${legendBadge(s.style)}<b>Легенда</b>` +
       (this.open
-        ? `${s.line ? `<span>${escapeHtml(s.line)}</span>` : ""}<span class="chev">▾</span>`
+        ? `${s.line ? `<span>${escapeHtml(s.line)}</span>` : ""}` +
+          '<span class="chev" title="Свернуть легенду">▾</span>'
         : "") + "</div>";
     if (!this.open) {
       this.element.innerHTML = head;
