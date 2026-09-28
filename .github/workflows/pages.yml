@@ -1,0 +1,59 @@
+name: Витрина
+
+# Витрина пересобирается и выкладывается на GitHub Pages при каждом изменении интерфейса,
+# ядра или родов в main. Запустить вручную можно кнопкой на вкладке Actions.
+on:
+  push:
+    branches: [main]
+    paths:
+      - web/**
+      - server/app/**
+      - houses/**
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# выкладывается одна витрина: новый запуск ждёт предыдущий, а не спорит с ним за публикацию
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  сборка:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Зависимости
+        working-directory: web
+        run: npm ci
+
+      - name: Собрать витрину
+        working-directory: web
+        run: npm run build:pages
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/витрина
+
+  публикация:
+    needs: сборка
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - id: pages
+        uses: actions/deploy-pages@v4
