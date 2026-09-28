@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Шапка в три строки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500&family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #241a12; --fg: #eadfc4; --mut: #a08d70; --acc: #c8a44e; --edge: #3a2c1e; --panelbg: #19110a;
+          --font: 'Cormorant Garamond', Georgia, serif; }
+  .light { --bg: #ded2b6; --fg: #2a2116; --mut: #6d5d42; --acc: #a8801f; --edge: #bba98a; --panelbg: #d2c5a6; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #14100c; color: #eadfc4; font: 400 13px/1.5 'Golos Text', sans-serif;
+         padding: 26px 30px 70px; }
+  h1 { font: 500 23px/1 var(--font); margin: 0 0 6px; }
+  .lead { color: #a08d70; font-size: 12px; margin: 0 0 8px; max-width: 880px; }
+  .lead b { color: #eadfc4; font-weight: 500; }
+  h2 { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+       color: #a08d70; margin: 34px 0 5px; }
+  .say { color: #8d7a60; font-size: 12px; margin: 0 0 12px; max-width: 880px; }
+  .frame { border: 1px solid #2c211a; border-radius: 8px; overflow: hidden; }
+  .canvas { background: var(--bg); height: 74px; }
+
+  /* ── общее для всех шапок ── */
+  .bar { background: var(--panelbg); color: var(--fg); border-bottom: 1px solid var(--edge); }
+  .row { display: flex; align-items: center; gap: 16px; padding: 8px 16px; }
+  .lbl { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); }
+  .grp { display: flex; align-items: center; gap: 7px; }
+  .sw { display: flex; border: 1px solid var(--edge); border-radius: 6px; overflow: hidden; }
+  .sw button { border: 0; border-right: 1px solid var(--edge); background: color-mix(in srgb, var(--fg) 8%, transparent);
+               color: var(--mut); font: 500 11.5px/1 'Golos Text', sans-serif; padding: 6px 11px; cursor: pointer; }
+  .sw button:last-child { border-right: 0; }
+  .sw button.on { background: var(--acc); color: var(--bg); }
+  .zoom { width: 54px; text-align: center; }
+  .link { border: 0; background: none; color: var(--mut); font: 500 11.5px/1 'Golos Text', sans-serif;
+          cursor: pointer; padding: 6px 2px; white-space: nowrap; }
+  .link:hover { color: var(--acc); }
+  .btn { border: 1px solid var(--edge); background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg);
+         border-radius: 6px; padding: 6px 11px; font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; white-space: nowrap; }
+  .find { display: flex; align-items: center; gap: 7px; border: 1px solid var(--edge); border-radius: 6px;
+          background: color-mix(in srgb, var(--fg) 8%, transparent); padding: 5px 10px; width: 210px; }
+  .find i { font-style: normal; color: var(--mut); font-size: 12px; }
+  .find span { color: var(--mut); font-size: 11.5px; }
+  .count { font: 400 11px/1.4 'IBM Plex Mono', monospace; color: var(--mut); white-space: nowrap; }
+  .gap { flex: 1; }
+  .clan b { font-family: var(--font); font-size: 18px; font-weight: 500; line-height: 1.05; }
+  .status { font: 400 10px/1.2 'IBM Plex Mono', monospace; color: var(--mut); }
+
+  /* ── А: ряды с подписями групп ── */
+  .a .row + .row { border-top: 1px solid color-mix(in srgb, var(--edge) 60%, transparent); }
+  .a .clan { display: flex; align-items: baseline; gap: 10px; }
+
+  /* ── Б: без подписей, группы через разделитель ── */
+  .b .row { gap: 12px; padding: 7px 16px; }
+  .b .row + .row { border-top: 1px solid color-mix(in srgb, var(--edge) 45%, transparent); }
+  .b .sep { width: 1px; height: 20px; background: var(--edge); }
+  .b .clan { display: flex; align-items: baseline; gap: 9px; }
+  .b .clan b { font-size: 19px; }
+
+  /* ── В: титул и полоса инструментов ── */
+  .c .title { display: flex; align-items: flex-end; gap: 14px; padding: 10px 16px 9px; }
+  .c .title .clan { display: flex; flex-direction: column; gap: 2px; }
+  .c .title .clan b { font-size: 21px; }
+  .c .tools { background: color-mix(in srgb, var(--bg) 78%, var(--panelbg));
+              border-top: 1px solid color-mix(in srgb, var(--edge) 70%, transparent); }
+  .c .tools .row { padding: 7px 16px; }
+  .c .tools .row + .row { border-top: 1px solid color-mix(in srgb, var(--edge) 45%, transparent); }
+
+  .note { color: #8d7a60; font-size: 11.5px; margin: 8px 0 0; }
+</style>
+</head>
+<body>
+<h1>Шапка в три строки</h1>
+<p class="lead">Порядок задан: <b>строка 1</b> — род, титул, поиск, счёт, «Вид»; <b>строка 2</b> — масштаб (бывший «вид»),
+  «Целиком» и «К выбранному», загрузка, выгрузка, режим; <b>строка 3</b> — связки и журнал. Различаются варианты только
+  подачей: подписи групп, разделители, вес имени рода.</p>
+
+<h2>Ш-А · ряды с подписями групп</h2>
+<p class="say">Как сейчас: у каждой группы мелкая подпись капсом, ряды разделены тонкой чертой. Больше всего
+  похоже на нынешнюю шапку, читается «по ярлыкам», но подписи занимают место и дробят строку.</p>
+<div class="frame a">
+  <div class="bar">
+    <div class="row">
+      <div class="grp"><span class="lbl">род</span>
+        <span class="clan"><b>Гленн Уриск</b><span class="status">род без титула</span></span></div>
+      <div class="grp"><span class="lbl">поиск</span><div class="find"><i>⌕</i><span>имя или фамилия</span></div></div>
+      <span class="count">38 человек · 14 семей</span>
+      <span class="gap"></span>
+      <button class="btn">⚙ Вид</button>
+    </div>
+    <div class="row">
+      <div class="grp"><span class="lbl">масштаб</span>
+        <div class="sw"><button>−</button><button class="zoom">21%</button><button>+</button></div>
+        <div class="sw"><button>Целиком</button><button>К выбранному</button></div></div>
+      <button class="link">+ Загрузить .ged</button>
+      <button class="link">Выгрузить .ged</button>
+      <span class="gap"></span>
+      <div class="grp"><span class="lbl">режим</span>
+        <div class="sw"><button class="on">Просмотр</button><button>Правка</button></div></div>
+    </div>
+    <div class="row">
+      <div class="grp"><span class="lbl">связки</span><div class="sw"><button>Проверить 6</button></div></div>
+      <div class="grp"><span class="lbl">журнал</span>
+        <div class="sw"><button>↶ Отменить</button><button>↷</button><button>Журнал · 4</button></div></div>
+    </div>
+  </div>
+  <div class="canvas"></div>
+</div>
+<p class="note">Журнал в просмотре скрыт — строка 3 тогда несёт только связки.</p>
+
+<h2>Ш-Б · без подписей, группы через разделитель</h2>
+<p class="say">Подписи групп сняты: что делает кнопка, говорит она сама. Вместо ярлыков — тонкие вертикальные
+  разделители, ряды ниже на 2 пикселя каждый. Шапка занимает меньше места и меньше рябит.</p>
+<div class="frame b">
+  <div class="bar">
+    <div class="row">
+      <span class="clan"><b>Гленн Уриск</b><span class="status">род без титула</span></span>
+      <span class="sep"></span>
+      <div class="find"><i>⌕</i><span>имя или фамилия</span></div>
+      <span class="sep"></span>
+      <span class="count">38 человек · 14 семей</span>
+      <span class="gap"></span>
+      <button class="btn">⚙ Вид</button>
+    </div>
+    <div class="row">
+      <div class="sw"><button>−</button><button class="zoom">21%</button><button>+</button></div>
+      <div class="sw"><button>Целиком</button><button>К выбранному</button></div>
+      <span class="sep"></span>
+      <button class="link">+ Загрузить .ged</button>
+      <button class="link">Выгрузить .ged</button>
+      <span class="gap"></span>
+      <div class="sw"><button class="on">Просмотр</button><button>Правка</button></div>
+    </div>
+    <div class="row">
+      <div class="sw"><button>Проверить 6</button></div>
+      <span class="sep"></span>
+      <div class="sw"><button>↶ Отменить</button><button>↷</button><button>Журнал · 4</button></div>
+    </div>
+  </div>
+  <div class="canvas"></div>
+</div>
+
+<h2>Ш-В · титул и полоса инструментов</h2>
+<p class="say">Первая строка — титул дерева: имя крупно, титул под ним, дальше поиск и счёт. Строки 2 и 3 уходят
+  на подложку потемнее и читаются как инструменты, а не как часть заголовка.</p>
+<div class="frame c">
+  <div class="bar">
+    <div class="title">
+      <span class="clan"><b>Гленн Уриск</b><span class="status">род без титула</span></span>
+      <div class="find"><i>⌕</i><span>имя или фамилия</span></div>
+      <span class="count">38 человек · 14 семей</span>
+      <span class="gap"></span>
+      <button class="btn">⚙ Вид</button>
+    </div>
+    <div class="tools">
+      <div class="row">
+        <div class="sw"><button>−</button><button class="zoom">21%</button><button>+</button></div>
+        <div class="sw"><button>Целиком</button><button>К выбранному</button></div>
+        <button class="link">+ Загрузить .ged</button>
+        <button class="link">Выгрузить .ged</button>
+        <span class="gap"></span>
+        <div class="sw"><button class="on">Просмотр</button><button>Правка</button></div>
+      </div>
+      <div class="row">
+        <div class="sw"><button>Проверить 6</button></div>
+        <div class="sw"><button>↶ Отменить</button><button>↷</button><button>Журнал · 4</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="canvas"></div>
+</div>
+
+<h2>Ш-Б в светлой теме и в правке</h2>
+<p class="say">Тот же Ш-Б светлой темой: проверка, что разделители и приглушённый титул читаются на светлом.</p>
+<div class="frame b light">
+  <div class="bar">
+    <div class="row">
+      <span class="clan"><b>Гленн Уриск</b><span class="status">титулованный древний благородный род</span></span>
+      <span class="sep"></span>
+      <div class="find"><i>⌕</i><span>имя или фамилия</span></div>
+      <span class="sep"></span>
+      <span class="count">38 человек · 14 семей</span>
+      <span class="gap"></span>
+      <button class="btn">⚙ Вид</button>
+    </div>
+    <div class="row">
+      <div class="sw"><button>−</button><button class="zoom">100%</button><button>+</button></div>
+      <div class="sw"><button>Целиком</button><button>К выбранному</button></div>
+      <span class="sep"></span>
+      <button class="link">+ Загрузить .ged</button>
+      <button class="link">Выгрузить .ged</button>
+      <span class="gap"></span>
+      <div class="sw"><button>Просмотр</button><button class="on">Правка</button></div>
+    </div>
+    <div class="row">
+      <div class="sw"><button>Проверить 6</button></div>
+      <span class="sep"></span>
+      <div class="sw"><button>↶ Отменить</button><button>↷</button><button>Журнал · 4</button></div>
+    </div>
+  </div>
+  <div class="canvas" style="background: #ded2b6"></div>
+</div>
+</body>
+</html>
