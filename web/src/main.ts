@@ -50,15 +50,29 @@ function spacer(): HTMLElement {
   return gap;
 }
 
+// тонкая черта между кусками строки: вместо подписей у каждой группы
+function sep(): HTMLElement {
+  const line = document.createElement("span");
+  line.className = "topSep";
+  return line;
+}
+
+function row(...parts: HTMLElement[]): HTMLElement {
+  const line = document.createElement("div");
+  line.className = "row";
+  line.append(...parts);
+  return line;
+}
+
 function switcher<T extends string | number>(
-  label: string,
+  title: string,
   options: [T, string][],
   current: T,
   onPick: (value: T) => void,
 ): HTMLElement {
   const group = document.createElement("div");
   group.className = "grp";
-  group.innerHTML = `<b>${label}</b>`;
+  group.title = title;
   const row = document.createElement("div");
   row.className = "sw";
   for (const [value, text] of options) {
@@ -174,7 +188,8 @@ async function start(root: HTMLElement): Promise<void> {
   queueBtn.addEventListener("click", () => void review.open());
   const queueGroup = document.createElement("div");
   queueGroup.className = "grp";
-  queueGroup.innerHTML = '<b>Связки</b><div class="sw"></div>';
+  queueGroup.innerHTML = '<div class="sw"></div>';
+  queueGroup.title = "Пары с одинаковым именем и годом рождения в других родах";
   queueGroup.querySelector(".sw")!.append(queueBtn);
   queueGroup.hidden = true;
   const countQueue = async () => {
@@ -497,12 +512,8 @@ async function start(root: HTMLElement): Promise<void> {
   });
 
   // род в шапке: название и счёт; сам список — в столбце слева
-  const clanTitleGroup = document.createElement("div");
-  clanTitleGroup.className = "grp";
-  clanTitleGroup.innerHTML = '<b>Род</b>';
   const clanTitle = document.createElement("div");
   clanTitle.className = "clanTitle";
-  clanTitleGroup.append(clanTitle);
   const exportLink = document.createElement("a");
   exportLink.className = "topLink";
   exportLink.textContent = "Выгрузить .ged";
@@ -583,9 +594,6 @@ async function start(root: HTMLElement): Promise<void> {
     zoomValue.textContent = `${canvas.zoomPercent}%`;
   };
 
-  const viewGroup = document.createElement("div");
-  viewGroup.className = "grp";
-  viewGroup.innerHTML = "<b>Вид</b>";
   const zoomRow = document.createElement("div");
   zoomRow.className = "sw";
   const button = (text: string, title: string, action: () => void) => {
@@ -604,27 +612,29 @@ async function start(root: HTMLElement): Promise<void> {
   const placeRow = document.createElement("div");
   placeRow.className = "sw";
   placeRow.append(button("Целиком", "Показать род целиком", () => canvas.fit()), button("К выбранному", "Центр на выбранном", () => canvas.goToSelected()));
-  viewGroup.append(zoomRow, placeRow);
 
   const stat = document.createElement("div");
   stat.className = "hint";
 
   showClan(currentClan);
 
-  // шапка: слева род и поиск, посередине режим и журнал, справа масштаб, панели и файлы
-  bar.append(
-    clanTitleGroup,
-    search.element,
-    modeSwitch,
-    journal.group,
-    queueGroup,
-    spacer(),
-    viewGroup,
-    viewBtn,
-    addLink,
-    exportLink,
-    stat,
-  );
+  // шапка тремя строками: первая говорит, какое дерево открыто, две другие — что с ним делать.
+  // Инструменты лежат на подложке потемнее, поэтому не читаются продолжением заголовка
+  const titleRow = row(clanTitle, sep(), search.element, sep(), stat, spacer(), viewBtn);
+  const viewRow = row(zoomRow, placeRow, sep(), addLink, exportLink, spacer(), modeSwitch);
+  const editRow = row(queueGroup, spacer(), journal.group);
+  const tools = document.createElement("div");
+  tools.className = "tools";
+  tools.append(viewRow, editRow);
+  bar.append(titleRow, tools);
+  // третья строка пустует в просмотре без связок — тогда её не видно вовсе
+  const syncEditRow = () => {
+    editRow.hidden = queueGroup.hidden && journal.group.hidden;
+  };
+  const queueObserver = new MutationObserver(syncEditRow);
+  queueObserver.observe(queueGroup, { attributes: true, attributeFilter: ["hidden"] });
+  queueObserver.observe(journal.group, { attributes: true, attributeFilter: ["hidden"] });
+  syncEditRow();
 
   await loadClan(clans[0]!.id);
   void countQueue();

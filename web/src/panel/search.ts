@@ -32,7 +32,7 @@ export class SearchBox {
   constructor(private readonly onPick: (id: number) => void) {
     this.element = document.createElement("div");
     this.element.className = "grp search";
-    this.element.innerHTML = '<b>Поиск</b><input type="search" placeholder="имя или фамилия" autocomplete="off"><div class="results" hidden></div>';
+    this.element.innerHTML = '<input type="search" placeholder="имя или фамилия" autocomplete="off"><div class="results" hidden></div>';
     this.input = this.element.querySelector("input")!;
     this.list = this.element.querySelector(".results")!;
 

@@ -12,10 +12,18 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
   --ch-btn: color-mix(in srgb, var(--fg) 8%, transparent); --ch-acc: var(--acc);
   --ch-on: var(--acc); --ch-onfg: var(--bg); }
 
-.bar { position: relative; z-index: 20; display: flex; flex-wrap: wrap; gap: 18px; align-items: center;
-       padding: 10px 16px; background: var(--ch-bg); color: var(--ch-fg); border-bottom: 1px solid var(--ch-edge); }
+/* шапка тремя строками: титул дерева сверху, инструменты — на подложке потемнее */
+.bar { position: relative; z-index: 20; display: flex; flex-direction: column;
+       background: var(--ch-bg); color: var(--ch-fg); border-bottom: 1px solid var(--ch-edge); }
+.bar .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 16px; }
+.bar .tools { background: color-mix(in srgb, var(--ch-bg) 70%, #000);
+  border-top: 1px solid color-mix(in srgb, var(--ch-edge) 70%, transparent); }
+.bar .tools .row { padding: 7px 16px; }
+.bar .tools .row + .row { border-top: 1px solid color-mix(in srgb, var(--ch-edge) 45%, transparent); }
+/* черта вместо подписи группы: делит строку на смысловые куски */
+.bar .topSep { flex: none; width: 1px; height: 20px;
+  background: color-mix(in srgb, var(--ch-fg) 22%, transparent); }
 .grp { display: flex; align-items: center; gap: 7px; }
-.grp > b { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ch-mut); }
 .sw { display: flex; border: 1px solid var(--ch-edge); border-radius: 6px; overflow: hidden; }
 .sw button { border: 0; background: var(--ch-btn); color: var(--ch-mut); font: 500 11.5px/1 'Golos Text', sans-serif;
              padding: 6px 11px; cursor: pointer; border-right: 1px solid var(--ch-edge); }
@@ -58,10 +66,10 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 .canvas.backdrop::after { display: none; }
 
 /* ── шапка: слева род и поиск, справа масштаб, панели и файлы ── */
-.bar .clanTitle { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.bar .clanTitle { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
 .bar .clanTitle b { font-family: var(--font, 'Cormorant Garamond', serif); font-size: 17px; line-height: 1.05;
   font-weight: 500; color: var(--ch-fg); letter-spacing: .02em; }
-.bar .clanStatus { font: 400 10px/1.2 'IBM Plex Mono', monospace; color: var(--ch-mut); letter-spacing: .02em; }
+.bar .clanStatus { font: 400 10.5px/1.2 'IBM Plex Mono', monospace; color: var(--ch-mut); letter-spacing: .02em; }
 .bar .statusPick { max-width: 260px; background: var(--ch-btn); color: var(--ch-fg); border: 1px solid var(--ch-edge);
   border-radius: 5px; font: 400 10.5px 'Golos Text', sans-serif; padding: 2px 4px; }
 .bar .lbl2 { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ch-mut); }
@@ -73,6 +81,7 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
   cursor: pointer; text-decoration: none; white-space: nowrap; padding: 6px 2px; }
 .bar .topLink:hover { color: var(--ch-acc); }
 .bar .hint { margin-left: 0; }
+.bar .row > .sw + .sw { margin-left: -4px; } /* масштаб и «целиком» — один инструмент, стоят рядом */
 
 /* ── столбец родовых деревьев слева ── */
 .rail { width: 216px; flex: none; background: var(--ch-bg); color: var(--ch-fg); border-right: 1px solid var(--ch-edge);
