@@ -2,7 +2,6 @@
 server/.venv/
 web/node_modules/
 web/dist/
-prototype/build/
 __pycache__/
 *.pyc
 .pytest_cache/
