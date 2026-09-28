@@ -109,7 +109,12 @@ await micropip.install(["fastapi", "pydantic"])
   const core = await fetch(new URL(CORE, document.baseURI)).then((r) => r.arrayBuffer());
   py.FS.mkdirTree("/core");
   py.unpackArchive(core, "zip", { extractDir: "/core" });
+  // хранилище браузера: база и снимки переживают перезагрузку и остаются у гостя
   py.FS.mkdirTree("/data");
+  py.FS.mount(py.FS.filesystems.IDBFS, {}, "/data");
+  await new Promise<void>((done, fail) => {
+    py.FS.syncfs(true, (error: unknown) => (error ? fail(error) : done()));
+  });
   await py.runPythonAsync(`
 import os, sys
 sys.path.insert(0, "/core")
@@ -148,6 +153,19 @@ for name, file in [("Гленн Уриск", "Gleann_Uruisg_tree.ged"), ("Уин
     import_clan(conn, name, load_file(pathlib.Path("/core/clans") / file), source_file=file)
 conn.close()
 `);
+  await new Promise<void>((done) => python?.FS.syncfs(false, () => done()));
+}
+
+/** Сброс в хранилище браузера: копим мелкие правки и пишем разом, чтобы не дёргать диск на каждый щелчок. */
+let saving: ReturnType<typeof setTimeout> | null = null;
+
+function keep(): void {
+  if (!python) return;
+  if (saving) clearTimeout(saving);
+  saving = setTimeout(() => {
+    saving = null;
+    python?.FS.syncfs(false, () => {});
+  }, 400);
 }
 
 /** Запросы к API уходят в ядро, всё прочее (шрифты, картинки) идёт как обычно. */
@@ -169,6 +187,7 @@ function catchFetch(): void {
       status: number; headers: [string, string][]; body: Uint8Array;
     };
     const bytes = new Uint8Array(plain.body);
+    if (request.method !== "GET" && request.method !== "HEAD" && plain.status < 400) keep();
     return new Response(bytes.buffer as ArrayBuffer, { status: plain.status, headers: plain.headers });
   };
 }
