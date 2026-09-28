@@ -1,0 +1,109 @@
+"""Вход редактора: пароль, сессия и запрет правок без входа."""
+
+import sqlite3
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app.db.access import AccessError, add_editor, editor_by_key, editors_exist, list_editors, login, logout, set_password
+from app.db.connection import migrate
+
+
+@pytest.fixture()
+def conn() -> sqlite3.Connection:
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    migrate(connection)
+    return connection
+
+
+def test_editor_appears_and_password_is_not_stored(conn: sqlite3.Connection) -> None:
+    add_editor(conn, "Tyr", "длинный пароль")
+    assert editors_exist(conn)
+    assert [item.name for item in list_editors(conn)] == ["Tyr"]
+    secret = conn.execute("SELECT secret FROM editors").fetchone()["secret"]
+    assert "длинный пароль" not in secret
+    assert secret.startswith("scrypt$")
+
+
+def test_short_password_and_double_name_are_refused(conn: sqlite3.Connection) -> None:
+    with pytest.raises(AccessError):
+        add_editor(conn, "Tyr", "коротко")
+    add_editor(conn, "Tyr", "длинный пароль")
+    with pytest.raises(AccessError):
+        add_editor(conn, "Tyr", "другой длинный")
+
+
+def test_login_gives_session_and_logout_takes_it_back(conn: sqlite3.Connection) -> None:
+    add_editor(conn, "Tyr", "длинный пароль")
+    key = login(conn, "Tyr", "длинный пароль")
+    editor = editor_by_key(conn, key)
+    assert editor is not None and editor.name == "Tyr"
+    logout(conn, key)
+    assert editor_by_key(conn, key) is None
+
+
+def test_wrong_password_and_unknown_name_answer_the_same(conn: sqlite3.Connection) -> None:
+    add_editor(conn, "Tyr", "длинный пароль")
+    with pytest.raises(AccessError) as wrong:
+        login(conn, "Tyr", "не тот пароль")
+    with pytest.raises(AccessError) as unknown:
+        login(conn, "Эйлин", "длинный пароль")
+    assert str(wrong.value) == str(unknown.value)
+
+
+def test_session_key_is_not_stored_as_is(conn: sqlite3.Connection) -> None:
+    add_editor(conn, "Tyr", "длинный пароль")
+    key = login(conn, "Tyr", "длинный пароль")
+    stored = conn.execute("SELECT fingerprint FROM sessions").fetchone()["fingerprint"]
+    assert stored != key
+
+
+def test_new_password_replaces_old_one(conn: sqlite3.Connection) -> None:
+    add_editor(conn, "Tyr", "длинный пароль")
+    set_password(conn, "Tyr", "совсем другой пароль")
+    with pytest.raises(AccessError):
+        login(conn, "Tyr", "длинный пароль")
+    assert login(conn, "Tyr", "совсем другой пароль")
+
+
+def test_api_without_editors_lets_edit(tmp_path, monkeypatch) -> None:
+    """Пока редакторов нет, правка открыта: приложение работает как раньше."""
+    import app.config
+    import app.main
+
+    monkeypatch.setattr(app.config, "DB_PATH", tmp_path / "base.sqlite3")
+    monkeypatch.setattr(app.main, "DB_PATH", tmp_path / "base.sqlite3")
+    client = TestClient(app.main.app)
+    me = client.get("/api/me").json()
+    assert me == {"name": None, "guarded": False}
+    # рода нет, но ответ приходит от самого обработчика, а не от заслона
+    assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 400
+
+
+def test_api_with_editor_demands_login(tmp_path, monkeypatch) -> None:
+    import app.config
+    import app.main
+    from app.db.connection import connect
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    base = connect(path)
+    add_editor(base, "Tyr", "длинный пароль")
+    base.close()
+
+    client = TestClient(app.main.app)
+    assert client.get("/api/me").json() == {"name": None, "guarded": True}
+    assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 401
+
+    assert client.post("/api/login", json={"name": "Tyr", "password": "не тот"}).status_code == 401
+    entered = client.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
+    assert entered.status_code == 200 and entered.json()["name"] == "Tyr"
+    assert client.get("/api/me").json() == {"name": "Tyr", "guarded": True}
+    # вошли: заслон пропускает, дальше отвечает сам обработчик
+    assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 400
+
+    client.post("/api/logout")
+    assert client.get("/api/me").json()["name"] is None
+    assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 401

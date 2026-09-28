@@ -97,8 +97,10 @@ class Edit:
         """Заголовок файла рода: в нём набор меток с цветами."""
         key = ("HEAD", self.clan_id)
         if key not in self.touched:
-            raw = self.conn.execute("SELECT header_raw FROM clans WHERE id = ?", (self.clan_id,)).fetchone()[0]
-            data = json.loads(raw) if raw else None
+            row = self.conn.execute("SELECT header_raw FROM clans WHERE id = ?", (self.clan_id,)).fetchone()
+            if row is None:
+                raise JournalError("Такого рода нет")
+            data = json.loads(row[0]) if row[0] else None
             record = _load(data) if data else Record(level=0, tag="HEAD")
             self.touched[key] = _Touched("HEAD", self.clan_id, "", data, record)
         return self.touched[key].record  # type: ignore[return-value]

@@ -28,6 +28,7 @@ import { LinkReview } from "./links/review";
 import { FamilyEditor } from "./editor/family";
 import { send } from "./editor/api";
 import { PersonEditor } from "./editor/form";
+import { Gate, whoami, type Me } from "./panel/gate";
 import { Journal } from "./editor/journal";
 import { RelativeMenu } from "./editor/menu";
 import { ClanRail } from "./panel/clans";
@@ -77,6 +78,7 @@ function switcher<T extends string | number>(
   row.className = "sw";
   for (const [value, text] of options) {
     const button = document.createElement("button");
+    button.dataset.value = String(value);
     button.textContent = text;
     button.setAttribute("aria-pressed", String(value === current));
     button.addEventListener("click", () => {
@@ -441,7 +443,19 @@ async function start(root: HTMLElement): Promise<void> {
     void journal.refresh();
     void countQueue();
   };
+  const gate = new Gate(stage);
+  let me: Me = await whoami();
   const modeSwitch = switcher("Режим", [["view", "Просмотр"], ["edit", "Правка"]], "view", (mode) => {
+    // правка без входа не открывается: сервер всё равно откажет, и лучше сказать это сразу
+    if (mode === "edit" && me.guarded && !me.name) {
+      setMode("view");
+      gate.open((who) => {
+        me = who;
+        showAccess();
+        setMode("edit");
+      });
+      return;
+    }
     editing = mode === "edit";
     journal.group.hidden = !editing;
     canvas.setEditing(editing);
@@ -451,6 +465,10 @@ async function start(root: HTMLElement): Promise<void> {
     drawLegend();
     showCurrent();
   });
+  const setMode = (mode: "view" | "edit") => {
+    const button = modeSwitch.querySelector<HTMLButtonElement>(`[data-value="${mode}"]`);
+    if (button && button.getAttribute("aria-pressed") !== "true") button.click();
+  };
   // панель показывает, свёрнута ли ветка, — перерисовать после щелчка по стопке на карте
   canvas.onFoldChange = showCurrent;
   canvas.onSelect = (id) => {
@@ -620,7 +638,31 @@ async function start(root: HTMLElement): Promise<void> {
 
   // шапка тремя строками: первая говорит, какое дерево открыто, две другие — что с ним делать.
   // Инструменты лежат на подложке потемнее, поэтому не читаются продолжением заголовка
-  const titleRow = row(clanTitle, search.element, spacer(), stat, sep(), viewBtn);
+  const access = document.createElement("button");
+  access.className = "topLink";
+  access.addEventListener("click", () => {
+    if (me.name) void leave();
+    else gate.open((who) => {
+      me = who;
+      showAccess();
+    });
+  });
+  const showAccess = () => {
+    // зритель не знает про вход: кнопка появляется, только когда редакторы заведены
+    access.hidden = !me.guarded && !me.name;
+    access.textContent = me.name ? `Выйти · ${me.name}` : "Войти";
+    access.title = me.name ? "Закончить работу редактором" : "Войти, чтобы править роды";
+    modeSwitch.classList.toggle("locked", me.guarded && !me.name);
+  };
+  const leave = async () => {
+    const result = await send<Me>("POST", "/api/logout");
+    me = result.ok ? result.data : { name: null, guarded: true };
+    if (editing) setMode("view");
+    showAccess();
+  };
+  showAccess();
+
+  const titleRow = row(clanTitle, search.element, spacer(), stat, sep(), access, viewBtn);
   const viewRow = row(zoomRow, placeRow, spacer(), addLink, exportLink, sep(), modeSwitch);
   const editRow = row(queueGroup, spacer(), journal.group);
   const tools = document.createElement("div");

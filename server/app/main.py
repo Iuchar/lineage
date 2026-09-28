@@ -5,13 +5,14 @@ from urllib.parse import quote
 from collections.abc import Iterator
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app import uploads
 from app.config import DB_PATH, DIST
+from app.db.access import AccessError, Editor, editor_by_key, editors_exist, login, logout
 from app.db.clans import ClanExistsError, import_clan
 from app.db.connection import connect
 from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonFields, PersonForm, add_person,
@@ -48,6 +49,67 @@ def database() -> Iterator[sqlite3.Connection]:
 
 
 Database = Annotated[sqlite3.Connection, Depends(database)]
+
+SESSION_COOKIE = "rodoslovnye_editor"
+SESSION_DAYS = 30
+# вход и проверка себя открыты всем: иначе войти было бы нечем
+OPEN_PATHS = {"/api/login", "/api/logout", "/api/me"}
+
+
+def _current_editor(conn: sqlite3.Connection, request: Request) -> Editor | None:
+    return editor_by_key(conn, request.cookies.get(SESSION_COOKIE))
+
+
+@app.middleware("http")
+async def guard_edits(request: Request, call_next):  # type: ignore[no-untyped-def]
+    """Пока заведён хотя бы один редактор, менять данные может только вошедший."""
+    path = request.url.path
+    if request.method in {"POST", "PUT", "PATCH", "DELETE"} and path.startswith("/api/") and path not in OPEN_PATHS:
+        conn = connect(DB_PATH)
+        try:
+            if editors_exist(conn) and _current_editor(conn, request) is None:
+                return JSONResponse({"detail": "Нужен вход редактора"}, status_code=401)
+        finally:
+            conn.close()
+    return await call_next(request)
+
+
+class Me(BaseModel):
+    name: str | None = None  # имя вошедшего редактора; null — не вошёл
+    guarded: bool  # заведён ли хоть один редактор: пока нет, правка открыта всем
+
+
+class LoginForm(BaseModel):
+    name: str
+    password: str
+
+
+@app.get("/api/me")
+def get_me(conn: Database, request: Request) -> Me:
+    editor = _current_editor(conn, request)
+    return Me(name=editor.name if editor else None, guarded=editors_exist(conn))
+
+
+@app.post("/api/login")
+def post_login(conn: Database, body: LoginForm, response: Response) -> Me:
+    try:
+        key = login(conn, body.name, body.password)
+    except AccessError as error:
+        raise HTTPException(status_code=401, detail=str(error)) from None
+    response.set_cookie(
+        SESSION_COOKIE, key, max_age=SESSION_DAYS * 24 * 3600,
+        httponly=True, samesite="lax", path="/",
+    )
+    return Me(name=body.name.strip(), guarded=True)
+
+
+@app.post("/api/logout")
+def post_logout(conn: Database, request: Request, response: Response) -> Me:
+    key = request.cookies.get(SESSION_COOKIE)
+    if key:
+        logout(conn, key)
+    response.delete_cookie(SESSION_COOKIE, path="/")
+    return Me(name=None, guarded=editors_exist(conn))
 
 
 @app.get("/api/health")

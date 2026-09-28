@@ -2,6 +2,7 @@
 
     rodoslovnye                                   собрать интерфейс, если устарел, и поднять сервер
     rodoslovnye import ФАЙЛ.ged --name "Род"      загрузить файл новым родом
+    rodoslovnye editor Tyr                        завести редактора или сменить ему пароль
     rodoslovnye --port 8730 --db .work/check.sqlite3   поднять сервер на отдельной базе
 """
 
@@ -76,6 +77,32 @@ def import_file(args: argparse.Namespace) -> None:
         print(f"  предупреждение: {warning}")
 
 
+def editor(args: argparse.Namespace) -> None:
+    """Заводит редактора или меняет ему пароль. Пароль спрашивается без показа на экране."""
+    from getpass import getpass
+
+    from app.db.access import AccessError, add_editor, list_editors, set_password
+    from app.db.connection import connect
+
+    conn = connect(args.db)
+    known = {item.name for item in list_editors(conn)}
+    again = args.name in known
+    print(f"Смена пароля редактору «{args.name}»." if again else f"Новый редактор «{args.name}».")
+    try:
+        password = getpass("Пароль (не короче восьми знаков): ")
+        if password != getpass("Ещё раз: "):
+            sys.exit("Пароли не совпали.")
+        if again:
+            set_password(conn, args.name, password)
+        else:
+            add_editor(conn, args.name, password)
+    except AccessError as error:
+        sys.exit(str(error))
+    except (EOFError, KeyboardInterrupt):
+        sys.exit("Отменено.")
+    print("Пароль сменён." if again else "Редактор заведён: теперь правка требует входа.")
+
+
 def main(argv: list[str] | None = None) -> None:
     # консоль Windows по умолчанию не в UTF-8, и русский вывод превращается в кракозябры
     if hasattr(sys.stdout, "reconfigure"):
@@ -100,6 +127,11 @@ def main(argv: list[str] | None = None) -> None:
     import_cmd.add_argument("--name", required=True, help="имя рода, под которым он появится")
     import_cmd.add_argument("--db", type=Path, default=DB_PATH, help="путь к базе")
     import_cmd.set_defaults(handler=import_file)
+
+    editor_cmd = commands.add_parser("editor", help="завести редактора или сменить ему пароль")
+    editor_cmd.add_argument("name", help="имя, под которым редактор входит")
+    editor_cmd.add_argument("--db", type=Path, default=DB_PATH, help="путь к базе")
+    editor_cmd.set_defaults(handler=editor)
 
     args = parser.parse_args(argv)
     args.handler(args)
