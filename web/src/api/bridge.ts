@@ -5,7 +5,7 @@
 const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/";
 const CORE = "core.zip"; // ядро и эталонные роды, собирает scripts/pack-core.mjs
 // на витрине заводим редактора с простым паролем: иначе гость не увидит, как устроена правка
-export const DEMO_EDITOR = { name: "редактор", password: "родословные" };
+export const DEMO_EDITOR = { name: "admin", password: "admin123" };
 
 // Обёртка вокруг нашего приложения: зовёт его по ASGI без всякой сети.
 const HANDLER = `
