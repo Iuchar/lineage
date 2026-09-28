@@ -337,8 +337,13 @@ export class PersonEditor {
       '<button type="button" class="chip" data-act="note">+ заметка</button>';
   }
 
-  private noteHtml(text: string): string {
-    return `<div class="noteRow"><textarea class="field" rows="2" data-note>${escapeHtml(text)}</textarea>` +
+  private noteHtml(note: { text: string; see?: See }): string {
+    const level: See = note.see ?? "clan";
+    return `<div class="noteRow"><textarea class="field" rows="2" data-note>${escapeHtml(note.text)}</textarea>` +
+      `<select class="lockPick ${level}" data-note-see title="Кому видна эта заметка">` +
+      (Object.entries(SEE_NAMES) as [See, string][]).map(([key, text]) =>
+        `<option value="${key}"${key === level ? " selected" : ""}>${SEE_SIGNS[key]} ${text}</option>`).join("") +
+      "</select>" +
       '<button type="button" class="x" data-act="unnote" title="Убрать заметку">×</button></div>';
   }
 
@@ -349,7 +354,10 @@ export class PersonEditor {
       given: value("given"), surname: value("surname"), married_surname: value("married_surname"),
       sex: (this.segValue("sex") ?? null) as PersonFields["sex"],
       birth: date("birth"), death: date("death"),
-      notes: [...this.host.querySelectorAll<HTMLTextAreaElement>("[data-note]")].map((t) => t.value).filter((t) => t.trim()),
+      notes: [...this.host.querySelectorAll<HTMLElement>(".noteRow")].map((row) => ({
+        text: row.querySelector<HTMLTextAreaElement>("[data-note]")?.value ?? "",
+        see: (row.querySelector<HTMLSelectElement>("[data-note-see]")?.value as See) ?? "clan",
+      })).filter((n) => n.text.trim()),
       tags: [...this.host.querySelectorAll<HTMLElement>("[data-tag].on")].map((c) => c.dataset.tag!),
       new_tags: Object.fromEntries(this.newTags),
       burnt: this.checked("burnt"), heir: this.checked("heir"),
@@ -380,7 +388,7 @@ export class PersonEditor {
     });
     this.on("cancel", () => this.actions.closed());
     this.on("note", () => {
-      this.host.querySelector("[data-role=notes]")?.insertAdjacentHTML("beforeend", this.noteHtml(""));
+      this.host.querySelector("[data-role=notes]")?.insertAdjacentHTML("beforeend", this.noteHtml({ text: "" }));
       [...this.host.querySelectorAll<HTMLTextAreaElement>("[data-note]")].pop()?.focus();
     });
     this.host.addEventListener("click", (e) => {

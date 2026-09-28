@@ -12,6 +12,8 @@ from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
+from app.gedcom.meta import See
+
 
 class LinkPerson(BaseModel):
     id: int
@@ -25,6 +27,7 @@ class LinkPerson(BaseModel):
 class Link(BaseModel):
     id: int
     note: str | None
+    see: See = "all"  # уровень видимости связки
     created_at: str
     a: LinkPerson
     b: LinkPerson
@@ -35,6 +38,7 @@ class ClanLink(BaseModel):
 
     link_id: int
     person_id: int
+    see: See = "all"
     other: LinkPerson
 
 
@@ -105,9 +109,23 @@ def _person(conn: sqlite3.Connection, person_id: int) -> sqlite3.Row:
     return row
 
 
+def _see(row: sqlite3.Row) -> See:
+    level = (row["visibility"] or "all").lower()
+    return level if level in ("all", "clan", "hidden") else "all"  # type: ignore[return-value]
+
+
 def _link(conn: sqlite3.Connection, row: sqlite3.Row) -> Link:
-    return Link(id=row["id"], note=row["note"], created_at=row["created_at"],
+    return Link(id=row["id"], note=row["note"], see=_see(row), created_at=row["created_at"],
                 a=_brief(_person(conn, row["a_person_id"])), b=_brief(_person(conn, row["b_person_id"])))
+
+
+def set_link_see(conn: sqlite3.Connection, link_id: int, see: See) -> Link:
+    with conn:
+        changed = conn.execute("UPDATE person_links SET visibility = ? WHERE id = ?", (see, link_id)).rowcount
+    if not changed:
+        raise LinkNotFoundError(link_id)
+    row = conn.execute("SELECT * FROM person_links WHERE id = ?", (link_id,)).fetchone()
+    return _link(conn, row)
 
 
 def list_links(conn: sqlite3.Connection) -> list[Link]:
@@ -118,7 +136,7 @@ def clan_links(conn: sqlite3.Connection, clan_id: int) -> list[ClanLink]:
     """Связки людей рода, по одной строке на каждого двойника: у человека их может быть несколько."""
     out: list[ClanLink] = []
     for row in conn.execute(
-        """SELECT l.id, l.a_person_id, l.b_person_id FROM person_links l
+        """SELECT l.id, l.a_person_id, l.b_person_id, l.visibility FROM person_links l
              JOIN persons pa ON pa.id = l.a_person_id JOIN persons pb ON pb.id = l.b_person_id
             WHERE pa.clan_id = ? OR pb.clan_id = ? ORDER BY l.id""",
         (clan_id, clan_id),
@@ -126,12 +144,12 @@ def clan_links(conn: sqlite3.Connection, clan_id: int) -> list[ClanLink]:
         a, b = _person(conn, row["a_person_id"]), _person(conn, row["b_person_id"])
         for own, other in ((a, b), (b, a)):
             if own["clan_id"] == clan_id:
-                out.append(ClanLink(link_id=row["id"], person_id=own["id"], other=_brief(other)))
+                out.append(ClanLink(link_id=row["id"], person_id=own["id"], see=_see(row), other=_brief(other)))
     return out
 
 
 def create_link(conn: sqlite3.Connection, a_id: int, b_id: int, note: str | None = None,
-                replace: bool = False) -> Link:
+                replace: bool = False, see: See = "all") -> Link:
     """Связать двоих. Если у одного из них в роду другого уже есть двойник, это перестановка связки:
     без replace — отказ, с replace — старая связка снимается и ставится новая."""
     if a_id == b_id:
@@ -159,8 +177,9 @@ def create_link(conn: sqlite3.Connection, a_id: int, b_id: int, note: str | None
         for link_id in clashes:
             conn.execute("DELETE FROM person_links WHERE id = ?", (link_id,))
         cursor = conn.execute(
-            "INSERT INTO person_links (a_person_id, b_person_id, note, created_at) VALUES (?, ?, ?, ?)",
-            (low, high, note or None, _now()),
+            "INSERT INTO person_links (a_person_id, b_person_id, note, visibility, created_at)"
+            " VALUES (?, ?, ?, ?, ?)",
+            (low, high, note or None, see, _now()),
         )
         # связанная пара больше не «разные люди»
         conn.execute("DELETE FROM link_rejects WHERE a_person_id = ? AND b_person_id = ?", (low, high))

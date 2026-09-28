@@ -222,6 +222,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/links/{link_id}/see": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Put Link See
+         * @description Уровень связки: скрытую зритель не видит и перейти по ней не может.
+         */
+        put: operations["put_link_see_api_links__link_id__see_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/links/{link_id}": {
         parameters: {
             query?: never;
@@ -647,6 +667,12 @@ export interface components {
             link_id: number;
             /** Person Id */
             person_id: number;
+            /**
+             * See
+             * @default all
+             * @enum {string}
+             */
+            see: "all" | "clan" | "hidden";
             other: components["schemas"]["LinkPerson"];
         };
         /** ClanMatch */
@@ -862,6 +888,12 @@ export interface components {
             id: number;
             /** Note */
             note: string | null;
+            /**
+             * See
+             * @default all
+             * @enum {string}
+             */
+            see: "all" | "clan" | "hidden";
             /** Created At */
             created_at: string;
             a: components["schemas"]["LinkPerson"];
@@ -881,6 +913,14 @@ export interface components {
             born: number | null;
             /** Died */
             died: number | null;
+        };
+        /** LinkSee */
+        LinkSee: {
+            /**
+             * See
+             * @enum {string}
+             */
+            see: "all" | "clan" | "hidden";
         };
         /** LoginForm */
         LoginForm: {
@@ -926,6 +966,12 @@ export interface components {
              * @default false
              */
             replace: boolean;
+            /**
+             * See
+             * @default all
+             * @enum {string}
+             */
+            see: "all" | "clan" | "hidden";
         };
         /** NewPerson */
         NewPerson: {
@@ -939,6 +985,20 @@ export interface components {
             relation: components["schemas"]["Relation"];
             /** Existing Id */
             existing_id?: number | null;
+        };
+        /**
+         * NoteForm
+         * @description Заметка человека со своим уровнем видимости.
+         */
+        NoteForm: {
+            /** Text */
+            text: string;
+            /**
+             * See
+             * @default clan
+             * @enum {string}
+             */
+            see: "all" | "clan" | "hidden";
         };
         /** PairDecision */
         PairDecision: {
@@ -1024,6 +1084,12 @@ export interface components {
             date: components["schemas"]["LifeDate"] | null;
             /** Place */
             place: string | null;
+            /**
+             * See
+             * @default all
+             * @enum {string}
+             */
+            see: "all" | "clan" | "hidden";
         };
         /**
          * PersonFields
@@ -1046,7 +1112,7 @@ export interface components {
              * Notes
              * @default []
              */
-            notes: string[];
+            notes: components["schemas"]["NoteForm"][];
             /** Tags */
             tags?: string[] | null;
             /**
@@ -1090,7 +1156,7 @@ export interface components {
             birth: components["schemas"]["DateValue"];
             death: components["schemas"]["DateValue"];
             /** Notes */
-            notes: string[];
+            notes: components["schemas"]["NoteForm"][];
             /** Tags */
             tags: string[];
             /** Burnt */
@@ -1843,6 +1909,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Candidate"][];
+                };
+            };
+        };
+    };
+    put_link_see_api_links__link_id__see_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkSee"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Link"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

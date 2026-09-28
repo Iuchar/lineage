@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.db.clans import import_clan
 from app.db.connection import connect
-from app.db.editor import NewPerson, PersonFields, Relation, add_person, update_person
+from app.db.editor import NoteForm, NewPerson, PersonFields, Relation, add_person, update_person
 from app.db.editor import person_form
 from app.gedcom.export import export_clan
 from app.gedcom.load import load_file, load_text
@@ -40,7 +40,7 @@ def test_edits_go_into_the_file_and_read_back(conn: sqlite3.Connection) -> None:
     murdo = conn.execute("SELECT id FROM persons WHERE xref = '@I1007@'").fetchone()[0]
     form = person_form(conn, murdo)
     update_person(conn, murdo, PersonFields(given=form.given, surname=form.surname, sex=form.sex,
-                                            birth="около 1748", death=form.death.gedcom, notes=["Арендатор"]))
+                                            birth="около 1748", death=form.death.gedcom, notes=[NoteForm(text="Арендатор")]))
     add_person(conn, 1, NewPerson(fields=PersonFields(given="Ангус", surname="Гленн Уриск", sex="M", birth="около 1785"),
                                   relation=Relation(kind="child", person_id=murdo, other_id=None)))
     text = export_clan(conn, 1)

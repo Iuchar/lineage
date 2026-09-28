@@ -8,6 +8,8 @@
 
 from dataclasses import dataclass
 
+from app.db.links import ClanLink
+from app.db.person import PersonDetails
 from app.db.tree import ClanTree
 from app.gedcom.meta import See
 
@@ -23,6 +25,21 @@ class Eyes:
         if level == "hidden":
             return False
         return level == "all" or clan_id in self.clans
+
+
+def sift_links(links: list[ClanLink], eyes: Eyes, clan_id: int) -> list[ClanLink]:
+    """Связки: уровень свой у каждой. Скрытую зритель не видит, и перехода по ней у него нет."""
+    if eyes.editor:
+        return links
+    return [link for link in links if eyes.allows(link.see, clan_id)]
+
+
+def sift_person(details: PersonDetails, eyes: Eyes) -> PersonDetails:
+    """Карточка человека: заметки уровнем выше доступного уходят вовсе, а не прячутся многоточием."""
+    if eyes.editor:
+        return details
+    details.events = [e for e in details.events if eyes.allows(e.see, details.clan_id)]
+    return details
 
 
 def sift(tree: ClanTree, eyes: Eyes) -> ClanTree:

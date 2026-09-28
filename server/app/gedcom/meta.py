@@ -9,6 +9,7 @@
     1 _SEE hidden               уровень видимости человека целиком (нет тега — общее)
     1 _SEE dates clan           уровень дат жизни, по умолчанию родовое
     1 _SEE portrait all         уровень портрета, по умолчанию общее
+    2 _SEE clan                 уровень отдельной заметки (внутри её EVEN), по умолчанию родовое
     1 _HIDDEN Y                 прежний вид «скрыт от зрителей»: читается как _SEE hidden
     1 _HEIR Y                   продолжатель главной линии
     1 _PORTRAIT none            портрет выключен у этого человека (silhouette — заглушка вместо снимка)
@@ -43,6 +44,7 @@ SEE_NAMES: dict[str, str] = {"all": "общее", "clan": "родовое", "hid
 # по проектному документу: имя и место в дереве видны всем, даты жизни — своим, портрет — всем
 DEFAULT_SEE: See = "all"
 DEFAULT_SEE_DATES: See = "clan"
+DEFAULT_SEE_NOTE: See = "clan"  # заметка из файла — родовая, по проектному документу
 
 
 @dataclass
@@ -124,6 +126,17 @@ def _write_see(record: Record, meta: PersonMeta) -> None:
     if meta.see_portrait != DEFAULT_SEE:
         lines.append(f"portrait {meta.see_portrait}")
     record.children.extend(Record(level=1, tag="_SEE", value=line) for line in lines)
+
+
+def read_note_see(note: Record) -> See:
+    """Уровень отдельной заметки: подтег _SEE внутри её записи."""
+    return _level(note.value_of("_SEE"), DEFAULT_SEE_NOTE)
+
+
+def write_note_see(note: Record, level: See) -> None:
+    note.children = [c for c in note.children if c.tag != "_SEE"]
+    if level != DEFAULT_SEE_NOTE:
+        note.children.append(Record(level=note.level + 1, tag="_SEE", value=level))
 
 
 def set_photo(record: Record, path: str | None) -> None:

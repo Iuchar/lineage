@@ -6,6 +6,7 @@ import { historyHtml, revertChange } from "../editor/journal";
 import { cardName, escapeHtml, formatDate, lifeYears } from "../format";
 import { silhouette } from "../canvas/portrait";
 import { TAG_COLORS, type Tag } from "../canvas/tags";
+import { SEE_NAMES, SEE_SIGNS, type See } from "../canvas/see";
 import { descendantsOf } from "../layout/fold";
 import { relativesOf } from "./relatives";
 
@@ -23,6 +24,7 @@ export interface PanelActions {
   isReturn: (link: ClanLink) => boolean; // по этой связке человек сюда и пришёл
   openLink: (link: ClanLink) => void;
   unlink: (link: ClanLink) => void;
+  linkSee: (link: ClanLink, see: See) => void; // кому видна эта связка
   linkWith: (personId: number) => void;
   // режим правки
   editing: () => boolean;
@@ -107,6 +109,15 @@ export class PersonPanel {
     });
     host.append(this.element);
     this.clear();
+  }
+
+  private bindLevels(): void {
+    this.element.querySelectorAll<HTMLSelectElement>("[data-link-see]").forEach((pick) => {
+      pick.addEventListener("change", () => {
+        const link = this.linkFor(Number(pick.dataset.linkSee));
+        if (link) this.actions.linkSee(link, pick.value as See);
+      });
+    });
   }
 
   private linkFor(id: number): ClanLink | undefined {
@@ -198,6 +209,7 @@ export class PersonPanel {
       h += '<div class="note" style="color:var(--mut)">детей нет</div>';
     }
     this.element.innerHTML = h + "</div>";
+    this.bindLevels();
   }
 
   private render(tree: ClanTree, person: TreePerson, details: PersonDetails | null): void {
@@ -314,6 +326,7 @@ export class PersonPanel {
 
     h += "</div>";
     this.element.innerHTML = h;
+    this.bindLevels();
   }
 
   // раздел «Добавить»: те же места, что плюсы на карте; занятые приглушены
@@ -355,6 +368,10 @@ export class PersonPanel {
       const sure = this.confirming === link.link_id;
       h +=
         `<div class="twin"><b>${clan}</b><small>${escapeHtml(link.other.name)} · ${lifeSpan(link.other.born, link.other.died)}</small>` +
+        (editing ? `<select class="lockPick ${link.see ?? "all"}" data-link-see="${link.link_id}" title="Кому видна эта связка">` +
+          (Object.entries(SEE_NAMES) as [See, string][]).map(([key, text]) =>
+            `<option value="${key}"${key === (link.see ?? "all") ? " selected" : ""}>${SEE_SIGNS[key]} ${text}</option>`).join("") +
+          "</select>" : "") +
         `<div class="acts">` +
         (sure
           ? `<button data-act="unlink" data-link="${link.link_id}">Снять связку</button>` +

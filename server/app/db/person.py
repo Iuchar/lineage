@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import sqlite3
 
 from pydantic import BaseModel
 
 from app.db.tree import LifeDate
+from app.gedcom.meta import See, read_note_see
+from app.gedcom.records import Record
 
 
 class PersonEvent(BaseModel):
@@ -15,6 +18,7 @@ class PersonEvent(BaseModel):
     value: str | None
     date: LifeDate | None
     place: str | None
+    see: See = "all"  # у заметки свой уровень видимости, у прочих событий он общий
 
 
 class MarriageDetails(BaseModel):
@@ -51,11 +55,23 @@ def _event(row: sqlite3.Row) -> PersonEvent:
     return PersonEvent(tag=row["tag"], type=row["type"], value=row["value"], date=date, place=row["place"])
 
 
+def _note_levels(conn: sqlite3.Connection, person_id: int) -> list[See]:
+    """Уровни заметок лежат в записи человека, а не в таблице событий: читаем их по порядку."""
+    row = conn.execute("SELECT raw FROM persons WHERE id = ?", (person_id,)).fetchone()
+    if row is None or not row["raw"]:
+        return []
+    record = Record.from_json(json.loads(row["raw"]))
+    return [read_note_see(c) for c in record.children
+            if c.tag == "EVEN" and c.value_of("TYPE") == "Comment"]
+
+
 def person_details(conn: sqlite3.Connection, person_id: int) -> PersonDetails:
     person = conn.execute("SELECT id, clan_id, xref, name_raw FROM persons WHERE id = ?", (person_id,)).fetchone()
     if person is None:
         raise PersonNotFoundError(person_id)
 
+    levels = _note_levels(conn, person_id)
+    note_at = 0
     events = [
         _event(row)
         for row in conn.execute(
@@ -64,6 +80,10 @@ def person_details(conn: sqlite3.Connection, person_id: int) -> PersonDetails:
             (person_id,),
         )
     ]
+    for event in events:  # заметки идут в том же порядке, что и в записи
+        if event.tag == "EVEN" and event.type == "Comment" and note_at < len(levels):
+            event.see = levels[note_at]
+            note_at += 1
     marriages = []
     for family in conn.execute(
         "SELECT family_id FROM spouse_families WHERE person_id = ? ORDER BY position", (person_id,)

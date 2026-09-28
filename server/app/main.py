@@ -14,7 +14,8 @@ from app import uploads
 from app.config import DB_PATH, DIST
 from app.db.access import AccessError, Editor, editor_by_key, editors_exist, login, logout
 from app.db.clans import ClanExistsError, import_clan
-from app.db.eyes import Eyes, sift
+from app.db.eyes import Eyes, sift, sift_links, sift_person
+from app.gedcom.meta import See
 from app.db.share import ShareError, ShareLink, enter, issue, link_of, revoke, viewer_clans
 from app.db.connection import connect
 from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonFields, PersonForm, add_person,
@@ -27,7 +28,8 @@ from app.db.tagset import TagChange, TagError, delete_tag, set_status, tag_usage
 from app.gedcom.export import ExportError, export_clan
 from app.gedcom.ru_dates import DateInputError, parse_input
 from app.db.links import (Candidate, ClanLink, Link, LinkClashError, LinkError, LinkNotFoundError, LinkPerson,
-                          candidates, clan_links, create_link, delete_link, list_links, reject_pair, search_persons)
+                          candidates, clan_links, create_link, delete_link, list_links, reject_pair, search_persons,
+                          set_link_see)
 from app.db.person import PersonDetails, PersonNotFoundError, person_details
 from app.db.reload import ClanMatch, ReloadPreview, ReloadReport, clan_matches, preview_reload, reload_clan, suggested_name
 from app.db.tree import ClanNotFoundError, ClanSummary, ClanTree, clan_tree, list_clans
@@ -199,9 +201,9 @@ def get_clan_tree(clan_id: int, conn: Database, request: Request) -> ClanTree:
 
 
 @app.get("/api/persons/{person_id}")
-def get_person(person_id: int, conn: Database) -> PersonDetails:
+def get_person(person_id: int, conn: Database, request: Request) -> PersonDetails:
     try:
-        return person_details(conn, person_id)
+        return sift_person(person_details(conn, person_id), _eyes(conn, request))
     except PersonNotFoundError:
         raise HTTPException(status_code=404, detail="Такого человека нет") from None
 
@@ -213,8 +215,8 @@ def find_persons(q: str, conn: Database, exclude_clan: int | None = None) -> lis
 
 
 @app.get("/api/clans/{clan_id}/links")
-def get_clan_links(clan_id: int, conn: Database) -> list[ClanLink]:
-    return clan_links(conn, clan_id)
+def get_clan_links(clan_id: int, conn: Database, request: Request) -> list[ClanLink]:
+    return sift_links(clan_links(conn, clan_id), _eyes(conn, request), clan_id)
 
 
 class NewLink(BaseModel):
@@ -222,6 +224,11 @@ class NewLink(BaseModel):
     b: int
     note: str | None = None
     replace: bool = False  # у человека в том роду уже есть двойник — снять старую связку и поставить эту
+    see: See = "all"  # уровень видимости связки, по умолчанию общий
+
+
+class LinkSee(BaseModel):
+    see: See
 
 
 class PairDecision(BaseModel):
@@ -242,11 +249,20 @@ def get_candidates(conn: Database) -> list[Candidate]:
 @app.post("/api/links")
 def post_link(body: NewLink, conn: Database) -> Link:
     try:
-        return create_link(conn, body.a, body.b, body.note, body.replace)
+        return create_link(conn, body.a, body.b, body.note, body.replace, body.see)
     except LinkClashError as error:
         raise HTTPException(status_code=409, detail=str(error)) from None
     except LinkError as error:
         raise HTTPException(status_code=400, detail=str(error)) from None
+
+
+@app.put("/api/links/{link_id}/see")
+def put_link_see(link_id: int, body: LinkSee, conn: Database) -> Link:
+    """Уровень связки: скрытую зритель не видит и перейти по ней не может."""
+    try:
+        return set_link_see(conn, link_id, body.see)
+    except LinkNotFoundError:
+        raise HTTPException(status_code=404, detail="Такой связки нет") from None
 
 
 @app.delete("/api/links/{link_id}", status_code=204)

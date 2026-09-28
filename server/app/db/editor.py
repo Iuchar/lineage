@@ -17,12 +17,20 @@ from app.db.journal import ChangeInfo, Edit, JournalError
 from app.db.kin import DateValue, KinChanges, KinError, apply_kin, manual_order
 from app.gedcom.convert import _person
 from app.gedcom.dates import parse_date
-from app.gedcom.meta import SEE_NAMES, TAG_COLORS, PersonMeta, See, add_tag_def, read_meta, write_meta
+from app.gedcom.meta import (DEFAULT_SEE_NOTE, SEE_NAMES, TAG_COLORS, PersonMeta, See, add_tag_def, read_meta,
+                             read_note_see, write_meta, write_note_see)
 from app.gedcom.records import Record
 from app.gedcom.ru_dates import DateInputError, format_ru, parse_input
 
 Sex = Literal["M", "F", "U"]
 Pedigree = Literal["birth", "adopted", "foster"]
+
+
+class NoteForm(BaseModel):
+    """Заметка человека со своим уровнем видимости."""
+
+    text: str
+    see: See = DEFAULT_SEE_NOTE
 
 
 class PersonForm(BaseModel):
@@ -36,7 +44,7 @@ class PersonForm(BaseModel):
     sex: Sex | None
     birth: DateValue
     death: DateValue
-    notes: list[str]
+    notes: list[NoteForm]
     tags: list[str]
     burnt: bool
     see: See  # человек целиком
@@ -57,7 +65,7 @@ class PersonFields(BaseModel):
     sex: Sex | None = None
     birth: str | None = None
     death: str | None = None
-    notes: list[str] = []
+    notes: list[NoteForm] = []
     # служебное: метки (новые — с цветом), состояния, главная линия, портрет
     # не прислано (None) — остаётся как было: частичная форма ничего не стирает
     tags: list[str] | None = None
@@ -199,16 +207,18 @@ def _apply_fields(record: Record, fields: PersonFields) -> None:
     ))
 
     old = _notes(record)
-    texts = [t.strip() for t in fields.notes if t.strip()]
-    for note, text in zip(old, texts, strict=False):
+    fresh_notes = [n for n in fields.notes if n.text.strip()]
+    for note, want in zip(old, fresh_notes, strict=False):
         keep = [c for c in note.children if c.tag not in ("CONT", "CONC")]
-        fresh = _text_record(1, "EVEN", text)
-        note.value, note.children = fresh.value, fresh.children + keep
-    for note in old[len(texts):]:
+        made = _text_record(1, "EVEN", want.text.strip())
+        note.value, note.children = made.value, made.children + keep
+        write_note_see(note, want.see)
+    for note in old[len(fresh_notes):]:
         record.children.remove(note)
-    for text in texts[len(old):]:
-        note = _text_record(1, "EVEN", text)
+    for want in fresh_notes[len(old):]:
+        note = _text_record(1, "EVEN", want.text.strip())
         note.children.append(Record(level=2, tag="TYPE", value="Comment"))
+        write_note_see(note, want.see)
         record.children.append(note)
 
 
@@ -269,7 +279,8 @@ def person_form(conn: sqlite3.Connection, person_id: int) -> PersonForm:
     return PersonForm(
         id=person_id, clan_id=clan_id, given=person.given, surname=person.surname,
         married_surname=person.married_surname, sex=person.sex,  # type: ignore[arg-type]
-        birth=date("BIRT"), death=date("DEAT"), notes=[n.text() for n in _notes(record)],
+        birth=date("BIRT"), death=date("DEAT"),
+        notes=[NoteForm(text=n.text(), see=read_note_see(n)) for n in _notes(record)],
         tags=meta.tags, burnt=meta.burnt, see=meta.see, see_dates=meta.see_dates,
         see_portrait=meta.see_portrait, heir=meta.heir, portrait=meta.portrait,
         photo=f"/api/{meta.photo}" if meta.photo else None, marriage_order_manual=manual_order(record),
@@ -313,7 +324,7 @@ def _describe(before: Record, after: Record, extra: list[str] | None = None) -> 
     for tag, label in (("BIRT", "рождение"), ("DEAT", "смерть")):
         if _date_ru(before, tag) != _date_ru(after, tag):
             parts.append(f"{label} {_date_ru(before, tag)} → {_date_ru(after, tag)}")
-    if [n.text() for n in _notes(before)] != [n.text() for n in _notes(after)]:
+    if [(n.text(), read_note_see(n)) for n in _notes(before)] != [(n.text(), read_note_see(n)) for n in _notes(after)]:
         parts.append("заметки")
     mb, ma = read_meta(before), read_meta(after)
     for tag in ma.tags:

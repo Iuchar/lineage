@@ -85,3 +85,42 @@ def test_portrait_level_takes_the_photo_away(conn: sqlite3.Connection) -> None:
     seen = sift(clan_tree(conn, 1), Eyes(editor=False, clans=frozenset({1})))
     person = next(p for p in seen.persons if p.id == pid)
     assert person.photo is None and person.portrait == "silhouette"
+
+
+def test_note_level_hides_the_note_from_stranger(conn: sqlite3.Connection) -> None:
+    """Заметка уровнем «родовое» уходит только своим, «скрытая» — никому, кроме редактора."""
+    from app.db.editor import NoteForm, person_form
+    from app.db.eyes import sift_person
+    from app.db.person import person_details
+
+    pid = someone(conn)
+    form = person_form(conn, pid)
+    update_person(conn, pid, PersonFields(
+        given=form.given, surname=form.surname, sex=form.sex,
+        birth=form.birth.gedcom, death=form.death.gedcom,
+        notes=[NoteForm(text="Своим", see="clan"), NoteForm(text="Никому", see="hidden"),
+               NoteForm(text="Всем", see="all")],
+    ))
+
+    def notes(eyes: Eyes) -> list[str]:
+        seen = sift_person(person_details(conn, pid), eyes)
+        return [e.value or "" for e in seen.events if e.tag == "EVEN" and e.type == "Comment"]
+
+    assert notes(Eyes(editor=True)) == ["Своим", "Никому", "Всем"]
+    assert notes(Eyes(editor=False, clans=frozenset({1}))) == ["Своим", "Всем"]
+    assert notes(Eyes(editor=False, clans=frozenset())) == ["Всем"]
+
+
+def test_hidden_link_is_not_shown_to_viewer(conn: sqlite3.Connection) -> None:
+    from app.db.eyes import sift_links
+    from app.db.links import ClanLink, LinkPerson
+
+    other = LinkPerson(id=2, clan_id=2, clan_name="Уинтерхоуп", name="Ниалл", born=1683, died=1751)
+    links = [
+        ClanLink(link_id=1, person_id=1, see="all", other=other),
+        ClanLink(link_id=2, person_id=1, see="clan", other=other),
+        ClanLink(link_id=3, person_id=1, see="hidden", other=other),
+    ]
+    assert [l.link_id for l in sift_links(links, Eyes(editor=True), 1)] == [1, 2, 3]
+    assert [l.link_id for l in sift_links(links, Eyes(editor=False, clans=frozenset({1})), 1)] == [1, 2]
+    assert [l.link_id for l in sift_links(links, Eyes(editor=False, clans=frozenset()), 1)] == [1]

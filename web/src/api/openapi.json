@@ -605,6 +605,56 @@
         }
       }
     },
+    "/api/links/{link_id}/see": {
+      "put": {
+        "summary": "Put Link See",
+        "description": "Уровень связки: скрытую зритель не видит и перейти по ней не может.",
+        "operationId": "put_link_see_api_links__link_id__see_put",
+        "parameters": [
+          {
+            "name": "link_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Link Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkSee"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Link"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/links/{link_id}": {
       "delete": {
         "summary": "Remove Link",
@@ -1777,6 +1827,16 @@
             "type": "integer",
             "title": "Person Id"
           },
+          "see": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See",
+            "default": "all"
+          },
           "other": {
             "$ref": "#/components/schemas/LinkPerson"
           }
@@ -2430,6 +2490,16 @@
             ],
             "title": "Note"
           },
+          "see": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See",
+            "default": "all"
+          },
           "created_at": {
             "type": "string",
             "title": "Created At"
@@ -2502,6 +2572,24 @@
           "died"
         ],
         "title": "LinkPerson"
+      },
+      "LinkSee": {
+        "properties": {
+          "see": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See"
+          }
+        },
+        "type": "object",
+        "required": [
+          "see"
+        ],
+        "title": "LinkSee"
       },
       "LoginForm": {
         "properties": {
@@ -2612,6 +2700,16 @@
             "type": "boolean",
             "title": "Replace",
             "default": false
+          },
+          "see": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See",
+            "default": "all"
           }
         },
         "type": "object",
@@ -2650,6 +2748,30 @@
           "relation"
         ],
         "title": "NewPerson"
+      },
+      "NoteForm": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "see": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See",
+            "default": "clan"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "NoteForm",
+        "description": "Заметка человека со своим уровнем видимости."
       },
       "PairDecision": {
         "properties": {
@@ -2913,6 +3035,16 @@
               }
             ],
             "title": "Place"
+          },
+          "see": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See",
+            "default": "all"
           }
         },
         "type": "object",
@@ -3000,7 +3132,7 @@
           },
           "notes": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/NoteForm"
             },
             "type": "array",
             "title": "Notes",
@@ -3196,7 +3328,7 @@
           },
           "notes": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/NoteForm"
             },
             "type": "array",
             "title": "Notes"

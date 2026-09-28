@@ -7,7 +7,7 @@ import pytest
 
 from app.db.clans import import_clan
 from app.db.connection import connect
-from app.db.editor import (EditError, NewPerson, PersonFields, Relation, add_person, delete_person, delete_preview,
+from app.db.editor import (EditError, NoteForm, NewPerson, PersonFields, Relation, add_person, delete_person, delete_preview,
                            person_form, update_person)
 from app.db.journal import RevertConflictError, clan_changes, person_changes, redo, revert, undo, undo_to
 from app.db.links import create_link
@@ -68,12 +68,12 @@ def test_unknown_tags_survive_an_edit(conn: sqlite3.Connection) -> None:
     murdo = pid(conn, MURDO)
     raw_before = conn.execute("SELECT raw FROM persons WHERE id = ?", (murdo,)).fetchone()[0]
     tags_before = [c["t"] for c in json.loads(raw_before)["c"]]
-    update_person(conn, murdo, fields(conn, murdo, notes=["Арендатор"]))
+    update_person(conn, murdo, fields(conn, murdo, notes=[NoteForm(text="Арендатор")]))
     raw_after = json.loads(conn.execute("SELECT raw FROM persons WHERE id = ?", (murdo,)).fetchone()[0])
     tags_after = [c["t"] for c in raw_after["c"]]
     assert tags_after[: len(tags_before)] == tags_before
     assert raw_after["c"][-1] == {"t": "EVEN", "v": "Арендатор", "c": [{"t": "TYPE", "v": "Comment"}]}
-    assert person_form(conn, murdo).notes == ["Арендатор"]
+    assert [(n.text, n.see) for n in person_form(conn, murdo).notes] == [("Арендатор", "clan")]
 
 
 def test_bad_date_is_refused(conn: sqlite3.Connection) -> None:

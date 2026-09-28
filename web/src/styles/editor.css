@@ -190,3 +190,10 @@
   border: 1px solid var(--edge); border-radius: 6px; font: 500 11px 'Golos Text', sans-serif; padding: 4px 6px; }
 .lockPick.clan { color: var(--acc); border-color: color-mix(in srgb, var(--acc) 45%, transparent); }
 .lockPick.hidden { color: #b9552f; border-color: color-mix(in srgb, #b9552f 45%, transparent); }
+
+/* заметка со своим замком: поле, уровень, крестик в одну строку */
+.noteRow { display: flex; align-items: flex-start; gap: 6px; }
+.noteRow textarea { flex: 1; min-width: 0; }
+.noteRow .lockPick { flex: none; margin-top: 2px; }
+/* связка в панели: замок рядом с родом */
+.twin .lockPick { margin: 6px 0 0; }

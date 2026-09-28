@@ -343,6 +343,10 @@ async function start(root: HTMLElement): Promise<void> {
     isReturn: (link) => nav.isReturn(link),
     openLink: (link) => openLink(link.person_id, nav.linksOf(link.person_id).indexOf(link)),
     unlink: (link) => void nav.unlink(link),
+    linkSee: (link, see) => void (async () => {
+      const result = await send<unknown>("PUT", `/api/links/${link.link_id}/see`, { see });
+      if (result.ok) await refreshLinks();
+    })(),
     linkWith: (id) => {
       const person = tree?.persons.find((p) => p.id === id);
       if (person) manual.open(brief(person));
