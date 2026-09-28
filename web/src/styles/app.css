@@ -15,10 +15,10 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 /* шапка тремя строками: титул дерева сверху, инструменты — на подложке потемнее */
 .bar { position: relative; z-index: 20; display: flex; flex-direction: column;
        background: var(--ch-bg); color: var(--ch-fg); border-bottom: 1px solid var(--ch-edge); }
-.bar .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 16px; }
+.bar .row { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; padding: 8px 16px; }
 .bar .tools { background: color-mix(in srgb, var(--ch-bg) 70%, #000);
   border-top: 1px solid color-mix(in srgb, var(--ch-edge) 70%, transparent); }
-.bar .tools .row { padding: 7px 16px; }
+.bar .tools .row { flex-wrap: wrap; padding: 7px 16px; }
 .bar .tools .row + .row { border-top: 1px solid color-mix(in srgb, var(--ch-edge) 45%, transparent); }
 /* черта вместо подписи группы: делит строку на смысловые куски */
 .bar .topSep { flex: none; width: 1px; height: 20px;
@@ -66,11 +66,12 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 .canvas.backdrop::after { display: none; }
 
 /* ── шапка: слева род и поиск, справа масштаб, панели и файлы ── */
-.bar .clanTitle { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
-.bar .clanTitle b { font-family: var(--font, 'Cormorant Garamond', serif); font-size: 17px; line-height: 1.05;
+.bar .clanTitle { display: flex; align-items: baseline; gap: 9px; flex: none; width: clamp(200px, 27vw, 360px); min-width: 0; }
+.bar .clanTitle b { flex: none; font-family: var(--font, 'Cormorant Garamond', serif); font-size: 18px; line-height: 1.05;
   font-weight: 500; color: var(--ch-fg); letter-spacing: .02em; }
-.bar .clanStatus { font: 400 10.5px/1.2 'IBM Plex Mono', monospace; color: var(--ch-mut); letter-spacing: .02em; }
-.bar .statusPick { max-width: 260px; background: var(--ch-btn); color: var(--ch-fg); border: 1px solid var(--ch-edge);
+.bar .clanStatus { font: 400 10.5px/1.2 'IBM Plex Mono', monospace; color: var(--ch-mut); letter-spacing: .02em; 
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .statusPick { flex: 1; min-width: 0; max-width: 240px; background: var(--ch-btn); color: var(--ch-fg); border: 1px solid var(--ch-edge);
   border-radius: 5px; font: 400 10.5px 'Golos Text', sans-serif; padding: 2px 4px; }
 .bar .lbl2 { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ch-mut); }
 .bar .topGap { flex: 1; }

@@ -620,8 +620,8 @@ async function start(root: HTMLElement): Promise<void> {
 
   // шапка тремя строками: первая говорит, какое дерево открыто, две другие — что с ним делать.
   // Инструменты лежат на подложке потемнее, поэтому не читаются продолжением заголовка
-  const titleRow = row(clanTitle, sep(), search.element, sep(), stat, spacer(), viewBtn);
-  const viewRow = row(zoomRow, placeRow, sep(), addLink, exportLink, spacer(), modeSwitch);
+  const titleRow = row(clanTitle, search.element, spacer(), stat, sep(), viewBtn);
+  const viewRow = row(zoomRow, placeRow, spacer(), addLink, exportLink, sep(), modeSwitch);
   const editRow = row(queueGroup, spacer(), journal.group);
   const tools = document.createElement("div");
   tools.className = "tools";
