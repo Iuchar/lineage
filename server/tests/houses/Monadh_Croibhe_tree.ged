@@ -1,0 +1,1048 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+1 SOUR FAMYTALE
+2 NAME FamyTale
+2 VERS 5.5.1
+0 @I51@ INDI
+1 NAME Хэмиш /Монад Кройве/
+2 GIVN Хэмиш
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1798
+1 DEAT
+2 DATE 1920
+1 EVEN Основатель рода
+2 TYPE Comment
+1 FAMS @F1@
+1 FAMC @F34@
+0 @I52@ INDI
+1 NAME Изабелла /Монад Кройве/
+2 GIVN Изабелла
+2 SURN Стюарт
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1801
+1 DEAT
+2 DATE 1879
+1 FAMS @F1@
+0 @I53@ INDI
+1 NAME Юэн /Монад Кройве/
+2 GIVN Юэн
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1826
+1 DEAT
+2 DATE 1898
+1 FAMS @F2@
+1 FAMC @F1@
+0 @I54@ INDI
+1 NAME Хелен /Монад Кройве/
+2 GIVN Хелен
+2 SURN МакМиллан
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1833
+1 DEAT
+2 DATE 1915
+1 FAMS @F2@
+0 @I55@ INDI
+1 NAME Эйлинн /Монад Кройве/
+2 GIVN Эйлинн
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1834
+1 DEAT
+2 DATE 1941
+1 FAMS @F3@
+1 FAMC @F1@
+0 @I56@ INDI
+1 NAME Роберт /Лоулоган/
+2 GIVN Роберт
+2 SURN Лоулоган
+1 SEX M
+1 BIRT
+2 DATE 1832
+1 DEAT
+2 DATE 1929
+1 FAMS @F3@
+0 @I57@ INDI
+1 NAME Айли /Монад Кройве/
+2 GIVN Айли
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1821
+1 DEAT
+2 DATE 1903
+1 EVEN Три мужа: Форбс, Артур, Хай. Детей нет.
+2 TYPE Comment
+1 FAMS @F4@
+1 FAMS @F5@
+1 FAMS @F6@
+1 FAMC @F1@
+0 @I58@ INDI
+1 NAME Роберт /Форбс/
+2 GIVN Роберт
+2 SURN Форбс
+1 SEX M
+1 BIRT
+2 DATE 1815
+1 DEAT
+2 DATE 1850
+1 EVEN 1-й муж Айли
+2 TYPE Comment
+1 FAMS @F4@
+0 @I59@ INDI
+1 NAME Артур /Хикс/
+2 GIVN Артур
+2 SURN Хикс
+1 SEX M
+1 BIRT
+2 DATE 1837
+1 DEAT
+2 DATE 1869
+1 EVEN 3-й муж Айли
+2 TYPE Comment
+1 EVEN Рейвенкло, выпуск 1855
+2 TYPE Comment
+1 FAMS @F5@
+0 @I510@ INDI
+1 NAME Ирвинг /Хай/
+2 GIVN Ирвинг
+2 SURN Хай
+1 SEX M
+1 BIRT
+2 DATE 1817
+1 DEAT
+2 DATE 1861
+1 EVEN 2-й муж Айли
+2 TYPE Comment
+1 FAMS @F6@
+0 @I511@ INDI
+1 NAME Кайл /Монад Кройве/
+2 GIVN Кайл
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1855
+1 DEAT
+2 DATE 1924
+1 FAMS @F7@
+1 FAMS @F8@
+1 FAMC @F2@
+0 @I512@ INDI
+1 NAME Мюриэль /Монад Кройве/
+2 GIVN Мюриэль
+2 SURN Сазерленд
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1851
+1 DEAT
+2 DATE 1876
+1 EVEN 1-я жена Кайла, детей нет
+2 TYPE Comment
+1 FAMS @F8@
+0 @I513@ INDI
+1 NAME Иннис /Монад Кройве/
+2 GIVN Иннис
+2 SURN МакЛарен
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1857
+1 DEAT
+2 DATE 1936
+1 EVEN 2-я жена Кайла
+2 TYPE Comment
+1 FAMS @F7@
+0 @I514@ INDI
+1 NAME Хильда /Монад Кройве/
+2 GIVN Хильда
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1857
+1 DEAT
+2 DATE 1948
+1 FAMS @F9@
+1 FAMC @F2@
+0 @I515@ INDI
+1 NAME Брюс /Кэмпбелл/
+2 GIVN Брюс
+2 SURN Кэмпбелл
+1 SEX M
+1 BIRT
+2 DATE 1849
+1 DEAT
+2 DATE 1928
+1 EVEN Муж Хильды
+2 TYPE Comment
+1 FAMS @F9@
+0 @I516@ INDI
+1 NAME Кейт /Монад Кройве/
+2 GIVN Кейт
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1864
+1 DEAT
+2 DATE 1931
+1 FAMS @F10@
+1 FAMC @F2@
+0 @I517@ INDI
+1 NAME Рональд /МакДональд/
+2 GIVN Рональд
+2 SURN МакДональд
+1 SEX M
+1 BIRT
+2 DATE 1855
+1 DEAT
+2 DATE 1939
+1 EVEN Муж Кейт
+2 TYPE Comment
+1 FAMS @F10@
+0 @I518@ INDI
+1 NAME Иэйн /Монад Кройве/
+2 GIVN Иэйн
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1884
+1 DEAT
+2 DATE 1962
+1 FAMS @F11@
+1 FAMC @F7@
+0 @I519@ INDI
+1 NAME Энн /Монад Кройве/
+2 GIVN Энн
+2 SURN Мюррей
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1885
+1 DEAT
+2 DATE 1969
+1 FAMS @F11@
+0 @I520@ INDI
+1 NAME Генри /Монад Кройве/
+2 GIVN Генри
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1880
+1 DEAT
+2 DATE 1908
+1 FAMS @F12@
+1 FAMS @F13@
+1 FAMC @F7@
+0 @I521@ INDI
+1 NAME Беатрис /Монад Кройве/
+2 GIVN Беатрис
+2 SURN Аберкромби
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1881
+1 DEAT
+2 DATE 1944
+1 EVEN 1-я жена Генри, детей нет
+2 TYPE Comment
+1 FAMS @F13@
+0 @I522@ INDI
+1 NAME Миранда /Монад Кройве/
+2 GIVN Миранда
+2 SURN Уоллес
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1883
+1 DEAT
+2 DATE 1957
+1 EVEN 2-я жена Генри
+2 TYPE Comment
+1 FAMS @F12@
+0 @I523@ INDI
+1 NAME Луиза /Монад Кройве/
+2 GIVN Луиза
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1888
+1 DEAT
+2 DATE 1974
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F7@
+0 @I524@ INDI
+1 NAME Мэтью /Монад Кройве/
+2 GIVN Мэтью
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1893
+1 DEAT
+2 DATE 1971
+1 FAMS @F14@
+1 FAMC @F7@
+0 @I525@ INDI
+1 NAME Иннис /Монад Кройве/
+2 GIVN Иннис
+2 SURN Янг
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1885
+1 DEAT
+2 DATE 1965
+1 FAMS @F14@
+0 @I526@ INDI
+1 NAME Роберт /Монад Кройве/
+2 GIVN Роберт
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1905
+1 DEAT
+2 DATE 2013
+1 FAMS @F15@
+1 FAMC @F11@
+0 @I527@ INDI
+1 NAME Мэри /Монад Кройве/
+2 GIVN Мэри
+2 SURN МакКей
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1907
+1 DEAT
+2 DATE 2012
+1 FAMS @F15@
+0 @I528@ INDI
+1 NAME Лаклан /Монад Кройве/
+2 GIVN Лаклан
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1908
+1 DEAT
+2 DATE 1990
+1 FAMS @F16@
+1 FAMS @F17@
+1 FAMC @F11@
+0 @I529@ INDI
+1 NAME Марджори /Монад Кройве/
+2 GIVN Марджори
+2 SURN Крейтон
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1909
+1 DEAT
+2 DATE 1995
+1 EVEN 1-я жена Джона, детей нет
+2 TYPE Comment
+1 FAMS @F17@
+0 @I530@ INDI
+1 NAME Изобель /Монад Кройве/
+2 GIVN Изобель
+2 SURN Питфор
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1913
+1 DEAT
+2 DATE 1981
+1 EVEN 2-я жена Джона, детей нет
+2 TYPE Comment
+1 FAMS @F16@
+0 @I531@ INDI
+1 NAME Хью /Монад Кройве/
+2 GIVN Хью
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1919
+1 DEAT
+2 DATE 1945
+1 FAMS @F18@
+1 FAMC @F11@
+0 @I532@ INDI
+1 NAME Маргарет /Монад Кройве/
+2 GIVN Маргарет
+2 SURN Хэй
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1924
+1 FAMS @F18@
+0 @I533@ INDI
+1 NAME Катарина /Монад Кройве/
+2 GIVN Катарина
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1923
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F11@
+0 @I534@ INDI
+1 NAME Джеральд /Монад Кройве/
+2 GIVN Джеральд
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1903
+1 DEAT
+2 DATE 1944
+1 EVEN Погиб молодым
+2 TYPE Comment
+1 FAMC @F12@
+0 @I535@ INDI
+1 NAME Чарльз /Монад Кройве/
+2 GIVN Чарльз
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1912
+1 DEAT
+2 DATE 1996
+1 FAMS @F19@
+1 FAMS @F20@
+1 FAMC @F14@
+0 @I536@ INDI
+1 NAME Сибилла /Монад Кройве/
+2 GIVN Сибилла
+2 SURN Нэрн
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1915
+1 EVEN 1-я жена Чарльза
+2 TYPE Comment
+1 FAMS @F20@
+0 @I537@ INDI
+1 NAME Энн /Монад Кройве/
+2 GIVN Энн
+2 SURN Робертсон
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1932
+1 EVEN 2-я жена Чарльза
+2 TYPE Comment
+1 FAMS @F19@
+0 @I538@ INDI
+1 NAME Малькольм /Монад Кройве/
+2 GIVN Малькольм
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1941
+1 FAMS @F21@
+1 FAMS @F22@
+1 FAMS @F23@
+1 FAMC @F15@
+0 @I539@ INDI
+1 NAME Элспет /Монад Кройве/
+2 GIVN Элспет
+2 SURN Камминг
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1934
+1 DEAT
+2 DATE 1977
+1 EVEN 1-я жена Малькольма
+2 TYPE Comment
+1 FAMS @F23@
+0 @I540@ INDI
+1 NAME Иона /Монад Кройве/
+2 GIVN Иона
+2 SURN Олифант
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1937
+1 EVEN 2-я жена Малькольма
+2 TYPE Comment
+1 FAMS @F21@
+0 @I541@ INDI
+1 NAME Финнула /Монад Кройве/
+2 GIVN Финнула
+2 SURN Эрскин
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1942
+1 DEAT
+2 DATE 2019
+1 EVEN 3-я жена Малькольма
+2 TYPE Comment
+1 FAMS @F22@
+0 @I542@ INDI
+1 NAME Грегор /Монад Кройве/
+2 GIVN Грегор
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1937
+1 FAMS @F24@
+1 FAMC @F15@
+0 @I543@ INDI
+1 NAME Мораг /Монад Кройве/
+2 GIVN Мораг
+2 SURN Болтон
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1941
+1 EVEN Жена Грегора
+2 TYPE Comment
+1 FAMS @F24@
+0 @I544@ INDI
+1 NAME Уильям /Монад Кройве/
+2 GIVN Уильям
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1954
+1 DEAT
+2 DATE 1979
+1 FAMS @F25@
+1 FAMC @F15@
+0 @I545@ INDI
+1 NAME Кенна /Монад Кройве/
+2 GIVN Кенна
+2 SURN Балфор
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1956
+1 DEAT
+2 DATE 1979
+1 FAMS @F25@
+0 @I546@ INDI
+1 NAME Даллас /Монад Кройве/
+2 GIVN Даллас
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1944
+1 DEAT
+2 DATE 2015
+1 FAMS @F26@
+1 FAMC @F18@
+0 @I547@ INDI
+1 NAME Мор /Монад Кройве/
+2 GIVN Мор
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1942
+1 FAMS @F27@
+1 FAMC @F18@
+0 @I548@ INDI
+1 NAME Логан /Данбар/
+2 GIVN Логан
+2 SURN Данбар
+1 SEX M
+1 BIRT
+2 DATE 1936
+1 EVEN Муж Мор
+2 TYPE Comment
+1 FAMS @F27@
+0 @I549@ INDI
+1 NAME Ивар /Монад Кройве/
+2 GIVN Ивар
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1960
+1 FAMS @F28@
+1 FAMC @F19@
+0 @I550@ INDI
+1 NAME Лукреция /Монад Кройве/
+2 GIVN Лукреция
+2 SURN Коннел
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1963
+1 FAMS @F28@
+0 @I551@ INDI
+1 NAME Рори /Монад Кройве/
+2 GIVN Рори
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1938
+1 EVEN Без жены, пропал без вести
+2 TYPE Comment
+1 FAMC @F20@
+0 @I552@ INDI
+1 NAME Агнес /Монад Кройве/
+2 GIVN Агнес
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1934
+1 EVEN Поздний ребёнок Роберта и Мэри
+2 TYPE Comment
+1 FAMS @F29@
+1 FAMC @F15@
+0 @I553@ INDI
+1 NAME Освальд /Фидельоффергуд/
+2 GIVN Освальд
+2 SURN Фидельоффергуд
+1 SEX M
+1 BIRT
+2 DATE 1957
+1 FAMS @F29@
+0 @I554@ INDI
+1 NAME Элизабет /Монад Кройве/
+2 GIVN Элизабет
+2 SURN Колхаун
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1980
+1 FAMS @F30@
+0 @I555@ INDI
+1 NAME Кеннет /Монад Кройве/
+2 GIVN Кеннет
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1976
+1 FAMS @F30@
+1 FAMC @F23@
+0 @I556@ INDI
+1 NAME Финлэй /Монад Кройве/
+2 GIVN Финлэй
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1982
+1 DEAT
+2 DATE 1999
+1 FAMC @F21@
+0 @I557@ INDI
+1 NAME Диан /Монад Кройве/
+2 GIVN Диан
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1991
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F22@
+0 @I558@ INDI
+1 NAME Калех /Монад Кройве/
+2 GIVN Калех
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1994
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F28@
+0 @I559@ INDI
+1 NAME Фаолли /Монад Кройве/
+2 GIVN Фаолли
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 2012
+1 FAMC @F30@
+0 @I560@ INDI
+1 NAME Хедра /Монад Кройве/
+2 GIVN Хедра
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 2012
+1 FAMC @F30@
+0 @I561@ INDI
+1 NAME Огастус /Монад Кройве/
+2 GIVN Огастус
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 2012
+1 FAMC @F30@
+0 @I562@ INDI
+1 NAME Фиона /Монад Кройве/
+2 GIVN Фиона
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 2012
+1 FAMS @F31@
+1 FAMC @F30@
+0 @I563@ INDI
+1 NAME Юхар /Монад Кройве/
+2 GIVN Юхар
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 2012
+1 FAMC @F30@
+0 @I564@ INDI
+1 NAME Потомки /Кэмпбелл/
+2 GIVN Потомки
+2 SURN Кэмпбелл
+1 SEX M
+1 EVEN Ветвь через Хильду
+2 TYPE Comment
+1 FAMC @F9@
+0 @I565@ INDI
+1 NAME Потомки /МакДональд/
+2 GIVN Потомки
+2 SURN МакДональд
+1 SEX M
+1 EVEN Ветвь через Кейт
+2 TYPE Comment
+1 FAMC @F10@
+0 @I566@ INDI
+1 NAME Потомки /Данбар/
+2 GIVN Потомки
+2 SURN Данбар
+1 SEX M
+1 EVEN Ветвь через Мор
+2 TYPE Comment
+1 FAMC @F27@
+0 @I567@ INDI
+1 NAME Ангус /Монад Кройве/
+2 GIVN Ангус
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1982
+1 FAMS @F32@
+1 FAMC @F26@
+0 @I568@ INDI
+1 NAME Джулия /Монад Кройве/
+2 GIVN Джулия
+2 SURN МакКензи
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1984
+1 FAMS @F32@
+0 @I569@ INDI
+1 NAME Дуглас /Монад Кройве/
+2 GIVN Дуглас
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 2014
+1 FAMC @F32@
+0 @I570@ INDI
+1 NAME Лесли /Монад Кройве/
+2 GIVN Лесли
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 2016
+1 FAMC @F32@
+0 @I571@ INDI
+1 NAME Кэмерон /Монад Кройве/
+2 GIVN Кэмерон
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1964
+1 DEAT
+2 DATE 1998
+1 FAMC @F24@
+0 @I572@ INDI
+1 NAME Эван /Монад Кройве/
+2 GIVN Эван
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1969
+1 FAMS @F33@
+1 FAMC @F24@
+0 @I573@ INDI
+1 NAME Эйлид /Монад Кройве/
+2 GIVN Эйлид
+2 SURN Скотт
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1972
+1 FAMS @F33@
+0 @I574@ INDI
+1 NAME Кирсти /Монад Кройве/
+2 GIVN Кирсти
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1999
+1 FAMC @F33@
+0 @I575@ INDI
+1 NAME Дункан /Монад Кройве/
+2 GIVN Дункан
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 1740
+1 DEAT
+2 DATE 1842
+1 EVEN Отец Хэмиша
+2 TYPE Comment
+1 FAMS @F34@
+0 @I576@ INDI
+1 NAME Бригит /Монад Кройве/
+2 GIVN Бригит
+2 SURN Фаркухарсон
+2 _MARNM Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 1752
+1 DEAT
+2 DATE 1837
+1 EVEN Жена Дункана
+2 TYPE Comment
+1 FAMS @F34@
+0 @I577@ INDI
+1 NAME Ангус /Монад Кройве из Глейнлайона/
+2 GIVN Ангус
+2 SURN Монад Кройве из Глейнлайона
+1 SEX M
+1 BIRT
+2 DATE 1786
+1 DEAT
+2 DATE 1853
+1 EVEN Старший брат Хэмиша
+2 TYPE Comment
+1 FAMS @F35@
+1 FAMC @F34@
+0 @I578@ INDI
+1 NAME Колин /Монад Кройве из Ранноха/
+2 GIVN Колин
+2 SURN Монад Кройве из Ранноха
+1 SEX M
+1 BIRT
+2 DATE 1791
+1 DEAT
+2 DATE 1879
+1 EVEN Старший брат Хэмиша
+2 TYPE Comment
+1 FAMS @F36@
+1 FAMC @F34@
+0 @I579@ INDI
+1 NAME Ветвь /Монад Кройве из Глейнлайона/
+2 GIVN Ветвь
+2 SURN Монад Кройве из Глейнлайона
+1 SEX M
+1 EVEN Ветвь через Ангуса
+2 TYPE Comment
+1 FAMC @F35@
+0 @I580@ INDI
+1 NAME Ветвь /Монад Кройве из Ранноха/
+2 GIVN Ветвь
+2 SURN Монад Кройве из Ранноха
+1 SEX M
+1 EVEN Ветвь через Колина
+2 TYPE Comment
+1 FAMC @F36@
+0 @I581@ INDI
+1 NAME Ветвь /Лоулоган/
+2 GIVN Ветвь
+2 SURN Лоулоган
+1 SEX M
+1 EVEN Ветвь через Эйлинн
+2 TYPE Comment
+1 FAMC @F3@
+0 @I582@ INDI
+1 NAME Ветвь /Фидельоффергуд/
+2 GIVN Ветвь
+2 SURN Фидельоффергуд
+1 SEX M
+1 EVEN Ветвь через Агнес
+2 TYPE Comment
+1 FAMC @F29@
+0 @I583@ INDI
+1 NAME Лайре /Монад Кройве/
+2 GIVN Лайре
+2 SURN Монад Кройве
+1 SEX F
+1 BIRT
+2 DATE 2028
+1 FAMC @F31@
+0 @I584@ INDI
+1 NAME Фьюнла /Монад Кройве/
+2 GIVN Фьюнла
+2 SURN Монад Кройве
+1 SEX M
+1 BIRT
+2 DATE 2028
+1 FAMC @F31@
+0 @F1@ FAM
+1 HUSB @I51@
+1 WIFE @I52@
+1 CHIL @I57@
+1 CHIL @I53@
+1 CHIL @I55@
+0 @F2@ FAM
+1 HUSB @I53@
+1 WIFE @I54@
+1 CHIL @I511@
+1 CHIL @I514@
+1 CHIL @I516@
+0 @F3@ FAM
+1 HUSB @I56@
+1 WIFE @I55@
+1 CHIL @I581@
+0 @F4@ FAM
+1 HUSB @I58@
+1 WIFE @I57@
+0 @F5@ FAM
+1 HUSB @I59@
+1 WIFE @I57@
+0 @F6@ FAM
+1 HUSB @I510@
+1 WIFE @I57@
+0 @F7@ FAM
+1 HUSB @I511@
+1 WIFE @I513@
+1 CHIL @I520@
+1 CHIL @I518@
+1 CHIL @I523@
+1 CHIL @I524@
+0 @F8@ FAM
+1 HUSB @I511@
+1 WIFE @I512@
+0 @F9@ FAM
+1 HUSB @I515@
+1 WIFE @I514@
+1 CHIL @I564@
+0 @F10@ FAM
+1 HUSB @I517@
+1 WIFE @I516@
+1 CHIL @I565@
+0 @F11@ FAM
+1 HUSB @I518@
+1 WIFE @I519@
+1 CHIL @I526@
+1 CHIL @I528@
+1 CHIL @I531@
+1 CHIL @I533@
+0 @F12@ FAM
+1 HUSB @I520@
+1 WIFE @I522@
+1 CHIL @I534@
+0 @F13@ FAM
+1 HUSB @I520@
+1 WIFE @I521@
+0 @F14@ FAM
+1 HUSB @I524@
+1 WIFE @I525@
+1 CHIL @I535@
+0 @F15@ FAM
+1 HUSB @I526@
+1 WIFE @I527@
+1 CHIL @I552@
+1 CHIL @I542@
+1 CHIL @I538@
+1 CHIL @I544@
+0 @F16@ FAM
+1 HUSB @I528@
+1 WIFE @I530@
+0 @F17@ FAM
+1 HUSB @I528@
+1 WIFE @I529@
+0 @F18@ FAM
+1 HUSB @I531@
+1 WIFE @I532@
+1 CHIL @I547@
+1 CHIL @I546@
+0 @F19@ FAM
+1 HUSB @I535@
+1 WIFE @I537@
+1 CHIL @I549@
+0 @F20@ FAM
+1 HUSB @I535@
+1 WIFE @I536@
+1 CHIL @I551@
+0 @F21@ FAM
+1 HUSB @I538@
+1 WIFE @I540@
+1 CHIL @I556@
+0 @F22@ FAM
+1 HUSB @I538@
+1 WIFE @I541@
+1 CHIL @I557@
+0 @F23@ FAM
+1 HUSB @I538@
+1 WIFE @I539@
+1 CHIL @I555@
+0 @F24@ FAM
+1 HUSB @I542@
+1 WIFE @I543@
+1 CHIL @I571@
+1 CHIL @I572@
+0 @F25@ FAM
+1 HUSB @I544@
+1 WIFE @I545@
+0 @F26@ FAM
+1 HUSB @I546@
+1 CHIL @I567@
+0 @F27@ FAM
+1 HUSB @I548@
+1 WIFE @I547@
+1 CHIL @I566@
+0 @F28@ FAM
+1 HUSB @I549@
+1 WIFE @I550@
+1 CHIL @I558@
+0 @F29@ FAM
+1 HUSB @I553@
+1 WIFE @I552@
+1 CHIL @I582@
+0 @F30@ FAM
+1 HUSB @I555@
+1 WIFE @I554@
+1 CHIL @I563@
+1 CHIL @I562@
+1 CHIL @I561@
+1 CHIL @I560@
+1 CHIL @I559@
+0 @F31@ FAM
+1 WIFE @I562@
+1 CHIL @I584@
+1 CHIL @I583@
+0 @F32@ FAM
+1 HUSB @I567@
+1 WIFE @I568@
+1 CHIL @I569@
+1 CHIL @I570@
+0 @F33@ FAM
+1 HUSB @I572@
+1 WIFE @I573@
+1 CHIL @I574@
+0 @F34@ FAM
+1 HUSB @I575@
+1 WIFE @I576@
+1 CHIL @I577@
+1 CHIL @I578@
+1 CHIL @I51@
+0 @F35@ FAM
+1 HUSB @I577@
+1 CHIL @I579@
+0 @F36@ FAM
+1 HUSB @I578@
+1 CHIL @I580@
+0 TRLR

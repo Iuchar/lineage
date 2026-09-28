@@ -19,6 +19,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from app.db.clans import _insert_event
+from app.db.houses import save_house
 from app.gedcom.convert import FAMILY_EVENT_TAGS, _event, _family, _person
 from app.db.author import author
 from app.gedcom.records import Record
@@ -161,6 +162,7 @@ class Edit:
             change_id = cursor.lastrowid or 0
             self.conn.executemany("INSERT OR IGNORE INTO change_persons (change_id, person_id) VALUES (?, ?)",
                                   [(change_id, pid) for pid in sorted(self.persons)])
+        save_house(self.conn, self.clan_id)
         return change_info(self.conn, change_id)
 
 
@@ -308,6 +310,7 @@ def undo(conn: sqlite3.Connection, clan_id: int) -> ChangeInfo | None:
     with conn:
         apply_records(conn, clan_id, list(reversed(records)), "b")
         conn.execute("UPDATE changes SET undone = 1 WHERE id = ?", (row[0],))
+    save_house(conn, clan_id)
     return change_info(conn, row[0])
 
 
@@ -322,6 +325,7 @@ def redo(conn: sqlite3.Connection, clan_id: int) -> ChangeInfo | None:
         apply_records(conn, clan_id, [r for r in records if r.get("k") != "LINKS"], "a")
         _drop_links(conn, records)
         conn.execute("UPDATE changes SET undone = 0 WHERE id = ?", (row[0],))
+    save_house(conn, clan_id)
     return change_info(conn, row[0])
 
 

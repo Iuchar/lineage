@@ -1,0 +1,498 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+1 SOUR FAMYTALE
+2 NAME FamyTale
+2 VERS 5.5.1
+0 @I1001@ INDI
+1 NAME Ниалл /Гленн Уриск/
+2 GIVN Ниалл
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1683
+1 DEAT
+2 DATE 1791
+1 EVEN Общий предок с родом Уинтерхоуп
+2 TYPE Comment
+1 FAMS @F1001@
+0 @I1002@ INDI
+1 NAME Мор /Гленн Уриск/
+2 GIVN Мор
+2 SURN Кинкейд
+2 _MARNM Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1691
+1 DEAT
+2 DATE 1779
+1 EVEN Жена Ниалла
+2 TYPE Comment
+1 FAMS @F1001@
+0 @I1003@ INDI
+1 NAME Тормод /Гленн Уриск/
+2 GIVN Тормод
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1712
+1 DEAT
+2 DATE 1818
+1 FAMS @F1002@
+1 FAMC @F1001@
+0 @I1004@ INDI
+1 NAME Эоган /Гленн Уриск/
+2 GIVN Эоган
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1719
+1 DEAT
+2 DATE 1830
+1 EVEN Ушёл в Приграничье, основал род Уинтерхоуп
+2 TYPE Comment
+1 FAMS @F1003@
+1 FAMC @F1001@
+0 @I1005@ INDI
+1 NAME Аилса /Гленн Уриск/
+2 GIVN Аилса
+2 SURN Мензис
+2 _MARNM Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1720
+1 DEAT
+2 DATE 1812
+1 EVEN Жена Тормода
+2 TYPE Comment
+1 FAMS @F1002@
+0 @I1006@ INDI
+1 NAME Ветвь /Уинтерхоуп/
+2 GIVN Ветвь
+2 SURN Уинтерхоуп
+1 SEX M
+1 EVEN Ветвь через Эогана
+2 TYPE Comment
+1 FAMC @F1003@
+0 @I1007@ INDI
+1 NAME Мурдо /Гленн Уриск/
+2 GIVN Мурдо
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1748
+1 DEAT
+2 DATE 1851
+1 FAMS @F1004@
+1 FAMC @F1002@
+0 @I1008@ INDI
+1 NAME Юна /Гленн Уриск/
+2 GIVN Юна
+2 SURN Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1752
+1 DEAT
+2 DATE 1848
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F1002@
+0 @I1009@ INDI
+1 NAME Кеннах /Гленн Уриск/
+2 GIVN Кеннах
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1755
+1 DEAT
+2 DATE 1779
+1 EVEN Погиб молодым
+2 TYPE Comment
+1 FAMC @F1002@
+0 @I1010@ INDI
+1 NAME Аина /Гленн Уриск/
+2 GIVN Аина
+2 SURN Драммонд
+2 _MARNM Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1756
+1 DEAT
+2 DATE 1849
+1 EVEN Жена Мурдо
+2 TYPE Comment
+1 FAMS @F1004@
+0 @I1011@ INDI
+1 NAME Дэрмид /Гленн Уриск/
+2 GIVN Дэрмид
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1783
+1 DEAT
+2 DATE 1889
+1 FAMS @F1005@
+1 FAMC @F1004@
+0 @I1012@ INDI
+1 NAME Мойра /Гленн Уриск/
+2 GIVN Мойра
+2 SURN Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1787
+1 DEAT
+2 DATE 1884
+1 FAMS @F1006@
+1 FAMC @F1004@
+0 @I1013@ INDI
+1 NAME Флора /Гленн Уриск/
+2 GIVN Флора
+2 SURN Максвелл
+2 _MARNM Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1790
+1 DEAT
+2 DATE 1885
+1 EVEN Жена Дэрмида
+2 TYPE Comment
+1 FAMS @F1005@
+0 @I1014@ INDI
+1 NAME Роберт /Кинкейд/
+2 GIVN Роберт
+2 SURN Кинкейд
+1 SEX M
+1 BIRT
+2 DATE 1780
+1 DEAT
+2 DATE 1877
+1 EVEN Муж Мойры
+2 TYPE Comment
+1 FAMS @F1006@
+0 @I1015@ INDI
+1 NAME Ветвь /Кинкейд/
+2 GIVN Ветвь
+2 SURN Кинкейд
+1 SEX M
+1 EVEN Ветвь через Мойру
+2 TYPE Comment
+1 FAMC @F1006@
+0 @I1016@ INDI
+1 NAME Тэвиш /Гленн Уриск/
+2 GIVN Тэвиш
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1820
+1 DEAT
+2 DATE 1926
+1 FAMS @F1007@
+1 FAMC @F1005@
+0 @I1017@ INDI
+1 NAME Иона /Гленн Уриск/
+2 GIVN Иона
+2 SURN Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1824
+1 DEAT
+2 DATE 1919
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F1005@
+0 @I1018@ INDI
+1 NAME Катриона /Гленн Уриск/
+2 GIVN Катриона
+2 SURN Огилви
+2 _MARNM Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1826
+1 DEAT
+2 DATE 1921
+1 EVEN Жена Тэвиша
+2 TYPE Comment
+1 FAMS @F1007@
+0 @I1019@ INDI
+1 NAME Струан /Гленн Уриск/
+2 GIVN Струан
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1856
+1 DEAT
+2 DATE 1958
+1 FAMS @F1008@
+1 FAMC @F1007@
+0 @I1020@ INDI
+1 NAME Мораг /Гленн Уриск/
+2 GIVN Мораг
+2 SURN Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1860
+1 DEAT
+2 DATE 1955
+1 FAMS @F1009@
+1 FAMC @F1007@
+0 @I1021@ INDI
+1 NAME Джин /Гленн Уриск/
+2 GIVN Джин
+2 SURN Лесли
+2 _MARNM Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1858
+1 DEAT
+2 DATE 1953
+1 EVEN Жена Струана
+2 TYPE Comment
+1 FAMS @F1008@
+0 @I1022@ INDI
+1 NAME Хэмиш /Фаркухар/
+2 GIVN Хэмиш
+2 SURN Фаркухар
+1 SEX M
+1 BIRT
+2 DATE 1855
+1 DEAT
+2 DATE 1950
+1 EVEN Муж Мораг
+2 TYPE Comment
+1 FAMS @F1009@
+0 @I1023@ INDI
+1 NAME Ветвь /Фаркухар/
+2 GIVN Ветвь
+2 SURN Фаркухар
+1 SEX M
+1 EVEN Ветвь через Мораг
+2 TYPE Comment
+1 FAMC @F1009@
+0 @I1024@ INDI
+1 NAME Ангус /Гленн Уриск/
+2 GIVN Ангус
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1893
+1 DEAT
+2 DATE 1994
+1 FAMS @F1010@
+1 FAMC @F1008@
+0 @I1025@ INDI
+1 NAME Эйлса /Гленн Уриск/
+2 GIVN Эйлса
+2 SURN Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1897
+1 DEAT
+2 DATE 1992
+1 FAMS @F1011@
+1 FAMC @F1008@
+0 @I1026@ INDI
+1 NAME Мэйри /Гленн Уриск/
+2 GIVN Мэйри
+2 SURN Гатри
+2 _MARNM Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1896
+1 DEAT
+2 DATE 1990
+1 EVEN Жена Ангуса
+2 TYPE Comment
+1 FAMS @F1010@
+0 @I1027@ INDI
+1 NAME Дональд /Стрэтерн/
+2 GIVN Дональд
+2 SURN Стрэтерн
+1 SEX M
+1 BIRT
+2 DATE 1890
+1 DEAT
+2 DATE 1986
+1 EVEN Муж Эйлсы
+2 TYPE Comment
+1 FAMS @F1011@
+0 @I1028@ INDI
+1 NAME Ветвь /Стрэтерн/
+2 GIVN Ветвь
+2 SURN Стрэтерн
+1 SEX M
+1 EVEN Ветвь через Эйлсу
+2 TYPE Comment
+1 FAMC @F1011@
+0 @I1029@ INDI
+1 NAME Кеннах /Гленн Уриск/
+2 GIVN Кеннах
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1928
+1 DEAT
+2 DATE 2019
+1 FAMS @F1012@
+1 FAMC @F1010@
+0 @I1030@ INDI
+1 NAME Фиона /Гленн Уриск/
+2 GIVN Фиона
+2 SURN Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1932
+1 FAMS @F1013@
+1 FAMC @F1010@
+0 @I1031@ INDI
+1 NAME Бет /Гленн Уриск/
+2 GIVN Бет
+2 SURN Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1936
+1 DEAT
+2 DATE 2021
+1 EVEN Детей нет
+2 TYPE Comment
+1 FAMC @F1010@
+0 @I1032@ INDI
+1 NAME Кирсти /Гленн Уриск/
+2 GIVN Кирсти
+2 SURN Иннес
+2 _MARNM Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1930
+1 EVEN Жена Кеннаха
+2 TYPE Comment
+1 FAMS @F1012@
+0 @I1033@ INDI
+1 NAME Малькольм /Балфор/
+2 GIVN Малькольм
+2 SURN Балфор
+1 SEX M
+1 BIRT
+2 DATE 1926
+1 DEAT
+2 DATE 2018
+1 EVEN Муж Фионы
+2 TYPE Comment
+1 FAMS @F1013@
+0 @I1034@ INDI
+1 NAME Ветвь /Балфор/
+2 GIVN Ветвь
+2 SURN Балфор
+1 SEX M
+1 EVEN Ветвь через Фиону
+2 TYPE Comment
+1 FAMC @F1013@
+0 @I1035@ INDI
+1 NAME Сорха /Гленн Уриск/
+2 GIVN Сорха
+2 SURN Гленн Уриск
+1 SEX F
+1 BIRT
+2 DATE 1962
+1 EVEN Вышла за Эдвина Уинтерхоупа
+2 TYPE Comment
+1 FAMS @F1014@
+1 FAMC @F1012@
+0 @I1036@ INDI
+1 NAME Юэн /Гленн Уриск/
+2 GIVN Юэн
+2 SURN Гленн Уриск
+1 SEX M
+1 BIRT
+2 DATE 1966
+1 EVEN Детей нет
+2 TYPE Comment
+1 EVEN Последний в мужской линии
+2 TYPE Comment
+1 FAMC @F1012@
+0 @I1037@ INDI
+1 NAME Эдвин /Уинтерхоуп/
+2 GIVN Эдвин
+2 SURN Уинтерхоуп
+1 SEX M
+1 BIRT
+2 DATE 1958
+1 EVEN Из рода Уинтерхоуп
+2 TYPE Comment
+1 FAMS @F1014@
+0 @I1038@ INDI
+1 NAME Ветвь /Уинтерхоуп/
+2 GIVN Ветвь
+2 SURN Уинтерхоуп
+1 SEX M
+1 EVEN Ветвь через Сорху
+2 TYPE Comment
+1 FAMC @F1014@
+0 @F1001@ FAM
+1 HUSB @I1001@
+1 WIFE @I1002@
+1 CHIL @I1003@
+1 CHIL @I1004@
+0 @F1002@ FAM
+1 HUSB @I1003@
+1 WIFE @I1005@
+1 CHIL @I1007@
+1 CHIL @I1008@
+1 CHIL @I1009@
+0 @F1003@ FAM
+1 HUSB @I1004@
+1 CHIL @I1006@
+0 @F1004@ FAM
+1 HUSB @I1007@
+1 WIFE @I1010@
+1 CHIL @I1011@
+1 CHIL @I1012@
+0 @F1005@ FAM
+1 HUSB @I1011@
+1 WIFE @I1013@
+1 CHIL @I1016@
+1 CHIL @I1017@
+0 @F1006@ FAM
+1 HUSB @I1014@
+1 WIFE @I1012@
+1 CHIL @I1015@
+0 @F1007@ FAM
+1 HUSB @I1016@
+1 WIFE @I1018@
+1 CHIL @I1019@
+1 CHIL @I1020@
+0 @F1008@ FAM
+1 HUSB @I1019@
+1 WIFE @I1021@
+1 CHIL @I1024@
+1 CHIL @I1025@
+0 @F1009@ FAM
+1 HUSB @I1022@
+1 WIFE @I1020@
+1 CHIL @I1023@
+0 @F1010@ FAM
+1 HUSB @I1024@
+1 WIFE @I1026@
+1 CHIL @I1029@
+1 CHIL @I1030@
+1 CHIL @I1031@
+0 @F1011@ FAM
+1 HUSB @I1027@
+1 WIFE @I1025@
+1 CHIL @I1028@
+0 @F1012@ FAM
+1 HUSB @I1029@
+1 WIFE @I1032@
+1 CHIL @I1035@
+1 CHIL @I1036@
+0 @F1013@ FAM
+1 HUSB @I1033@
+1 WIFE @I1030@
+1 CHIL @I1034@
+0 @F1014@ FAM
+1 HUSB @I1037@
+1 WIFE @I1035@
+1 CHIL @I1038@
+0 TRLR

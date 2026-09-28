@@ -164,7 +164,7 @@ from app.gedcom.load import load_file
 conn = connect(os.environ["RODOSLOVNYE_DB"])
 for name, file in [("Гленн Уриск", "Gleann_Uruisg_tree.ged"), ("Уинтерхоуп", "Winterhope_tree.ged"),
                    ("О'Дувейн", "O_Dubhain_tree.ged"), ("Монад Кройве", "Monadh_Croibhe_tree.ged")]:
-    import_clan(conn, name, load_file(pathlib.Path("/core/clans") / file), source_file=file)
+    import_clan(conn, name, load_file(pathlib.Path("/core/houses") / file), source_file=file)
 if not editors_exist(conn):
     add_editor(conn, ${JSON.stringify(DEMO_EDITOR.name)}, ${JSON.stringify(DEMO_EDITOR.password)})
 conn.close()

@@ -1,4 +1,4 @@
-// Складывает ядро (server/app) и эталонные роды в архив, который страница распаковывает в браузере.
+// Складывает ядро (server/app) и роды проекта в архив, который страница распаковывает в браузере.
 // Руками ничего не копируем: витрина всегда едет с тем же кодом, что и настоящий сервер.
 
 import { createWriteStream } from "node:fs";
@@ -11,7 +11,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "..", "..");
 const CORE = resolve(ROOT, "server", "app");
 const OUT = resolve(ROOT, "web", "public", "core.zip");
-// эталонные роды: с них начинается первый заход гостя
+// роды проекта: их видит гость при первом заходе
 const CLANS = ["Gleann_Uruisg_tree.ged", "Winterhope_tree.ged", "O_Dubhain_tree.ged", "Monadh_Croibhe_tree.ged"];
 
 async function* walk(dir) {
@@ -102,7 +102,7 @@ for await (const path of walk(CORE)) {
   files.push([`app/${relative(CORE, path).split("\\").join("/")}`, await readFile(path)]);
 }
 for (const name of CLANS) {
-  files.push([`clans/${name}`, await readFile(resolve(ROOT, name))]);
+  files.push([`houses/${name}`, await readFile(resolve(ROOT, "houses", name))]);
 }
 
 await mkdir(dirname(OUT), { recursive: true });

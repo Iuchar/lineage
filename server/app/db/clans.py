@@ -7,6 +7,7 @@ import sqlite3
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
+from app.db.houses import save_house
 from app.gedcom.convert import ClanData, Event
 from app.gedcom.records import Record
 
@@ -130,6 +131,7 @@ def import_clan(conn: sqlite3.Connection, name: str, data: ClanData, source_file
                 (clan_id, position, record.tag, record.xref, _raw(record)),
             )
 
+    save_house(conn, clan_id)
     return ImportReport(
         clan_id=clan_id,
         name=name,

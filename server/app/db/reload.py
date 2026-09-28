@@ -15,6 +15,7 @@ from datetime import UTC, datetime
 from pydantic import BaseModel
 
 from app.db.clans import _insert_event, _raw
+from app.db.houses import save_house
 from app.db.tree import ClanNotFoundError, ClanTree, clan_tree
 from app.gedcom.convert import ClanData
 
@@ -207,6 +208,7 @@ def reload_clan(conn: sqlite3.Connection, clan_id: int, data: ClanData, delete: 
             conn.execute("INSERT INTO extra_records (clan_id, position, tag, xref, raw) VALUES (?, ?, ?, ?, ?)",
                          (clan_id, position, record.tag, record.xref, _raw(record)))
 
+    save_house(conn, clan_id)
     after = _snapshots(conn, clan_id)
     changed = sum(1 for xref in data.persons if xref in before and before[xref] != after.get(xref))
     return ReloadReport(added=len(set(data.persons) - set(old_persons)), changed=changed,

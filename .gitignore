@@ -11,6 +11,13 @@ __pycache__/
 data/*
 !data/.gitkeep
 
+# рода: в git едут только роды проекта, личные остаются на диске
+houses/*
+!houses/Gleann_Uruisg_tree.ged
+!houses/Winterhope_tree.ged
+!houses/O_Dubhain_tree.ged
+!houses/Monadh_Croibhe_tree.ged
+
 # рабочие и служебные папки
 .work/
 .superpowers/

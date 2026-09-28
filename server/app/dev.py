@@ -15,7 +15,9 @@ from app.db.tree import clan_tree
 from app.gedcom.load import load_file
 from app.main import app
 
-# фикстуры собираются из исходных файлов, а не из рабочей базы, — чтобы тесты не зависели от её состояния
+# фикстуры собираются из замороженных копий родов, а не из рабочей базы и не из houses/, —
+# чтобы эталоны раскладки не поехали вслед за правками дерева
+FIXTURE_HOUSES = ROOT / "server" / "tests" / "houses"
 FIXTURE_CLANS = {
     "gleann": ("Гленн Уриск", "Gleann_Uruisg_tree.ged"),
     "monadh": ("Монад Кройве", "Monadh_Croibhe_tree.ged"),
@@ -31,7 +33,7 @@ def write_fixtures(folder: Path) -> None:
     folder.mkdir(parents=True, exist_ok=True)
     conn = connect(":memory:")
     for key, (name, file) in FIXTURE_CLANS.items():
-        report = import_clan(conn, name, load_file(ROOT / file), source_file=file)
+        report = import_clan(conn, name, load_file(FIXTURE_HOUSES / file), source_file=file)
         # очередь браков как в файле: раскладка и связи сверяются со стендом, который правила очереди не знал
         payload = clan_tree(conn, report.clan_id, file_order=True).model_dump(mode="json")
         (folder / f"{key}.tree.json").write_text(

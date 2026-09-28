@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from app.config import ROOT
+# замороженные копии родов: рабочие файлы в houses/ меняются вместе с деревом, проверки должны стоять на месте
+HOUSES = Path(__file__).parent / "houses"
 
 # род → файл, людей, семей, узлов-заглушек «Ветвь» и «Потомки»; числа людей и семей — из проектного документа
 CLANS = {
@@ -12,4 +13,4 @@ CLANS = {
 
 
 def source(name: str) -> Path:
-    return ROOT / CLANS[name][0]
+    return HOUSES / CLANS[name][0]
