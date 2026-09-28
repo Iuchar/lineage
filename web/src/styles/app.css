@@ -8,15 +8,22 @@ body { margin: 0; font-family: 'Golos Text', system-ui, sans-serif; background: 
 /* хром — шапка, столбец, панели — берёт цвета стиля; до выбора стиля действуют запасные тона */
 body { --ch-bg: #16181b; --ch-fg: #e6e2d8; --ch-mut: #7c8492; --ch-edge: #2a2d32; --ch-btn: #1d2126;
   --ch-acc: #e9c46a; --ch-on: #e9e4d8; --ch-onfg: #14161a; }
-body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--mut); --ch-edge: var(--edge);
+body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-edge: var(--edge);
+  /* приглушённый цвет стиля рассчитан на полотно карты; на панели он выходит бледным,
+     поэтому в хроме берётся смесь текста с фоном — контраст держится в обеих темах */
+  --ch-mut: color-mix(in srgb, var(--fg) 76%, var(--panelbg));
   --ch-btn: color-mix(in srgb, var(--fg) 8%, transparent); --ch-acc: var(--acc);
   --ch-on: var(--acc); --ch-onfg: var(--bg); }
+/* на светлой теме акценты насыщенные и тёмные: надпись на них должна быть светлой, а не фоновой */
+body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 86%, #000); --ch-onfg: #fff7ea; }
 
 /* шапка тремя строками: титул дерева сверху, инструменты — на подложке потемнее */
 .bar { position: relative; z-index: 20; display: flex; flex-direction: column;
        background: var(--ch-bg); color: var(--ch-fg); border-bottom: 1px solid var(--ch-edge); }
 .bar .row { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; padding: 8px 16px; }
-.bar .tools { background: color-mix(in srgb, var(--ch-bg) 70%, #000);
+/* подложка инструментов сдвинута от фона к тексту: на тёмной теме светлеет, на светлой темнеет,
+   и в обоих случаях остаётся фоном, а не пятном, по которому не читаются подписи */
+.bar .tools { background: color-mix(in srgb, var(--ch-bg) 90%, var(--ch-fg));
   border-top: 1px solid color-mix(in srgb, var(--ch-edge) 70%, transparent); }
 .bar .tools .row { flex-wrap: wrap; padding: 7px 16px; }
 .bar .tools .row + .row { border-top: 1px solid color-mix(in srgb, var(--ch-edge) 45%, transparent); }
@@ -25,7 +32,8 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
   background: color-mix(in srgb, var(--ch-fg) 22%, transparent); }
 .grp { display: flex; align-items: center; gap: 7px; }
 .sw { display: flex; border: 1px solid var(--ch-edge); border-radius: 6px; overflow: hidden; }
-.sw button { border: 0; background: var(--ch-btn); color: var(--ch-mut); font: 500 11.5px/1 'Golos Text', sans-serif;
+.sw button { border: 0; background: var(--ch-btn); color: color-mix(in srgb, var(--ch-fg) 82%, var(--ch-bg));
+  font: 500 11.5px/1 'Golos Text', sans-serif;
              padding: 6px 11px; cursor: pointer; border-right: 1px solid var(--ch-edge); }
 .sw button:last-child { border-right: 0; }
 .sw button[aria-pressed=true] { background: var(--ch-on); color: var(--ch-onfg); }
@@ -78,7 +86,8 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 .bar .topBtn { border: 1px solid var(--ch-edge); background: var(--ch-btn); color: var(--ch-fg); border-radius: 6px; padding: 6px 11px;
   font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; white-space: nowrap; }
 .bar .topBtn[aria-pressed=true] { background: var(--ch-on); color: var(--ch-onfg); border-color: var(--ch-on); }
-.bar .topLink { border: 0; background: none; color: var(--ch-mut); font: 500 11.5px/1 'Golos Text', sans-serif;
+.bar .topLink { border: 0; background: none; color: color-mix(in srgb, var(--ch-fg) 82%, var(--ch-bg));
+  font: 500 11.5px/1 'Golos Text', sans-serif;
   cursor: pointer; text-decoration: none; white-space: nowrap; padding: 6px 2px; }
 .bar .topLink:hover { color: var(--ch-acc); }
 .bar .hint { margin-left: 0; }

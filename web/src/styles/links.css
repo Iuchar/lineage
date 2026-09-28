@@ -58,7 +58,8 @@
 .side .linkBtn { display: block; width: 100%; margin-top: 6px; }
 
 /* кнопка очереди связок в верхней панели */
-.sw button.queueBtn b { font-weight: 500; color: #e9c46a; margin-left: 4px; }
+/* число в кнопке выделяется весом, а не цветом: акцент стиля на светлых темах бледнеет */
+.sw button.queueBtn b { font-weight: 700; margin-left: 5px; color: inherit; }
 
 /* ═══ Проверка очереди связок ═══ */
 /* П3 — панель сбоку: шире панели человека, чтобы окружения читались */

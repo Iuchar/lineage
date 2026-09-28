@@ -530,7 +530,7 @@ async function start(root: HTMLElement): Promise<void> {
     clanTitle.innerHTML = `<b>${escapeHtml(clan?.name ?? "")}</b>` + (editing
       ? `<select class="statusPick" title="Титул рода">${Object.entries(STATUS_NAMES).map(([key, name]) =>
         `<option value="${key}"${key === status ? " selected" : ""}>${name}</option>`).join("")}</select>`
-      : `<span class="clanStatus">${STATUS_NAMES[status] ?? ""}</span>`);
+      : `<span class="clanStatus" title="${STATUS_NAMES[status] ?? ""}">${STATUS_NAMES[status] ?? ""}</span>`);
     clanTitle.querySelector("select")?.addEventListener("change", (e) => {
       void setClanStatus(id, (e.target as HTMLSelectElement).value);
     });
