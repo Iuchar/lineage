@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Доступ: связка, скрытый в дереве, автор правки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #241a12; --fg: #eadfc4; --mut: #b0a083; --acc: #c8a44e; --edge: #3a2c1e; --panelbg: #19110a;
+          --link: #7d6b52; --font: 'Cormorant Garamond', Georgia, serif; --warn: #b9552f; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #14100c; color: #eadfc4; font: 400 13px/1.55 'Golos Text', sans-serif; padding: 26px 30px 80px; }
+  h1 { font: 500 24px/1.1 var(--font); margin: 0 0 6px; }
+  .lead { color: #b0a083; font-size: 12.5px; margin: 0 0 4px; max-width: 900px; }
+  h2 { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+       color: #b0a083; margin: 36px 0 5px; }
+  h3 { font: 500 12px/1 'Golos Text', sans-serif; margin: 20px 0 6px; }
+  .say { color: #9c8a6d; font-size: 12px; margin: 0 0 12px; max-width: 900px; }
+  .pair { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+  .cap { color: #9c8a6d; font-size: 11px; margin: 7px 0 0; max-width: 380px; }
+  .frame { background: var(--bg); border: 1px solid #2c211a; border-radius: 8px; padding: 16px; }
+
+  .lockbtn { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--edge); border-radius: 6px;
+    background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg); font: 500 11px 'Golos Text', sans-serif;
+    padding: 4px 8px; cursor: pointer; white-space: nowrap; }
+  .lockbtn.rod { color: var(--acc); border-color: color-mix(in srgb, var(--acc) 45%, transparent); }
+  .lockbtn.shut { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+
+  .side { width: 300px; background: var(--panelbg); border: 1px solid var(--edge); border-radius: 8px; padding: 14px; }
+  .side h4 { font: 600 19px/1.15 var(--font); margin: 0 0 2px; }
+  .side .sub { font: 400 9.5px 'IBM Plex Mono', monospace; color: var(--mut); margin-bottom: 12px; }
+  .side .lbl { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--mut); margin: 14px 0 6px; }
+  .side .row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 5px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--edge) 55%, transparent); }
+  .side .row span { flex: 1; }
+  .also { display: flex; align-items: center; gap: 8px; border: 1px solid var(--edge); border-radius: 6px; padding: 9px 10px; margin-top: 6px; }
+  .also div { flex: 1; }
+  .also b { display: block; font: 500 12.5px 'Golos Text', sans-serif; }
+  .also small { color: var(--mut); font-size: 11px; }
+
+  .queue { width: 420px; background: var(--panelbg); border: 1px solid var(--edge); border-radius: 8px; padding: 14px; }
+  .queue .pairRow { display: flex; align-items: center; gap: 10px; padding: 9px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--edge) 55%, transparent); }
+  .queue .pairRow b { font: 500 13px var(--font); }
+  .queue .pairRow small { display: block; color: var(--mut); font: 400 10.5px 'IBM Plex Mono', monospace; }
+  .queue .pairRow .gap { flex: 1; }
+  .btn { border: 1px solid var(--edge); background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg);
+    border-radius: 6px; padding: 6px 10px; font: 500 11px/1 'Golos Text', sans-serif; cursor: pointer; }
+
+  .tree { position: relative; width: 380px; height: 250px; background: var(--bg);
+    border: 1px solid var(--edge); border-radius: 8px; }
+  .node { position: absolute; width: 96px; text-align: center; }
+  .node b { display: block; font: 500 14px/1.1 var(--font); color: var(--fg); }
+  .node small { font: 400 9px 'IBM Plex Mono', monospace; color: var(--mut); }
+  .node.hid b { color: var(--warn); }
+  .node.hid small { color: color-mix(in srgb, var(--warn) 70%, var(--mut)); }
+  .wire { position: absolute; background: var(--link); }
+  .knot { position: absolute; font: 400 10px 'IBM Plex Mono', monospace; color: var(--mut); }
+  .ring { position: absolute; width: 9px; height: 9px; border: 1.4px solid var(--link); border-radius: 50%; }
+
+  .journal { width: 430px; background: var(--panelbg); border: 1px solid var(--edge); border-radius: 8px; padding: 14px; }
+  .journal .jRow { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--edge) 55%, transparent); }
+  .journal .who { font: 500 11px 'Golos Text', sans-serif; color: var(--acc); width: 54px; flex: none; }
+  .journal .what { flex: 1; font-size: 12.5px; }
+  .journal .when { font: 400 10px 'IBM Plex Mono', monospace; color: var(--mut); white-space: nowrap; }
+</style>
+</head>
+<body>
+<h1>Доступ: связка, скрытый в дереве, автор правки</h1>
+<p class="lead">Добор к первому макету. Уровни показаны выбранным видом В2, замком со словом:
+  <button class="lockbtn">◇ общее</button> <button class="lockbtn rod">◈ родовое</button>
+  <button class="lockbtn shut">◆ скрытое</button></p>
+
+<h2>Д · уровень у связки между родами</h2>
+<p class="say">У связки свой уровень. Она видна в двух местах, и замок нужен в обоих.</p>
+<div class="pair">
+  <div>
+    <h3>Д1 · в панели человека</h3>
+    <div class="frame">
+      <div class="side">
+        <h4>Ниалл Монад Кройве</h4>
+        <div class="sub">1683 — 1751 · @I5288</div>
+        <div class="lbl">сведения</div>
+        <div class="row"><span>Пол</span>мужской<button class="lockbtn">◇</button></div>
+        <div class="row"><span>Даты жизни</span>1683 — 1751<button class="lockbtn rod">◈</button></div>
+        <div class="lbl">также в роду</div>
+        <div class="also">
+          <div><b>Уинтерхоуп</b><small>связал Tyr, 27 сентября</small></div>
+          <button class="lockbtn">◇ общее</button>
+        </div>
+        <div class="also">
+          <div><b>О’Дувейн</b><small>связал Tyr, 12 сентября</small></div>
+          <button class="lockbtn shut">◆ скрытое</button>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Замок стоит у самой связки, рядом с тем, кто её поставил. Скрытой связки зритель не видит и перейти по ней не может.</p>
+  </div>
+  <div>
+    <h3>Д2 · в очереди проверки</h3>
+    <div class="frame">
+      <div class="queue">
+        <div style="font: 500 15px var(--font); margin-bottom: 6px">Проверить связки · 6</div>
+        <div class="pairRow">
+          <div><b>Ниалл Монад Кройве</b><small>1683 · Уинтерхоуп</small></div>
+          <span class="gap"></span>
+          <button class="lockbtn">◇ общее</button>
+          <button class="btn">Связать</button>
+        </div>
+        <div class="pairRow">
+          <div><b>Мойра Гленн Уриск</b><small>1749 · О’Дувейн</small></div>
+          <span class="gap"></span>
+          <button class="lockbtn">◇ общее</button>
+          <button class="btn">Связать</button>
+        </div>
+        <p style="color: var(--mut); font-size: 11.5px; margin: 10px 0 0">Уровень выбирается сразу при подтверждении,
+          позже его можно сменить в панели человека.</p>
+      </div>
+    </div>
+    <p class="cap">По умолчанию связка общая, как в документе.</p>
+  </div>
+</div>
+
+<h2>Е · скрытый человек в дереве зрителя</h2>
+<p class="say">У редактора Дункан помечен скрытым. У зрителя его нет вовсе. Вопрос в том, что делать с его детьми.</p>
+<div class="pair">
+  <div>
+    <h3>Как видит редактор</h3>
+    <div class="frame">
+      <div class="tree">
+        <div class="node hid" style="left: 142px; top: 18px"><b>◆ Дункан</b><small>1740 — 1812</small></div>
+        <div class="wire" style="left: 190px; top: 54px; width: 2px; height: 26px"></div>
+        <div class="wire" style="left: 96px; top: 80px; width: 190px; height: 2px"></div>
+        <div class="wire" style="left: 96px; top: 80px; width: 2px; height: 22px"></div>
+        <div class="wire" style="left: 284px; top: 80px; width: 2px; height: 22px"></div>
+        <div class="node" style="left: 48px; top: 104px"><b>Ангус</b><small>1770 — 1840</small></div>
+        <div class="node" style="left: 236px; top: 104px"><b>Мойра</b><small>1774 — 1851</small></div>
+        <div class="wire" style="left: 96px; top: 140px; width: 2px; height: 26px"></div>
+        <div class="node" style="left: 48px; top: 168px"><b>Кеннет</b><small>1801 — 1866</small></div>
+      </div>
+    </div>
+    <p class="cap">Скрытый помечен цветом и ромбом, и только в правке.</p>
+  </div>
+  <div>
+    <h3>Е1 · дети остаются, родителя нет</h3>
+    <div class="frame">
+      <div class="tree">
+        <div class="ring" style="left: 186px; top: 30px"></div>
+        <div class="knot" style="left: 120px; top: 44px">родители не записаны</div>
+        <div class="wire" style="left: 190px; top: 62px; width: 2px; height: 18px"></div>
+        <div class="wire" style="left: 96px; top: 80px; width: 190px; height: 2px"></div>
+        <div class="wire" style="left: 96px; top: 80px; width: 2px; height: 22px"></div>
+        <div class="wire" style="left: 284px; top: 80px; width: 2px; height: 22px"></div>
+        <div class="node" style="left: 48px; top: 104px"><b>Ангус</b><small>1770 — 1840</small></div>
+        <div class="node" style="left: 236px; top: 104px"><b>Мойра</b><small>1774 — 1851</small></div>
+        <div class="wire" style="left: 96px; top: 140px; width: 2px; height: 26px"></div>
+        <div class="node" style="left: 48px; top: 168px"><b>Кеннет</b><small>1801 — 1866</small></div>
+      </div>
+    </div>
+    <p class="cap">Дети встают под знаком «родители не записаны», тем самым, что уже есть на карте у братьев без родителей.
+      Дерево сохраняется целиком, но видно, что выше кто-то был.</p>
+  </div>
+  <div>
+    <h3>Е2 · ветка уходит целиком</h3>
+    <div class="frame">
+      <div class="tree">
+        <div style="position: absolute; left: 90px; top: 112px; font-size: 12px; color: var(--mut)">в этом роду для вас пусто</div>
+      </div>
+    </div>
+    <p class="cap">Вместе со скрытым пропадают его дети и внуки. Никаких следов, но от дерева может не остаться почти ничего:
+      скрыть прадеда значит скрыть весь род.</p>
+  </div>
+</div>
+
+<h2>Ж · кто правил и кто связал</h2>
+<p class="say">В журнале появляется имя редактора, у связки, кто её поставил, уже показано в Д1.</p>
+<div class="pair">
+  <div>
+    <h3>Ж1 · имя слева, время справа</h3>
+    <div class="frame">
+      <div class="journal">
+        <div style="font: 500 15px var(--font); margin-bottom: 6px">Журнал · Гленн Уриск</div>
+        <div class="jRow"><span class="who">Tyr</span><span class="what">Титул рода: древний благородный род</span><span class="when">сегодня 14:20</span></div>
+        <div class="jRow"><span class="who">Tyr</span><span class="what">Мойра: даты жизни, родовое</span><span class="when">сегодня 14:06</span></div>
+        <div class="jRow"><span class="who">Эйлин</span><span class="what">Дункан скрыт от зрителей</span><span class="when">вчера 19:41</span></div>
+        <div class="jRow"><span class="who">Эйлин</span><span class="what">Связка с родом Уинтерхоуп</span><span class="when">27 сент. 11:12</span></div>
+      </div>
+    </div>
+    <p class="cap">Имя стоит первым столбцом: видно, чьих рук дело, не вчитываясь в строку.</p>
+  </div>
+  <div>
+    <h3>Ж2 · имя в подписи под строкой</h3>
+    <div class="frame">
+      <div class="journal">
+        <div style="font: 500 15px var(--font); margin-bottom: 6px">Журнал · Гленн Уриск</div>
+        <div class="jRow"><span class="what">Титул рода: древний благородный род<br>
+          <small style="color: var(--mut); font: 400 10px 'IBM Plex Mono', monospace">Tyr, сегодня 14:20</small></span></div>
+        <div class="jRow"><span class="what">Мойра: даты жизни, родовое<br>
+          <small style="color: var(--mut); font: 400 10px 'IBM Plex Mono', monospace">Tyr, сегодня 14:06</small></span></div>
+        <div class="jRow"><span class="what">Дункан скрыт от зрителей<br>
+          <small style="color: var(--mut); font: 400 10px 'IBM Plex Mono', monospace">Эйлин, вчера 19:41</small></span></div>
+      </div>
+    </div>
+    <p class="cap">Строка шире под само дело, имя и время уходят подписью. Журнал становится выше.</p>
+  </div>
+</div>
+</body>
+</html>

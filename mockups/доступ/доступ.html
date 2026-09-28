@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Доступ: вход, ссылки, видимость</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #241a12; --fg: #eadfc4; --mut: #b0a083; --acc: #c8a44e; --edge: #3a2c1e; --panelbg: #19110a;
+          --font: 'Cormorant Garamond', Georgia, serif; --warn: #b9552f; }
+  .light { --bg: #ded2b6; --fg: #2a2116; --mut: #5f513a; --acc: #8a6a18; --edge: #bba98a; --panelbg: #d2c5a6; --warn: #9a3f1c; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #14100c; color: #eadfc4; font: 400 13px/1.55 'Golos Text', sans-serif; padding: 26px 30px 80px; }
+  h1 { font: 500 24px/1.1 var(--font); margin: 0 0 6px; }
+  .lead { color: #b0a083; font-size: 12.5px; margin: 0 0 4px; max-width: 900px; }
+  h2 { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+       color: #b0a083; margin: 36px 0 5px; }
+  h3 { font: 500 12px/1 'Golos Text', sans-serif; color: #eadfc4; margin: 20px 0 6px; }
+  .say { color: #9c8a6d; font-size: 12px; margin: 0 0 12px; max-width: 900px; }
+  .pair { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+  .cap { color: #9c8a6d; font-size: 11px; margin: 7px 0 0; }
+
+  .frame { background: var(--bg); color: var(--fg); border: 1px solid #2c211a; border-radius: 8px; padding: 16px; }
+  .panelbg { background: var(--panelbg); }
+
+  /* общие кирпичики интерфейса */
+  .btn { border: 1px solid var(--edge); background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg);
+         border-radius: 6px; padding: 7px 12px; font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; }
+  .btn.pri { background: var(--acc); border-color: var(--acc); color: var(--bg); }
+  .btn.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 50%, transparent); }
+  .link { border: 0; background: none; color: var(--acc); font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; padding: 0; }
+  .field { display: block; margin-bottom: 10px; }
+  .field span { display: block; font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em;
+                text-transform: uppercase; color: var(--mut); margin-bottom: 5px; }
+  .field input { width: 100%; border: 1px solid var(--edge); border-radius: 6px; background: color-mix(in srgb, var(--fg) 7%, transparent);
+                 color: var(--fg); font: 400 13px 'Golos Text', sans-serif; padding: 8px 10px; }
+  .mono { font: 400 11.5px 'IBM Plex Mono', monospace; color: var(--mut); }
+  .seg { display: inline-flex; border: 1px solid var(--edge); border-radius: 6px; overflow: hidden; }
+  .seg button { border: 0; border-right: 1px solid var(--edge); background: color-mix(in srgb, var(--fg) 8%, transparent);
+                color: color-mix(in srgb, var(--fg) 82%, var(--panelbg)); font: 500 11px/1 'Golos Text', sans-serif;
+                padding: 6px 10px; cursor: pointer; }
+  .seg button:last-child { border-right: 0; }
+  .seg button.on { background: var(--acc); color: var(--bg); }
+  .seg button.shut.on { background: var(--warn); color: #fff3e8; }
+
+  /* А. вход */
+  .gate { width: 330px; }
+  .gate h4 { font: 500 19px/1.2 var(--font); margin: 0 0 3px; }
+  .gate p { color: var(--mut); font-size: 12px; margin: 0 0 16px; }
+  .over { position: relative; width: 420px; height: 250px; overflow: hidden; }
+  .over .tree { position: absolute; inset: 0; opacity: .5;
+    background-image: radial-gradient(circle at 20% 30%, var(--acc) 2px, transparent 3px),
+      radial-gradient(circle at 46% 30%, var(--acc) 2px, transparent 3px),
+      radial-gradient(circle at 33% 62%, var(--acc) 2px, transparent 3px),
+      radial-gradient(circle at 70% 62%, var(--acc) 2px, transparent 3px); }
+  .over .card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 290px;
+    background: var(--panelbg); border: 1px solid var(--edge); border-radius: 8px; padding: 16px;
+    box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+
+  /* Б. ссылки */
+  .rail { width: 230px; background: var(--panelbg); border: 1px solid var(--edge); border-radius: 8px; padding: 9px 8px; }
+  .rail .row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 5px; }
+  .rail .row.on { background: color-mix(in srgb, var(--acc) 20%, transparent); }
+  .rail .row b { flex: 1; font: 500 14px var(--font); }
+  .rail .row small { font: 400 10px 'IBM Plex Mono', monospace; color: var(--mut); }
+  .rail .row i { font-style: normal; color: var(--mut); cursor: pointer; }
+  .menu { width: 250px; background: var(--panelbg); border: 1px solid var(--edge); border-radius: 8px; padding: 6px;
+          box-shadow: 0 14px 34px rgba(0,0,0,.4); }
+  .menu div { padding: 7px 10px; border-radius: 5px; font-size: 12px; }
+  .menu div.on { background: color-mix(in srgb, var(--fg) 8%, transparent); }
+  .share { width: 420px; background: var(--panelbg); border: 1px solid var(--edge); border-radius: 8px; padding: 16px; }
+  .share .url { display: flex; align-items: center; gap: 8px; border: 1px solid var(--edge); border-radius: 6px;
+    background: color-mix(in srgb, var(--fg) 7%, transparent); padding: 8px 10px; margin: 8px 0 10px; }
+  .share .url code { flex: 1; font: 400 11.5px 'IBM Plex Mono', monospace; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .share .foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .share .foot .gap { flex: 1; }
+
+  /* В. видимость */
+  .form { width: 330px; background: var(--panelbg); border: 1px solid var(--edge); border-radius: 8px; padding: 14px; }
+  .form .line { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, var(--edge) 60%, transparent); }
+  .form .line:last-child { border-bottom: 0; }
+  .form .line b { flex: 1; font: 500 12px 'Golos Text', sans-serif; }
+  .form .line .val { color: var(--mut); font-size: 12px; }
+  .lockbtn { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--edge); border-radius: 6px;
+    background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg); font: 500 11px 'Golos Text', sans-serif;
+    padding: 5px 8px; cursor: pointer; }
+  .lockbtn.rod { color: var(--acc); border-color: color-mix(in srgb, var(--acc) 45%, transparent); }
+  .lockbtn.shut { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+  .note { border: 1px solid var(--edge); border-radius: 6px; padding: 9px 10px; margin-top: 8px; font-size: 12px; }
+  .note .head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .note .head b { flex: 1; font: 500 11px 'Golos Text', sans-serif; color: var(--mut); }
+
+  /* Г. глазами зрителя */
+  .view { width: 430px; }
+  .ribbon { display: flex; align-items: center; gap: 10px; background: color-mix(in srgb, var(--warn) 85%, #000);
+    color: #fff3e8; padding: 7px 12px; font: 500 11.5px 'Golos Text', sans-serif; border-radius: 6px 6px 0 0; }
+  .ribbon .gap { flex: 1; }
+  .ribbon button { border: 1px solid rgba(255,255,255,.4); background: none; color: #fff3e8; border-radius: 5px;
+    padding: 4px 9px; font: 500 11px 'Golos Text', sans-serif; cursor: pointer; }
+  .stage { height: 150px; border: 1px solid var(--edge); border-top: 0; border-radius: 0 0 6px 6px; position: relative;
+    background-image: radial-gradient(circle at 25% 35%, var(--acc) 2px, transparent 3px),
+      radial-gradient(circle at 55% 35%, var(--acc) 2px, transparent 3px),
+      radial-gradient(circle at 40% 72%, var(--acc) 2px, transparent 3px); }
+  .stage.edged { border: 2px solid var(--warn); border-radius: 6px; }
+  .stage .tag { position: absolute; right: 10px; bottom: 10px; background: color-mix(in srgb, var(--warn) 85%, #000);
+    color: #fff3e8; border-radius: 5px; padding: 5px 9px; font: 500 11px 'Golos Text', sans-serif; }
+</style>
+</head>
+<body>
+<h1>Доступ: вход, ссылки зрителям, уровни видимости</h1>
+<p class="lead">По проектному документу: редактор входит по логину и паролю, зритель — по ссылке на род.
+  Уровень видимости стоит у человека, у отдельной заметки и у связки: <b>общее</b> · <b>родовое</b> · <b>скрытое</b>.
+  Скрытого в дереве зрителя нет вовсе, а не «???».</p>
+
+<h2>А · вход редактора</h2>
+<p class="say">Зритель приходит по ссылке и никакого входа не видит. Вопрос только в том, как входит редактор.</p>
+<div class="pair">
+  <div>
+    <h3>А1 · отдельная страница</h3>
+    <div class="frame" style="width: 420px">
+      <div class="gate">
+        <h4>Родословные</h4>
+        <p>Вход для тех, кто ведёт роды. Зрителю вход не нужен — он приходит по ссылке.</p>
+        <label class="field"><span>имя</span><input value="tyr"></label>
+        <label class="field"><span>пароль</span><input type="password" value="········"></label>
+        <button class="btn pri">Войти</button>
+      </div>
+    </div>
+    <p class="cap">Страница открывается на пустом месте: карты за ней нет.</p>
+  </div>
+  <div>
+    <h3>А2 · окошко поверх карты</h3>
+    <div class="frame" style="padding: 0; overflow: hidden">
+      <div class="over">
+        <div class="tree"></div>
+        <div class="card">
+          <h4 style="font: 500 17px/1.2 var(--font); margin: 0 0 3px">Вход редактора</h4>
+          <p style="color: var(--mut); font-size: 12px; margin: 0 0 14px">Дерево останется открытым.</p>
+          <label class="field"><span>имя</span><input value="tyr"></label>
+          <label class="field"><span>пароль</span><input type="password" value="········"></label>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <button class="btn pri">Войти</button><button class="btn">Отмена</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Карта видна и до входа: редактор жмёт «Войти» в шапке, когда собрался править.</p>
+  </div>
+</div>
+
+<h2>Б · ссылка зрителям на род</h2>
+<p class="say">Ссылка своя у каждого дерева, отзывается и выпускается заново. Вопрос — откуда её достают.</p>
+<div class="pair">
+  <div>
+    <h3>Б1 · из столбца деревьев</h3>
+    <div class="frame">
+      <div style="display: flex; gap: 14px; align-items: flex-start">
+        <div class="rail">
+          <div class="row on"><b>Гленн Уриск</b><small>38</small><i>⋯</i></div>
+          <div class="row"><b>Монад Кройве</b><small>84</small></div>
+          <div class="row"><b>О’Дувейн</b><small>17</small></div>
+        </div>
+        <div class="menu">
+          <div class="on">Ссылка зрителям…</div>
+          <div>Выгрузить .ged</div>
+          <div>Титул рода…</div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Ссылка живёт там же, где сам род: в его строке.</p>
+  </div>
+  <div>
+    <h3>Б2 · окно ссылки (общее для обоих)</h3>
+    <div class="frame">
+      <div class="share">
+        <div style="font: 500 15px var(--font)">Ссылка зрителям · Гленн Уриск</div>
+        <div class="url"><code>https://rodoslovnye.tyr/r/8f3ad1c0b7</code><button class="btn">Копировать</button></div>
+        <div class="mono">выпущена 27 сентября · открывали 4 раза · последний раз вчера</div>
+        <div style="margin-top: 12px; font-size: 12px; color: var(--mut)">
+          Кто открыл ссылку, считается своим для этого рода: видит даты жизни и родовые заметки.
+          Чужие роды показываются ему только общим слоем.</div>
+        <div class="foot">
+          <button class="btn">Выпустить заново</button>
+          <span class="gap"></span>
+          <button class="btn warn">Отозвать</button>
+        </div>
+      </div>
+    </div>
+    <p class="cap">«Выпустить заново» гасит старую ссылку и сразу даёт новую.</p>
+  </div>
+</div>
+
+<h2>В · уровень видимости</h2>
+<p class="say">Три уровня у человека, у каждой заметки и у связки. Значения по умолчанию из документа:
+  имя и место в дереве — общее, даты жизни — родовое, заметка из файла — родовое, связка — общее.</p>
+<div class="pair">
+  <div>
+    <h3>В1 · сегмент из трёх</h3>
+    <div class="frame">
+      <div class="form">
+        <div class="line"><b>Имя и место в дереве</b>
+          <div class="seg"><button class="on">общее</button><button>родовое</button><button class="shut">скрытое</button></div></div>
+        <div class="line"><b>Даты жизни</b>
+          <div class="seg"><button>общее</button><button class="on">родовое</button><button class="shut">скрытое</button></div></div>
+        <div class="line"><b>Портрет</b>
+          <div class="seg"><button class="on">общее</button><button>родовое</button><button class="shut">скрытое</button></div></div>
+        <div class="line"><b>Человек целиком</b>
+          <div class="seg"><button>общее</button><button>родовое</button><button class="shut on">скрытое</button></div></div>
+        <div class="note">
+          <div class="head"><b>Заметка · крещение</b>
+            <div class="seg"><button>общее</button><button class="on">родовое</button><button class="shut">скрытое</button></div></div>
+          Крещён в приходе Гленн Уриск, восприемник — Мурдо.
+        </div>
+      </div>
+    </div>
+    <p class="cap">Видно все три уровня разом, выбор в один щелчок. Занимает много места по ширине.</p>
+  </div>
+  <div>
+    <h3>В2 · замок с подписью</h3>
+    <div class="frame">
+      <div class="form">
+        <div class="line"><b>Имя и место в дереве</b><button class="lockbtn">◇ общее</button></div>
+        <div class="line"><b>Даты жизни</b><button class="lockbtn rod">◈ родовое</button></div>
+        <div class="line"><b>Портрет</b><button class="lockbtn">◇ общее</button></div>
+        <div class="line"><b>Человек целиком</b><button class="lockbtn shut">◆ скрытое</button></div>
+        <div class="note">
+          <div class="head"><b>Заметка · крещение</b><button class="lockbtn rod">◈ родовое</button></div>
+          Крещён в приходе Гленн Уриск, восприемник — Мурдо.
+        </div>
+        <p style="color: var(--mut); font-size: 11.5px; margin: 10px 0 0">Щелчок по замку открывает три уровня списком.</p>
+      </div>
+    </div>
+    <p class="cap">Строка узкая, уровень читается словом и знаком. Смена — два щелчка.</p>
+  </div>
+</div>
+
+<h2>Г · «глазами зрителя»</h2>
+<p class="say">Редактор одной кнопкой смотрит то же, что приглашённый. Главное — не забыть, что ты в этом режиме.</p>
+<div class="pair">
+  <div>
+    <h3>Г1 · лента сверху</h3>
+    <div class="frame view">
+      <div class="ribbon">Глазами зрителя рода «Гленн Уриск»
+        <span class="gap"></span>
+        <span style="opacity: .85">скрыто 3 человека, 7 заметок</span>
+        <button>Вернуться к правке</button></div>
+      <div class="stage"></div>
+    </div>
+    <p class="cap">Лента занимает строку, но её нельзя не заметить.</p>
+  </div>
+  <div>
+    <h3>Г2 · рамка и бирка</h3>
+    <div class="frame view">
+      <div class="stage edged"><span class="tag">глазами зрителя · вернуться</span></div>
+    </div>
+    <p class="cap">Место не отнимает, но при долгой работе о режиме легко забыть.</p>
+  </div>
+</div>
+
+<h2>Светлая тема · проверка</h2>
+<div class="pair">
+  <div class="frame light" style="width: 430px">
+    <div class="form">
+      <div class="line"><b>Даты жизни</b><button class="lockbtn rod">◈ родовое</button></div>
+      <div class="line"><b>Человек целиком</b><button class="lockbtn shut">◆ скрытое</button></div>
+    </div>
+  </div>
+  <div class="frame light view">
+    <div class="ribbon">Глазами зрителя рода «Гленн Уриск»<span class="gap"></span><button>Вернуться к правке</button></div>
+    <div class="stage"></div>
+  </div>
+</div>
+</body>
+</html>
