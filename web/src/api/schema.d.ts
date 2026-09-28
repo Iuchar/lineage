@@ -649,6 +649,8 @@ export interface components {
             id: number;
             /** Summary */
             summary: string;
+            /** Author */
+            author?: string | null;
             /** Created At */
             created_at: string;
             /** Undone */
@@ -673,6 +675,8 @@ export interface components {
              * @enum {string}
              */
             see: "all" | "clan" | "hidden";
+            /** Created By */
+            created_by?: string | null;
             other: components["schemas"]["LinkPerson"];
         };
         /** ClanMatch */
@@ -894,6 +898,8 @@ export interface components {
              * @enum {string}
              */
             see: "all" | "clan" | "hidden";
+            /** Created By */
+            created_by?: string | null;
             /** Created At */
             created_at: string;
             a: components["schemas"]["LinkPerson"];
@@ -1649,7 +1655,9 @@ export interface operations {
     };
     get_clan_tree_api_clans__clan_id__tree_get: {
         parameters: {
-            query?: never;
+            query?: {
+                as_viewer?: number | null;
+            };
             header?: never;
             path: {
                 clan_id: number;
@@ -1680,7 +1688,9 @@ export interface operations {
     };
     get_person_api_persons__person_id__get: {
         parameters: {
-            query?: never;
+            query?: {
+                as_viewer?: number | null;
+            };
             header?: never;
             path: {
                 person_id: number;
@@ -1811,7 +1821,9 @@ export interface operations {
     };
     get_clan_links_api_clans__clan_id__links_get: {
         parameters: {
-            query?: never;
+            query?: {
+                as_viewer?: number | null;
+            };
             header?: never;
             path: {
                 clan_id: number;

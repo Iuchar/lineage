@@ -20,12 +20,14 @@ from pydantic import BaseModel
 
 from app.db.clans import _insert_event
 from app.gedcom.convert import FAMILY_EVENT_TAGS, _event, _family, _person
+from app.db.author import author
 from app.gedcom.records import Record
 
 
 class ChangeInfo(BaseModel):
     id: int
     summary: str
+    author: str | None = None  # кто правил; у прежних правок имени нет
     created_at: str
     undone: bool
     persons: list[int]
@@ -152,8 +154,9 @@ class Edit:
             if self.links:
                 records.append({"k": "LINKS", "b": self.links, "a": None})
             cursor = self.conn.execute(
-                "INSERT INTO changes (clan_id, summary, created_at, records) VALUES (?, ?, ?, ?)",
-                (self.clan_id, self.summary, _now(), json.dumps(records, ensure_ascii=False, separators=(",", ":"))),
+                "INSERT INTO changes (clan_id, summary, created_at, author, records) VALUES (?, ?, ?, ?, ?)",
+                (self.clan_id, self.summary, _now(), author(),
+                 json.dumps(records, ensure_ascii=False, separators=(",", ":"))),
             )
             change_id = cursor.lastrowid or 0
             self.conn.executemany("INSERT OR IGNORE INTO change_persons (change_id, person_id) VALUES (?, ?)",
@@ -273,8 +276,8 @@ def change_info(conn: sqlite3.Connection, change_id: int) -> ChangeInfo:
     if row is None:
         raise JournalError("Такой правки нет")
     persons = [r[0] for r in conn.execute("SELECT person_id FROM change_persons WHERE change_id = ?", (change_id,))]
-    return ChangeInfo(id=row["id"], summary=row["summary"], created_at=row["created_at"], undone=bool(row["undone"]),
-                      persons=persons, reverts=row["reverts"])
+    return ChangeInfo(id=row["id"], summary=row["summary"], author=row["author"], created_at=row["created_at"],
+                      undone=bool(row["undone"]), persons=persons, reverts=row["reverts"])
 
 
 def clan_changes(conn: sqlite3.Connection, clan_id: int, limit: int = 200) -> list[ChangeInfo]:

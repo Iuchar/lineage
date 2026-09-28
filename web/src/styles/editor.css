@@ -197,3 +197,7 @@
 .noteRow .lockPick { flex: none; margin-top: 2px; }
 /* связка в панели: замок рядом с родом */
 .twin .lockPick { margin: 6px 0 0; }
+
+/* кто правил: подписью под самим делом, как в макете Ж2 */
+.jr .e .who { display: block; font: 400 10px 'IBM Plex Mono', monospace; font-style: normal;
+  color: var(--mut); margin-top: 2px; }

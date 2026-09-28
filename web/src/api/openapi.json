@@ -263,6 +263,22 @@
               "type": "integer",
               "title": "Clan Id"
             }
+          },
+          {
+            "name": "as_viewer",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Viewer"
+            }
           }
         ],
         "responses": {
@@ -301,6 +317,22 @@
             "schema": {
               "type": "integer",
               "title": "Person Id"
+            }
+          },
+          {
+            "name": "as_viewer",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Viewer"
             }
           }
         ],
@@ -494,6 +526,22 @@
             "schema": {
               "type": "integer",
               "title": "Clan Id"
+            }
+          },
+          {
+            "name": "as_viewer",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Viewer"
             }
           }
         ],
@@ -1779,6 +1827,17 @@
             "type": "string",
             "title": "Summary"
           },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
           "created_at": {
             "type": "string",
             "title": "Created At"
@@ -1836,6 +1895,17 @@
             ],
             "title": "See",
             "default": "all"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
           },
           "other": {
             "$ref": "#/components/schemas/LinkPerson"
@@ -2499,6 +2569,17 @@
             ],
             "title": "See",
             "default": "all"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
           },
           "created_at": {
             "type": "string",

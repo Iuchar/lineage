@@ -128,7 +128,8 @@ export class Journal {
       if (d !== last) h += `<div class="day">${d}</div>`;
       last = d;
       h += `<div class="e${change.undone ? " undone" : ""}" data-change="${change.id}"><time>${time(change.created_at)}</time>` +
-        `<span data-goto="${change.persons[0] ?? ""}">${escapeHtml(change.summary)}</span>` +
+        `<span data-goto="${change.persons[0] ?? ""}">${escapeHtml(change.summary)}` +
+        (change.author ? `<i class="who">${escapeHtml(change.author)}</i>` : "") + "</span>" +
         (change.undone ? "" : `<button data-undo-to="${change.id}" title="Отменить эту правку и всё, что сделано после">отменить до сюда</button>`) +
         "</div>";
     }
@@ -164,7 +165,8 @@ export async function historyHtml(personId: number): Promise<string> {
     const d = day(change.created_at);
     if (d !== last) h += `<div class="day">${d}</div>`;
     last = d;
-    h += `<div class="e"><time>${time(change.created_at)}</time><span>${escapeHtml(change.summary)}</span>` +
+    h += `<div class="e"><time>${time(change.created_at)}</time><span>${escapeHtml(change.summary)}` +
+      (change.author ? `<i class="who">${escapeHtml(change.author)}</i>` : "") + "</span>" +
       `<button data-revert="${change.id}">вернуть</button></div>`;
   }
   return h + '<div class="parse">«Вернуть» ставит прежнее значение новой правкой — она тоже попадёт в общий журнал.</div>' +

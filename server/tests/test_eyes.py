@@ -124,3 +124,35 @@ def test_hidden_link_is_not_shown_to_viewer(conn: sqlite3.Connection) -> None:
     assert [l.link_id for l in sift_links(links, Eyes(editor=True), 1)] == [1, 2, 3]
     assert [l.link_id for l in sift_links(links, Eyes(editor=False, clans=frozenset({1})), 1)] == [1, 2]
     assert [l.link_id for l in sift_links(links, Eyes(editor=False, clans=frozenset()), 1)] == [1]
+
+
+def test_editor_can_look_with_viewer_eyes(tmp_path, monkeypatch) -> None:
+    """«Глазами зрителя рода N»: редактор видит ровно то, что увидит приглашённый по ссылке."""
+    from fastapi.testclient import TestClient
+
+    import app.config
+    import app.main
+    from app.db.access import add_editor
+    from app.db.connection import connect
+    from app.gedcom.load import load_file
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    base = connect(path)
+    import_clan(base, "Гленн Уриск", load_file(source("Гленн Уриск")), source_file="Gleann.ged")
+    add_editor(base, "Tyr", "длинный пароль")
+    hidden = int(base.execute("SELECT id FROM persons ORDER BY id LIMIT 1").fetchone()["id"])
+    base.close()
+
+    client = TestClient(app.main.app)
+    client.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
+    client.put(f"/api/persons/{hidden}", json={"see": "hidden"})
+
+    whole = client.get("/api/clans/1/tree").json()
+    as_own = client.get("/api/clans/1/tree", params={"as_viewer": 1}).json()
+    as_stranger = client.get("/api/clans/1/tree", params={"as_viewer": 2}).json()
+    assert len(whole["persons"]) == len(as_own["persons"]) + 1
+    assert hidden not in {p["id"] for p in as_own["persons"]}
+    assert any(p["birth"] or p["death"] for p in as_own["persons"])
+    assert all(p["birth"] is None and p["death"] is None for p in as_stranger["persons"])

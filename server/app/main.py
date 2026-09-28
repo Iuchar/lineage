@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from app import uploads
 from app.config import DB_PATH, DIST
 from app.db.access import AccessError, Editor, editor_by_key, editors_exist, login, logout
+from app.db.author import set_author
 from app.db.clans import ClanExistsError, import_clan
 from app.db.eyes import Eyes, sift, sift_links, sift_person
 from app.gedcom.meta import See
@@ -66,9 +67,15 @@ def _current_editor(conn: sqlite3.Connection, request: Request) -> Editor | None
     return editor_by_key(conn, request.cookies.get(SESSION_COOKIE))
 
 
-def _eyes(conn: sqlite3.Connection, request: Request) -> Eyes:
-    """Чьими глазами смотрят: редактор видит всё, зритель — общий слой и свои роды по ссылкам."""
-    if not editors_exist(conn) or _current_editor(conn, request) is not None:
+def _eyes(conn: sqlite3.Connection, request: Request, as_viewer: int | None = None) -> Eyes:
+    """Чьими глазами смотрят: редактор видит всё, зритель — общий слой и свои роды по ссылкам.
+
+    as_viewer — редактор смотрит «глазами зрителя рода N»: ровно то, что увидит приглашённый по ссылке.
+    """
+    editor = not editors_exist(conn) or _current_editor(conn, request) is not None
+    if editor and as_viewer is not None:
+        return Eyes(editor=False, clans=frozenset({as_viewer}))
+    if editor:
         return Eyes(editor=True)
     return Eyes(editor=False, clans=frozenset(viewer_clans(conn, request.cookies.get(VIEWER_COOKIE))))
 
@@ -77,11 +84,14 @@ def _eyes(conn: sqlite3.Connection, request: Request) -> Eyes:
 async def guard_edits(request: Request, call_next):  # type: ignore[no-untyped-def]
     """Пока заведён хотя бы один редактор, менять данные может только вошедший."""
     path = request.url.path
+    set_author(None)
     if request.method in {"POST", "PUT", "PATCH", "DELETE"} and path.startswith("/api/") and path not in OPEN_PATHS:
         conn = connect(DB_PATH)
         try:
-            if editors_exist(conn) and _current_editor(conn, request) is None:
+            editor = _current_editor(conn, request)
+            if editors_exist(conn) and editor is None:
                 return JSONResponse({"detail": "Нужен вход редактора"}, status_code=401)
+            set_author(editor.name if editor else None)
         finally:
             conn.close()
     return await call_next(request)
@@ -193,17 +203,17 @@ def get_clans(conn: Database) -> list[ClanSummary]:
 
 
 @app.get("/api/clans/{clan_id}/tree")
-def get_clan_tree(clan_id: int, conn: Database, request: Request) -> ClanTree:
+def get_clan_tree(clan_id: int, conn: Database, request: Request, as_viewer: int | None = None) -> ClanTree:
     try:
-        return sift(clan_tree(conn, clan_id), _eyes(conn, request))
+        return sift(clan_tree(conn, clan_id), _eyes(conn, request, as_viewer))
     except ClanNotFoundError:
         raise HTTPException(status_code=404, detail="Такого рода нет") from None
 
 
 @app.get("/api/persons/{person_id}")
-def get_person(person_id: int, conn: Database, request: Request) -> PersonDetails:
+def get_person(person_id: int, conn: Database, request: Request, as_viewer: int | None = None) -> PersonDetails:
     try:
-        return sift_person(person_details(conn, person_id), _eyes(conn, request))
+        return sift_person(person_details(conn, person_id), _eyes(conn, request, as_viewer))
     except PersonNotFoundError:
         raise HTTPException(status_code=404, detail="Такого человека нет") from None
 
@@ -215,8 +225,8 @@ def find_persons(q: str, conn: Database, exclude_clan: int | None = None) -> lis
 
 
 @app.get("/api/clans/{clan_id}/links")
-def get_clan_links(clan_id: int, conn: Database, request: Request) -> list[ClanLink]:
-    return sift_links(clan_links(conn, clan_id), _eyes(conn, request), clan_id)
+def get_clan_links(clan_id: int, conn: Database, request: Request, as_viewer: int | None = None) -> list[ClanLink]:
+    return sift_links(clan_links(conn, clan_id), _eyes(conn, request, as_viewer), clan_id)
 
 
 class NewLink(BaseModel):

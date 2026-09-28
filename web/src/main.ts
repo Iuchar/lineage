@@ -100,7 +100,13 @@ async function start(root: HTMLElement): Promise<void> {
   bar.className = "bar";
   const stage = document.createElement("div");
   stage.className = "stage";
-  root.append(bar, stage);
+  // «глазами зрителя рода N»: пока включено, все запросы идут с этими глазами
+  let asViewer: number | null = null;
+  const eyes = () => (asViewer == null ? "" : `?as_viewer=${asViewer}`);
+  const ribbon = document.createElement("div");
+  ribbon.className = "ribbon";
+  ribbon.hidden = true;
+  root.append(bar, ribbon, stage);
 
   let clans = await getJson<ClanSummary[]>("/api/clans");
   if (!clans.length) {
@@ -164,7 +170,7 @@ async function start(root: HTMLElement): Promise<void> {
   // очередь связок: пары с одинаковым именем и годом рождения ждут решения человека
   const trees = new Map<number, Promise<ClanTree>>();
   const treeOf = (clanId: number) => {
-    if (!trees.has(clanId)) trees.set(clanId, getJson<ClanTree>(`/api/clans/${clanId}/tree`));
+    if (!trees.has(clanId)) trees.set(clanId, getJson<ClanTree>(`/api/clans/${clanId}/tree${eyes()}`));
     return trees.get(clanId)!;
   };
   const review = new LinkReview(stage, {
@@ -428,7 +434,7 @@ async function start(root: HTMLElement): Promise<void> {
   const afterEdit = async (focusId: number | null) => {
     trees.delete(currentClan);
     const [loaded, links, summaries] = await Promise.all([
-      getJson<ClanTree>(`/api/clans/${currentClan}/tree`), nav.load(currentClan), getJson<ClanSummary[]>("/api/clans"),
+      getJson<ClanTree>(`/api/clans/${currentClan}/tree${eyes()}`), nav.load(currentClan), getJson<ClanSummary[]>("/api/clans"),
     ]);
     tree = loaded;
     clans = summaries;
@@ -473,6 +479,25 @@ async function start(root: HTMLElement): Promise<void> {
     drawLegend();
     showCurrent();
   });
+  // редактор смотрит глазами приглашённого: дерево перезагружается урезанным, сверху лента, карта в рамке
+  const lookAsViewer = async (clanId: number | null) => {
+    asViewer = clanId;
+    nav.asViewer = clanId;
+    if (clanId != null) setMode("view");
+    canvas.viewport.classList.toggle("asViewer", clanId != null);
+    ribbon.hidden = clanId == null;
+    viewerBtn.hidden = clanId != null;
+    trees.clear();
+    const before = tree?.persons.length ?? 0;
+    await loadClan(currentClan);
+    const after = tree?.persons.length ?? 0;
+    const lost = Math.max(0, clanId == null ? 0 : before - after);
+    ribbon.innerHTML = `<b>Глазами зрителя рода «${escapeHtml(clanName(currentClan))}»</b>` +
+      `<span>${lost ? `скрыто ${lost} человек` : "скрытого в этом роду нет"}</span>` +
+      '<span class="gap"></span><button data-role="back">Вернуться к правке</button>';
+    ribbon.querySelector("[data-role=back]")?.addEventListener("click", () => void lookAsViewer(null));
+  };
+
   const setMode = (mode: "view" | "edit") => {
     const button = modeSwitch.querySelector<HTMLButtonElement>(`[data-value="${mode}"]`);
     if (button && button.getAttribute("aria-pressed") !== "true") button.click();
@@ -490,7 +515,7 @@ async function start(root: HTMLElement): Promise<void> {
   const loadClan = async (id: number) => {
     currentClan = id;
     showClan(id);
-    const [loaded, links] = await Promise.all([getJson<ClanTree>(`/api/clans/${id}/tree`), nav.load(id)]);
+    const [loaded, links] = await Promise.all([getJson<ClanTree>(`/api/clans/${id}/tree${eyes()}`), nav.load(id)]);
     tree = loaded;
     search.setTree(tree);
     const data = dataOf(tree);
@@ -671,7 +696,12 @@ async function start(root: HTMLElement): Promise<void> {
   showAccess();
 
   const titleRow = row(clanTitle, search.element, spacer(), stat, sep(), access, viewBtn);
-  const viewRow = row(zoomRow, placeRow, spacer(), addLink, exportLink, sep(), modeSwitch);
+  const viewerBtn = document.createElement("button");
+  viewerBtn.className = "topLink";
+  viewerBtn.textContent = "Глазами зрителя";
+  viewerBtn.title = "Посмотреть род так, как его увидит приглашённый по ссылке";
+  viewerBtn.addEventListener("click", () => void lookAsViewer(currentClan));
+  const viewRow = row(zoomRow, placeRow, spacer(), viewerBtn, addLink, exportLink, sep(), modeSwitch);
   const editRow = row(queueGroup, spacer(), journal.group);
   const tools = document.createElement("div");
   tools.className = "tools";

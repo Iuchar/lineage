@@ -35,8 +35,11 @@ export class LinkNav {
     host.append(this.ribbon);
   }
 
+  asViewer: number | null = null; // редактор смотрит «глазами зрителя рода N»
+
   async load(clanId: number): Promise<ReadonlyMap<number, readonly ClanLink[]>> {
-    const response = await fetch(`/api/clans/${clanId}/links`);
+    const eyes = this.asViewer == null ? "" : `?as_viewer=${this.asViewer}`;
+    const response = await fetch(`/api/clans/${clanId}/links${eyes}`);
     const links = response.ok ? ((await response.json()) as ClanLink[]) : [];
     const map = new Map<number, ClanLink[]>();
     for (const link of links) map.set(link.person_id, [...(map.get(link.person_id) ?? []), link]);
