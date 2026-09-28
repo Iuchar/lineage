@@ -23,7 +23,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  сборка:
+  # ключ задачи GitHub Actions читает только латиницей, показное имя может быть любым
+  build:
+    name: Сборка
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,8 +50,9 @@ jobs:
         with:
           path: docs/витрина
 
-  публикация:
-    needs: сборка
+  deploy:
+    name: Публикация
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
