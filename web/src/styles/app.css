@@ -139,10 +139,10 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 .legend .lgTop { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 9px; padding: 8px 12px 8px 12px;
   cursor: pointer; border-radius: 5px; }
 .legend.open .lgTop { padding-right: 8px; }
-.legend .lgTop:hover { background: color-mix(in srgb, var(--ch-fg) 6%, transparent); }
 .legend .lgTop b { font: 500 12px 'Golos Text', sans-serif; white-space: nowrap; }
 .legend .lgTop > span { color: var(--ch-mut); font-size: 11px; }
-/* знак сворачивания — в правом краю плашки, при наведении на шапку проступает сильнее */
+/* знак сворачивания — в правом краю плашки; подсвечивается только он сам, фон под всей
+   шапкой подходил вплотную к вкладкам и смотрелся как наползание */
 .legend .lgTop .chev { margin-left: auto; flex: none; width: 24px; height: 24px; border-radius: 5px;
   font-size: 13px; line-height: 24px; text-align: center; color: var(--ch-fg); }
 .legend .lgTop:hover .chev { background: color-mix(in srgb, var(--ch-fg) 12%, transparent); }
