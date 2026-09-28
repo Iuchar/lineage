@@ -46,10 +46,12 @@ async function getJson<T>(url: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-function spacer(): HTMLElement {
-  const gap = document.createElement("div");
-  gap.className = "topGap";
-  return gap;
+// сторона строки шапки: при нехватке ширины переносится целиком, а не рассыпается по кнопке
+function side(kind: "left" | "right" | "grow", ...parts: HTMLElement[]): HTMLElement {
+  const box = document.createElement("div");
+  box.className = kind === "left" ? "barSide" : `barSide ${kind}`;
+  box.append(...parts);
+  return box;
 }
 
 // тонкая черта между кусками строки: вместо подписей у каждой группы
@@ -695,14 +697,14 @@ async function start(root: HTMLElement): Promise<void> {
   };
   showAccess();
 
-  const titleRow = row(clanTitle, search.element, spacer(), stat, sep(), access, viewBtn);
+  const titleRow = row(side("grow", clanTitle, search.element), side("right", stat, sep(), access, viewBtn));
   const viewerBtn = document.createElement("button");
   viewerBtn.className = "topLink";
   viewerBtn.textContent = "Глазами зрителя";
   viewerBtn.title = "Посмотреть род так, как его увидит приглашённый по ссылке";
   viewerBtn.addEventListener("click", () => void lookAsViewer(currentClan));
-  const viewRow = row(zoomRow, placeRow, spacer(), viewerBtn, addLink, exportLink, sep(), modeSwitch);
-  const editRow = row(queueGroup, spacer(), journal.group);
+  const viewRow = row(side("left", zoomRow, placeRow), side("right", viewerBtn, addLink, exportLink, sep(), modeSwitch));
+  const editRow = row(side("left", queueGroup), side("right", journal.group));
   const tools = document.createElement("div");
   tools.className = "tools";
   tools.append(viewRow, editRow);

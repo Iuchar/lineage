@@ -13,26 +13,36 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-edge: var(-
      поэтому в хроме берётся смесь текста с фоном — контраст держится в обеих темах */
   --ch-mut: color-mix(in srgb, var(--fg) 76%, var(--panelbg));
   --ch-btn: color-mix(in srgb, var(--fg) 8%, transparent); --ch-acc: var(--acc);
+  --ch-soft: color-mix(in srgb, var(--ch-fg) 82%, var(--ch-bg));
   --ch-on: var(--acc); --ch-onfg: var(--bg); }
 /* на светлой теме акценты насыщенные и тёмные: надпись на них должна быть светлой, а не фоновой */
-body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 86%, #000); --ch-onfg: #fff7ea; }
+body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%, #000); --ch-onfg: #fff7ea;
+  /* на светлой теме подложка инструментов темнее фона, и прежняя приглушённость надписей падала ниже 4,5 */
+  --ch-soft: color-mix(in srgb, var(--ch-fg) 94%, var(--ch-bg)); }
 
 /* шапка тремя строками: титул дерева сверху, инструменты — на подложке потемнее */
 .bar { position: relative; z-index: 20; display: flex; flex-direction: column;
        background: var(--ch-bg); color: var(--ch-fg); border-bottom: 1px solid var(--ch-edge); }
-.bar .row { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; padding: 8px 16px; }
+.bar .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 16px; }
+/* сторона строки шапки: левая с инструментом, правая с состоянием. Переносится целая сторона, а не
+   отдельная кнопка, и правая остаётся правой даже когда уехала на свою строку.
+   Имя своё: класс .side занят панелью человека */
+.bar .barSide { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.bar .barSide.right { margin-left: auto; }
+.bar .barSide.grow { flex: 1 1 auto; }
+.bar .barSide > .sw + .sw { margin-left: -4px; } /* масштаб и «целиком» — один инструмент, стоят рядом */
 /* подложка инструментов сдвинута от фона к тексту: на тёмной теме светлеет, на светлой темнеет,
    и в обоих случаях остаётся фоном, а не пятном, по которому не читаются подписи */
 .bar .tools { background: color-mix(in srgb, var(--ch-bg) 90%, var(--ch-fg));
   border-top: 1px solid color-mix(in srgb, var(--ch-edge) 70%, transparent); }
-.bar .tools .row { flex-wrap: wrap; padding: 7px 16px; }
+.bar .tools .row { padding: 7px 16px; }
 .bar .tools .row + .row { border-top: 1px solid color-mix(in srgb, var(--ch-edge) 45%, transparent); }
 /* черта вместо подписи группы: делит строку на смысловые куски */
 .bar .topSep { flex: none; width: 1px; height: 20px;
   background: color-mix(in srgb, var(--ch-fg) 22%, transparent); }
 .grp { display: flex; align-items: center; gap: 7px; }
 .sw { display: flex; border: 1px solid var(--ch-edge); border-radius: 6px; overflow: hidden; }
-.sw button { border: 0; background: var(--ch-btn); color: color-mix(in srgb, var(--ch-fg) 82%, var(--ch-bg));
+.sw button { border: 0; background: var(--ch-btn); color: var(--ch-soft);
   font: 500 11.5px/1 'Golos Text', sans-serif;
              padding: 6px 11px; cursor: pointer; border-right: 1px solid var(--ch-edge); }
 .sw button:last-child { border-right: 0; }
@@ -82,16 +92,14 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 86%,
 .bar .statusPick { flex: 1; min-width: 0; max-width: 240px; background: var(--ch-btn); color: var(--ch-fg); border: 1px solid var(--ch-edge);
   border-radius: 5px; font: 400 10.5px 'Golos Text', sans-serif; padding: 2px 4px; }
 .bar .lbl2 { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ch-mut); }
-.bar .topGap { flex: 1; }
 .bar .topBtn { border: 1px solid var(--ch-edge); background: var(--ch-btn); color: var(--ch-fg); border-radius: 6px; padding: 6px 11px;
   font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; white-space: nowrap; }
 .bar .topBtn[aria-pressed=true] { background: var(--ch-on); color: var(--ch-onfg); border-color: var(--ch-on); }
-.bar .topLink { border: 0; background: none; color: color-mix(in srgb, var(--ch-fg) 82%, var(--ch-bg));
+.bar .topLink { border: 0; background: none; color: var(--ch-soft);
   font: 500 11.5px/1 'Golos Text', sans-serif;
   cursor: pointer; text-decoration: none; white-space: nowrap; padding: 6px 2px; }
 .bar .topLink:hover { color: var(--ch-acc); }
 .bar .hint { margin-left: 0; }
-.bar .row > .sw + .sw { margin-left: -4px; } /* масштаб и «целиком» — один инструмент, стоят рядом */
 
 /* ── столбец родовых деревьев слева ── */
 .rail { width: 216px; flex: none; background: var(--ch-bg); color: var(--ch-fg); border-right: 1px solid var(--ch-edge);
