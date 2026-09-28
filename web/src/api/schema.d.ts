@@ -1058,8 +1058,12 @@ export interface components {
             };
             /** Burnt */
             burnt?: boolean | null;
-            /** Hidden */
-            hidden?: boolean | null;
+            /** See */
+            see?: ("all" | "clan" | "hidden") | null;
+            /** See Dates */
+            see_dates?: ("all" | "clan" | "hidden") | null;
+            /** See Portrait */
+            see_portrait?: ("all" | "clan" | "hidden") | null;
             /** Heir */
             heir?: boolean | null;
             /** Portrait */
@@ -1091,8 +1095,21 @@ export interface components {
             tags: string[];
             /** Burnt */
             burnt: boolean;
-            /** Hidden */
-            hidden: boolean;
+            /**
+             * See
+             * @enum {string}
+             */
+            see: "all" | "clan" | "hidden";
+            /**
+             * See Dates
+             * @enum {string}
+             */
+            see_dates: "all" | "clan" | "hidden";
+            /**
+             * See Portrait
+             * @enum {string}
+             */
+            see_portrait: "all" | "clan" | "hidden";
             /** Heir */
             heir: boolean;
             /**
@@ -1282,10 +1299,23 @@ export interface components {
              */
             burnt: boolean;
             /**
-             * Hidden
-             * @default false
+             * See
+             * @default all
+             * @enum {string}
              */
-            hidden: boolean;
+            see: "all" | "clan" | "hidden";
+            /**
+             * See Dates
+             * @default clan
+             * @enum {string}
+             */
+            see_dates: "all" | "clan" | "hidden";
+            /**
+             * See Portrait
+             * @default all
+             * @enum {string}
+             */
+            see_portrait: "all" | "clan" | "hidden";
             /**
              * Heir
              * @default false

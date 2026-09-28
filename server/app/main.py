@@ -14,6 +14,7 @@ from app import uploads
 from app.config import DB_PATH, DIST
 from app.db.access import AccessError, Editor, editor_by_key, editors_exist, login, logout
 from app.db.clans import ClanExistsError, import_clan
+from app.db.eyes import Eyes, sift
 from app.db.share import ShareError, ShareLink, enter, issue, link_of, revoke, viewer_clans
 from app.db.connection import connect
 from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonFields, PersonForm, add_person,
@@ -61,6 +62,13 @@ OPEN_PATHS = {"/api/login", "/api/logout", "/api/me"}
 
 def _current_editor(conn: sqlite3.Connection, request: Request) -> Editor | None:
     return editor_by_key(conn, request.cookies.get(SESSION_COOKIE))
+
+
+def _eyes(conn: sqlite3.Connection, request: Request) -> Eyes:
+    """Чьими глазами смотрят: редактор видит всё, зритель — общий слой и свои роды по ссылкам."""
+    if not editors_exist(conn) or _current_editor(conn, request) is not None:
+        return Eyes(editor=True)
+    return Eyes(editor=False, clans=frozenset(viewer_clans(conn, request.cookies.get(VIEWER_COOKIE))))
 
 
 @app.middleware("http")
@@ -183,9 +191,9 @@ def get_clans(conn: Database) -> list[ClanSummary]:
 
 
 @app.get("/api/clans/{clan_id}/tree")
-def get_clan_tree(clan_id: int, conn: Database) -> ClanTree:
+def get_clan_tree(clan_id: int, conn: Database, request: Request) -> ClanTree:
     try:
-        return clan_tree(conn, clan_id)
+        return sift(clan_tree(conn, clan_id), _eyes(conn, request))
     except ClanNotFoundError:
         raise HTTPException(status_code=404, detail="Такого рода нет") from None
 

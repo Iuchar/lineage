@@ -17,7 +17,7 @@ from app.db.journal import ChangeInfo, Edit, JournalError
 from app.db.kin import DateValue, KinChanges, KinError, apply_kin, manual_order
 from app.gedcom.convert import _person
 from app.gedcom.dates import parse_date
-from app.gedcom.meta import TAG_COLORS, PersonMeta, add_tag_def, read_meta, write_meta
+from app.gedcom.meta import SEE_NAMES, TAG_COLORS, PersonMeta, See, add_tag_def, read_meta, write_meta
 from app.gedcom.records import Record
 from app.gedcom.ru_dates import DateInputError, format_ru, parse_input
 
@@ -39,7 +39,9 @@ class PersonForm(BaseModel):
     notes: list[str]
     tags: list[str]
     burnt: bool
-    hidden: bool
+    see: See  # человек целиком
+    see_dates: See
+    see_portrait: See
     heir: bool
     portrait: Literal["auto", "silhouette", "none"]
     photo: str | None
@@ -61,7 +63,9 @@ class PersonFields(BaseModel):
     tags: list[str] | None = None
     new_tags: dict[str, str] = {}  # имя → цвет; метки, которых ещё нет в наборе рода
     burnt: bool | None = None
-    hidden: bool | None = None
+    see: See | None = None
+    see_dates: See | None = None
+    see_portrait: See | None = None
     heir: bool | None = None
     portrait: Literal["auto", "silhouette", "none"] | None = None
     kin: KinChanges | None = None  # правка родни — той же правкой журнала
@@ -186,7 +190,9 @@ def _apply_fields(record: Record, fields: PersonFields) -> None:
     write_meta(record, PersonMeta(
         tags=was.tags if fields.tags is None else fields.tags,
         burnt=was.burnt if fields.burnt is None else fields.burnt,
-        hidden=was.hidden if fields.hidden is None else fields.hidden,
+        see=was.see if fields.see is None else fields.see,
+        see_dates=was.see_dates if fields.see_dates is None else fields.see_dates,
+        see_portrait=was.see_portrait if fields.see_portrait is None else fields.see_portrait,
         heir=was.heir if fields.heir is None else fields.heir,
         portrait=was.portrait if fields.portrait is None else fields.portrait,
         photo=was.photo,
@@ -264,7 +270,8 @@ def person_form(conn: sqlite3.Connection, person_id: int) -> PersonForm:
         id=person_id, clan_id=clan_id, given=person.given, surname=person.surname,
         married_surname=person.married_surname, sex=person.sex,  # type: ignore[arg-type]
         birth=date("BIRT"), death=date("DEAT"), notes=[n.text() for n in _notes(record)],
-        tags=meta.tags, burnt=meta.burnt, hidden=meta.hidden, heir=meta.heir, portrait=meta.portrait,
+        tags=meta.tags, burnt=meta.burnt, see=meta.see, see_dates=meta.see_dates,
+        see_portrait=meta.see_portrait, heir=meta.heir, portrait=meta.portrait,
         photo=f"/api/{meta.photo}" if meta.photo else None, marriage_order_manual=manual_order(record),
     )
 
@@ -315,10 +322,13 @@ def _describe(before: Record, after: Record, extra: list[str] | None = None) -> 
     for tag in mb.tags:
         if tag not in ma.tags:
             parts.append(f"снята метка «{tag}»")
-    for flag, on, off in (("burnt", "выжжен из рода", "снова в роду"), ("hidden", "скрыт от зрителей", "виден зрителям"),
+    for flag, on, off in (("burnt", "выжжен из рода", "снова в роду"),
                           ("heir", "продолжатель линии", "не продолжатель линии")):
         if getattr(mb, flag) != getattr(ma, flag):
             parts.append(on if getattr(ma, flag) else off)
+    for level, what in (("see", "человек"), ("see_dates", "даты жизни"), ("see_portrait", "портрет")):
+        if getattr(mb, level) != getattr(ma, level):
+            parts.append(f"{what}: {SEE_NAMES[getattr(ma, level)]}")
     if mb.portrait != ma.portrait:
         parts.append({"auto": "портрет включён", "silhouette": "портрет — заглушка", "none": "портрет выключен"}[ma.portrait])
     parts += extra or []

@@ -6,7 +6,10 @@
 
     1 _TAG Переселенец          метка человека (сколько угодно)
     1 _BURNT Y                  выжжен из рода
-    1 _HIDDEN Y                 скрыт от зрителей
+    1 _SEE hidden               уровень видимости человека целиком (нет тега — общее)
+    1 _SEE dates clan           уровень дат жизни, по умолчанию родовое
+    1 _SEE portrait all         уровень портрета, по умолчанию общее
+    1 _HIDDEN Y                 прежний вид «скрыт от зрителей»: читается как _SEE hidden
     1 _HEIR Y                   продолжатель главной линии
     1 _PORTRAIT none            портрет выключен у этого человека (silhouette — заглушка вместо снимка)
     1 OBJE / 2 FILE photos/…    снимок, лежит в папке photos рядом с базой
@@ -33,12 +36,22 @@ DEFAULT_STATUS = "plain"
 Portrait = Literal["auto", "silhouette", "none"]
 PHOTO_PREFIX = "photos/"
 
+# уровни видимости: общее — всем зрителям, родовое — только своим для этого рода, скрытое — только редакторам
+See = Literal["all", "clan", "hidden"]
+SEE_LEVELS: tuple[See, ...] = ("all", "clan", "hidden")
+SEE_NAMES: dict[str, str] = {"all": "общее", "clan": "родовое", "hidden": "скрытое"}
+# по проектному документу: имя и место в дереве видны всем, даты жизни — своим, портрет — всем
+DEFAULT_SEE: See = "all"
+DEFAULT_SEE_DATES: See = "clan"
+
 
 @dataclass
 class PersonMeta:
     tags: list[str] = field(default_factory=list)
     burnt: bool = False
-    hidden: bool = False
+    see: See = DEFAULT_SEE  # человек целиком
+    see_dates: See = DEFAULT_SEE_DATES
+    see_portrait: See = DEFAULT_SEE
     heir: bool = False
     portrait: Portrait = "auto"
     photo: str | None = None  # путь внутри папки снимков: photos/<род>/<файл>
@@ -48,13 +61,34 @@ def _flag(record: Record, tag: str) -> bool:
     return (record.value_of(tag) or "").upper() == "Y"
 
 
+def _level(value: str | None, fallback: See) -> See:
+    level = (value or "").strip().lower()
+    return level if level in SEE_LEVELS else fallback  # type: ignore[return-value]
+
+
+def _read_see(record: Record, what: str | None, fallback: See) -> See:
+    """Уровень из `_SEE [что] уровень`: без «что» — человек целиком."""
+    for child in record.all("_SEE"):
+        parts = (child.value or "").split()
+        if what is None and len(parts) == 1:
+            return _level(parts[0], fallback)
+        if what is not None and len(parts) == 2 and parts[0].lower() == what:
+            return _level(parts[1], fallback)
+    return fallback
+
+
 def read_meta(record: Record) -> PersonMeta:
     portrait = (record.value_of("_PORTRAIT") or "auto").lower()
     photo = next((obje.value_of("FILE") for obje in record.all("OBJE")
                   if (obje.value_of("FILE") or "").startswith(PHOTO_PREFIX)), None)
     return PersonMeta(
         tags=[c.value for c in record.all("_TAG") if c.value],
-        burnt=_flag(record, "_BURNT"), hidden=_flag(record, "_HIDDEN"), heir=_flag(record, "_HEIR"),
+        burnt=_flag(record, "_BURNT"),
+        # прежние файлы помечали скрытых флагом _HIDDEN — он читается как уровень «скрытое»
+        see=_read_see(record, None, "hidden" if _flag(record, "_HIDDEN") else DEFAULT_SEE),
+        see_dates=_read_see(record, "dates", DEFAULT_SEE_DATES),
+        see_portrait=_read_see(record, "portrait", DEFAULT_SEE),
+        heir=_flag(record, "_HEIR"),
         portrait=portrait if portrait in ("auto", "silhouette", "none") else "auto",  # type: ignore[arg-type]
         photo=photo,
     )
@@ -71,11 +105,25 @@ def write_meta(record: Record, meta: PersonMeta) -> None:
     keep = [c for c in record.children if c.tag != "_TAG"]
     record.children = keep + [Record(level=1, tag="_TAG", value=t) for t in dict.fromkeys(meta.tags) if t.strip()]
     _set_flag(record, "_BURNT", meta.burnt)
-    _set_flag(record, "_HIDDEN", meta.hidden)
+    _set_flag(record, "_HIDDEN", False)  # флаг заменён уровнем, в файле его больше не держим
     _set_flag(record, "_HEIR", meta.heir)
+    _write_see(record, meta)
     record.children = [c for c in record.children if c.tag != "_PORTRAIT"]
     if meta.portrait != "auto":
         record.children.append(Record(level=1, tag="_PORTRAIT", value=meta.portrait))
+
+
+def _write_see(record: Record, meta: PersonMeta) -> None:
+    """Уровни пишутся только там, где отличаются от значения по умолчанию: файл не пухнет."""
+    record.children = [c for c in record.children if c.tag != "_SEE"]
+    lines = []
+    if meta.see != DEFAULT_SEE:
+        lines.append(meta.see)
+    if meta.see_dates != DEFAULT_SEE_DATES:
+        lines.append(f"dates {meta.see_dates}")
+    if meta.see_portrait != DEFAULT_SEE:
+        lines.append(f"portrait {meta.see_portrait}")
+    record.children.extend(Record(level=1, tag="_SEE", value=line) for line in lines)
 
 
 def set_photo(record: Record, path: str | None) -> None:

@@ -3039,16 +3039,53 @@
             ],
             "title": "Burnt"
           },
-          "hidden": {
+          "see": {
             "anyOf": [
               {
-                "type": "boolean"
+                "type": "string",
+                "enum": [
+                  "all",
+                  "clan",
+                  "hidden"
+                ]
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Hidden"
+            "title": "See"
+          },
+          "see_dates": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "all",
+                  "clan",
+                  "hidden"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "See Dates"
+          },
+          "see_portrait": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "all",
+                  "clan",
+                  "hidden"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "See Portrait"
           },
           "heir": {
             "anyOf": [
@@ -3175,9 +3212,32 @@
             "type": "boolean",
             "title": "Burnt"
           },
-          "hidden": {
-            "type": "boolean",
-            "title": "Hidden"
+          "see": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See"
+          },
+          "see_dates": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See Dates"
+          },
+          "see_portrait": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See Portrait"
           },
           "heir": {
             "type": "boolean",
@@ -3222,7 +3282,9 @@
           "notes",
           "tags",
           "burnt",
-          "hidden",
+          "see",
+          "see_dates",
+          "see_portrait",
           "heir",
           "portrait",
           "photo"
@@ -3668,10 +3730,35 @@
             "title": "Burnt",
             "default": false
           },
-          "hidden": {
-            "type": "boolean",
-            "title": "Hidden",
-            "default": false
+          "see": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See",
+            "default": "all"
+          },
+          "see_dates": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See Dates",
+            "default": "clan"
+          },
+          "see_portrait": {
+            "type": "string",
+            "enum": [
+              "all",
+              "clan",
+              "hidden"
+            ],
+            "title": "See Portrait",
+            "default": "all"
           },
           "heir": {
             "type": "boolean",

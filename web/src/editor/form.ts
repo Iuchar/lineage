@@ -5,6 +5,7 @@
 import type { ChangeInfo, ClanTree, Created, DeletePreview, PersonFields, PersonForm, Relation, TreePerson } from "../api/types";
 import { escapeHtml, lifeYears } from "../format";
 import { TAG_COLORS, type TagColor } from "../canvas/tags";
+import { SEE_NAMES, SEE_SIGNS, type See } from "../canvas/see";
 import { silhouette } from "../canvas/portrait";
 import { send } from "./api";
 import { bindDateFields, dateFieldHtml } from "./datefield";
@@ -74,7 +75,8 @@ export class PersonEditor {
     const blank: PersonForm = {
       id: 0, clan_id: clanId, given: null, surname: plan.surname, married_surname: null, sex: plan.sex,
       birth: { gedcom: null, ru: "", input: "" }, death: { gedcom: null, ru: "", input: "" }, notes: [], marriage_order_manual: false,
-      tags: [], burnt: false, hidden: false, heir: false, portrait: "auto", photo: null,
+      tags: [], burnt: false, see: "all", see_dates: "clan", see_portrait: "all",
+      heir: false, portrait: "auto", photo: null,
     };
     this.host.innerHTML =
       `<div class="sideIn form"><span class="lbl" style="margin-top:0">новый человек</span>` +
@@ -175,6 +177,15 @@ export class PersonEditor {
       `<i></i>${escapeHtml(name)}</button>`;
     const flag = (name: string, label: string, on: boolean, note: string) =>
       `<label class="flag"><input type="checkbox" data-flag="${name}"${on ? " checked" : ""}><span>${label}<i>${note}</i></span></label>`;
+    // уровень видимости: замок со словом, список открывается щелчком
+    const lock = (name: string, label: string, level: See | undefined) => {
+      const now: See = level ?? "all";
+      return `<div class="seeRow"><span>${label}</span>` +
+      `<select class="lockPick ${now}" data-see="${name}">` +
+      (Object.entries(SEE_NAMES) as [See, string][]).map(([key, text]) =>
+        `<option value="${key}"${key === now ? " selected" : ""}>${SEE_SIGNS[key]} ${text}</option>`).join("") +
+        "</select></div>";
+    };
     return `<label class="fl">Метки</label><div class="tagChips" data-role="tags">` +
       known.map((t) => chip(t.name, t.color, form.tags.includes(t.name))).join("") +
       form.tags.filter((t) => !known.some((k) => k.name === t)).map((t) => chip(t, "дымный", true)).join("") +
@@ -187,7 +198,10 @@ export class PersonEditor {
       '<button type="button" class="chip" data-act="addtag">добавить</button></div>' +
       '<label class="fl">Состояние</label>' +
       flag("burnt", "выжжен из рода", form.burnt, "знак на карточке") +
-      flag("hidden", "скрыт от зрителей", form.hidden, "редактор видит с пометкой") +
+      '<label class="fl">Кому видно</label>' +
+      lock("see", "Человек целиком", form.see) +
+      lock("see_dates", "Даты жизни", form.see_dates) +
+      lock("see_portrait", "Портрет", form.see_portrait) +
       (hasParents ? '<label class="fl">Главная линия</label>' +
         flag("heir", "продолжатель главной линии", form.heir, "пара родителей встанет над ним прямым стволом") : "");
   }
@@ -338,13 +352,19 @@ export class PersonEditor {
       notes: [...this.host.querySelectorAll<HTMLTextAreaElement>("[data-note]")].map((t) => t.value).filter((t) => t.trim()),
       tags: [...this.host.querySelectorAll<HTMLElement>("[data-tag].on")].map((c) => c.dataset.tag!),
       new_tags: Object.fromEntries(this.newTags),
-      burnt: this.checked("burnt"), hidden: this.checked("hidden"), heir: this.checked("heir"),
+      burnt: this.checked("burnt"), heir: this.checked("heir"),
+      see: this.level("see"), see_dates: this.level("see_dates"), see_portrait: this.level("see_portrait"),
       portrait: (this.segValue("portrait") ?? "auto") as PersonFields["portrait"],
     };
   }
 
   private checked(name: string): boolean {
     return this.host.querySelector<HTMLInputElement>(`[data-flag=${name}]`)?.checked ?? false;
+  }
+
+  private level(name: string): See {
+    const pick = this.host.querySelector<HTMLSelectElement>(`[data-see=${name}]`);
+    return (pick?.value as See) ?? "all";
   }
 
   private bind(): void {

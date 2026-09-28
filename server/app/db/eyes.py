@@ -1,0 +1,68 @@
+"""Кто смотрит и что ему видно.
+
+Редактор видит всё. Зритель — общий слой любого рода плюс родовой слой тех родов, ссылки на которые
+он открывал. Скрытого не видит никто, кроме редактора, и скрытый не намекает на себя: его нет в дереве
+вовсе, а не висит серым. Дети скрытого остаются — просто их семья теряет родителя и рисуется как
+«родители не записаны», такой знак на карте и так есть у братьев без родителей.
+"""
+
+from dataclasses import dataclass
+
+from app.db.tree import ClanTree
+from app.gedcom.meta import See
+
+
+@dataclass(frozen=True)
+class Eyes:
+    editor: bool = True  # правка открыта — значит смотрит редактор
+    clans: frozenset[int] = frozenset()  # роды, для которых смотрящий свой
+
+    def allows(self, level: See, clan_id: int) -> bool:
+        if self.editor:
+            return True
+        if level == "hidden":
+            return False
+        return level == "all" or clan_id in self.clans
+
+
+def sift(tree: ClanTree, eyes: Eyes) -> ClanTree:
+    """Убирает из дерева то, чего этим глазам видеть не положено."""
+    if eyes.editor:
+        return tree
+
+    clan_id = tree.clan.id
+    keep = [p for p in tree.persons if eyes.allows(p.see, clan_id)]
+    gone = {p.id for p in tree.persons} - {p.id for p in keep}
+    for person in keep:
+        if not eyes.allows(person.see_dates, clan_id):
+            person.birth = None
+            person.death = None
+        if not eyes.allows(person.see_portrait, clan_id):
+            person.photo = None
+            person.portrait = "silhouette"
+
+    families = []
+    for family in tree.families:
+        # скрытый родитель уходит из семьи: остаётся союз без него, а без обоих — «родители не записаны»
+        if family.husband in gone:
+            family.husband = None
+        if family.wife in gone:
+            family.wife = None
+        # родство ребёнка лежит вторым списком — вычёркиваем парами, иначе оно съедет
+        pedigree = family.child_pedigree or []
+        pairs = [(child, pedigree[i] if i < len(pedigree) else "birth")
+                 for i, child in enumerate(family.children) if child not in gone]
+        family.children = [child for child, _ in pairs]
+        if pedigree:
+            family.child_pedigree = [kind for _, kind in pairs]
+        if family.husband is None and family.wife is None and not family.children:
+            continue
+        families.append(family)
+
+    alive = {f.id for f in families}
+    for person in keep:
+        person.parent_families = [f for f in person.parent_families if f in alive]
+        person.spouse_families = [f for f in person.spouse_families if f in alive]
+    tree.persons = keep
+    tree.families = families
+    return tree

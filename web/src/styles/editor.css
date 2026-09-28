@@ -182,3 +182,11 @@
 .side .seg.mini button { padding: 4px 2px; font-size: 10.5px; }
 .side .kinPick { border: 1px solid var(--acc); border-radius: 4px; padding: 8px; margin: 4px 0 8px; }
 .side .kinPick .pickList { max-height: 180px; overflow: auto; margin: 6px 0; }
+
+/* уровень видимости в форме: строка с замком, цвет говорит, насколько узок круг */
+.seeRow { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+.seeRow > span { flex: 1; font-size: 12.5px; color: var(--fg); }
+.lockPick { flex: none; background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg);
+  border: 1px solid var(--edge); border-radius: 6px; font: 500 11px 'Golos Text', sans-serif; padding: 4px 6px; }
+.lockPick.clan { color: var(--acc); border-color: color-mix(in srgb, var(--acc) 45%, transparent); }
+.lockPick.hidden { color: #b9552f; border-color: color-mix(in srgb, #b9552f 45%, transparent); }

@@ -9,7 +9,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from app.db.kin import manual_order
-from app.gedcom.meta import read_meta, read_status, read_tag_defs
+from app.gedcom.meta import See, read_meta, read_status, read_tag_defs
 from app.gedcom.records import Record
 
 
@@ -48,7 +48,9 @@ class TreePerson(BaseModel):
     # служебные теги приложения из записи человека (app/gedcom/meta.py)
     tags: list[str] = []
     burnt: bool = False
-    hidden: bool = False
+    see: See = "all"  # человек целиком: общее, родовое, скрытое
+    see_dates: See = "clan"
+    see_portrait: See = "all"
     heir: bool = False
     portrait: Literal["auto", "silhouette", "none"] = "auto"
     photo: str | None = None  # адрес снимка, если он есть
@@ -224,7 +226,8 @@ def clan_tree(conn: sqlite3.Connection, clan_id: int, file_order: bool = False) 
             married_surname=row["married_surname"], sex=row["sex"], is_branch_stub=bool(row["is_branch_stub"]),
             birth=births.get(row["id"]), death=deaths.get(row["id"]),
             parent_families=parents.get(row["id"], []), spouse_families=spouses.get(row["id"], []),
-            tags=meta.tags, burnt=meta.burnt, hidden=meta.hidden, heir=meta.heir, portrait=meta.portrait,
+            tags=meta.tags, burnt=meta.burnt, see=meta.see, see_dates=meta.see_dates,
+            see_portrait=meta.see_portrait, heir=meta.heir, portrait=meta.portrait,
             photo=f"/api/{meta.photo}" if meta.photo else None,
         )
 

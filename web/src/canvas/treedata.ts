@@ -35,7 +35,8 @@ export function treeData(tree: ClanTree): TreeData {
   return {
     marks: {
       burnt: new Set(tree.persons.filter((p) => p.burnt).map((p) => p.id)),
-      hidden: new Set(tree.persons.filter((p) => p.hidden).map((p) => p.id)),
+      // «скрыт» на карте редактора — это уровень «скрытое»: зрителю такого человека сервер не отдаёт вовсе
+      hidden: new Set(tree.persons.filter((p) => p.see === "hidden").map((p) => p.id)),
     },
     tags: { list, of },
     heirs: new Set(tree.persons.filter((p) => p.heir).map((p) => p.id)),

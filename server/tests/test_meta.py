@@ -46,7 +46,7 @@ def test_tags_states_and_heir_are_stored_in_the_record(conn: sqlite3.Connection)
         tags=["Переселенец"], new_tags={"Переселенец": "синий"}, burnt=True, heir=True))
     assert "метка «Переселенец»" in change.summary and "выжжен из рода" in change.summary
     p = person(conn, pid)
-    assert (p.tags, p.burnt, p.hidden, p.heir) == (["Переселенец"], True, False, True)
+    assert (p.tags, p.burnt, p.see, p.heir) == (["Переселенец"], True, "all", True)
     assert [(t.name, t.color) for t in clan_tree(conn, 1).tags] == [("Переселенец", "синий")]
     undo(conn, 1)
     p = person(conn, pid)
@@ -57,10 +57,10 @@ def test_tags_states_and_heir_are_stored_in_the_record(conn: sqlite3.Connection)
 def test_partial_form_keeps_what_it_does_not_send(conn: sqlite3.Connection) -> None:
     pid = murdo(conn)
     update_person(conn, pid, PersonFields(given="Мурдо", surname="Гленн Уриск", sex="M", birth="1748", death="1851",
-                                          tags=["Проверить"], hidden=True))
+                                          tags=["Проверить"], see="hidden"))
     update_person(conn, pid, PersonFields(given="Мурдо", surname="Гленн Уриск", sex="M", birth="около 1748", death="1851"))
     form = person_form(conn, pid)
-    assert (form.tags, form.hidden, form.birth.gedcom) == (["Проверить"], True, "ABT 1748")
+    assert (form.tags, form.see, form.birth.gedcom) == (["Проверить"], "hidden", "ABT 1748")
 
 
 def test_meta_goes_into_the_file_and_back(conn: sqlite3.Connection) -> None:
