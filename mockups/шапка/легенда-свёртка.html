@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Легенда: как сворачивать</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500&family=Cormorant+Garamond:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Caveat&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #241a12; --fg: #eadfc4; --mut: #a08d70; --acc: #c8a44e; --edge: #3a2c1e; --panelbg: #19110a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #14100c; color: var(--fg); font: 400 13px/1.5 'Golos Text', sans-serif; padding: 26px 30px 60px; }
+  h1 { font: 400 22px/1 'Cormorant Garamond', serif; margin: 0 0 6px; }
+  .lead { color: var(--mut); font-size: 12px; margin: 0 0 26px; max-width: 760px; }
+  h2 { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+       color: var(--mut); margin: 30px 0 4px; }
+  .say { color: var(--mut); font-size: 12px; margin: 0 0 12px; max-width: 760px; }
+  .pair { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+
+  /* полотно карты под плашкой — чтобы видеть плашку так, как она лежит на древе */
+  .map { background: var(--bg); border: 1px solid #2c211a; border-radius: 6px; padding: 18px; }
+
+  .legend { background: var(--panelbg); border: 1px solid var(--edge); border-radius: 6px;
+            box-shadow: 0 8px 26px rgba(0,0,0,.32); width: max-content; }
+  .lgTop { display: flex; align-items: center; gap: 9px; padding: 8px 12px; cursor: pointer; }
+  .lgTop b { font: 500 12px 'Golos Text', sans-serif; white-space: nowrap; }
+  .lgTop .line { color: var(--mut); font-size: 11px; white-space: nowrap; }
+  .lgBadge { flex: none; }
+  .lgTabs { display: flex; gap: 4px; padding: 0 12px 6px; }
+  .lgTabs button { border: 0; background: none; color: var(--mut); font: 500 11.5px 'Golos Text', sans-serif;
+                   padding: 4px 9px; border-radius: 5px; cursor: pointer; }
+  .lgTabs button.on { background: rgba(234,223,196,.08); color: var(--fg); }
+  .lgRows { display: flex; flex-wrap: wrap; column-gap: 18px; padding: 0 12px 10px; }
+  .lgItem { display: flex; align-items: center; gap: 9px; padding: 3px 0; min-height: 38px; }
+  .lgItem b { display: block; font: 500 11.5px/1.25 'Golos Text', sans-serif; }
+  .lgItem i { display: block; font-style: normal; font-size: 10.5px; color: var(--mut); }
+  .sym { flex: none; width: 60px; height: 24px; }
+
+  /* ── В1: шеврон в правом краю, шапка подсвечивается ── */
+  .v1 .lgTop { padding-right: 8px; }
+  .v1 .fold { margin-left: 14px; flex: none; width: 24px; height: 24px; border: 0; border-radius: 5px;
+              background: none; color: var(--fg); font-size: 13px; line-height: 1; cursor: pointer; }
+  .v1 .lgTop.hover { background: rgba(234,223,196,.05); }
+  .v1 .lgTop.hover .fold { background: rgba(234,223,196,.1); color: var(--fg); }
+
+  /* ── В2: крестик, как в панели «Вид» ── */
+  .v2 .lgTop { padding-right: 8px; }
+  .v2 .fold { margin-left: 14px; flex: none; width: 24px; height: 24px; border: 0; border-radius: 5px;
+              background: none; color: var(--mut); font-size: 15px; line-height: 1; cursor: pointer; }
+  .v2 .lgTop.hover .fold { background: rgba(234,223,196,.1); color: var(--fg); }
+  .v2 .open2 { display: flex; align-items: center; gap: 8px; border: 1px solid var(--edge); border-radius: 6px;
+               background: var(--panelbg); color: var(--fg); font: 500 12px 'Golos Text', sans-serif;
+               padding: 7px 12px; cursor: pointer; box-shadow: 0 8px 26px rgba(0,0,0,.32); }
+
+  /* ── В3: словом ── */
+  .v3 .lgTop { padding-right: 10px; }
+  .v3 .fold { margin-left: 16px; border: 0; background: none; color: var(--acc); cursor: pointer;
+              font: 500 11px 'Golos Text', sans-serif; padding: 2px 0; }
+  .v3 .lgTop.hover .fold { text-decoration: underline; }
+
+  .cap { font-size: 11px; color: var(--mut); margin: 6px 0 0; }
+</style>
+</head>
+<body>
+<h1>Легенда: как её сворачивать</h1>
+<p class="lead">Сейчас нажимается вся шапка, но по ней это не видно: галочка стоит сразу за словом «Легенда» и читается
+  как точка. Три варианта — слева раскрытая плашка (наведение показано), справа то же в свёрнутом виде.</p>
+
+<h2>В1 · шеврон в правом краю</h2>
+<p class="say">Знак сворачивания уезжает в правый край, как в обычных сворачиваемых панелях. Наведение подсвечивает
+  всю шапку и сам шеврон — видно, что нажимается строка целиком.</p>
+<div class="pair v1">
+  <div class="map">
+    <div class="legend">
+      <div class="lgTop hover">
+        <svg class="lgBadge" width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="4" fill="#e8dcb8"/></svg>
+        <b>Легенда</b><span class="line">8 поколений: Дункан — Кеннет</span>
+        <button class="fold" title="Свернуть">▾</button>
+      </div>
+      <div class="lgTabs"><button class="on">знаки</button><button>метки рода</button></div>
+      <div class="lgRows">
+        <div class="lgItem"><svg class="sym" viewBox="0 0 60 24"><path d="M4 12H56" stroke="#c8a44e" stroke-width="2"/><circle cx="30" cy="12" r="3" fill="#e8dcb8"/></svg><div><b>Брак</b></div></div>
+        <div class="lgItem"><svg class="sym" viewBox="0 0 60 24"><path d="M14 4H46M30 4v16" stroke="#7d6b52" stroke-width="1.6" fill="none"/></svg><div><b>Дети</b></div></div>
+      </div>
+    </div>
+    <p class="cap">раскрытая, курсор на шапке</p>
+  </div>
+  <div class="map">
+    <div class="legend">
+      <div class="lgTop">
+        <svg class="lgBadge" width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="4" fill="#e8dcb8"/></svg>
+        <b>Легенда</b><span class="line">8 поколений: Дункан — Кеннет</span>
+        <button class="fold" title="Развернуть">▴</button>
+      </div>
+    </div>
+    <p class="cap">свёрнутая</p>
+  </div>
+</div>
+
+<h2>В2 · крестик, как в панели «Вид»</h2>
+<p class="say">Закрывается крестиком — тем же знаком, что и панель «Вид». Свёрнутая легенда тогда не строка, а кнопка
+  «Легенда» со значком стиля: её видно как кнопку, а не как обрезанную плашку.</p>
+<div class="pair v2">
+  <div class="map">
+    <div class="legend">
+      <div class="lgTop hover">
+        <svg class="lgBadge" width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="4" fill="#e8dcb8"/></svg>
+        <b>Легенда</b><span class="line">8 поколений: Дункан — Кеннет</span>
+        <button class="fold" title="Закрыть">×</button>
+      </div>
+      <div class="lgTabs"><button class="on">знаки</button><button>метки рода</button></div>
+      <div class="lgRows">
+        <div class="lgItem"><svg class="sym" viewBox="0 0 60 24"><path d="M4 12H56" stroke="#c8a44e" stroke-width="2"/><circle cx="30" cy="12" r="3" fill="#e8dcb8"/></svg><div><b>Брак</b></div></div>
+        <div class="lgItem"><svg class="sym" viewBox="0 0 60 24"><path d="M14 4H46M30 4v16" stroke="#7d6b52" stroke-width="1.6" fill="none"/></svg><div><b>Дети</b></div></div>
+      </div>
+    </div>
+    <p class="cap">раскрытая, курсор на шапке</p>
+  </div>
+  <div class="map">
+    <button class="open2">
+      <svg class="lgBadge" width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="4" fill="#e8dcb8"/></svg>
+      Легенда
+    </button>
+    <p class="cap">свёрнутая — кнопка</p>
+  </div>
+</div>
+
+<h2>В3 · словом «свернуть»</h2>
+<p class="say">Вместо значка — слово цветом стиля: «свернуть», в свёрнутом виде «развернуть». Понятно без догадок,
+  но слово тянет на себя внимание сильнее знака.</p>
+<div class="pair v3">
+  <div class="map">
+    <div class="legend">
+      <div class="lgTop hover">
+        <svg class="lgBadge" width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="4" fill="#e8dcb8"/></svg>
+        <b>Легенда</b><span class="line">8 поколений: Дункан — Кеннет</span>
+        <button class="fold">свернуть</button>
+      </div>
+      <div class="lgTabs"><button class="on">знаки</button><button>метки рода</button></div>
+      <div class="lgRows">
+        <div class="lgItem"><svg class="sym" viewBox="0 0 60 24"><path d="M4 12H56" stroke="#c8a44e" stroke-width="2"/><circle cx="30" cy="12" r="3" fill="#e8dcb8"/></svg><div><b>Брак</b></div></div>
+        <div class="lgItem"><svg class="sym" viewBox="0 0 60 24"><path d="M14 4H46M30 4v16" stroke="#7d6b52" stroke-width="1.6" fill="none"/></svg><div><b>Дети</b></div></div>
+      </div>
+    </div>
+    <p class="cap">раскрытая, курсор на шапке</p>
+  </div>
+  <div class="map">
+    <div class="legend">
+      <div class="lgTop">
+        <svg class="lgBadge" width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="4" fill="#e8dcb8"/></svg>
+        <b>Легенда</b><span class="line">8 поколений: Дункан — Кеннет</span>
+        <button class="fold">развернуть</button>
+      </div>
+    </div>
+    <p class="cap">свёрнутая</p>
+  </div>
+</div>
+</body>
+</html>
