@@ -136,10 +136,16 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-mut: var(--
 /* раскрытая — по содержимому: колонок столько, сколько знаков, но не больше, чем влезает в карту */
 .viewport .legend.open { width: min(calc(100% - 28px),
   max(var(--head, 0px), calc(var(--body, 225px) + 26px))); }
-.legend .lgTop { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 9px; padding: 8px 12px; cursor: pointer; }
+.legend .lgTop { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 9px; padding: 8px 12px 8px 12px;
+  cursor: pointer; border-radius: 5px; }
+.legend.open .lgTop { padding-right: 8px; }
+.legend .lgTop:hover { background: color-mix(in srgb, var(--ch-fg) 6%, transparent); }
 .legend .lgTop b { font: 500 12px 'Golos Text', sans-serif; white-space: nowrap; }
 .legend .lgTop > span { color: var(--ch-mut); font-size: 11px; }
-.legend .lgTop .chev { margin-left: 4px; font-size: 9px; }
+/* знак сворачивания — в правом краю плашки, при наведении на шапку проступает сильнее */
+.legend .lgTop .chev { margin-left: auto; flex: none; width: 24px; height: 24px; border-radius: 5px;
+  font-size: 13px; line-height: 24px; text-align: center; color: var(--ch-fg); }
+.legend .lgTop:hover .chev { background: color-mix(in srgb, var(--ch-fg) 12%, transparent); }
 .legend .lgBadge { flex: none; }
 .legend .lgTabs { display: flex; gap: 4px; padding: 0 12px 6px; }
 .legend .lgTabs button { border: 0; background: none; color: var(--ch-mut); font: 500 11.5px 'Golos Text', sans-serif;
