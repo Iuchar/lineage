@@ -724,22 +724,19 @@ const root = document.getElementById("app");
 if (root) {
   // витрина: сервера нет, ядро работает прямо в браузере. На настоящем сервере мост не нужен
   const witness = document.documentElement.dataset.mode === "browser";
-  let note: (() => void) | null = null;
   const ready = witness
     ? (async () => {
-      const [{ startBridge, seedClans, DEMO_EDITOR }, { splash, witnessNote }] = await Promise.all([
+      const [{ startBridge, seedClans }, { splash }] = await Promise.all([
         import("./api/bridge"), import("./panel/firstrun"),
       ]);
       const screen = splash(root);
       await startBridge(screen.say);
       await seedClans(screen.say);
       screen.close();
-      note = () => witnessNote(document.body, DEMO_EDITOR);
     })()
     : Promise.resolve();
   ready
     .then(() => start(root))
-    .then(() => note?.())
     .catch((error: unknown) => {
       root.innerHTML = `<div class="empty">Не удалось загрузить роды: ${String(error)}</div>`;
     });
