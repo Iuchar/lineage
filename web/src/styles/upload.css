@@ -7,7 +7,7 @@
 .up h3 { margin: 0; font: 600 20px/1.15 var(--font); }
 .up .file { font: 400 9.5px/1.5 'IBM Plex Mono', monospace; color: var(--mut); margin-top: 5px; }
 .up .lbl { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--acc); margin: 16px 0 6px; }
+  color: var(--acc-ink); margin: 16px 0 6px; }
 .up .choice { display: flex; gap: 8px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--edge); cursor: pointer; }
 .up .choice > span { flex: 1; }
 .up .choice input { accent-color: var(--acc); margin: 2px 0 0; }
@@ -17,14 +17,14 @@
   border-radius: 4px; padding: 5px 7px; font: 400 12.5px 'Golos Text', sans-serif; }
 .up .field:disabled { opacity: .45; }
 .up .note { font-size: 11px; color: var(--mut); line-height: 1.45; margin-top: 10px; }
-.up .err { font-size: 11.5px; color: var(--acc); line-height: 1.45; margin-top: 10px; }
+.up .err { font-size: 11.5px; color: var(--acc-ink); line-height: 1.45; margin-top: 10px; }
 .up .item { padding: 6px 0; border-bottom: 1px solid var(--edge); }
 .up .item b { font-weight: 500; }
 .up .item small { display: block; color: var(--mut); font-size: 11px; margin-top: 2px; }
 .up .item .diff { display: block; font-size: 11.5px; margin-top: 3px; }
 .up .item .diff s { color: var(--mut); }
 .up .item.go { cursor: pointer; }
-.up .item.go:hover b, .up .item.on b { color: var(--acc); }
+.up .item.go:hover b, .up .item.on b { color: var(--acc-ink); }
 .up .keep { display: flex; margin-top: 6px; border: 1px solid var(--edge); border-radius: 4px; overflow: hidden; width: max-content; }
 .up .keep button { border: 0; background: transparent; color: var(--mut); font: 500 11px 'Golos Text', sans-serif; padding: 4px 10px; cursor: pointer; }
 .up .keep button[aria-pressed=true] { background: var(--acc); color: var(--bg); }
@@ -46,7 +46,7 @@
   max-height: 220px; overflow: auto; }
 .pick .opt { padding: 6px 9px; font: 400 12.5px 'Golos Text', sans-serif; color: var(--fg); cursor: pointer; }
 .pick .opt.on { background: color-mix(in srgb, var(--acc) 16%, transparent); }
-.pick .opt.cur { color: var(--acc); }
+.pick .opt.cur { color: var(--acc-ink); }
 
 /* лист над картой: вся сцена в тени, лист по центру сверху */
 .sheetWrap { position: absolute; inset: 0; z-index: 15; background: rgba(0,0,0,.45);
@@ -57,7 +57,7 @@
 /* метки разбора на карте: новый — заливкой спокойного цвета стиля, изменён — контуром, нет в файле — приглушённо */
 .node.up-gone { opacity: .45; }
 [data-style=gobelen] .node.up-new .badge { background: var(--acc); color: var(--bg); }
-[data-style=gobelen] .node.up-mod .badge { background: transparent; color: var(--acc); box-shadow: inset 0 0 0 1px var(--acc); }
+[data-style=gobelen] .node.up-mod .badge { background: transparent; color: var(--acc-ink); box-shadow: inset 0 0 0 1px var(--acc); }
 [data-style=gobelen] .node.up-gone .badge { background: transparent; color: var(--mut); box-shadow: inset 0 0 0 1px var(--mut); }
 [data-style=viktorian] .node.up-new .badge i { background: var(--link); }
 [data-style=viktorian] .node.up-new .badge { color: var(--card); }
@@ -67,7 +67,7 @@
 [data-style=viktorian] .node.up-gone .badge { color: var(--mut); }
 [data-style=gazeta] .node.up-new .badge { color: var(--fg); border-bottom-color: var(--fg); }
 [data-style=gazeta] .node.up-mod .badge, [data-style=gazeta] .node.up-gone .badge { color: var(--mut); border-bottom: 1px dotted var(--mut); }
-[data-style=kabinet] .node.up-mod .badge { background: var(--card); color: var(--acc); box-shadow: inset 0 0 0 1px var(--acc); }
+[data-style=kabinet] .node.up-mod .badge { background: var(--card); color: var(--acc-ink); box-shadow: inset 0 0 0 1px var(--acc); }
 [data-style=kabinet] .node.up-gone .badge { background: var(--card); color: var(--mut); box-shadow: inset 0 0 0 1px var(--mut); }
 [data-style=polotno] .node.up-new .badge { color: var(--fg); border-bottom-color: var(--fg); }
 [data-style=polotno] .node.up-mod .badge, [data-style=polotno] .node.up-gone .badge { color: var(--m1); border-bottom: 1px dotted var(--m1); }

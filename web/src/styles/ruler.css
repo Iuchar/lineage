@@ -15,5 +15,5 @@
 .ruler .cap { position: absolute; width: 8px; height: 1px; background: var(--acc); opacity: .62; }
 .ruler .glab { position: absolute; transform: translateY(-50%); white-space: nowrap;
   font: 500 8px/1.5 'IBM Plex Mono', monospace; color: var(--mut); letter-spacing: .13em; text-transform: uppercase; }
-.ruler .glab.on { color: var(--acc); }
+.ruler .glab.on { color: var(--acc-ink); }
 .ruler .glab small { display: block; font-size: 8.5px; letter-spacing: .02em; text-transform: none; opacity: .8; }

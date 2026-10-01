@@ -1,9 +1,9 @@
 /* ═══ Викторианский: гравированные карточки, пыльца на фоне ═══ */
 [data-style=viktorian] { --mark: #63202a; --mark-fg: #f2e0c4; --label-past: #7c6a3c; --label-past-fg: #efe6cf;
-  --bg: #262721; --fg: #f2e8d2; --mut: #a09578; --acc: #b99a52; --edge: #3b382c;
+  --bg: #262721; --fg: #f2e8d2; --mut: #a2977a; --acc: #b99a52; --edge: #3b382c;
   --panelbg: #1b1c17; --link: #7c6a3c; --card: #2e2f27; --font: 'Playfair Display', Georgia, serif;
   --orn: rgba(185,154,82,.11); }
-[data-style=viktorian][data-theme=light] { --mark: #7a2230; --mark-fg: #f6ead4; --bg: #efe9dc; --fg: #231f16; --mut: #7d7358; --acc: #8a6d28;
+[data-style=viktorian][data-theme=light] { --mark: #7a2230; --mark-fg: #f6ead4; --bg: #efe9dc; --fg: #231f16; --mut: #675f48; --acc: #8a6d28; --acc-ink: #755d24;
   --panelbg: #e4ddcc; --link: #a9986a; --card: #fbf8ef; --edge: #cdc4ac; --orn: rgba(122,95,32,.12); }
 
 [data-style=viktorian] .canvas { background: var(--bg); }

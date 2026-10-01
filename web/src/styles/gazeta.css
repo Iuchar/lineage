@@ -9,10 +9,10 @@
 [data-style=gazeta] .node .box { border-top: 2px solid var(--fg); padding: 9px 10px 0; }
 [data-style=gazeta] .node .nm { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px;
   line-height: 1; color: var(--fg); }
-[data-style=gazeta] .node .nm sup { font-size: 9px; color: var(--acc); font-weight: 400; margin-left: 3px; vertical-align: super; }
+[data-style=gazeta] .node .nm sup { font-size: 9px; color: var(--acc-ink); font-weight: 400; margin-left: 3px; vertical-align: super; }
 [data-style=gazeta] .node .yr { font-size: 9.5px; letter-spacing: .07em; color: var(--mut); margin-top: 8px; }
-[data-style=gazeta] .node.sel .nm { color: var(--acc); }
-[data-style=gazeta] .node .badge { font-size: 8.5px; font-style: italic; color: var(--acc); left: 10px; top: 48px;
+[data-style=gazeta] .node.sel .nm { color: var(--acc-ink); }
+[data-style=gazeta] .node .badge { font-size: 8.5px; font-style: italic; color: var(--acc-ink); left: 10px; top: 48px;
   border-bottom: 1px solid var(--acc); }
 
 /* выжжен из рода — корректорская выкидка: имя приглушено и перечёркнуто красным наискось по ширине

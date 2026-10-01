@@ -12,7 +12,9 @@ body[data-style] { --ch-bg: var(--panelbg); --ch-fg: var(--fg); --ch-edge: var(-
   /* приглушённый цвет стиля рассчитан на полотно карты; на панели он выходит бледным,
      поэтому в хроме берётся смесь текста с фоном — контраст держится в обеих темах */
   --ch-mut: color-mix(in srgb, var(--fg) 76%, var(--panelbg));
-  --ch-btn: color-mix(in srgb, var(--fg) 8%, transparent); --ch-acc: var(--acc);
+  /* акцент заливкой и акцент буквами — разные краски: буквам на светлом фоне нужен запас контраста */
+  --acc-ink: var(--acc);
+  --ch-btn: color-mix(in srgb, var(--fg) 8%, transparent); --ch-acc: var(--acc-ink);
   --ch-soft: color-mix(in srgb, var(--ch-fg) 82%, var(--ch-bg));
   --ch-on: var(--acc); --ch-onfg: var(--bg); }
 /* на светлой теме акценты насыщенные и тёмные: надпись на них должна быть светлой, а не фоновой */
@@ -73,7 +75,7 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 
 /* главная линия рода: ствол подсвечен всегда, дерево вокруг в полную силу, имена на линии — акцентом */
 .canvas svg.line.main path { stroke-width: 2.2; }
-.canvas .node.heir .nm { color: var(--acc); }
+.canvas .node.heir .nm { color: var(--acc-ink); }
 
 .empty { margin: auto; padding: 40px 16px; color: #7c8492; font-size: 13px; line-height: 1.7; text-align: center; }
 .empty code { font: 400 12px 'IBM Plex Mono', monospace; color: #aeb6c2; }
@@ -121,7 +123,8 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .rail .row { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 6px 8px; border: 0; border-radius: 5px;
   background: none; text-align: left; cursor: pointer; }
 .rail .row:hover { background: var(--ch-btn); }
-.rail .row.on { background: color-mix(in srgb, var(--ch-acc) 20%, transparent); }
+.rail .row.on { background: color-mix(in srgb, var(--acc) 20%, transparent); }
+.rail .row.on small { color: var(--ch-fg); } /* на подсвеченной строке приглушённое число не читается */
 .rail .row b { flex: 1; font-family: var(--font, 'Golos Text', sans-serif); font-size: 14px; font-weight: 500; color: var(--ch-fg); }
 .rail .row small { font: 400 10px 'IBM Plex Mono', monospace; color: var(--ch-mut); }
 .rail .railAdd { margin-top: 8px; border: 0; border-top: 1px solid var(--ch-edge); background: none; color: var(--ch-acc);

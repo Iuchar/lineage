@@ -13,11 +13,11 @@
 .links .knotLbl { font: 400 11px 'IBM Plex Mono', monospace; fill: var(--mut); letter-spacing: .02em; }
 /* приёмный или под опекой: ярлык над карточкой, спуск к ней пунктиром */
 .node .pedi { position: absolute; left: calc(50% + 7px); top: -23px; z-index: 2; white-space: nowrap;
-  font: 500 10px/1 'Golos Text', sans-serif; color: var(--acc); background: var(--bg); padding: 2px 6px;
+  font: 500 10px/1 'Golos Text', sans-serif; color: var(--acc-ink); background: var(--bg); padding: 2px 6px;
   border: 1px solid var(--acc); border-radius: 8px; }
 
 /* продолжатель главной ветви — ромб цвета акцента перед именем, в любом виде карты */
-.canvas .node.hr .nm::before { content: '◆'; color: var(--acc); font-size: .62em; vertical-align: .22em; margin-right: 4px; }
+.canvas .node.hr .nm::before { content: '◆'; color: var(--acc-ink); font-size: .62em; vertical-align: .22em; margin-right: 4px; }
 /* фамилия второй строкой под именем */
 .canvas .node .sn { font: 400 10.5px/1.25 'Golos Text', sans-serif; color: var(--mut); margin-top: 1px; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; max-width: 100%; }

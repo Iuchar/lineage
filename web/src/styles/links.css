@@ -7,30 +7,30 @@
 .node .also b { font-weight: inherit; color: var(--mut); }
 .node .also:hover { filter: brightness(1.18); }
 
-[data-style=gobelen] .node .also { font: 400 13px/1.2 var(--hand); color: var(--acc);
+[data-style=gobelen] .node .also { font: 400 13px/1.2 var(--hand); color: var(--acc-ink);
   border-bottom: 1px solid color-mix(in srgb, var(--acc) 45%, transparent);
   left: 50%; transform: translateX(-50%); top: 124px; }
 [data-style=gobelen] .node.badged .also { top: 144px; }
 /* золото на светлой шерсти без подкладки не читается — тёмная охра с золотой чертой */
 [data-style=gobelen][data-theme=light] .node .also { color: #5d4415; border-bottom-color: #a8801f; }
 
-[data-style=viktorian] .node .also { font: italic 400 11px/1.2 var(--font); letter-spacing: .04em; color: var(--acc);
+[data-style=viktorian] .node .also { font: italic 400 11px/1.2 var(--font); letter-spacing: .04em; color: var(--acc-ink);
   border-bottom: 1px solid color-mix(in srgb, var(--acc) 50%, transparent); left: 8px; top: 100%; margin-top: 6px; }
 [data-style=viktorian] .node.badged .also { margin-top: 26px; }
 
-[data-style=gazeta] .node .also { font: italic 400 10.5px/1.2 var(--font); color: var(--acc);
+[data-style=gazeta] .node .also { font: italic 400 10.5px/1.2 var(--font); color: var(--acc-ink);
   border-bottom: 1px dotted color-mix(in srgb, var(--acc) 70%, transparent); left: 10px; top: 48px; }
 [data-style=gazeta] .node.badged .also { top: 63px; }
 /* у газеты снимок стоит слева от имени до 51-го пикселя — сноска и знак выравниваются по колонке имени */
 [data-style=gazeta] .node.has-por .also, [data-style=gazeta] .node.has-por .badge { left: 44px; }
 
 [data-style=kabinet] .node .also { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--acc); border-bottom: 1px solid color-mix(in srgb, var(--acc) 45%, transparent);
+  color: var(--acc-ink); border-bottom: 1px solid color-mix(in srgb, var(--acc) 45%, transparent);
   left: 0; top: 100%; margin-top: 6px; padding-bottom: 2px; }
 [data-style=kabinet] .node.badged .also { margin-top: 24px; }
 
 [data-style=polotno] .node .also { font: 500 9px/1 'Golos Text', sans-serif; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--acc); left: 0; top: 50px; padding-left: 13px; }
+  color: var(--acc-ink); left: 0; top: 50px; padding-left: 13px; }
 [data-style=polotno] .node .also::before { content: ''; position: absolute; left: 0; top: 50%; width: 9px; height: 1px; background: var(--acc); }
 [data-style=polotno] .node.badged .also { top: 66px; }
 /* у полотна портрет стоит справа от годов — сноска уходит строкой ниже него, чтобы не наехать */
@@ -41,7 +41,7 @@
   padding: 7px 14px; font-size: 12px; color: var(--fg);
   background: color-mix(in srgb, var(--acc) 14%, var(--bg)); border-bottom: 1px solid var(--edge); }
 .trail .mk { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); }
-.trail button { border: 1px solid var(--acc); background: transparent; color: var(--acc); border-radius: 4px;
+.trail button { border: 1px solid var(--acc); background: transparent; color: var(--acc-ink); border-radius: 4px;
   font: 500 11px/1 'Golos Text', sans-serif; padding: 5px 9px; cursor: pointer; }
 .trail button.x { border-color: transparent; color: var(--mut); margin-left: auto; padding: 5px 6px; }
 .trail button.x:hover { color: var(--fg); }
@@ -54,7 +54,7 @@
 .side .twin button, .side .linkBtn { flex: 1; border: 1px solid var(--edge); background: transparent; color: var(--fg);
   border-radius: 4px; font: 500 11px/1 'Golos Text', sans-serif; padding: 6px 8px; cursor: pointer; }
 .side .twin button.go { border-color: var(--acc); background: var(--acc); color: var(--bg); }
-.side .twin button:hover:not(.go), .side .linkBtn:hover { border-color: var(--acc); color: var(--acc); }
+.side .twin button:hover:not(.go), .side .linkBtn:hover { border-color: var(--acc); color: var(--acc-ink); }
 .side .linkBtn { display: block; width: 100%; margin-top: 6px; }
 
 /* кнопка очереди связок в верхней панели */
@@ -68,7 +68,7 @@
 .review .who, .queueWrap .who { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 8px 10px 6px; }
 .review .who b, .queueWrap .who b { font: 500 13px/1.2 'Golos Text', sans-serif; }
 .review .who span, .queueWrap .who span { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--acc); white-space: nowrap; }
+  text-transform: uppercase; color: var(--acc-ink); white-space: nowrap; }
 .rScene { position: relative; overflow: hidden; height: 160px; background: var(--bg); border-top: 1px solid var(--edge); }
 .rScene .canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
 .review .kinText { padding: 7px 10px 9px; font-size: 11.5px; line-height: 1.5; }
@@ -78,12 +78,12 @@
 .review .rActs button, .queueWrap button:not(.qRow) { flex: 1; border: 1px solid var(--edge); background: transparent; color: var(--fg);
   border-radius: 4px; font: 500 12px/1 'Golos Text', sans-serif; padding: 9px 12px; cursor: pointer; white-space: nowrap; }
 .review .rActs button.pri, .queueWrap button.pri { flex-basis: 100%; border-color: var(--acc); background: var(--acc); color: var(--bg); }
-.review .rActs button:hover:not(.pri), .queueWrap button:hover:not(.pri):not(.qRow) { border-color: var(--acc); color: var(--acc); }
+.review .rActs button:hover:not(.pri), .queueWrap button:hover:not(.pri):not(.qRow) { border-color: var(--acc); color: var(--acc-ink); }
 
 /* П2 — очередь во весь экран: на узком окне панель сжала бы окружения до нечитаемого */
 .queueWrap { position: absolute; inset: 0; z-index: 14; display: grid; grid-template-columns: 232px 1fr;
   background: var(--bg); color: var(--fg); overflow: auto; }
-.queueWrap .lbl { display: block; font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--acc); }
+.queueWrap .lbl { display: block; font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--acc-ink); }
 .queueWrap .qList { border-right: 1px solid var(--edge); background: var(--panelbg); padding: 12px 0; overflow: auto; }
 .queueWrap .qList .lbl { padding: 0 14px 8px; }
 .queueWrap .qRow { display: block; width: 100%; text-align: left; border: 0; border-left: 2px solid transparent; background: transparent;
@@ -131,15 +131,15 @@
   background: var(--panelbg); }
 .review .rClose button, .queueWrap .qClose { border: 1px solid var(--edge); background: transparent; color: var(--fg);
   border-radius: 4px; font: 500 12px/1 'Golos Text', sans-serif; padding: 7px 12px; cursor: pointer; }
-.review .rClose button:hover, .queueWrap .qClose:hover { border-color: var(--acc); color: var(--acc); }
+.review .rClose button:hover, .queueWrap .qClose:hover { border-color: var(--acc); color: var(--acc-ink); }
 .queueWrap .qClose { margin-left: auto; flex: none !important; }
 
 /* родня пары, которая сама ждёт проверки или уже связана: кнопка к ней */
 .review .kinText .qk, .queueWrap .qCmp .qk { display: inline-block; margin-left: 4px; padding: 2px 6px; border: 1px solid var(--acc); border-radius: 8px;
-  background: transparent; color: var(--acc); font: 500 10px/1 'Golos Text', sans-serif; white-space: nowrap; vertical-align: 1px; cursor: pointer; }
+  background: transparent; color: var(--acc-ink); font: 500 10px/1 'Golos Text', sans-serif; white-space: nowrap; vertical-align: 1px; cursor: pointer; }
 .review .kinText .qk:hover, .queueWrap .qCmp button.qk:hover { background: var(--acc); color: var(--bg); }
 .review .kinText .qk.link, .queueWrap .qCmp .qk.link { background: color-mix(in srgb, var(--acc) 14%, transparent); }
-.review .qBack, .queueWrap .qTop .qBack { display: block; margin: 0 0 10px; padding: 0; border: 0; background: none; color: var(--acc);
+.review .qBack, .queueWrap .qTop .qBack { display: block; margin: 0 0 10px; padding: 0; border: 0; background: none; color: var(--acc-ink);
   font: 500 12px 'Golos Text', sans-serif; cursor: pointer; text-align: left; }
 
 .queueWrap .qTop .qBack { display: inline-block; margin: 0 0 0 16px; }

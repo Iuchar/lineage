@@ -22,7 +22,7 @@
   font: 700 14px/1 'Playfair Display', serif; color: var(--fg); }
 [data-style=gazeta] .fold small { position: absolute; left: 10px; top: 42px; font: 400 9.5px/1 'PT Serif', serif;
   letter-spacing: .07em; text-transform: uppercase; color: var(--mut); }
-[data-style=gazeta] .fold:hover > span { color: var(--acc); }
+[data-style=gazeta] .fold:hover > span { color: var(--acc-ink); }
 
 /* полотно — каскад имён: каждая строка мельче и бледнее, внизу счёт набором годов */
 [data-style=polotno] .fold { width: auto; min-width: 112px; height: auto; padding-top: 4px; }
@@ -32,7 +32,7 @@
 [data-style=polotno] .fold > span:nth-child(3) { font-size: 14px; opacity: .3; }
 [data-style=polotno] .fold small { display: block; margin-top: 6px; font: 400 9px/1 'IBM Plex Mono', monospace;
   letter-spacing: .06em; color: var(--mut); }
-[data-style=polotno] .fold:hover > span:first-child { color: var(--acc); }
+[data-style=polotno] .fold:hover > span:first-child { color: var(--acc-ink); }
 /* каскад имён не шире карточки: при развороте по поколению стопки стоят тесно, длинные «ветвь … из …» обрезаются */
 [data-style=polotno] .fold { max-width: 150px; }
 [data-style=polotno] .fold > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

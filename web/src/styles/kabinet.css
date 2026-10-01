@@ -1,8 +1,8 @@
 /* ═══ Ночной кабинет: картотека, латунь, лампа ═══ */
-[data-style=kabinet] { --label-past: #6b5636; --label-past-fg: #f0e5cf; --bg: #161310; --fg: #e9e2d4; --mut: #8d8171; --acc: #e0b96a; --edge: #2a231c;
+[data-style=kabinet] { --label-past: #6b5636; --label-past-fg: #f0e5cf; --bg: #161310; --fg: #e9e2d4; --mut: #918575; --acc: #e0b96a; --edge: #2a231c;
   --panelbg: #100e0c; --link: #57493a; --card: #221d18; --font: 'Literata', Georgia, serif; }
 /* светлая — «зелёная лампа»: банкирская лампа горит и днём, ярлыки и выбранный — зелёные */
-[data-style=kabinet][data-theme=light] { --bg: #e8e5d8; --fg: #1f1d16; --mut: #6f6b5c; --acc: #8a6a1e; --label-past: #4f7a5a;
+[data-style=kabinet][data-theme=light] { --bg: #e8e5d8; --fg: #1f1d16; --mut: #625f51; --acc: #8a6a1e; --acc-ink: #755b1c; --label-past: #4f7a5a;
   --panelbg: #dfdccf; --link: #aaa58f; --card: #fbfaf3; --edge: #d2cebb; }
 
 [data-style=kabinet] .canvas { background: var(--bg);

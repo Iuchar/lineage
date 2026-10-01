@@ -7,23 +7,23 @@
 .side .maiden { font-size: 12px; color: var(--mut); margin-top: 3px; }
 .side .sub { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: var(--mut); margin-top: 6px; }
 .side .lbl { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--acc); margin: 16px 0 6px; }
+  color: var(--acc-ink); margin: 16px 0 6px; }
 .side .row { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; padding: 4px 0;
   border-bottom: 1px solid var(--edge); }
 .side .row > span { flex: none; }
 .side .row i { font-style: normal; color: var(--mut); text-align: right; }
 .side .kin { border: 0; padding: 0; background: none; color: var(--fg); font: inherit; cursor: pointer;
   border-bottom: 1px dotted var(--mut); }
-.side .kin:hover { color: var(--acc); border-bottom-color: var(--acc); }
+.side .kin:hover { color: var(--acc-ink); border-bottom-color: var(--acc); }
 .side .note { font-size: 12.5px; line-height: 1.45; color: var(--fg); opacity: .9; margin: 4px 0 8px; }
 .side .empty { padding: 40px 16px; color: var(--mut); font-size: 12.5px; text-align: center; }
 .nudge, .foldRow { display: flex; align-items: center; gap: 8px; }
 .foldRow { margin: 2px 0 10px; }
 .nudge button, .foldRow button, .side .actions button { flex: 1; border: 1px solid var(--edge); background: transparent; color: var(--fg);
   cursor: pointer; font: 500 11px/1 'Golos Text', sans-serif; padding: 6px 4px; border-radius: 4px; }
-.nudge button:hover, .foldRow button:hover, .side .actions button:hover { border-color: var(--acc); color: var(--acc); }
+.nudge button:hover, .foldRow button:hover, .side .actions button:hover { border-color: var(--acc); color: var(--acc-ink); }
 .foldRow button { flex: 0 1 auto; padding: 6px 12px; }
-.foldRow button[aria-pressed=true] { border-color: var(--acc); color: var(--acc); }
+.foldRow button[aria-pressed=true] { border-color: var(--acc); color: var(--acc-ink); }
 .nudge span, .foldRow span { font: 400 9.5px/1 'IBM Plex Mono', monospace; color: var(--mut); min-width: 48px; text-align: center; }
 .side .actions { display: flex; margin-top: 18px; }
 

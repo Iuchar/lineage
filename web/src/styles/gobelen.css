@@ -4,7 +4,7 @@
 [data-style=gobelen] { --st-old: #8a7a5e; --st-new: #9d8b68; --bg: #241a12; --fg: #eadfc4; --mut: #a08d70; --acc: #c8a44e; --edge: #3a2c1e;
   --panelbg: #19110a; --link: #7d6b52; --warp: rgba(0,0,0,.2); --weft: rgba(255,236,196,.035);
   --font: 'Cormorant Garamond', Georgia, serif; --hand: 'Caveat', cursive; }
-[data-style=gobelen][data-theme=light] { --st-old: #b09a66; --st-new: #93742f; --bg: #ded2b6; --fg: #2a2116; --mut: #6d5d42; --acc: #a8801f;
+[data-style=gobelen][data-theme=light] { --st-old: #b09a66; --st-new: #93742f; --bg: #ded2b6; --fg: #2a2116; --mut: #5d4f37; --acc: #a8801f; --acc-ink: #644d1a;
   --panelbg: #d2c5a6; --link: #9a8762; --edge: #bba98a; --warp: rgba(84,70,40,.14); --weft: rgba(255,255,255,.3); }
 
 /* фактура — узелки на пересечениях нитей: точка не выстраивается в линию, муару нечего усиливать */
