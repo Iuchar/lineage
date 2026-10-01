@@ -1,0 +1,291 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+1 _TAGDEF Шахтёр
+2 _COLOR дымный
+1 _TAGDEF Проповедник
+2 _COLOR лиловый
+0 @I3001@ INDI
+1 NAME Эван /Прайс/
+2 GIVN Эван
+2 SURN Прайс
+1 SEX M
+1 BIRT
+2 DATE 1822
+1 DEAT
+2 DATE 1890
+1 FAMS @F3003@
+1 FAMC @F3001@
+1 _TAG Шахтёр
+0 @I3002@ INDI
+1 NAME Дэфидд /Прайс/
+2 GIVN Дэфидд
+2 SURN Прайс
+1 SEX M
+1 BIRT
+2 DATE 1825
+1 DEAT
+2 DATE 1901
+1 FAMS @F3004@
+1 FAMC @F3001@
+1 _TAG Шахтёр
+0 @I3003@ INDI
+1 NAME Гвен /Прайс/
+2 GIVN Гвен
+2 SURN Прайс
+1 SEX F
+1 BIRT
+2 DATE 1829
+1 DEAT
+2 DATE 1900
+1 EVEN Не замужем; проповедница при часовне
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F3001@
+1 _TAG Проповедник
+0 @I3004@ INDI
+1 NAME Кэтрин /Прайс/
+2 GIVN Кэтрин
+2 SURN Хьюз
+2 _MARNM Прайс
+1 SEX F
+1 BIRT
+2 DATE 1827
+1 DEAT
+2 DATE 1899
+1 FAMS @F3003@
+1 FAMC @F3002@
+0 @I3005@ INDI
+1 NAME Элин /Прайс/
+2 GIVN Элин
+2 SURN Хьюз
+2 _MARNM Прайс
+1 SEX F
+1 BIRT
+2 DATE 1830
+1 DEAT
+2 DATE 1910
+1 FAMS @F3004@
+1 FAMC @F3002@
+0 @I3006@ INDI
+1 NAME Томос /Прайс/
+2 GIVN Томос
+2 SURN Прайс
+1 SEX M
+1 BIRT
+2 DATE 1852
+1 DEAT
+2 DATE 1930
+1 FAMS @F3010@
+1 FAMC @F3003@
+1 _TAG Шахтёр
+0 @I3007@ INDI
+1 NAME Мэри /Прайс/
+2 GIVN Мэри
+2 SURN Прайс
+1 SEX F
+1 BIRT
+2 DATE 1855
+1 DEAT
+2 DATE 1930
+1 EVEN Мать-одиночка, отец ребёнка не назван
+2 TYPE Comment
+1 FAMS @F3005@
+1 FAMC @F3003@
+0 @I3008@ INDI
+1 NAME Ллойд /Прайс/
+2 GIVN Ллойд
+2 SURN Прайс
+1 SEX M
+1 BIRT
+2 DATE 1858
+1 DEAT
+2 DATE 1935
+1 FAMS @F3008@
+1 FAMC @F3004@
+0 @I3009@ INDI
+1 NAME Гвилим /Прайс/
+2 GIVN Гвилим
+2 SURN Прайс
+1 SEX M
+1 BIRT
+2 DATE 1861
+1 DEAT
+2 DATE 1923
+1 FAMS @F3009@
+1 FAMC @F3004@
+0 @I3010@ INDI
+1 NAME Идрис /Прайс/
+2 GIVN Идрис
+2 SURN Прайс
+1 SEX M
+1 BIRT
+2 DATE 1880
+1 DEAT
+2 DATE 1944
+1 FAMS @F3006@
+1 FAMS @F3007@
+1 FAMC @F3005@
+1 _TAG Проповедник
+0 @I3011@ INDI
+1 NAME Блодвен /Прайс/
+2 GIVN Блодвен
+2 SURN Оуэн
+2 _MARNM Прайс
+1 SEX F
+1 BIRT
+2 DATE 1884
+1 DEAT
+2 DATE 1960
+1 FAMS @F3006@
+1 _SEE hidden
+0 @I3012@ INDI
+1 NAME Эрик /Прайс/
+2 GIVN Эрик
+2 SURN Прайс
+1 SEX M
+1 BIRT
+2 DATE 1908
+1 DEAT
+2 DATE 1975
+1 FAMC @F3006@
+0 @I3013@ INDI
+1 NAME Гвенллиан /Прайс/
+2 GIVN Гвенллиан
+2 SURN Гриффитс
+2 _MARNM Прайс
+1 SEX F
+1 BIRT
+2 DATE 1890
+1 DEAT
+2 DATE 1970
+1 FAMS @F3007@
+0 @I3014@ INDI
+1 NAME Эмрис /Прайс/
+2 GIVN Эмрис
+2 SURN Прайс
+1 SEX M
+1 BIRT
+2 DATE 1920
+1 DEAT
+2 DATE 1999
+1 FAMC @F3007@
+1 _TAG Проповедник
+0 @I3016@ INDI
+1 NAME Сара /Прайс/
+2 GIVN Сара
+2 SURN Уоткинс
+2 _MARNM Прайс
+1 SEX F
+1 BIRT
+2 DATE 1860
+1 DEAT
+2 DATE 1940
+1 FAMS @F3008@
+0 @I3017@ INDI
+1 NAME Мегги /Прайс/
+2 GIVN Мегги
+2 SURN Лэйн
+2 _MARNM Прайс
+1 SEX F
+1 BIRT
+2 DATE 1865
+1 DEAT
+2 DATE 1930
+1 FAMS @F3009@
+0 @I3018@ INDI
+1 NAME Ханна /Прайс/
+2 GIVN Ханна
+2 SURN Бивен
+2 _MARNM Прайс
+1 SEX F
+1 BIRT
+2 DATE 1855
+1 DEAT
+2 DATE 1925
+1 FAMS @F3010@
+0 @I3019@ INDI
+1 NAME Алун /Прайс/
+2 GIVN Алун
+2 SURN Прайс
+1 SEX M
+1 BIRT
+2 DATE 1878
+1 DEAT Y
+1 EVEN Погиб в шахте, год в приходской книге не указан
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F3010@
+1 _TAG Шахтёр
+0 @I3020@ INDI
+1 NAME /Прайс/
+2 SURN Прайс
+1 SEX U
+1 BIRT
+2 DATE 1882
+1 DEAT
+2 DATE 1882
+1 EVEN Умерший младенец, имя не успели дать
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F3010@
+0 @F3001@ FAM
+1 CHIL @I3001@
+1 CHIL @I3002@
+1 CHIL @I3003@
+0 @F3002@ FAM
+1 CHIL @I3004@
+1 CHIL @I3005@
+0 @F3003@ FAM
+1 HUSB @I3001@
+1 WIFE @I3004@
+1 CHIL @I3006@
+1 CHIL @I3007@
+1 MARR
+2 DATE 1848
+2 PLAC Ньюпорт
+0 @F3004@ FAM
+1 HUSB @I3002@
+1 WIFE @I3005@
+1 CHIL @I3008@
+1 CHIL @I3009@
+1 MARR
+2 DATE 1850
+2 PLAC Ньюпорт
+0 @F3005@ FAM
+1 WIFE @I3007@
+1 CHIL @I3010@
+0 @F3006@ FAM
+1 HUSB @I3010@
+1 WIFE @I3011@
+1 CHIL @I3012@
+1 MARR
+2 DATE 1905
+1 DIV Y
+0 @F3007@ FAM
+1 HUSB @I3010@
+1 WIFE @I3013@
+1 CHIL @I3014@
+1 MARR
+2 PLAC Кардифф
+0 @F3008@ FAM
+1 HUSB @I3008@
+1 WIFE @I3016@
+1 MARR
+2 DATE 1884
+0 @F3009@ FAM
+1 HUSB @I3009@
+1 WIFE @I3017@
+1 MARR
+2 DATE 1890
+0 @F3010@ FAM
+1 HUSB @I3006@
+1 WIFE @I3018@
+1 CHIL @I3019@
+1 CHIL @I3020@
+1 MARR
+2 DATE 1875
+0 TRLR

@@ -1,0 +1,428 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+1 _STATUS old
+1 _TAGDEF Врач
+2 _COLOR зелёный
+1 _TAGDEF Учитель
+2 _COLOR синий
+1 _TAGDEF Солдат
+2 _COLOR кирпичный
+0 @I2001@ INDI
+1 NAME Хорас /Хартли/
+2 GIVN Хорас
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE ABT 1705
+1 DEAT
+2 DATE 1775
+1 EVEN Основатель рода, землевладелец из Дербишира
+2 TYPE Comment
+2 _SEE all
+1 FAMS @F2001@
+0 @I2002@ INDI
+1 NAME Эстер /Хартли/
+2 GIVN Эстер
+2 SURN Гоф
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE ABT 1710
+1 DEAT
+2 DATE AFT 1780
+1 FAMS @F2001@
+0 @I2003@ INDI
+1 NAME Саймон /Хартли/
+2 GIVN Саймон
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1752
+1 DEAT
+2 DATE 1820
+1 FAMS @F2002@
+1 FAMC @F2001@
+0 @I2004@ INDI
+1 NAME Шарлотта /Хартли/
+2 GIVN Шарлотта
+2 SURN Эшфорд
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE 1755
+1 DEAT
+2 DATE 1830
+1 EVEN Дочь виконта Эшфорда
+2 TYPE Comment
+2 _SEE all
+1 FAMS @F2002@
+0 @I2005@ INDI
+1 NAME Эдмунд /Хартли/
+2 GIVN Эдмунд
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1780
+1 DEAT
+2 DATE 1850
+1 FAMS @F2003@
+1 FAMC @F2002@
+1 _TAG Врач
+0 @I2006@ INDI
+1 NAME Джейн /Хартли/
+2 GIVN Джейн
+2 SURN Хартли
+1 SEX F
+1 BIRT
+2 DATE 1783
+1 DEAT
+2 DATE 1860
+1 FAMC @F2002@
+0 @I2007@ INDI
+1 NAME Анна /Хартли/
+2 GIVN Анна
+2 SURN Поуп
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE 1785
+1 DEAT
+2 DATE 1865
+1 FAMS @F2003@
+0 @I2008@ INDI
+1 NAME Фрэнсис /Хартли/
+2 GIVN Фрэнсис
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1810
+1 DEAT
+2 DATE 1880
+1 FAMS @F2004@
+1 FAMC @F2003@
+1 _TAG Врач
+0 @I2009@ INDI
+1 NAME Хорас /Хартли/
+2 GIVN Хорас
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1815
+1 DEAT
+2 DATE 1816
+1 EVEN Умер младенцем
+2 TYPE Comment
+1 FAMC @F2003@
+0 @I2010@ INDI
+1 NAME Агнес /Хартли/
+2 GIVN Агнес
+2 SURN Блант
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE 1815
+1 DEAT
+2 DATE 1890
+1 FAMS @F2004@
+0 @I2011@ INDI
+1 NAME Артур /Хартли/
+2 GIVN Артур
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1845
+1 DEAT
+2 DATE 1920
+1 FAMS @F2005@
+1 FAMC @F2004@
+0 @I2012@ INDI
+1 NAME Сьюзен /Хартли/
+2 GIVN Сьюзен
+2 SURN Роу
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE 1850
+1 DEAT
+2 DATE 1930
+1 FAMS @F2005@
+0 @I2013@ INDI
+1 NAME Гарольд /Хартли/
+2 GIVN Гарольд
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1875
+1 DEAT
+2 DATE 1950
+1 OCCU Школьный учитель
+1 FAMS @F2007@
+1 FAMC @F2005@
+1 _TAG Учитель
+0 @I2014@ INDI
+1 NAME Виктор /Хартли/
+2 GIVN Виктор
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1878
+1 DEAT
+2 DATE 1 JUL 1916
+1 EVEN Погиб в первый день битвы на Сомме
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F2005@
+1 _TAG Солдат
+0 @I2015@ INDI
+1 NAME Милдред /Хартли/
+2 GIVN Милдред
+2 SURN Крофт
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE 1880
+1 DEAT
+2 DATE 1960
+1 FAMS @F2007@
+0 @I2016@ INDI
+1 NAME Дафна /Лейн/
+2 GIVN Дафна
+2 SURN Хартли
+2 _MARNM Лейн
+1 SEX F
+1 BIRT
+2 DATE 1910
+1 DEAT
+2 DATE 1990
+1 FAMS @F2008@
+1 FAMC @F2007@
+0 @I2017@ INDI
+1 NAME Дейзи /Хартли/
+2 GIVN Дейзи
+2 SURN Хартли
+1 SEX F
+1 BIRT
+2 DATE 8 NOV 1912
+1 DEAT
+2 DATE 3 APR 1999
+1 EVEN Вышла замуж за Хью Эшфорда, второго графа
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F2007@
+0 @I2018@ INDI
+1 NAME Эрнест /Хартли/
+2 GIVN Эрнест
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1914
+1 DEAT
+2 DATE 1942
+1 EVEN Лётчик, сбит над Ла-Маншем
+2 TYPE Comment
+1 FAMC @F2007@
+1 _TAG Солдат
+0 @I2019@ INDI
+1 NAME Алан /Хартли/
+2 GIVN Алан
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1919
+1 DEAT
+2 DATE 2002
+1 EVEN Усыновлён в 1920 году; родная семья записана в роду Дрейк
+2 TYPE Comment
+1 FAMS @F2009@
+1 FAMC @F2007@
+2 PEDI adopted
+1 _SEE dates all
+0 @I2020@ INDI
+1 NAME Мэри /Дэвис/
+2 GIVN Мэри
+2 SURN Дэвис
+1 SEX F
+1 BIRT
+2 DATE 1936
+1 EVEN Эвакуирована из Лондона в 1940-м; родители погибли при бомбёжке
+2 TYPE Comment
+1 FAMC @F2006@
+1 FAMC @F2007@
+2 PEDI foster
+0 @I2021@ INDI
+1 NAME Реджиналд /Дэвис/
+2 GIVN Реджиналд
+2 SURN Дэвис
+1 SEX M
+1 BIRT
+2 DATE 1912
+1 DEAT
+2 DATE 10 MAY 1941
+1 FAMS @F2006@
+0 @I2022@ INDI
+1 NAME Нора /Дэвис/
+2 GIVN Нора
+2 SURN Эванс
+2 _MARNM Дэвис
+1 SEX F
+1 BIRT
+2 DATE 1915
+1 DEAT
+2 DATE 10 MAY 1941
+1 FAMS @F2006@
+0 @I2023@ INDI
+1 NAME Роджер /Лейн/
+2 GIVN Роджер
+2 SURN Лейн
+1 SEX M
+1 BIRT
+2 DATE 1905
+1 DEAT
+2 DATE 1975
+1 FAMS @F2008@
+1 _SEE hidden
+0 @I2024@ INDI
+1 NAME Майкл /Лейн/
+2 GIVN Майкл
+2 SURN Лейн
+1 SEX M
+1 BIRT
+2 DATE 4 DEC 1932
+1 DEAT
+2 DATE 2001
+1 EVEN Родился за год до свадьбы родителей
+2 TYPE Comment
+1 FAMC @F2008@
+0 @I2025@ INDI
+1 NAME Бетти /Хартли/
+2 GIVN Бетти
+2 SURN Ходж
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE 1922
+1 DEAT
+2 DATE 2010
+1 FAMS @F2009@
+0 @I2026@ INDI
+1 NAME Дэвид /Хартли/
+2 GIVN Дэвид
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1946
+1 FAMS @F2010@
+1 FAMC @F2009@
+1 _TAG Врач
+0 @I2027@ INDI
+1 NAME Памела /Хартли/
+2 GIVN Памела
+2 SURN Эшфорд
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE 22 AUG 1948
+1 FAMS @F2010@
+0 @I2028@ INDI
+1 NAME Тоби /Хартли/
+2 GIVN Тоби
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1975
+1 FAMS @F2011@
+1 FAMC @F2010@
+0 @I2029@ INDI
+1 NAME Эмма /Уорд/
+2 GIVN Эмма
+2 SURN Уорд
+1 SEX F
+1 BIRT
+2 DATE 1978
+1 FAMS @F2011@
+0 @I2030@ INDI
+1 NAME Лили /Хартли/
+2 GIVN Лили
+2 SURN Хартли
+1 SEX F
+1 BIRT
+2 DATE 2006
+1 FAMC @F2011@
+0 @F2001@ FAM
+1 HUSB @I2001@
+1 WIFE @I2002@
+1 CHIL @I2003@
+1 MARR
+2 DATE ABT 1750
+0 @F2002@ FAM
+1 HUSB @I2003@
+1 WIFE @I2004@
+1 CHIL @I2005@
+1 CHIL @I2006@
+1 MARR
+2 DATE 1778
+2 PLAC Дерби
+0 @F2003@ FAM
+1 HUSB @I2005@
+1 WIFE @I2007@
+1 CHIL @I2008@
+1 CHIL @I2009@
+1 MARR
+2 DATE 1808
+0 @F2004@ FAM
+1 HUSB @I2008@
+1 WIFE @I2010@
+1 CHIL @I2011@
+1 MARR
+2 DATE 1840
+0 @F2005@ FAM
+1 HUSB @I2011@
+1 WIFE @I2012@
+1 CHIL @I2013@
+1 CHIL @I2014@
+1 MARR
+2 DATE 1873
+0 @F2006@ FAM
+1 HUSB @I2021@
+1 WIFE @I2022@
+1 CHIL @I2020@
+1 MARR
+2 DATE 1934
+0 @F2007@ FAM
+1 HUSB @I2013@
+1 WIFE @I2015@
+1 CHIL @I2016@
+1 CHIL @I2017@
+1 CHIL @I2018@
+1 CHIL @I2019@
+1 CHIL @I2020@
+1 MARR
+2 DATE 1908
+2 PLAC Дерби
+0 @F2008@ FAM
+1 HUSB @I2023@
+1 WIFE @I2016@
+1 CHIL @I2024@
+1 MARR
+2 DATE 1933
+0 @F2009@ FAM
+1 HUSB @I2019@
+1 WIFE @I2025@
+1 CHIL @I2026@
+1 MARR
+2 DATE 1944
+0 @F2010@ FAM
+1 HUSB @I2026@
+1 WIFE @I2027@
+1 CHIL @I2028@
+1 MARR
+2 DATE 1972
+0 @F2011@ FAM
+1 HUSB @I2028@
+1 WIFE @I2029@
+1 CHIL @I2030@
+0 TRLR

@@ -1,0 +1,288 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+1 _STATUS old
+1 _TAGDEF Вождь
+2 _COLOR винный
+1 _TAGDEF Эмигрант
+2 _COLOR охра
+0 @I5001@ INDI
+1 NAME Ангус /Макинтош/
+2 GIVN Ангус
+2 SURN Макинтош
+1 SEX M
+1 BIRT
+2 DATE 1700
+1 DEAT
+2 DATE 1768
+1 EVEN Основатель линии, вождь клана
+2 TYPE Comment
+2 _SEE all
+1 FAMS @F5001@
+1 _TAG Вождь
+1 _HEIR Y
+0 @I5002@ INDI
+1 NAME Джин /Макинтош/
+2 GIVN Джин
+2 SURN Грант
+2 _MARNM Макинтош
+1 SEX F
+1 BIRT
+2 DATE 1705
+1 DEAT
+2 DATE 1780
+1 FAMS @F5001@
+0 @I5003@ INDI
+1 NAME Лахлан /Макинтош/
+2 GIVN Лахлан
+2 SURN Макинтош
+1 SEX M
+1 BIRT
+2 DATE 1730
+1 DEAT
+2 DATE 1801
+1 FAMS @F5003@
+1 FAMC @F5001@
+1 _TAG Вождь
+1 _HEIR Y
+0 @I5004@ INDI
+1 NAME Дункан /Макинтош/
+2 GIVN Дункан
+2 SURN Макинтош
+1 SEX M
+1 BIRT
+2 DATE 1735
+1 DEAT
+2 DATE 1790
+1 FAMS @F5002@
+1 FAMC @F5001@
+0 @I5005@ INDI
+1 NAME Хэрриет /Макинтош/
+2 GIVN Хэрриет
+2 SURN Макинтош
+1 SEX F
+1 BIRT
+2 DATE 1740
+1 DEAT
+2 DATE 1771
+1 EVEN Вышла замуж за англичанина, виконта Эшфорда
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F5001@
+0 @I5006@ INDI
+1 NAME Потомки /Макинтош из Мойдарта/
+2 GIVN Потомки
+2 SURN Макинтош из Мойдарта
+1 SEX M
+1 EVEN Потомки Дункана в Мойдарте
+2 TYPE Comment
+1 FAMC @F5002@
+0 @I5007@ INDI
+1 NAME Кэтрин /Макинтош/
+2 GIVN Кэтрин
+2 SURN Фрэзер
+2 _MARNM Макинтош
+1 SEX F
+1 BIRT
+2 DATE 1735
+1 DEAT
+2 DATE 1805
+1 FAMS @F5003@
+0 @I5008@ INDI
+1 NAME Уильям /Макинтош/
+2 GIVN Уильям
+2 SURN Макинтош
+1 SEX M
+1 BIRT
+2 DATE 1765
+1 DEAT
+2 DATE 1840
+1 FAMS @F5005@
+1 FAMC @F5003@
+1 _TAG Вождь
+1 _HEIR Y
+0 @I5009@ INDI
+1 NAME Изабель /Камерон/
+2 GIVN Изабель
+2 SURN Макинтош
+2 _MARNM Камерон
+1 SEX F
+1 BIRT
+2 DATE 1768
+1 DEAT
+2 DATE 1850
+1 FAMS @F5004@
+1 FAMC @F5003@
+0 @I5010@ INDI
+1 NAME Ветвь /Камерон/
+2 GIVN Ветвь
+2 SURN Камерон
+1 SEX M
+1 EVEN Ветвь через Изабель
+2 TYPE Comment
+1 FAMC @F5004@
+0 @I5011@ INDI
+1 NAME Мэрион /Макинтош/
+2 GIVN Мэрион
+2 SURN Бейн
+2 _MARNM Макинтош
+1 SEX F
+1 BIRT
+2 DATE 1770
+1 DEAT
+2 DATE 1850
+1 FAMS @F5005@
+0 @I5012@ INDI
+1 NAME Джон /Макинтош/
+2 GIVN Джон
+2 SURN Макинтош
+1 SEX M
+1 BIRT
+2 DATE 1798
+1 DEAT
+2 DATE 1870
+1 FAMS @F5007@
+1 FAMC @F5005@
+1 _TAG Вождь
+1 _HEIR Y
+0 @I5013@ INDI
+1 NAME Дональд /Макинтош/
+2 GIVN Дональд
+2 SURN Макинтош
+1 SEX M
+1 BIRT
+2 DATE 1801
+1 DEAT
+2 DATE 1880
+1 FAMS @F5006@
+1 FAMC @F5005@
+1 _TAG Эмигрант
+0 @I5014@ INDI
+1 NAME Потомки /Макинтош из Онтарио/
+2 GIVN Потомки
+2 SURN Макинтош из Онтарио
+1 SEX M
+1 EVEN Потомки Дональда в Канаде
+2 TYPE Comment
+1 FAMC @F5006@
+0 @I5015@ INDI
+1 NAME Эффи /Макинтош/
+2 GIVN Эффи
+2 SURN Росс
+2 _MARNM Макинтош
+1 SEX F
+1 BIRT
+2 DATE 1805
+1 DEAT
+2 DATE 1890
+1 FAMS @F5007@
+0 @I5016@ INDI
+1 NAME Рори /Макинтош/
+2 GIVN Рори
+2 SURN Макинтош
+1 SEX M
+1 BIRT
+2 DATE 1830
+1 DEAT
+2 DATE 1895
+1 FAMS @F5008@
+1 FAMC @F5007@
+1 _TAG Вождь
+1 _HEIR Y
+0 @I5017@ INDI
+1 NAME Элспет /Макинтош/
+2 GIVN Элспет
+2 SURN Грант
+2 _MARNM Макинтош
+1 SEX F
+1 BIRT
+2 DATE 1835
+1 DEAT
+2 DATE 1910
+1 FAMS @F5008@
+0 @I5018@ INDI
+1 NAME Мэри /Макинтош/
+2 GIVN Мэри
+2 SURN Макинтош
+1 SEX F
+1 BIRT
+2 DATE 1855
+1 DEAT
+2 DATE 1930
+1 EVEN Не путать с Мэри Прайс из Уэльса, года рождения у них совпали
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F5008@
+0 @I5019@ INDI
+1 NAME Ангус /Макинтош/
+2 GIVN Ангус
+2 SURN Макинтош
+1 SEX M
+1 BIRT
+2 DATE 1858
+1 DEAT
+2 DATE 1920
+1 FAMS @F5009@
+1 FAMC @F5008@
+1 _TAG Вождь
+1 _TAG Эмигрант
+1 _HEIR Y
+0 @I5020@ INDI
+1 NAME Ветвь /Макинтош из Торонто/
+2 GIVN Ветвь
+2 SURN Макинтош из Торонто
+1 SEX M
+1 EVEN Ветвь через Ангуса, линия продолжается в Канаде
+2 TYPE Comment
+1 FAMC @F5009@
+0 @F5001@ FAM
+1 HUSB @I5001@
+1 WIFE @I5002@
+1 CHIL @I5003@
+1 CHIL @I5004@
+1 CHIL @I5005@
+1 MARR
+2 DATE 1728
+0 @F5002@ FAM
+1 HUSB @I5004@
+1 CHIL @I5006@
+0 @F5003@ FAM
+1 HUSB @I5003@
+1 WIFE @I5007@
+1 CHIL @I5008@
+1 CHIL @I5009@
+1 MARR
+2 DATE 1760
+0 @F5004@ FAM
+1 WIFE @I5009@
+1 CHIL @I5010@
+0 @F5005@ FAM
+1 HUSB @I5008@
+1 WIFE @I5011@
+1 CHIL @I5012@
+1 CHIL @I5013@
+1 MARR
+2 DATE 1795
+0 @F5006@ FAM
+1 HUSB @I5013@
+1 CHIL @I5014@
+0 @F5007@ FAM
+1 HUSB @I5012@
+1 WIFE @I5015@
+1 CHIL @I5016@
+1 MARR
+2 DATE 1826
+0 @F5008@ FAM
+1 HUSB @I5016@
+1 WIFE @I5017@
+1 CHIL @I5018@
+1 CHIL @I5019@
+1 MARR
+2 DATE 1853
+0 @F5009@ FAM
+1 HUSB @I5019@
+1 CHIL @I5020@
+0 TRLR

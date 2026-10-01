@@ -12,7 +12,8 @@ const ROOT = resolve(HERE, "..", "..");
 const CORE = resolve(ROOT, "server", "app");
 const OUT = resolve(ROOT, "web", "public", "core.zip");
 // роды проекта: их видит гость при первом заходе
-const CLANS = ["Gleann_Uruisg_tree.ged", "Winterhope_tree.ged", "O_Dubhain_tree.ged", "Monadh_Croibhe_tree.ged"];
+const CLANS = ["Ashford_tree.ged", "Hartley_tree.ged", "Pryce_tree.ged", "Drake_tree.ged", "Macintosh_tree.ged",
+  "Wakefield_tree.ged"];
 
 async function* walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {

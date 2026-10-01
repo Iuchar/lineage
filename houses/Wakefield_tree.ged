@@ -1,0 +1,18 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+0 @I6001@ INDI
+1 NAME Гарри /Уэйкфилд/
+2 GIVN Гарри
+2 SURN Уэйкфилд
+1 SEX M
+1 BIRT
+2 DATE 3 MAY 1991
+1 EVEN Первый в роду, кто записал его сам
+2 TYPE Comment
+2 _SEE all
+1 _SEE portrait hidden
+0 TRLR

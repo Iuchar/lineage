@@ -1,0 +1,839 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+1 _STATUS titled
+1 _TAGDEF Пэр
+2 _COLOR винный
+1 _TAGDEF Военный
+2 _COLOR зелёный
+1 _TAGDEF Духовенство
+2 _COLOR лиловый
+1 _TAGDEF Депутат
+2 _COLOR синий
+1 _TAGDEF Художник
+2 _COLOR морской
+1 _TAGDEF Эмигрант
+2 _COLOR охра
+0 @I1001@ INDI
+1 NAME Уильям /Эшфорд/
+2 GIVN Уильям
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1558
+2 PLAC Эшфорд, Кент
+1 DEAT
+2 DATE 1629
+1 TITL 1-й барон Эшфорд (1603)
+1 EVEN Основатель рода: баронство получено в 1603 году за службу короне
+2 TYPE Comment
+2 _SEE all
+1 FAMS @F1001@
+1 _TAG Пэр
+1 _HEIR Y
+0 @I1002@ INDI
+1 NAME Элинор /Эшфорд/
+2 GIVN Элинор
+2 SURN Фэрфакс
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE ABT 1565
+1 DEAT
+2 DATE 1640
+1 FAMS @F1001@
+0 @I1003@ INDI
+1 NAME Генри /Эшфорд/
+2 GIVN Генри
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1588
+1 DEAT
+2 DATE 1651
+1 TITL 2-й барон Эшфорд
+1 FAMS @F1004@
+1 FAMC @F1001@
+1 _TAG Пэр
+1 _HEIR Y
+0 @I1004@ INDI
+1 NAME Томас /Эшфорд/
+2 GIVN Томас
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE ABT 1592
+1 DEAT
+2 DATE BEF 1660
+1 EVEN Поселился в Дерби, его потомки ушли из рода
+2 TYPE Comment
+1 FAMS @F1003@
+1 FAMC @F1001@
+0 @I1005@ INDI
+1 NAME Маргарет /Кавендиш/
+2 GIVN Маргарет
+2 SURN Эшфорд
+2 _MARNM Кавендиш
+1 SEX F
+1 BIRT
+2 DATE 1595
+1 DEAT
+2 DATE 1670
+1 FAMS @F1002@
+1 FAMC @F1001@
+0 @I1006@ INDI
+1 NAME Роберт /Кавендиш/
+2 GIVN Роберт
+2 SURN Кавендиш
+1 SEX M
+1 BIRT
+2 DATE ABT 1590
+1 DEAT
+2 DATE 1655
+1 FAMS @F1002@
+0 @I1007@ INDI
+1 NAME Ветвь /Кавендиш/
+2 GIVN Ветвь
+2 SURN Кавендиш
+1 SEX M
+1 EVEN Ветвь через Маргарет
+2 TYPE Comment
+1 FAMC @F1002@
+0 @I1008@ INDI
+1 NAME Потомки /Эшфорд из Дерби/
+2 GIVN Потомки
+2 SURN Эшфорд из Дерби
+1 SEX M
+1 EVEN Потомки Томаса, ушедшие из рода
+2 TYPE Comment
+1 FAMC @F1003@
+0 @I1009@ INDI
+1 NAME Люси /Эшфорд/
+2 GIVN Люси
+2 SURN Паркер
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1594
+1 DEAT
+2 DATE 1662
+1 FAMS @F1004@
+0 @I1010@ INDI
+1 NAME Джон /Эшфорд/
+2 GIVN Джон
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1620
+1 DEAT
+2 DATE 1690
+1 TITL 3-й барон Эшфорд
+1 FAMS @F1005@
+1 FAMC @F1004@
+1 _TAG Пэр
+1 _HEIR Y
+0 @I1011@ INDI
+1 NAME Энн /Эшфорд/
+2 GIVN Энн
+2 SURN Эшфорд
+1 SEX F
+1 BIRT
+2 DATE BET 1622 AND 1625
+1 DEAT
+2 DATE AFT 1699
+1 EVEN Не вышла замуж, вела хозяйство брата
+2 TYPE Comment
+1 FAMC @F1004@
+0 @I1012@ INDI
+1 NAME Элизабет /Эшфорд/
+2 GIVN Элизабет
+2 SURN Хэмпден
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1625
+1 DEAT
+2 DATE 1700
+1 FAMS @F1005@
+0 @I1013@ INDI
+1 NAME Эдмунд /Эшфорд/
+2 GIVN Эдмунд
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1655
+1 DEAT
+2 DATE 1712
+1 TITL 4-й барон Эшфорд
+1 FAMS @F1007@
+1 FAMC @F1005@
+1 _TAG Пэр
+1 _HEIR Y
+0 @I1014@ INDI
+1 NAME Роберт /Эшфорд/
+2 GIVN Роберт
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1658
+1 DEAT
+2 DATE 1730
+1 OCCU Приходской священник
+1 EVEN Не женился; усыновил подкидыша
+2 TYPE Comment
+1 FAMS @F1006@
+1 FAMC @F1005@
+1 _TAG Духовенство
+0 @I1015@ INDI
+1 NAME Джозеф /Эшфорд/
+2 GIVN Джозеф
+2 SURN Эшфорд
+1 SEX M
+1 DEAT
+2 DATE AFT 1740
+1 EVEN Подкидыш, найден у церкви около 1690 года; родные неизвестны, Роберт воспитал его как сына
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F1006@
+2 PEDI adopted
+0 @I1016@ INDI
+1 NAME Кэтрин /Эшфорд/
+2 GIVN Кэтрин
+2 SURN Бэкон
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1660
+1 DEAT
+2 DATE 1720
+1 FAMS @F1007@
+0 @I1017@ INDI
+1 NAME Чарльз /Эшфорд/
+2 GIVN Чарльз
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1690
+1 DEAT
+2 DATE 1760
+1 TITL 5-й барон Эшфорд
+1 FAMS @F1008@
+1 FAMC @F1007@
+1 _TAG Пэр
+1 _HEIR Y
+0 @I1019@ INDI
+1 NAME Дороти /Эшфорд/
+2 GIVN Дороти
+2 SURN Уолпол
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1695
+1 DEAT
+2 DATE 1750
+1 FAMS @F1008@
+0 @I1020@ INDI
+1 NAME Огастес /Эшфорд/
+2 GIVN Огастес
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1728
+1 DEAT
+2 DATE 1805
+1 TITL 1-й виконт Эшфорд (1771)
+1 EVEN Четыре брака; единственный в роду, получивший развод парламентским актом
+2 TYPE Comment
+2 _SEE all
+1 EVEN Два года жил в Вест-Индии, оттуда привёз коллекцию гравюр
+2 TYPE Comment
+1 FAMS @F1009@
+1 FAMS @F1010@
+1 FAMS @F1011@
+1 FAMS @F1012@
+1 FAMC @F1008@
+1 _TAG Пэр
+1 _TAG Депутат
+1 _TAG Военный
+1 _TAG Художник
+1 _TAG Эмигрант
+1 _HEIR Y
+1 _SEE dates all
+0 @I1021@ INDI
+1 NAME Френсис /Эшфорд/
+2 GIVN Френсис
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1725
+1 DEAT
+2 DATE 11 MAY 1745
+1 EVEN Погиб при Фонтенуа, не оставив детей
+2 TYPE Comment
+1 FAMC @F1008@
+1 _TAG Военный
+0 @I1022@ INDI
+1 NAME Мэри /Эшфорд/
+2 GIVN Мэри
+2 SURN Дэшвуд
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1730
+1 DEAT
+2 DATE 1758
+1 EVEN Умерла после родов
+2 TYPE Comment
+1 FAMS @F1009@
+0 @I1023@ INDI
+1 NAME Фредерик /Эшфорд/
+2 GIVN Фредерик
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1752
+1 DEAT
+2 DATE 1770
+1 FAMC @F1009@
+0 @I1024@ INDI
+1 NAME Шарлотта /Хартли/
+2 GIVN Шарлотта
+2 SURN Эшфорд
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE 1755
+1 DEAT
+2 DATE 1830
+1 FAMC @F1009@
+0 @I1025@ INDI
+1 NAME Хэрриет /Эшфорд/
+2 GIVN Хэрриет
+2 SURN Макинтош
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1740
+1 DEAT
+2 DATE 1771
+1 FAMS @F1010@
+0 @I1026@ INDI
+1 NAME Уильям /Эшфорд/
+2 GIVN Уильям
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1762
+1 DEAT
+2 DATE 1839
+1 TITL 2-й виконт Эшфорд
+1 FAMS @F1013@
+1 FAMC @F1010@
+1 _TAG Пэр
+1 _HEIR Y
+0 @I1027@ INDI
+1 NAME Джейн /Эшфорд/
+2 GIVN Джейн
+2 SURN Мортимер
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1745
+1 DEAT
+2 DATE 1790
+1 FAMS @F1011@
+0 @I1028@ INDI
+1 NAME Кэролайн /Эшфорд/
+2 GIVN Кэролайн
+2 SURN Вернон
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1760
+1 DEAT
+2 DATE 1830
+1 FAMS @F1012@
+0 @I1029@ INDI
+1 NAME Генри /Эшфорд/
+2 GIVN Генри
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1785
+1 DEAT
+2 DATE 1850
+1 FAMC @F1012@
+0 @I1030@ INDI
+1 NAME Эмили /Эшфорд/
+2 GIVN Эмили
+2 SURN Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1788
+1 DEAT
+2 DATE 1860
+1 FAMC @F1012@
+0 @I1031@ INDI
+1 NAME Софи /Эшфорд/
+2 GIVN Софи
+2 SURN Лэнгтон
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1768
+1 DEAT
+2 DATE 1850
+1 FAMS @F1013@
+0 @I1032@ INDI
+1 NAME Джордж /Эшфорд/
+2 GIVN Джордж
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1792
+1 DEAT
+2 DATE 1860
+1 TITL 3-й виконт Эшфорд
+1 FAMS @F1014@
+1 FAMC @F1013@
+1 _TAG Пэр
+1 _HEIR Y
+0 @I1033@ INDI
+1 NAME Мэриан /Эшфорд/
+2 GIVN Мэриан
+2 SURN Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1795
+1 DEAT
+2 DATE 1880
+1 EVEN Незамужняя, основала школу для девочек в Эшфорде
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F1013@
+0 @I1034@ INDI
+1 NAME Люсинда /Эшфорд/
+2 GIVN Люсинда
+2 SURN Кэмпбелл
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1800
+1 DEAT
+2 DATE 1870
+1 FAMS @F1014@
+0 @I1035@ INDI
+1 NAME Артур /Эшфорд/
+2 GIVN Артур
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1830
+1 DEAT
+2 DATE 1904
+1 TITL 4-й виконт Эшфорд
+1 FAMS @F1015@
+1 FAMC @F1014@
+1 _TAG Пэр
+1 _HEIR Y
+1 _PORTRAIT none
+0 @I1037@ INDI
+1 NAME Виктория /Эшфорд/
+2 GIVN Виктория
+2 SURN Роуз
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1838
+1 DEAT
+2 DATE 1910
+1 FAMS @F1015@
+0 @I1038@ INDI
+1 NAME Реджинальд /Эшфорд/
+2 GIVN Реджинальд
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1868
+1 DEAT
+2 DATE 1941
+1 TITL 5-й виконт, 1-й граф Эшфорд (1920)
+1 EVEN Графство получено за заслуги в Первой мировой войне
+2 TYPE Comment
+2 _SEE all
+1 FAMS @F1016@
+1 FAMC @F1015@
+1 _TAG Пэр
+1 _TAG Депутат
+1 _HEIR Y
+0 @I1040@ INDI
+1 NAME Констанс /Эшфорд/
+2 GIVN Констанс
+2 SURN Бофорт
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1875
+1 DEAT
+2 DATE 1955
+1 FAMS @F1016@
+0 @I1041@ INDI
+1 NAME Хью /Эшфорд/
+2 GIVN Хью
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 14 MAR 1905
+2 PLAC Эшфорд-холл, Кент
+1 DEAT
+2 DATE 2 NOV 1983
+1 TITL 2-й граф Эшфорд
+1 EVEN Жил в Кении с 1951 по 1969 год
+2 TYPE Comment
+1 EVEN Служил в Королевских ВВС
+2 TYPE Comment
+2 _SEE all
+1 FAMS @F1019@
+1 FAMS @F1020@
+1 FAMS @F1021@
+1 FAMC @F1016@
+1 _TAG Пэр
+1 _TAG Военный
+1 _TAG Депутат
+1 _TAG Художник
+1 _TAG Эмигрант
+1 _HEIR Y
+0 @I1042@ INDI
+1 NAME Лоренс /Эшфорд/
+2 GIVN Лоренс
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 3 JUL 1908
+1 DEAT
+2 DATE 21 SEP 1944
+1 EVEN Изгнан из рода в 1932 году за брак с Сисили Мэй; погиб в Нормандии
+2 TYPE Comment
+1 FAMS @F1017@
+1 FAMC @F1016@
+1 _TAG Военный
+1 _BURNT Y
+0 @I1043@ INDI
+1 NAME Сисили /Эшфорд/
+2 GIVN Сисили
+2 SURN Мэй
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1910
+1 DEAT
+2 DATE 1990
+1 FAMS @F1017@
+0 @I1044@ INDI
+1 NAME Ричард /Эшфорд/
+2 GIVN Ричард
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 1935
+1 DEAT
+2 DATE 2012
+1 OCCU Овцевод
+1 EVEN Уехал в Австралию в 1957 году
+2 TYPE Comment
+1 FAMS @F1018@
+1 FAMC @F1017@
+1 _TAG Эмигрант
+0 @I1045@ INDI
+1 NAME Потомки /Эшфорд из Сиднея/
+2 GIVN Потомки
+2 SURN Эшфорд из Сиднея
+1 SEX M
+1 EVEN Потомки Ричарда в Австралии
+2 TYPE Comment
+1 FAMC @F1018@
+0 @I1046@ INDI
+1 NAME Беатрис /Эшфорд/
+2 GIVN Беатрис
+2 SURN Скотт
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 1910
+1 DEAT
+2 DATE 1946
+1 FAMS @F1019@
+0 @I1047@ INDI
+1 NAME Оливер /Эшфорд/
+2 GIVN Оливер
+2 SURN Эшфорд
+1 SEX M
+1 BIRT
+2 DATE 9 FEB 1943
+1 DEAT
+2 DATE 17 OCT 2009
+1 TITL 3-й граф Эшфорд
+1 EVEN Последний продолжатель линии; детей не оставил
+2 TYPE Comment
+2 _SEE all
+1 FAMC @F1019@
+1 _TAG Пэр
+1 _HEIR Y
+0 @I1048@ INDI
+1 NAME Дейзи /Эшфорд/
+2 GIVN Дейзи
+2 SURN Хартли
+2 _MARNM Эшфорд
+1 SEX F
+1 BIRT
+2 DATE 8 NOV 1912
+1 DEAT
+2 DATE 3 APR 1999
+1 FAMS @F1021@
+0 @I1049@ INDI
+1 NAME Памела /Хартли/
+2 GIVN Памела
+2 SURN Эшфорд
+2 _MARNM Хартли
+1 SEX F
+1 BIRT
+2 DATE 22 AUG 1948
+1 OCCU Художница
+1 FAMS @F1023@
+1 FAMC @F1021@
+1 _TAG Художник
+1 _SEE dates hidden
+0 @I1050@ INDI
+1 NAME Дафна /Лейн/
+2 GIVN Дафна
+2 SURN Хартли
+2 _MARNM Лейн
+1 SEX F
+1 BIRT
+2 DATE 1910
+1 DEAT
+2 DATE 1990
+1 EVEN Мать Майкла Лейна; отец ребёнка в бумагах рода назван только здесь
+2 TYPE Comment
+2 _SEE hidden
+1 FAMS @F1020@
+1 _SEE hidden
+0 @I1051@ INDI
+1 NAME Майкл /Лейн/
+2 GIVN Майкл
+2 SURN Лейн
+1 SEX M
+1 BIRT
+2 DATE 4 DEC 1932
+1 DEAT
+2 DATE 2001
+1 FAMS @F1022@
+1 FAMC @F1020@
+0 @I1052@ INDI
+1 NAME Рут /Лейн/
+2 GIVN Рут
+2 SURN Фрэнкс
+2 _MARNM Лейн
+1 SEX F
+1 BIRT
+2 DATE 1936
+1 DEAT
+2 DATE 2015
+1 FAMS @F1022@
+0 @I1053@ INDI
+1 NAME Пол /Лейн/
+2 GIVN Пол
+2 SURN Лейн
+1 SEX M
+1 BIRT
+2 DATE 1960
+1 FAMC @F1022@
+0 @I1054@ INDI
+1 NAME Дэвид /Хартли/
+2 GIVN Дэвид
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1946
+1 FAMS @F1023@
+0 @I1055@ INDI
+1 NAME Тоби /Хартли/
+2 GIVN Тоби
+2 SURN Хартли
+1 SEX M
+1 BIRT
+2 DATE 1975
+1 FAMS @F1024@
+1 FAMC @F1023@
+1 _TAG Художник
+1 _SEE portrait hidden
+0 @I1056@ INDI
+1 NAME Эмма /Уорд/
+2 GIVN Эмма
+2 SURN Уорд
+1 SEX F
+1 BIRT
+2 DATE 1978
+1 FAMS @F1024@
+0 @I1057@ INDI
+1 NAME Лили /Хартли/
+2 GIVN Лили
+2 SURN Хартли
+1 SEX F
+1 BIRT
+2 DATE 2005
+1 FAMC @F1024@
+1 _SEE portrait clan
+0 @F1001@ FAM
+1 HUSB @I1001@
+1 WIFE @I1002@
+1 CHIL @I1003@
+1 CHIL @I1004@
+1 CHIL @I1005@
+1 MARR
+2 DATE 1586
+2 PLAC Эшфорд, Кент
+0 @F1002@ FAM
+1 HUSB @I1006@
+1 WIFE @I1005@
+1 CHIL @I1007@
+1 MARR
+2 DATE 1618
+0 @F1003@ FAM
+1 HUSB @I1004@
+1 CHIL @I1008@
+0 @F1004@ FAM
+1 HUSB @I1003@
+1 WIFE @I1009@
+1 CHIL @I1010@
+1 CHIL @I1011@
+1 MARR
+2 DATE 1615
+0 @F1005@ FAM
+1 HUSB @I1010@
+1 WIFE @I1012@
+1 CHIL @I1013@
+1 CHIL @I1014@
+1 MARR
+2 DATE BET 1648 AND 1650
+0 @F1006@ FAM
+1 HUSB @I1014@
+1 CHIL @I1015@
+0 @F1007@ FAM
+1 HUSB @I1013@
+1 WIFE @I1016@
+1 CHIL @I1017@
+1 MARR
+2 DATE 1685
+0 @F1008@ FAM
+1 HUSB @I1017@
+1 WIFE @I1019@
+1 CHIL @I1021@
+1 CHIL @I1020@
+1 MARR
+2 DATE 1722
+0 @F1009@ FAM
+1 HUSB @I1020@
+1 WIFE @I1022@
+1 CHIL @I1023@
+1 CHIL @I1024@
+1 MARR
+2 DATE 14 JUN 1750
+2 PLAC Лондон
+0 @F1010@ FAM
+1 HUSB @I1020@
+1 WIFE @I1025@
+1 CHIL @I1026@
+1 MARR
+2 DATE 3 SEP 1760
+2 PLAC Инвернесс
+0 @F1011@ FAM
+1 HUSB @I1020@
+1 WIFE @I1027@
+1 MARR
+2 DATE 1773
+2 PLAC Бат
+1 DIV
+2 DATE 12 MAY 1780
+0 @F1012@ FAM
+1 HUSB @I1020@
+1 WIFE @I1028@
+1 CHIL @I1029@
+1 CHIL @I1030@
+1 MARR
+2 DATE 1783
+0 @F1013@ FAM
+1 HUSB @I1026@
+1 WIFE @I1031@
+1 CHIL @I1032@
+1 CHIL @I1033@
+1 MARR
+2 DATE 1790
+0 @F1014@ FAM
+1 HUSB @I1032@
+1 WIFE @I1034@
+1 CHIL @I1035@
+1 MARR
+2 DATE 1824
+0 @F1015@ FAM
+1 HUSB @I1035@
+1 WIFE @I1037@
+1 CHIL @I1038@
+1 MARR
+2 DATE 1862
+0 @F1016@ FAM
+1 HUSB @I1038@
+1 WIFE @I1040@
+1 CHIL @I1041@
+1 CHIL @I1042@
+1 MARR
+2 DATE 1900
+2 PLAC Эшфорд, Кент
+0 @F1017@ FAM
+1 HUSB @I1042@
+1 WIFE @I1043@
+1 CHIL @I1044@
+1 MARR
+2 DATE 1932
+2 PLAC Лондон
+0 @F1018@ FAM
+1 HUSB @I1044@
+1 CHIL @I1045@
+0 @F1019@ FAM
+1 HUSB @I1041@
+1 WIFE @I1046@
+1 CHIL @I1047@
+1 MARR
+2 DATE 1 JUN 1931
+2 PLAC Лондон
+0 @F1020@ FAM
+1 HUSB @I1041@
+1 WIFE @I1050@
+1 CHIL @I1051@
+0 @F1021@ FAM
+1 HUSB @I1041@
+1 WIFE @I1048@
+1 CHIL @I1049@
+1 MARR
+2 DATE 1947
+0 @F1022@ FAM
+1 HUSB @I1051@
+1 WIFE @I1052@
+1 CHIL @I1053@
+1 MARR
+2 DATE 1958
+0 @F1023@ FAM
+1 HUSB @I1054@
+1 WIFE @I1049@
+1 CHIL @I1055@
+1 MARR
+2 DATE 1972
+2 PLAC Эшфорд, Кент
+0 @F1024@ FAM
+1 HUSB @I1055@
+1 WIFE @I1056@
+1 CHIL @I1057@
+0 TRLR
