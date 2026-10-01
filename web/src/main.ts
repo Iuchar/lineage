@@ -63,6 +63,8 @@ function sep(): HTMLElement {
   return line;
 }
 
+type Look = "all" | "clan" | "edit"; // чьими глазами редактор смотрит на дерево
+
 function row(...parts: HTMLElement[]): HTMLElement {
   const line = document.createElement("div");
   line.className = "row";
@@ -105,9 +107,15 @@ async function start(root: HTMLElement): Promise<void> {
   bar.className = "bar";
   const stage = document.createElement("main");
   stage.className = "stage";
-  // «глазами зрителя рода N»: пока включено, все запросы идут с этими глазами
-  let asViewer: number | null = null;
-  const eyes = () => (asViewer == null ? "" : `?as_viewer=${asViewer}`);
+  // Чьими глазами смотрит редактор. «all» — общий зритель: любой, кто открыл сайт, видит только общий слой.
+  // «clan» — родовой зритель: гость по ссылке этого рода, видит общий слой и родовой. «edit» — правка, видно всё.
+  // null — смотрит не редактор, а настоящий зритель: что ему видно, решает сервер.
+  let look: Look | null = null;
+  const viewerId = (): number | null => (look === "all" ? 0 : look === "clan" ? currentClan : null);
+  const eyes = () => {
+    const id = viewerId();
+    return id == null ? "" : `?as_viewer=${id}`;
+  };
   const ribbon = document.createElement("div");
   ribbon.className = "ribbon";
   ribbon.hidden = true;
@@ -481,50 +489,41 @@ async function start(root: HTMLElement): Promise<void> {
   const gate = new Gate(stage);
   let me: Me = await whoami();
   let syncEditRow = () => {}; // строка редактора собирается ниже, а режим переключается раньше
-  const modeSwitch = switcher("Режим", [["view", "Просмотр"], ["edit", "Правка"]], "view", (mode) => {
-    // правка без входа не открывается: сервер всё равно откажет, и лучше сказать это сразу
-    if (mode === "edit" && me.guarded && !me.name) {
-      setMode("view");
-      gate.open((who) => {
-        me = who;
-        showAccess();
-        setMode("edit");
-      });
-      return;
-    }
-    editing = mode === "edit";
+  // редактор — вошедший, а пока редакторы не заведены, правка открыта каждому
+  const isEditor = () => Boolean(me.name) || !me.guarded;
+  const modeSep = sep();
+  // переключатель есть только у редактора: зрителю выбирать не из чего
+  const modeSwitch = switcher<Look>("Чьими глазами смотреть на дерево",
+    [["all", "Общий зритель"], ["clan", "Родовой зритель"], ["edit", "Правка"]], "clan", (mode) => void applyLook(mode));
+  // у каждого взгляда своё дерево: оно перезагружается, а на карте появляется плашка и рамка
+  const applyLook = async (next: Look | null) => {
+    look = next;
+    editing = next === "edit";
+    const watching = next === "all" || next === "clan";
     journal.group.hidden = !editing;
     syncEditRow();
     canvas.setEditing(editing);
     menu.close();
-    if (editing) void journal.refresh();
     rail.setEditing(editing);
-    showClan(currentClan);
-    drawLegend();
-    showCurrent();
-  });
-  // редактор смотрит глазами приглашённого: дерево перезагружается урезанным, сверху лента, карта в рамке
-  const lookAsViewer = async (clanId: number | null) => {
-    asViewer = clanId;
-    nav.asViewer = clanId;
-    if (clanId != null) setMode("view");
-    canvas.viewport.classList.toggle("asViewer", clanId != null);
-    ribbon.hidden = clanId == null;
-    viewerBtn.hidden = clanId != null;
+    canvas.viewport.classList.toggle("asViewer", watching);
+    ribbon.hidden = !watching;
     trees.clear();
-    const before = tree?.persons.length ?? 0;
     await loadClan(currentClan);
-    const after = tree?.persons.length ?? 0;
-    const lost = Math.max(0, clanId == null ? 0 : before - after);
-    ribbon.innerHTML = `<b>Глазами зрителя рода «${escapeHtml(clanName(currentClan))}»</b>` +
-      `<span>${lost ? `скрыто ${lost} человек` : "скрытого в этом роду нет"}</span>` +
-      '<span class="gap"></span><button data-role="back">Вернуться к правке</button>';
-    ribbon.querySelector("[data-role=back]")?.addEventListener("click", () => void lookAsViewer(null));
+    showCurrent();
   };
-
-  const setMode = (mode: "view" | "edit") => {
-    const button = modeSwitch.querySelector<HTMLButtonElement>(`[data-value="${mode}"]`);
-    if (button && button.getAttribute("aria-pressed") !== "true") button.click();
+  // плашка над картой говорит, чей это вид и чего в нём нет
+  const drawRibbon = () => {
+    if (look !== "all" && look !== "clan") return;
+    const total = clans.find((c) => c.id === currentClan)?.persons ?? 0;
+    const lost = Math.max(0, total - (tree?.persons.length ?? 0));
+    const hidden = lost ? ` · скрыто людей: ${lost}` : "";
+    ribbon.innerHTML = look === "all"
+      ? `<b>Так дерево видит любой посетитель</b><span>только общий слой: без дат жизни и родовых заметок${hidden}</span>`
+      : `<b>Так дерево видит гость по ссылке рода «${escapeHtml(clanName(currentClan))}»</b><span>общий слой и родовой${hidden}</span>`;
+  };
+  const setLook = (next: Look) => {
+    modeSwitch.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.value === next)));
+    return applyLook(next);
   };
   // панель показывает, свёрнута ли ветка, — перерисовать после щелчка по стопке на карте
   canvas.onFoldChange = showCurrent;
@@ -538,6 +537,7 @@ async function start(root: HTMLElement): Promise<void> {
   let beforeReview = currentClan; // куда вернуться, если разбор отменён
   const loadClan = async (id: number) => {
     currentClan = id;
+    nav.asViewer = viewerId();
     showClan(id);
     const [loaded, links] = await Promise.all([getJson<ClanTree>(`/api/clans/${id}/tree${eyes()}`), nav.load(id)]);
     tree = loaded;
@@ -551,6 +551,7 @@ async function start(root: HTMLElement): Promise<void> {
     drawLegend();
     void journal.refresh();
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
+    drawRibbon();
   };
 
   // новый род с нуля открывается сразу, как и загруженный файлом
@@ -704,6 +705,7 @@ async function start(root: HTMLElement): Promise<void> {
     else gate.open((who) => {
       me = who;
       showAccess();
+      void setLook("clan"); // вошёл — сначала смотрит родовым зрителем
     });
   });
   const showAccess = () => {
@@ -711,33 +713,30 @@ async function start(root: HTMLElement): Promise<void> {
     access.hidden = !me.guarded && !me.name;
     access.textContent = me.name ? `Выйти · ${me.name}` : "Войти";
     access.title = me.name ? "Закончить работу редактором" : "Войти, чтобы править роды";
-    // пока редактор не вошёл, режим один — просмотр: кнопки «Правка» нет вовсе
-    modeSwitch.classList.toggle("locked", me.guarded && !me.name);
+    // переключатель взглядов — только редактору
+    modeSwitch.hidden = !isEditor();
+    modeSep.hidden = !isEditor();
   };
   const leave = async () => {
     const result = await send<Me>("POST", "/api/logout");
     me = result.ok ? result.data : { name: null, guarded: true };
-    if (editing) setMode("view");
     showAccess();
+    // вышел — взгляды редактора сбрасываются: дальше смотрит настоящий зритель
+    await (isEditor() ? setLook("clan") : applyLook(null));
   };
   showAccess();
 
   // строка 1: имя рода слева, поиск ровно по центру, счёт и вход справа
   const titleRow = row(clanTitle, search.element, side("right", stat, sep(), access));
   titleRow.classList.add("top");
-  const viewerBtn = document.createElement("button");
-  viewerBtn.className = "topLink";
-  viewerBtn.textContent = "Глазами зрителя";
-  viewerBtn.title = "Посмотреть род так, как его увидит приглашённый по ссылке";
-  viewerBtn.addEventListener("click", () => void lookAsViewer(currentClan));
   // строка 2 — для всех; строка 3 — строка редактора, её видно только в правке.
-  // Правые стороны собраны одинаково: ссылка, черта, группа — «Загрузить» встаёт точно под «Выгрузить»,
-  // а журнал под переключателем режима
-  const viewRow = row(side("left", zoomRow, placeRow), side("right", exportLink, sep(), modeSwitch));
+  // «Выгрузить» и «Загрузить» стоят у самого правого края друг под другом, а группы слева от них
+  // берут свою ширину: переключателя у незашедшего нет вовсе
+  const viewRow = row(side("left", zoomRow, placeRow), side("right", modeSwitch, modeSep, exportLink));
   const editorMark = document.createElement("span");
   editorMark.className = "editorMark";
   editorMark.textContent = "редактор";
-  const editRow = row(side("left", editorMark, queueGroup, viewerBtn), side("right", addLink, sep(), journal.group));
+  const editRow = row(side("left", editorMark, queueGroup), side("right", journal.group, sep(), addLink));
   editRow.classList.add("editRow");
   const tools = document.createElement("div");
   tools.className = "tools";
@@ -748,7 +747,8 @@ async function start(root: HTMLElement): Promise<void> {
   };
   syncEditRow();
 
-  await loadClan(clans[0]!.id);
+  // редактор начинает родовым зрителем; не редактор смотрит тем, что отдаст сервер
+  await applyLook(isEditor() ? "clan" : null);
   void countQueue();
 }
 

@@ -71,11 +71,12 @@ def _current_editor(conn: sqlite3.Connection, request: Request) -> Editor | None
 def _eyes(conn: sqlite3.Connection, request: Request, as_viewer: int | None = None) -> Eyes:
     """Чьими глазами смотрят: редактор видит всё, зритель — общий слой и свои роды по ссылкам.
 
-    as_viewer — редактор смотрит «глазами зрителя рода N»: ровно то, что увидит приглашённый по ссылке.
+    as_viewer — редактор смотрит чужими глазами. N — «родовой зритель рода N»: ровно то, что увидит
+    приглашённый по ссылке этого рода. 0 — «общий зритель»: тот, кто открыл сайт без всякой ссылки.
     """
     editor = not editors_exist(conn) or _current_editor(conn, request) is not None
     if editor and as_viewer is not None:
-        return Eyes(editor=False, clans=frozenset({as_viewer}))
+        return Eyes(editor=False, clans=frozenset({as_viewer}) if as_viewer else frozenset())
     if editor:
         return Eyes(editor=True)
     return Eyes(editor=False, clans=frozenset(viewer_clans(conn, request.cookies.get(VIEWER_COOKIE))))

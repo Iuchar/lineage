@@ -86,7 +86,13 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .canvas.backdrop::after { display: none; }
 
 /* ── шапка: слева род и поиск, справа масштаб, панели и файлы ── */
-.bar .clanTitle { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+/* имя рода и титул в одну строку через 50 px. Под титул отведено место по самому длинному из них —
+   36 знаков моноширинным, — чтобы поиск не ездил ни при смене титула, ни в правке, где на его месте список */
+.bar .clanTitle { display: flex; align-items: baseline; gap: 50px; flex: none; min-width: 0;
+  --status-room: calc(36ch + 36 * .02em + 46px); }
+.bar .clanTitle .clanStatus, .bar .clanTitle .statusPick { flex: none; width: var(--status-room);
+  font: 400 11px/1.2 'IBM Plex Mono', monospace; letter-spacing: .02em; }
+.bar .clanTitle .statusPick { align-self: center; }
 .bar .clanTitle b { flex: none; font-family: var(--font, 'Cormorant Garamond', serif); font-size: 25px; line-height: 1.05;
   font-weight: 500; color: var(--ch-fg); letter-spacing: .02em; }
 .bar .clanStatus { font: 400 11px/1.2 'IBM Plex Mono', monospace; color: var(--ch-mut); letter-spacing: .02em; 
@@ -248,7 +254,6 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .gateOff { border: 1px solid var(--ch-edge); background: var(--ch-btn); color: var(--ch-fg); border-radius: 6px;
   padding: 7px 12px; font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; }
 /* пока не вошли, «Правка» выглядит доступной, но сначала спросит имя и пароль */
-.bar .grp.locked .sw button[data-value=edit] { display: none; }
 
 /* строка дерева: «⋯» открывает ссылку зрителям, появляется только в правке */
 .rail .row { position: relative; }
@@ -271,16 +276,11 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .shareOff { color: var(--warn, #b9552f); border-color: color-mix(in srgb, var(--warn, #b9552f) 45%, transparent); }
 
 /* ── «глазами зрителя»: лента над картой и рамка вокруг неё ── */
-.ribbon { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 7px 16px;
-  background: color-mix(in srgb, var(--warn, #b9552f) 85%, #000); color: #fff3e8;
-  font: 500 11.5px/1.3 'Golos Text', sans-serif; }
+.ribbon { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 8px 16px;
+  background: var(--ch-on); color: var(--ch-onfg); font: 500 12px/1.3 'Golos Text', sans-serif; }
 .ribbon b { font-weight: 600; }
-.ribbon > span { opacity: .85; }
-.ribbon .gap { flex: 1; }
-.ribbon button { border: 1px solid rgba(255, 255, 255, .45); background: none; color: #fff3e8; border-radius: 5px;
-  padding: 4px 10px; font: 500 11px/1 'Golos Text', sans-serif; cursor: pointer; }
-.ribbon button:hover { background: rgba(255, 255, 255, .12); }
-.viewport.asViewer { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--warn, #b9552f) 85%, #000); }
+/* вид зрителя помечен краской самого стиля — той же, что у нажатой кнопки: заметно на любом фоне и не тревожно */
+.viewport.asViewer { box-shadow: inset 0 0 0 2px var(--ch-on); }
 
 /* ── витрина: заставка, пока поднимается ядро, и заметка о том, где гость оказался ── */
 .splash { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column;
@@ -303,23 +303,19 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .ico.lead { margin-right: .4em; }
 
 /* ── шапка по макету «шапка-4» ── */
-/* строка 1: три колонки, поиск стоит по центру окна и не ездит, какой бы длины ни было имя рода */
-.bar .row.top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, 420px) minmax(0, 1fr);
-  align-items: center; gap: 20px; padding: 10px 16px; }
-.bar .row.top .search { max-width: none; min-width: 0; }
-@media (max-width: 760px) {
-  .bar .row.top { grid-template-columns: minmax(0, 1fr) auto; }
-  .bar .row.top .search { grid-column: 1 / -1; grid-row: 2; }
+/* строка 1: имя рода, титул, через 50 px поиск, счёт и вход у правого края */
+.bar .row.top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 0; padding: 10px 16px; }
+.bar .row.top .search { flex: 1 1 200px; min-width: 160px; max-width: 480px; margin-left: 50px; }
+.bar .row.top > .barSide.right { padding-left: 20px; }
+@media (max-width: 1100px) {
+  .bar .clanTitle { gap: 20px; }
+  .bar .clanTitle .clanStatus, .bar .clanTitle .statusPick { width: auto; }
+  .bar .row.top .search { margin-left: 20px; }
 }
-/* правые стороны строк 2 и 3 собраны одной сеткой: ссылка, черта, группа. Ширины равны —
-   «Загрузить» стоит под «Выгрузить», журнал под переключателем режима */
+/* правые стороны строк 2 и 3: группа своей ширины, черта и ссылка у самого края.
+   Ссылки одной ширины — «Загрузить» стоит точно под «Выгрузить» */
 .bar .tools .barSide.right > .topLink { min-width: 112px; text-align: right; }
-.bar .tools .barSide.right > .grp { width: 250px; justify-content: flex-end; }
-.bar .tools .barSide.right > .grp > .sw { width: 100%; }
-.bar .tools .barSide.right > .grp > .sw > button { flex: 1 1 0; white-space: nowrap; padding-left: 6px; padding-right: 6px; }
-.bar .tools .barSide.right > .grp > .sw > button[aria-label] { flex: 0 0 38px; } /* повтор — одна иконка */
-/* до входа редактора режим один: кнопка «Просмотр» занимает свою половину */
-.bar .tools .barSide.right > .grp.locked > .sw { width: 50%; }
+.bar .tools .barSide.right > .grp > .sw > button { white-space: nowrap; }
 /* строка редактора (Т3): темнее второй, акцентная полоса слева и слово «редактор» */
 .bar .tools .row.editRow { background: color-mix(in srgb, var(--ch-bg) 82%, #000); border-top-color: var(--ch-edge);
   box-shadow: inset 3px 0 0 var(--acc); }

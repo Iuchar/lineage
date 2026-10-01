@@ -5,12 +5,14 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 
 from app.db.clans import import_clan
 from app.db.connection import connect
 from app.db.eyes import Eyes
 from app.gedcom.export import export_clan
 from app.gedcom.load import load_text
+from app.main import app, database
 
 FILE = """0 HEAD
 1 CHAR UTF-8
@@ -104,3 +106,37 @@ def test_clan_member_gets_the_clan_layer_too(conn: sqlite3.Connection) -> None:
     # свой для другого рода здесь — чужой
     other = as_seen(conn, Eyes(editor=False, clans=frozenset({7})))
     assert "2 DATE 1700" not in other and "Арендатор" not in other
+
+
+def test_editor_can_look_as_either_viewer(tmp_path: Path) -> None:
+    """Редактор смотрит чужими глазами: 0 — общий зритель, номер рода — родовой."""
+    path = tmp_path / "api.sqlite3"
+    c = connect(path)
+    import_clan(c, "Гленн", load_text(FILE))
+    c.close()
+
+    def test_database() -> Iterator[sqlite3.Connection]:
+        cc = connect(path)
+        try:
+            yield cc
+        finally:
+            cc.close()
+
+    app.dependency_overrides[database] = test_database
+    try:
+        client = TestClient(app)
+
+        def born(as_viewer: str) -> dict[str, int | None]:
+            tree = client.get(f"/api/clans/1/tree{as_viewer}").json()
+            return {p["given"]: (p["birth"] or {}).get("year") for p in tree["persons"]}
+
+        assert born("") == {"Тормод": 1700, "Аилса": None, "Мурдо": 1730, "Тайный": None, "Вторая": None}
+        # родовой зритель: скрытых нет, даты рода видны
+        assert born("?as_viewer=1") == {"Тормод": 1700, "Мурдо": 1730}
+        # общий зритель: скрытых нет, родовые даты закрыты, открытые всем — видны
+        assert born("?as_viewer=0") == {"Тормод": None, "Мурдо": 1730}
+        common = client.get("/api/clans/1/export?as_viewer=0").text
+        assert "2 DATE 1700" not in common and "Арендатор" not in common
+        assert "2 DATE 1700" in client.get("/api/clans/1/export?as_viewer=1").text
+    finally:
+        app.dependency_overrides.clear()
