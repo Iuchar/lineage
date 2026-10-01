@@ -469,10 +469,12 @@ def get_photo(clan: str, name: str) -> FileResponse:
 
 
 @app.get("/api/clans/{clan_id}/export", response_class=PlainTextResponse)
-def get_export(clan_id: int, conn: Database) -> PlainTextResponse:
-    """Род файлом GEDCOM 5.5.1 — со всеми правками и всем, что пришло из исходного файла."""
+def get_export(clan_id: int, request: Request, conn: Database, as_viewer: int | None = None) -> PlainTextResponse:
+    """Род файлом GEDCOM 5.5.1. Каждый получает свой слой: редактор — всё, свой для рода — общее
+    и родовое, прочий зритель — только общее."""
+    eyes = _eyes(conn, request, as_viewer)
     try:
-        text = export_clan(conn, clan_id)
+        text = export_clan(conn, clan_id, None if eyes.editor else (lambda level: eyes.allows(level, clan_id)))
     except ExportError:
         raise HTTPException(status_code=404, detail="Такого рода нет") from None
     name = conn.execute("SELECT name FROM clans WHERE id = ?", (clan_id,)).fetchone()[0]

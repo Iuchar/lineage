@@ -1605,7 +1605,7 @@
     "/api/clans/{clan_id}/export": {
       "get": {
         "summary": "Get Export",
-        "description": "Род файлом GEDCOM 5.5.1 — со всеми правками и всем, что пришло из исходного файла.",
+        "description": "Род файлом GEDCOM 5.5.1. Каждый получает свой слой: редактор — всё, свой для рода — общее\nи родовое, прочий зритель — только общее.",
         "operationId": "get_export_api_clans__clan_id__export_get",
         "parameters": [
           {
@@ -1615,6 +1615,22 @@
             "schema": {
               "type": "integer",
               "title": "Clan Id"
+            }
+          },
+          {
+            "name": "as_viewer",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Viewer"
             }
           }
         ],

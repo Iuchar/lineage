@@ -616,7 +616,7 @@ async function start(root: HTMLElement): Promise<void> {
     clanTitle.querySelector("select")?.addEventListener("change", (e) => {
       void setClanStatus(id, (e.target as HTMLSelectElement).value);
     });
-    exportLink.href = `/api/clans/${id}/export`;
+    exportLink.href = `/api/clans/${id}/export${eyes()}`; // «глазами зрителя» выгружается его слой
   };
   // титул рода пишется в заголовок файла и откатывается журналом
   const setClanStatus = async (id: number, status: string) => {

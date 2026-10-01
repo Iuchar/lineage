@@ -575,7 +575,8 @@ export interface paths {
         };
         /**
          * Get Export
-         * @description Род файлом GEDCOM 5.5.1 — со всеми правками и всем, что пришло из исходного файла.
+         * @description Род файлом GEDCOM 5.5.1. Каждый получает свой слой: редактор — всё, свой для рода — общее
+         *     и родовое, прочий зритель — только общее.
          */
         get: operations["get_export_api_clans__clan_id__export_get"];
         put?: never;
@@ -2671,7 +2672,9 @@ export interface operations {
     };
     get_export_api_clans__clan_id__export_get: {
         parameters: {
-            query?: never;
+            query?: {
+                as_viewer?: number | null;
+            };
             header?: never;
             path: {
                 clan_id: number;
