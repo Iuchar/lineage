@@ -35,6 +35,8 @@ export interface FoldAnchor {
 }
 
 const FOLD_DROP = 30;
+const BUS_DROP = 30; // шина выводка — на столько выше верха детей
+const BUS_STEP = 34; // разнос шин разных браков одного человека
 const FOSTER_DASH = "5 4"; // спуск к приёмному или под опекой — заметный штрих во всех стилях // от низа карточек до стопки
 
 type Segment = [number, number];
@@ -73,6 +75,25 @@ export function drawLinks(
     return segments.filter((s) => s[1] - s[0] > 2);
   };
 
+  // Где у пары знак союза: уровень нити и точка, откуда уходит спуск к детям.
+  // Очередь союза считается у того, у кого браков больше.
+  const unionOf = (family: TreeFamily) => {
+    const a = pos.get(family.husband!)!;
+    const b = pos.get(family.wife!)!;
+    const top = Math.min(a.y, b.y);
+    const x1 = Math.min(a.x, b.x) + w;
+    const x2 = Math.max(a.x, b.x);
+    const marriagesOf = (id: number) => persons.get(id)?.spouse_families ?? [];
+    const owner = marriagesOf(family.husband!).length >= marriagesOf(family.wife!).length ? family.husband! : family.wife!;
+    const list = marriagesOf(owner);
+    const N = list.length;
+    const idx = Math.max(0, list.indexOf(family.id));
+    const level = marriageLevel(style, idx, top, N, h);
+    const anchor = gapsAt(x1, x2, level)[0];
+    const x = anchor ? (anchor[0] + anchor[1]) / 2 : (x1 + x2) / 2; // спуск идёт с нити союза
+    return { a, b, owner, top, x1, x2, N, idx, level, x };
+  };
+
   let paths = "";
   let marks = "";
   const folds: FoldAnchor[] = [];
@@ -81,6 +102,10 @@ export function drawLinks(
   // человек из двух семей (родной и приёмной) стоит под одной — спуск только от неё
   const primary = primaryFamilies(tree);
   const PEDI = new Map<number, string>();
+  const slots = busSlots(tree, {
+    folded, visible, primary, persons, pos, cardWidth: w, gap: S.descentGap,
+    union: (family) => unionOf(family),
+  });
 
   for (const family of tree.families) {
     const parents = [family.husband, family.wife].filter((id): id is number => id != null && visible(id));
@@ -112,25 +137,13 @@ export function drawLinks(
     let famIndex = 0;
 
     if (parents.length === 2) {
-      const a = pos.get(family.husband!)!;
-      const b = pos.get(family.wife!)!;
-      const top = Math.min(a.y, b.y);
-      const x1 = Math.min(a.x, b.x) + w;
-      const x2 = Math.max(a.x, b.x);
-
-      // очередь союза считается у того, у кого браков больше
-      const marriagesOf = (id: number) => persons.get(id)?.spouse_families ?? [];
-      const owner = marriagesOf(family.husband!).length >= marriagesOf(family.wife!).length ? family.husband! : family.wife!;
-      const list = marriagesOf(owner);
-      const N = list.length;
-      const idx = Math.max(0, list.indexOf(family.id));
+      const union = unionOf(family);
+      const { a, b, owner, x1, x2, N, idx, level } = union;
       const past = idx < N - 1 || !!family.divorced;
 
-      const level = marriageLevel(style, idx, top, N, h);
       famLevel = level;
       famIndex = idx;
-      const anchor = gapsAt(x1, x2, level)[0];
-      famX = anchor ? (anchor[0] + anchor[1]) / 2 : (x1 + x2) / 2; // спуск идёт с нити союза
+      famX = union.x;
       unions.set(family.id, { x: famX, y: level });
 
       const op = past ? ".72" : "1";
@@ -211,7 +224,7 @@ export function drawLinks(
     }
     if (!kids.length || !parents.length) continue;
     paths += descent(family, parents, kids, pos, {
-      w, h, style, CL, famLevel, famX, famIndex, persons,
+      w, h, style, CL, famLevel, famX, famIndex, persons, slot: slots.get(family.id)?.slot, busFrom: slots.get(family.id)?.from,
       record: (geometry) => descents.set(family.id, geometry),
       fostered: new Set(kids.filter((id) => PEDI.get(id) !== "birth")),
     });
@@ -234,6 +247,8 @@ interface DescentContext {
   famLevel: number | null;
   famX: number | null;
   famIndex: number;
+  slot?: number; // на какой высоте идёт шина выводка: подобрано так, чтобы спуски не пересекались
+  busFrom?: number; // от какого верха отсчитывать шину: общий для всех выводков одного человека
   persons: Map<number, TreePerson>;
   up?: boolean;
   families?: Map<number, TreeFamily>;
@@ -319,7 +334,7 @@ function descent(
   const kidsTop = Math.min(...kids.map((id) => pos.get(id)!.y));
   const multi = c.famX != null ? parents.find((id) => (c.persons.get(id)?.spouse_families.length ?? 0) > 1) : undefined;
   const broods = multi != null ? c.persons.get(multi)!.spouse_families.length || 1 : 1;
-  const bus = kidsTop - 30 - Math.max(0, broods - 1 - c.famIndex) * 34;
+  const bus = (c.busFrom ?? kidsTop) - BUS_DROP - (c.slot ?? Math.max(0, broods - 1 - c.famIndex)) * BUS_STEP;
   const kxs = kids.map((id) => pos.get(id)!.x + c.w / 2);
   const runL = Math.min(px, ...kxs);
   const runR = Math.max(px, ...kxs);
@@ -331,4 +346,112 @@ function descent(
     out += `<path d="M${p.x + c.w / 2} ${bus}V${p.y - S.descentGap}" stroke="${c.CL}" stroke-width="${S.width}" fill="none" stroke-linecap="butt" stroke-linejoin="round"${dash}/>`;
   }
   return out;
+}
+
+interface SlotContext {
+  folded: ReadonlySet<number>;
+  visible: (id: number) => boolean;
+  primary: Map<number, number>;
+  persons: Map<number, TreePerson>;
+  pos: Map<number, Point>;
+  cardWidth: number;
+  gap: number;
+  union: (family: TreeFamily) => { level: number; x: number; idx: number };
+}
+
+interface Route {
+  family: number;
+  x: number; // ось спуска от знака союза
+  top: number; // уровень нити союза
+  kidsTop: number;
+  kids: { x: number; y: number }[];
+  slot: number;
+}
+
+// Высоты шин у многобрачного. У каждого брака свой выводок и своя шина; раньше высота шла строго по очереди
+// брака — первый брак выше всех. Пока дети стоят по порядку под своими узлами, это работает, но стоит наследнику
+// встать под середину ряда (вид «главная ветвь») или выводкам разойтись — спуск одного брака ложится на спуск
+// другого. Поэтому высоты подбираются: перебираем расстановки и берём ту, где спуски не пересекаются и не
+// накладываются. Привычная расстановка проверяется первой и остаётся, если она не хуже остальных.
+function busSlots(tree: ClanTree, c: SlotContext): Map<number, { slot: number; from: number }> {
+  const out = new Map<number, { slot: number; from: number }>();
+  const groups = new Map<number, Route[]>();
+  for (const family of tree.families) {
+    if (family.husband == null || family.wife == null || c.folded.has(family.id)) continue;
+    if (!c.visible(family.husband) || !c.visible(family.wife)) continue;
+    const kids = family.children.filter((id) => c.visible(id) && c.primary.get(id) === family.id);
+    if (!kids.length) continue;
+    // выводки считаются у того из родителей, у кого браков больше одного — как и при отрисовке спуска
+    const multi = [family.husband, family.wife].find((id) => (c.persons.get(id)?.spouse_families.length ?? 0) > 1);
+    if (multi == null) continue;
+    const broods = c.persons.get(multi)!.spouse_families.length;
+    const union = c.union(family);
+    const points = kids.map((id) => ({ x: c.pos.get(id)!.x + c.cardWidth / 2, y: c.pos.get(id)!.y - c.gap }));
+    const route: Route = {
+      family: family.id, x: union.x, top: union.level, kids: points,
+      kidsTop: Math.min(...kids.map((id) => c.pos.get(id)!.y)),
+      slot: Math.max(0, broods - 1 - union.idx),
+    };
+    groups.set(multi, [...(groups.get(multi) ?? []), route]);
+  }
+
+  for (const routes of groups.values()) {
+    if (routes.length < 2) continue;
+    // Шины отсчитываются от общего верха — самого высокого из детей всех браков. С линейкой дат дети стоят
+    // на разной высоте, и отсчёт от своего верха сводил бы шины разных браков почти вплотную.
+    const from = Math.min(...routes.map((r) => r.kidsTop));
+    for (const r of routes) r.kidsTop = from;
+    const usual = routes.map((r) => r.slot);
+    let best = usual;
+    let bestCost = clashes(routes, usual);
+    if (bestCost > 0) {
+      for (const order of permutations(usual)) {
+        const cost = clashes(routes, order);
+        if (cost < bestCost) {
+          best = order;
+          bestCost = cost;
+          if (!cost) break;
+        }
+      }
+    }
+    routes.forEach((r, i) => out.set(r.family, { slot: best[i]!, from }));
+  }
+  return out;
+}
+
+// сколько раз спуски разных выводков пересекают чужую шину или ложатся друг на друга при такой расстановке высот
+function clashes(routes: Route[], slots: number[]): number {
+  const shape = routes.map((r, i) => {
+    const bus = r.kidsTop - BUS_DROP - slots[i]! * BUS_STEP;
+    const xs = [r.x, ...r.kids.map((k) => k.x)];
+    return {
+      bus, left: Math.min(...xs), right: Math.max(...xs),
+      // вертикали: ствол от нити союза до шины и спуски от шины к детям
+      verticals: [{ x: r.x, from: r.top, to: bus }, ...r.kids.map((k) => ({ x: k.x, from: bus, to: k.y }))],
+    };
+  });
+  let count = 0;
+  for (let a = 0; a < shape.length; a++) {
+    for (let b = 0; b < shape.length; b++) {
+      if (a === b) continue;
+      for (const v of shape[a]!.verticals) {
+        const lo = Math.min(v.from, v.to);
+        const hi = Math.max(v.from, v.to);
+        // чужая шина проходит сквозь вертикаль
+        if (v.x >= shape[b]!.left - 1 && v.x <= shape[b]!.right + 1 && shape[b]!.bus > lo + 1 && shape[b]!.bus < hi - 1) count++;
+        // две вертикали разных выводков на одной оси и перекрываются по высоте
+        if (a < b) {
+          for (const u of shape[b]!.verticals) {
+            if (Math.abs(u.x - v.x) < 4 && Math.min(hi, Math.max(u.from, u.to)) - Math.max(lo, Math.min(u.from, u.to)) > 2) count++;
+          }
+        }
+      }
+    }
+  }
+  return count;
+}
+
+function permutations<T>(items: T[]): T[][] {
+  if (items.length <= 1) return [items];
+  return items.flatMap((item, i) => permutations([...items.slice(0, i), ...items.slice(i + 1)]).map((rest) => [item, ...rest]));
 }

@@ -35,6 +35,7 @@ export interface RulerLayout {
   gutter: number; // поле слева под линейку
   top: number;
   scale: number; // пикселей на год для типичного поколения
+  anchor: number; // год человека приходится на эту точку карточки, от верхнего края (середина портрета)
   firstYear: number;
   generations: number[];
   rowY: Map<number, number>;
@@ -344,7 +345,7 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOpti
 }
 
 // По вертикали с линейкой: ярус на медиане поколения, шаг — от типичного интервала между поколениями.
-function rulerTiers(idx: Index, gen: Map<number, number>, gens: number[], height: number) {
+function rulerTiers(idx: Index, gen: Map<number, number>, gens: number[], height: number, anchor: number) {
   const median = new Map<number, number | null>();
   const range = new Map<number, GenerationRange | null>();
   const keep = new Map<number, number>();
@@ -407,6 +408,7 @@ function rulerTiers(idx: Index, gen: Map<number, number>, gens: number[], height
       gutter: RULER_GUTTER,
       top: RULER_TOP,
       scale: base / typicalGap,
+      anchor,
       firstYear: Math.min(...known),
       generations: gens,
       rowY,
@@ -501,7 +503,7 @@ export function layoutTree(tree: ClanTree, metrics: CardMetrics, options: Layout
   let ruler: RulerLayout | null = null;
   const y = new Map<number, number>();
   if (options.ruler) {
-    const tiers = rulerTiers(idx, gen, gens, height);
+    const tiers = rulerTiers(idx, gen, gens, height, metrics.yearAnchor);
     ruler = tiers.ruler;
     for (const [id, x] of xs) xs.set(id, x + RULER_GUTTER);
     shiftByYear(idx, gen, gens, ruler, tiers.keep, height, y);

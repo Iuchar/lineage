@@ -10,7 +10,7 @@ import { layoutTree } from "../layout/layout";
 import { STYLE_METRICS, type StyleName } from "../layout/metrics";
 import standLinks from "./fixtures/stand-links.json";
 import { drawLinks } from "./links";
-import { tickStep } from "./ruler";
+import { generationBands, tickStep, yearToCanvas } from "./ruler";
 import { centreOn, fitAll, keepAnchor, zoomAt } from "./view";
 
 const TREES: Record<string, ClanTree> = {
@@ -43,6 +43,8 @@ const fingerprint = (s: string) => {
   return `${h.toString(16)}:${s.length}`;
 };
 
+// Пять отпечатков «monadh/…/ruler» пересняты 1 октября 2026: шины выводков у многобрачных с линейкой дат
+// теперь отсчитываются от общего верха детей, иначе шины разных браков сходились почти вплотную.
 // Отпечатки сняты со стенда: разметка связей в тёмной теме, оба рода, пять стилей, с линейкой и без.
 describe("связи совпадают со стендом побайтно", () => {
   for (const [key, expected] of Object.entries(standLinks as Record<string, string>)) {
@@ -110,5 +112,100 @@ describe("вид карты", () => {
     expect(tickStep(10, 1)).toBe(5);
     expect(tickStep(10, 0.4)).toBe(10);
     expect(tickStep(10, 0.1)).toBe(50);
+  });
+});
+
+// У многобрачного у каждого брака свой выводок и своя шина. Спуск одного выводка не должен пересекать шину
+// другого и ложиться на чужой ствол — иначе не понять, чей ребёнок. Проверяем на всех, у кого больше одного брака
+// с детьми: во всех стилях, в «стандарте» и в «главной ветви», где наследник встаёт под середину ряда родителя.
+describe("спуски разных браков не пересекаются", () => {
+  const vars = () => new Map<string, string>();
+  const source = TREES.monadh!;
+  const malcolm = source.persons.find((p) => p.given === "Малькольм" && p.birth?.year === 1941)!;
+  const kenneth = source.persons.find((p) => p.given === "Кеннет" && p.birth?.year === 1976)!;
+  // В эталонном файле браки идут как записаны; приложение ставит их по правилу очереди — у Малькольма
+  // первой становится Элспет, мать Кеннета. Именно так его линия ложилась на чужой ствол, поэтому
+  // здесь браки переставлены по году рождения жены, как на карте.
+  const wifeYear = (familyId: number) => {
+    const family = source.families.find((f) => f.id === familyId)!;
+    const wife = source.persons.find((p) => p.id === (family.husband === malcolm.id ? family.wife : family.husband));
+    return wife?.birth?.year ?? 9999;
+  };
+  const tree: ClanTree = {
+    ...source,
+    persons: source.persons.map((p) => p.id === malcolm.id
+      ? { ...p, spouse_families: [...p.spouse_families].sort((a, b) => wifeYear(a) - wifeYear(b)) } : p),
+  };
+  const persons = new Map(tree.persons.map((p) => [p.id, p]));
+
+  const crossings = (style: StyleName, heirs: Set<number>, ruler = false): number => {
+    const layout = layoutTree(tree, STYLE_METRICS[style], { ruler, rootAtBottom: false, heirs });
+    const links = drawLinks(tree, layout, style, (name, fallback) => (vars().get(name) || fallback).trim());
+    let count = 0;
+    for (const person of tree.persons.filter((p) => p.spouse_families.length > 1)) {
+      const routes = person.spouse_families
+        .map((id) => ({ family: tree.families.find((f) => f.id === id)!, geometry: links.descents.get(id) }))
+        .filter((r) => r.geometry)
+        .map((r) => {
+          const kids = r.family.children.filter((c) => persons.has(c)).map((c) => layout.positions.get(c)!);
+          const xs = [r.geometry!.x, ...kids.map((k) => k.x + layout.cardWidth / 2)];
+          return {
+            bus: r.geometry!.bus, left: Math.min(...xs), right: Math.max(...xs),
+            verticals: [{ x: r.geometry!.x, from: r.geometry!.y, to: r.geometry!.bus },
+              ...kids.map((k) => ({ x: k.x + layout.cardWidth / 2, from: r.geometry!.bus, to: k.y }))],
+          };
+        });
+      for (const a of routes) {
+        for (const b of routes) {
+          if (a === b) continue;
+          for (const v of a.verticals) {
+            const lo = Math.min(v.from, v.to);
+            const hi = Math.max(v.from, v.to);
+            if (v.x >= b.left - 1 && v.x <= b.right + 1 && b.bus > lo + 1 && b.bus < hi - 1) count++;
+          }
+        }
+      }
+    }
+    return count;
+  };
+
+  for (const style of Object.keys(STYLE_METRICS) as StyleName[]) {
+    it(`${style}: стандарт и главная ветвь`, () => {
+      expect(crossings(style, new Set())).toBe(0);
+      expect(crossings(style, new Set([malcolm.id, kenneth.id]))).toBe(0);
+      // с линейкой дат дети стоят на разной высоте — шины всё равно не должны сходиться и пересекаться
+      expect(crossings(style, new Set(), true)).toBe(0);
+      expect(crossings(style, new Set([malcolm.id, kenneth.id]), true)).toBe(0);
+    });
+  }
+});
+
+describe("линейка дат", () => {
+  const tree = TREES.gleann!;
+  const layout = layoutTree(tree, STYLE_METRICS.gobelen, { ruler: true, rootAtBottom: false });
+  const ruler = layout.ruler!;
+
+  it("год человека приходится на середину портрета, а не на край карточки", () => {
+    const morag = tree.persons.find((p) => p.given === "Мораг" && p.birth?.year === 1860)!;
+    const top = layout.positions.get(morag.id)!.y;
+    expect(Math.abs(yearToCanvas(ruler, 1860) - (top + STYLE_METRICS.gobelen.yearAnchor))).toBeLessThan(2);
+  });
+
+  it("полосы поколений идут сплошь: конец одного — начало следующего", () => {
+    const bands = [...generationBands(ruler).values()];
+    expect(bands.length).toBe(9); // у десятого поколения годов нет
+    for (let i = 1; i < bands.length; i++) expect(bands[i]!.from).toBe(bands[i - 1]!.to);
+    // шестое поколение — не пять лет между крайними рождениями, а промежуток до соседей
+    const sixth = bands[5]!;
+    expect([sixth.from, sixth.to]).toEqual([1841, 1877]);
+  });
+
+  it("люди своего поколения лежат внутри его полосы или у самой границы", () => {
+    const bands = generationBands(ruler);
+    for (const [g, band] of bands) {
+      const range = ruler.range.get(g)!;
+      expect(range.min).toBeGreaterThanOrEqual(band.from - 6);
+      expect(range.max).toBeLessThanOrEqual(band.to + 6);
+    }
   });
 });
