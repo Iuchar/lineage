@@ -427,6 +427,8 @@ async function start(root: HTMLElement): Promise<void> {
   cardDock.element.classList.add("cardDock");
   cardDock.body.append(panel.element);
   stage.append(cardDock.element);
+  // выбрали человека или союз, а карточка свёрнута — она раскрывается сама: иначе щелчок выглядит пустым
+  canvas.onPick = () => cardDock.setOpen(true);
   // что сейчас в панели: союз или человек
   const showCurrent = () => {
     if (!tree) return panel.clear();

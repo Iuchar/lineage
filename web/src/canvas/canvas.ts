@@ -88,6 +88,8 @@ export class TreeCanvas {
   editing = false;
   onPlus: (kind: PlusKind, personId: number, at: DOMRect) => void = () => {};
   onFamily: (familyId: number) => void = () => {};
+  // человек или союз выбран действием, а не перерисовкой после правки: по этому знаку открывается карточка
+  onPick: () => void = () => {};
 
   constructor(host: HTMLElement) {
     this.viewport = document.createElement("div");
@@ -254,6 +256,7 @@ export class TreeCanvas {
     this.selectedFamily = null;
     this.render();
     this.onSelect(id);
+    if (id != null) this.onPick();
   }
 
   // выбрать союз: знак подсвечен кольцом, человек не выбран
@@ -262,6 +265,7 @@ export class TreeCanvas {
     this.selectedFamily = id;
     this.render();
     this.onFamily(id);
+    this.onPick();
   }
 
   fit(): void {
