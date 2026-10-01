@@ -7,6 +7,10 @@
 1 SOUR FAMYTALE
 2 NAME FamyTale
 2 VERS 5.5.1
+1 _TAGDEF Воин
+2 _COLOR винный
+1 _TAGDEF Что-то там
+2 _COLOR винный
 0 @I51@ INDI
 1 NAME Хэмиш /Монад Кройве/
 2 GIVN Хэмиш
@@ -20,6 +24,7 @@
 2 TYPE Comment
 1 FAMS @F1@
 1 FAMC @F34@
+1 _HEIR Y
 0 @I52@ INDI
 1 NAME Изабелла /Монад Кройве/
 2 GIVN Изабелла
@@ -42,6 +47,7 @@
 2 DATE 1898
 1 FAMS @F2@
 1 FAMC @F1@
+1 _HEIR Y
 0 @I54@ INDI
 1 NAME Хелен /Монад Кройве/
 2 GIVN Хелен
@@ -139,6 +145,7 @@
 1 FAMS @F7@
 1 FAMS @F8@
 1 FAMC @F2@
+1 _HEIR Y
 0 @I512@ INDI
 1 NAME Мюриэль /Монад Кройве/
 2 GIVN Мюриэль
@@ -222,6 +229,7 @@
 2 DATE 1962
 1 FAMS @F11@
 1 FAMC @F7@
+1 _HEIR Y
 0 @I519@ INDI
 1 NAME Энн /Монад Кройве/
 2 GIVN Энн
@@ -316,6 +324,7 @@
 2 DATE 2013
 1 FAMS @F15@
 1 FAMC @F11@
+1 _HEIR Y
 0 @I527@ INDI
 1 NAME Мэри /Монад Кройве/
 2 GIVN Мэри
@@ -339,6 +348,7 @@
 1 FAMS @F16@
 1 FAMS @F17@
 1 FAMC @F11@
+1 _BURNT Y
 0 @I529@ INDI
 1 NAME Марджори /Монад Кройве/
 2 GIVN Марджори
@@ -452,6 +462,7 @@
 1 FAMS @F22@
 1 FAMS @F23@
 1 FAMC @F15@
+1 _HEIR Y
 0 @I539@ INDI
 1 NAME Элспет /Монад Кройве/
 2 GIVN Элспет
@@ -626,6 +637,7 @@
 2 DATE 1976
 1 FAMS @F30@
 1 FAMC @F23@
+1 _HEIR Y
 0 @I556@ INDI
 1 NAME Финлэй /Монад Кройве/
 2 GIVN Финлэй
@@ -803,6 +815,7 @@
 1 EVEN Отец Хэмиша
 2 TYPE Comment
 1 FAMS @F34@
+1 _PORTRAIT none
 0 @I576@ INDI
 1 NAME Бригит /Монад Кройве/
 2 GIVN Бригит
@@ -829,6 +842,8 @@
 2 TYPE Comment
 1 FAMS @F35@
 1 FAMC @F34@
+1 _TAG Воин
+1 _TAG Что-то там
 0 @I578@ INDI
 1 NAME Колин /Монад Кройве из Ранноха/
 2 GIVN Колин
