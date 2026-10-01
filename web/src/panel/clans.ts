@@ -56,6 +56,13 @@ export class ClanRail {
       const row = target.closest<HTMLElement>("[data-clan]");
       if (row) this.actions.pick(Number(row.dataset.clan));
     });
+    this.element.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const row = e.target instanceof HTMLElement && e.target.matches("[data-clan]") ? e.target : null;
+      if (!row) return;
+      e.preventDefault();
+      this.actions.pick(Number(row.dataset.clan));
+    });
     this.element.addEventListener("input", (e) => {
       const input = e.target as HTMLInputElement;
       if (input.dataset.rail !== "q") return;
@@ -116,7 +123,9 @@ export class ClanRail {
     found.sort((a, b) => this.sort === "size" ? b.persons - a.persons
       : this.sort === "status" ? order(a) - order(b) || a.name.localeCompare(b.name, "ru")
         : a.name.localeCompare(b.name, "ru"));
-    const row = (c: ClanSummary) => `<div class="row${c.id === this.current ? " on" : ""}" data-clan="${c.id}">` +
+    // строка рода — кнопка: до неё доходит Tab, Enter и пробел открывают дерево
+    const row = (c: ClanSummary) => `<div class="row${c.id === this.current ? " on" : ""}" data-clan="${c.id}" role="button" ` +
+      `tabindex="0"${c.id === this.current ? ' aria-current="true"' : ""} aria-label="${escapeHtml(c.name)}, людей: ${c.persons}">` +
       `<b>${escapeHtml(c.name)}</b><small>${c.persons}</small>` +
       (this.editing ? `<i class="railShare" data-share="${c.id}" title="Ссылка зрителям на это дерево">⋯</i>` : "") +
       "</div>";

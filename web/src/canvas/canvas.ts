@@ -54,6 +54,7 @@ export class TreeCanvas {
   private size = { width: 1000, height: 1000 };
   private view: View = { k: 1, x: 0, y: 0 };
   private drag: { sx: number; sy: number; vx: number; vy: number; moved: number } | null = null;
+  private keyFocus: number | null = null; // кому вернуть фокус после перерисовки: её вызвала клавиша
 
   selected: number | null = null;
   // выбранный союз — щелчком по его знаку или ссылкой из панели; человек тогда не выбран
@@ -360,7 +361,59 @@ export class TreeCanvas {
       this.surface.style.setProperty("--lampx", `${lamp.x}px`);
       this.surface.style.setProperty("--lampy", `${lamp.y}px`);
     }
+    this.makeReachable();
     this.apply();
+  }
+
+  // Карточки доступны с клавиатуры. Их разметка сверена с эталоном, поэтому роль и подпись вешаются уже на
+  // готовые узлы. В очереди Tab стоит одна карточка — выбранная или первая; по остальным ходят стрелками,
+  // иначе до панели пришлось бы прошагать весь род.
+  private makeReachable(): void {
+    const people = new Map((this.tree?.persons ?? []).map((p) => [p.id, p]));
+    const nodes = [...this.surface.querySelectorAll<HTMLElement>(".node[data-id]")];
+    const door = this.keyFocus ?? this.selected ?? (nodes[0] ? Number(nodes[0].dataset.id) : null);
+    for (const node of nodes) {
+      const id = Number(node.dataset.id);
+      const person = people.get(id);
+      node.tabIndex = id === door ? 0 : -1;
+      node.setAttribute("role", "button");
+      node.setAttribute("aria-pressed", String(id === this.selected));
+      if (person) {
+        const name = [person.given, person.surname].filter(Boolean).join(" ") || "имя не записано";
+        const years = [person.birth?.year, person.death?.year].map((y) => y ?? "").join("–");
+        node.setAttribute("aria-label", years === "–" ? name : `${name}, ${years}`);
+      }
+    }
+    if (this.keyFocus != null) {
+      this.surface.querySelector<HTMLElement>(`.node[data-id="${this.keyFocus}"]`)?.focus({ preventScroll: true });
+      this.keyFocus = null;
+    }
+  }
+
+  // ближайшая карточка в сторону стрелки: сначала расстояние по ходу, поперечное считается вдвое дороже
+  private neighbour(from: HTMLElement, key: string): HTMLElement | null {
+    const at = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    };
+    const here = at(from);
+    let best: HTMLElement | null = null;
+    let bestCost = Infinity;
+    for (const node of this.surface.querySelectorAll<HTMLElement>(".node[data-id]")) {
+      if (node === from) continue;
+      const p = at(node);
+      const dx = p.x - here.x;
+      const dy = p.y - here.y;
+      const along = key === "ArrowRight" ? dx : key === "ArrowLeft" ? -dx : key === "ArrowDown" ? dy : -dy;
+      const across = key === "ArrowRight" || key === "ArrowLeft" ? Math.abs(dy) : Math.abs(dx);
+      if (along <= 1) continue;
+      const cost = along + across * 2;
+      if (cost < bestCost) {
+        bestCost = cost;
+        best = node;
+      }
+    }
+    return best;
   }
 
   private pollen: string | null = null;
@@ -471,6 +524,7 @@ export class TreeCanvas {
   private apply(): void {
     const { k, x, y } = this.view;
     this.surface.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${k.toFixed(3)})`;
+    this.surface.style.setProperty("--unzoom", (1 / k).toFixed(3)); // рамка фокуса держит толщину на любом масштабе
     this.drawBackdrop();
     this.drawRuler();
     this.drawPluses();
@@ -582,6 +636,36 @@ export class TreeCanvas {
     };
     vp.addEventListener("pointerup", endDrag);
     vp.addEventListener("pointercancel", endDrag);
+
+    // клавиатура: Enter и пробел выбирают карточку, стрелки ведут к соседней
+    vp.addEventListener("keydown", (e) => {
+      const node = e.target instanceof HTMLElement && e.target.matches(".node[data-id]") ? e.target : null;
+      if (!node) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        this.keyFocus = Number(node.dataset.id);
+        this.select(this.keyFocus);
+      } else if (e.key.startsWith("Arrow")) {
+        const next = this.neighbour(node, e.key);
+        if (!next) return;
+        e.preventDefault();
+        node.tabIndex = -1;
+        next.tabIndex = 0;
+        next.focus({ preventScroll: true });
+      }
+    });
+    // карта ездит сдвигом, а браузер тянет сфокусированное в поле зрения прокруткой: прокрутку возвращаем
+    // и ведём карту сами, если карточка за краем
+    vp.addEventListener("focusin", (e) => {
+      vp.scrollLeft = 0;
+      vp.scrollTop = 0;
+      const node = e.target instanceof HTMLElement && e.target.matches(".node[data-id]") ? e.target : null;
+      if (!node) return;
+      const box = vp.getBoundingClientRect();
+      const r = node.getBoundingClientRect();
+      const seen = r.left >= box.left && r.right <= box.right && r.top >= box.top && r.bottom <= box.bottom;
+      if (!seen) this.centreOnPerson(Number(node.dataset.id));
+    });
 
     window.addEventListener("resize", () => this.drawRuler());
   }
