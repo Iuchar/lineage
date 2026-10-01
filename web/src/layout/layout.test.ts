@@ -155,35 +155,34 @@ describe("поколения", () => {
   });
 });
 
-// Зрителю сервер отдаёт не годы рождения, а место по старшинству: годы ему видны не все.
-// Дерево при этом должно стоять точно так же, как у редактора, — иначе род у гостя разъезжается в другую форму.
+// Зрителю, которому даты закрыты, сервер отдаёт годы служебными полями — отдельно от дат на карточке.
+// Дерево при этом должно стоять точно так же, как у редактора: скрываются данные, а не расположение людей.
 describe("зритель без дат видит ту же раскладку", () => {
-  const withoutDates = (tree: ClanTree): ClanTree => {
-    const year = (p: ClanTree["persons"][number]) => p.birth?.year ?? p.birth?.end_year ?? null;
-    const place = new Map([...new Set(tree.persons.map(year).filter((y): y is number => y != null))]
-      .sort((a, b) => a - b).map((y, at) => [y, at]));
-    return {
-      ...tree,
-      persons: tree.persons.map((p) => {
-        const y = year(p);
-        return { ...p, birth: null, death: null, birth_rank: y == null ? null : place.get(y)! };
-      }),
-    };
-  };
+  const year = (date: { year?: number | null; end_year?: number | null } | null | undefined) =>
+    date ? (date.year ?? date.end_year ?? null) : null;
+  const withoutDates = (tree: ClanTree): ClanTree => ({
+    ...tree,
+    persons: tree.persons.map((p) => ({
+      ...p, birth: null, death: null, layout_birth: year(p.birth), layout_death: year(p.death),
+    })),
+  });
 
   for (const [name, tree] of Object.entries(TREES)) {
-    for (const rootAtBottom of [false, true]) {
-      it(`${name}, основатель ${rootAtBottom ? "снизу" : "сверху"}`, () => {
-        const metrics = STYLE_METRICS.gobelen;
-        const full = layoutTree(tree, metrics, { ruler: false, rootAtBottom });
-        const bare = layoutTree(withoutDates(tree), metrics, { ruler: false, rootAtBottom });
-        expect(bare.width).toBe(full.width);
-        expect([...bare.positions]).toEqual([...full.positions]);
-      });
+    for (const ruler of [false, true]) {
+      for (const rootAtBottom of [false, true]) {
+        it(`${name}, ${ruler ? "с линейкой" : "без линейки"}, основатель ${rootAtBottom ? "снизу" : "сверху"}`, () => {
+          const metrics = STYLE_METRICS.gobelen;
+          const full = layoutTree(tree, metrics, { ruler, rootAtBottom });
+          const bare = layoutTree(withoutDates(tree), metrics, { ruler, rootAtBottom });
+          expect(bare.width).toBe(full.width);
+          expect(bare.height).toBe(full.height);
+          expect([...bare.positions]).toEqual([...full.positions]);
+        });
+      }
     }
   }
 
-  it("без места по старшинству дерево действительно разъезжается — проверка самой проверки", () => {
+  it("без служебных годов дерево действительно разъезжается — проверка самой проверки", () => {
     const tree = TREES.monadh!;
     const blind: ClanTree = { ...tree, persons: tree.persons.map((p) => ({ ...p, birth: null, death: null })) };
     const full = layoutTree(tree, STYLE_METRICS.gobelen, { ruler: false, rootAtBottom: false });

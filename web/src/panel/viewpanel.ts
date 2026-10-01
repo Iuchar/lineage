@@ -15,6 +15,8 @@ export interface ViewState {
   surnames: "off" | "maiden" | "married";
   portraits: boolean;
   ruler: boolean;
+  dates: boolean; // показаны ли годы на карточках
+  datesLocked: boolean; // у общего зрителя дат нет — флажок выключен и не нажимается
 }
 
 export interface ViewActions {
@@ -25,6 +27,7 @@ export interface ViewActions {
   surnames: (mode: "off" | "maiden" | "married") => void;
   portraits: (on: boolean) => void;
   ruler: (on: boolean) => void;
+  dates: (on: boolean) => void;
   foldAll: () => void;
   unfoldAll: () => void;
   closed: () => void;
@@ -67,6 +70,7 @@ export class ViewPanel {
       const input = e.target as HTMLInputElement;
       if (input.dataset.flag === "portraits") this.actions.portraits(input.checked);
       if (input.dataset.flag === "ruler") this.actions.ruler(input.checked);
+      if (input.dataset.flag === "dates") this.actions.dates(input.checked);
     });
     host.append(this.element);
   }
@@ -107,7 +111,10 @@ export class ViewPanel {
       '<div class="sec"><span class="lbl2">карточки</span>' +
       this.seg("surnames", [["off", "без фамилий"], ["maiden", "девичья"], ["married", "после брака"]], s.surnames) +
       `<label class="chk2"><input type="checkbox" data-flag="portraits"${s.portraits ? " checked" : ""}> портреты</label>` +
-      `<label class="chk2"><input type="checkbox" data-flag="ruler"${s.ruler ? " checked" : ""}> линейка дат</label></div>`;
+      `<label class="chk2"><input type="checkbox" data-flag="ruler"${s.ruler ? " checked" : ""}> линейка дат</label>` +
+      // даты на карточках: общему зрителю они закрыты, поэтому у него флажок выключен и заблокирован
+      `<label class="chk2${s.datesLocked ? " off" : ""}"${s.datesLocked ? ' title="Даты видны только своим для рода и редактору"' : ""}>` +
+      `<input type="checkbox" data-flag="dates"${s.dates && !s.datesLocked ? " checked" : ""}${s.datesLocked ? " disabled" : ""}> даты</label></div>`;
   }
 
 }

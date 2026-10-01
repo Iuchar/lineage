@@ -309,6 +309,11 @@ async function start(root: HTMLElement): Promise<void> {
       if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
     },
     ruler: (on) => canvas.update({ ruler: on }),
+    dates: (on) => {
+      datesWanted = on;
+      syncDates();
+      drawViewPanel();
+    },
     foldAll: () => {
       canvas.foldAll();
       drawLegend();
@@ -358,8 +363,16 @@ async function start(root: HTMLElement): Promise<void> {
       surnames: canvas.surnames ?? "off",
       portraits: canvas.portraits,
       ruler: canvas.state.ruler,
+      dates: datesWanted,
+      datesLocked: !datesAllowed(),
     });
   };
+  // Даты на карточках. Общему зрителю они закрыты — у него флажок выключен и заблокирован;
+  // родовому зрителю и редактору даты показаны, пока они сами их не уберут.
+  let datesWanted = true;
+  const datesAllowed = () => look === "edit" || look === "clan" ||
+    (look === null && Boolean(me.access?.some((a) => a.clan_id === currentClan)));
+  const syncDates = () => canvas.showDates(datesAllowed() && datesWanted);
   const viewDock = new Dock({ key: "view", title: "Вид", icon: "view", side: "right", width: 272, open: false, changed: redrawMap });
   viewDock.element.classList.add("viewDock");
   viewDock.body.append(viewPanel.element);
@@ -575,6 +588,7 @@ async function start(root: HTMLElement): Promise<void> {
     void journal.refresh();
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
     drawRibbon();
+    syncDates();
   };
 
   // новый род с нуля открывается сразу, как и загруженный файлом

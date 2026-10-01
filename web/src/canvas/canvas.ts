@@ -164,6 +164,11 @@ export class TreeCanvas {
   }
 
   // показать или спрятать портреты; вид остаётся на месте
+  // годы на карточках: строка прячется, но место держит — схема от флажка не меняется
+  showDates(on: boolean): void {
+    this.surface.classList.toggle("noDates", !on);
+  }
+
   showPortraits(on: boolean): void {
     this.portraits = on;
     this.keepView(() => this.render());

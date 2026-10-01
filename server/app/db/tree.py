@@ -43,8 +43,11 @@ class TreePerson(BaseModel):
     is_branch_stub: bool
     birth: LifeDate | None
     death: LifeDate | None
-    # место по старшинству среди людей рода — зрителю вместо года: раскладке нужен порядок, а не сама дата
-    birth_rank: int | None = None
+    # Годы для раскладки — служебные: зрителю, которому даты закрыты, они приходят сюда вместо birth и death.
+    # На карточке и в панели их нет, в выгрузку они не попадают; нужны они затем, чтобы дерево у зрителя
+    # стояло точно так же, как у редактора: порядок по старшинству, высота на линейке дат, оценка для людей без года.
+    layout_birth: int | None = None
+    layout_death: int | None = None
     parent_families: list[int]
     spouse_families: list[int]  # в порядке браков
     # служебные теги приложения из записи человека (app/gedcom/meta.py)

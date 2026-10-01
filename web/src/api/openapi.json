@@ -4081,7 +4081,7 @@
               }
             ]
           },
-          "birth_rank": {
+          "layout_birth": {
             "anyOf": [
               {
                 "type": "integer"
@@ -4090,7 +4090,18 @@
                 "type": "null"
               }
             ],
-            "title": "Birth Rank"
+            "title": "Layout Birth"
+          },
+          "layout_death": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout Death"
           },
           "parent_families": {
             "items": {

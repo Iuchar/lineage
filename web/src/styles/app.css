@@ -432,3 +432,7 @@ select option { background: var(--ch-bg); color: var(--ch-fg); }
 .foot a { color: var(--ch-acc); text-decoration: none; white-space: nowrap; }
 .foot a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .foot .ico { width: .85em; height: .85em; margin-left: .3em; vertical-align: -.05em; opacity: .8; }
+
+/* флажок «даты» снят: строка годов на карточке невидима, но место держит — схема от этого не меняется */
+.canvas.noDates .node .yr { visibility: hidden; }
+.viewPanel .chk2.off { opacity: .5; cursor: default; }

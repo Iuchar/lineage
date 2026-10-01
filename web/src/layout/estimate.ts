@@ -8,8 +8,9 @@ import type { ClanTree, TreePerson } from "../api/types";
 const MIN_PARENT_AGE = 15; // моложе родителем не становятся
 const GENERATION = 30; // типичный разрыв между родителем и ребёнком, когда граница только одна
 
+// у зрителя, которому даты закрыты, годы приходят служебными полями layout_birth и layout_death
 const yearOf = (person: TreePerson | undefined): number | null =>
-  person?.birth ? (person.birth.year ?? person.birth.end_year ?? null) : null;
+  person?.layout_birth ?? (person?.birth ? (person.birth.year ?? person.birth.end_year ?? null) : null);
 
 const median = (values: number[]): number => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -40,7 +41,7 @@ export function estimateBirthYears(tree: ClanTree): Map<number, number> {
 
     const low = parents.length ? Math.max(...parents) + MIN_PARENT_AGE : null;
     const beforeChildren = children.length ? Math.min(...children) - MIN_PARENT_AGE : null;
-    const death = person.death ? (person.death.year ?? person.death.end_year ?? null) : null;
+    const death = person.layout_death ?? (person.death ? (person.death.year ?? person.death.end_year ?? null) : null);
     const high = [beforeChildren, death].filter((y): y is number => y != null).reduce<number | null>(
       (a, b) => (a == null ? b : Math.min(a, b)), null);
     const clamp = (year: number) => Math.min(high ?? year, Math.max(low ?? year, year));
