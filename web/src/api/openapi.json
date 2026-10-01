@@ -248,6 +248,43 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Post Clan",
+        "description": "Новый род с нуля: имя рода и первый человек.",
+        "operationId": "post_clan_api_clans_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClanStart"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClanSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/clans/{clan_id}/tree": {
@@ -1948,6 +1985,28 @@
         ],
         "title": "ClanMatch"
       },
+      "ClanStart": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "plain"
+          },
+          "person": {
+            "$ref": "#/components/schemas/FirstPerson"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "person"
+        ],
+        "title": "ClanStart"
+      },
       "ClanStatus": {
         "properties": {
           "status": {
@@ -2306,6 +2365,37 @@
           "now"
         ],
         "title": "FieldChange"
+      },
+      "FirstPerson": {
+        "properties": {
+          "given": {
+            "type": "string",
+            "title": "Given",
+            "default": ""
+          },
+          "surname": {
+            "type": "string",
+            "title": "Surname",
+            "default": ""
+          },
+          "sex": {
+            "type": "string",
+            "enum": [
+              "M",
+              "F",
+              "U"
+            ],
+            "title": "Sex",
+            "default": "U"
+          },
+          "birth": {
+            "type": "string",
+            "title": "Birth",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "FirstPerson"
       },
       "HTTPValidationError": {
         "properties": {

@@ -86,12 +86,12 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .canvas.backdrop::after { display: none; }
 
 /* ── шапка: слева род и поиск, справа масштаб, панели и файлы ── */
-.bar .clanTitle { display: flex; align-items: baseline; gap: 9px; flex: none; width: clamp(200px, 27vw, 360px); min-width: 0; }
-.bar .clanTitle b { flex: none; font-family: var(--font, 'Cormorant Garamond', serif); font-size: 18px; line-height: 1.05;
+.bar .clanTitle { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.bar .clanTitle b { flex: none; font-family: var(--font, 'Cormorant Garamond', serif); font-size: 25px; line-height: 1.05;
   font-weight: 500; color: var(--ch-fg); letter-spacing: .02em; }
 .bar .clanStatus { font: 400 11px/1.2 'IBM Plex Mono', monospace; color: var(--ch-mut); letter-spacing: .02em; 
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bar .statusPick { flex: 1; min-width: 0; max-width: 240px; background: var(--ch-btn); color: var(--ch-fg); border: 1px solid var(--ch-edge);
+.bar .statusPick { max-width: 100%; background: var(--ch-btn); color: var(--ch-fg); border: 1px solid var(--ch-edge);
   border-radius: 5px; font: 400 11px 'Golos Text', sans-serif; padding: 2px 4px; }
 .bar .lbl2 { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ch-mut); }
 .bar .topBtn { border: 1px solid var(--ch-edge); background: var(--ch-btn); color: var(--ch-fg); border-radius: 6px; padding: 6px 11px;
@@ -248,7 +248,7 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .gateOff { border: 1px solid var(--ch-edge); background: var(--ch-btn); color: var(--ch-fg); border-radius: 6px;
   padding: 7px 12px; font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; }
 /* пока не вошли, «Правка» выглядит доступной, но сначала спросит имя и пароль */
-.bar .grp.locked .sw button[data-value=edit] { opacity: .7; }
+.bar .grp.locked .sw button[data-value=edit] { display: none; }
 
 /* строка дерева: «⋯» открывает ссылку зрителям, появляется только в правке */
 .rail .row { position: relative; }
@@ -301,3 +301,120 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 /* иконка в строке текста: размер от кегля, сидит на базовой линии, от подписи отделена пробелом */
 .ico { width: 1.2em; height: 1.2em; flex: none; vertical-align: -.22em; }
 .ico.lead { margin-right: .4em; }
+
+/* ── шапка по макету «шапка-4» ── */
+/* строка 1: три колонки, поиск стоит по центру окна и не ездит, какой бы длины ни было имя рода */
+.bar .row.top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, 420px) minmax(0, 1fr);
+  align-items: center; gap: 20px; padding: 10px 16px; }
+.bar .row.top .search { max-width: none; min-width: 0; }
+@media (max-width: 760px) {
+  .bar .row.top { grid-template-columns: minmax(0, 1fr) auto; }
+  .bar .row.top .search { grid-column: 1 / -1; grid-row: 2; }
+}
+/* правые стороны строк 2 и 3 собраны одной сеткой: ссылка, черта, группа. Ширины равны —
+   «Загрузить» стоит под «Выгрузить», журнал под переключателем режима */
+.bar .tools .barSide.right > .topLink { min-width: 112px; text-align: right; }
+.bar .tools .barSide.right > .grp { width: 250px; justify-content: flex-end; }
+.bar .tools .barSide.right > .grp > .sw { width: 100%; }
+.bar .tools .barSide.right > .grp > .sw > button { flex: 1 1 0; white-space: nowrap; padding-left: 6px; padding-right: 6px; }
+.bar .tools .barSide.right > .grp > .sw > button[aria-label] { flex: 0 0 38px; } /* повтор — одна иконка */
+/* до входа редактора режим один: кнопка «Просмотр» занимает свою половину */
+.bar .tools .barSide.right > .grp.locked > .sw { width: 50%; }
+/* строка редактора (Т3): темнее второй, акцентная полоса слева и слово «редактор» */
+.bar .tools .row.editRow { background: color-mix(in srgb, var(--ch-bg) 82%, #000); border-top-color: var(--ch-edge);
+  box-shadow: inset 3px 0 0 var(--acc); }
+.bar .editorMark { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ch-acc); }
+/* на светлой теме затемнение теряется — строка подкрашивается акцентом и отбивается акцентной чертой */
+body[data-theme=light] .bar .tools .row.editRow { background: color-mix(in srgb, var(--acc) 15%, var(--ch-bg));
+  border-top: 1px solid color-mix(in srgb, var(--acc) 45%, transparent); }
+
+/* ── доки: общая рамка боковых панелей ── */
+.mapCol { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mapCol > .viewport { flex: 1; min-height: 0; }
+.dock { flex: none; display: flex; flex-direction: column; position: relative; min-height: 0;
+  background: var(--ch-bg); color: var(--ch-fg); }
+.dock.left { border-right: 1px solid var(--ch-edge); }
+.dock.right { border-left: 1px solid var(--ch-edge); }
+.dock.cardDock { order: 8; }
+.dock.viewDock { order: 9; }
+.dock[hidden] { display: none; }
+.dockHead { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px;
+  border-bottom: 1px solid var(--ch-edge); }
+.dockHead b { flex: 1; font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ch-acc); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dockBtn { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid var(--ch-edge);
+  border-radius: 6px; background: var(--ch-btn); color: var(--ch-fg); cursor: pointer; padding: 0; }
+.dockBtn:hover { border-color: var(--ch-acc); }
+.dockBody { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.dockBody > * { flex: 1; min-height: 0; width: auto; border: 0; overflow: auto; order: 0; }
+/* свёрнутый док — полоска: иконка и название по вертикали; вся полоска нажимается */
+.dockStrip { display: none; }
+.dock.mini { width: 40px; }
+.dock.mini > .dockHead, .dock.mini > .dockBody, .dock.mini > .dockGrip { display: none; }
+.dock.mini > .dockStrip { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0;
+  border: 0; background: none; color: var(--ch-mut); cursor: pointer; }
+.dock.mini > .dockStrip:hover { color: var(--ch-fg); }
+.dock.mini > .dockStrip:hover .dockBtn { border-color: var(--ch-acc); }
+.dockStrip em { font: 500 10px/1 'IBM Plex Mono', monospace; font-style: normal; letter-spacing: .16em; text-transform: uppercase;
+  writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
+/* ручка растяжки: тонкая полоса на границе, видна при наведении */
+.dockGrip { position: absolute; top: 0; bottom: 0; width: 9px; cursor: col-resize; z-index: 6; touch-action: none; }
+.dock.left > .dockGrip { right: -5px; }
+.dock.right > .dockGrip { left: -5px; }
+.dockGrip::after { content: ""; position: absolute; top: 50%; left: 3px; width: 3px; height: 38px; margin-top: -19px; border-radius: 2px;
+  background: color-mix(in srgb, var(--ch-fg) 26%, transparent); }
+.dockGrip:hover::after, .dock.resizing > .dockGrip::after { background: var(--ch-acc); height: 64px; margin-top: -32px; }
+.dock.resizing { user-select: none; }
+/* столбец родов внутри дока: своя шапка ему больше не нужна */
+.rail .railAdds { margin-top: 8px; border-top: 1px solid var(--ch-edge); padding-top: 4px; display: flex; flex-direction: column; }
+.rail .railAdds .railAdd { margin-top: 0; border-top: 0; }
+
+/* ── окно «Новая родословная»: то же окно входа, только шире и с парами полей ── */
+.gateBox.wide { width: 380px; }
+.gateBox select { width: 100%; }
+.gateTwo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
+.gateTwo > .sw { margin-bottom: 10px; }
+.gateTwo > .sw button { flex: 1; padding: 9px 6px; }
+.gateRule { border-top: 1px solid var(--ch-edge); margin: 6px 0 12px; }
+.gateLbl { display: block; font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ch-acc); margin-bottom: 10px; }
+
+/* ── списки и флажки в красках стиля вместо системных ── */
+body[data-theme=dark] { color-scheme: dark; }
+body[data-theme=light] { color-scheme: light; }
+input[type=checkbox] { appearance: none; -webkit-appearance: none; flex: none; width: 16px; height: 16px; margin: 0;
+  display: inline-grid; place-content: center; vertical-align: -3px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--ch-fg, currentColor) 42%, transparent); border-radius: 4px;
+  background: var(--ch-btn, transparent); }
+input[type=checkbox]::after { content: ""; width: 9px; height: 5px; margin-top: -2px;
+  border-left: 2px solid var(--ch-onfg, #fff); border-bottom: 2px solid var(--ch-onfg, #fff);
+  transform: rotate(-45deg) scale(0); }
+input[type=checkbox]:checked { background: var(--ch-on, #c8a44e); border-color: var(--ch-on, #c8a44e); }
+input[type=checkbox]:checked::after { transform: rotate(-45deg) scale(1); }
+input[type=checkbox]:disabled { opacity: .45; cursor: default; }
+
+select { appearance: none; -webkit-appearance: none; cursor: pointer; max-width: 100%;
+  font: 500 11.5px/1.25 'Golos Text', sans-serif; color: var(--ch-fg); background-color: var(--ch-btn);
+  border: 1px solid var(--ch-edge); border-radius: 6px; padding: 6px 28px 6px 10px; }
+/* стрелка списка рисуется двумя косыми заливками: так она берёт цвет темы. Правила панелей задают списку
+   свой фон целиком, поэтому здесь нужен перевес */
+select { background-image: linear-gradient(45deg, transparent 50%, var(--ch-mut) 50%),
+    linear-gradient(135deg, var(--ch-mut) 50%, transparent 50%) !important;
+  background-repeat: no-repeat !important; background-size: 5px 5px !important;
+  background-position: calc(100% - 15px) calc(50% + 1px), calc(100% - 10px) calc(50% + 1px) !important; }
+select:hover, select:focus-visible { border-color: var(--ch-acc); }
+select option { background: var(--ch-bg); color: var(--ch-fg); }
+/* где браузер умеет — выпадающая часть тоже своя: рамка, тень, отметка выбранного */
+@supports (appearance: base-select) {
+  select, ::picker(select) { appearance: base-select; }
+  select { background-image: none !important; padding-right: 10px; display: inline-flex; align-items: center; gap: 8px; }
+  select::picker-icon { color: var(--ch-mut); margin-left: auto; }
+  ::picker(select) { margin-top: 4px; padding: 4px; border: 1px solid var(--ch-edge); border-radius: 6px;
+    background: var(--ch-bg); color: var(--ch-fg); box-shadow: 0 14px 30px rgba(0, 0, 0, .4); }
+  select option { display: flex; gap: 8px; padding: 7px 9px; border-radius: 4px; background: none;
+    font: 500 11.5px/1.25 'Golos Text', sans-serif; color: var(--ch-soft); cursor: pointer; }
+  select option:hover, select option:focus-visible { background: var(--ch-btn); color: var(--ch-fg); outline: none; }
+  select option:checked { color: var(--ch-fg); }
+  select option::checkmark { order: 2; margin-left: auto; color: var(--ch-acc); }
+}

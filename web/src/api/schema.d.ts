@@ -107,7 +107,11 @@ export interface paths {
         /** Get Clans */
         get: operations["get_clans_api_clans_get"];
         put?: never;
-        post?: never;
+        /**
+         * Post Clan
+         * @description Новый род с нуля: имя рода и первый человек.
+         */
+        post: operations["post_clan_api_clans_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -690,6 +694,17 @@ export interface components {
             /** Matched */
             matched: number;
         };
+        /** ClanStart */
+        ClanStart: {
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @default plain
+             */
+            status: string;
+            person: components["schemas"]["FirstPerson"];
+        };
         /** ClanStatus */
         ClanStatus: {
             /** Status */
@@ -814,6 +829,30 @@ export interface components {
             was: string;
             /** Now */
             now: string;
+        };
+        /** FirstPerson */
+        FirstPerson: {
+            /**
+             * Given
+             * @default
+             */
+            given: string;
+            /**
+             * Surname
+             * @default
+             */
+            surname: string;
+            /**
+             * Sex
+             * @default U
+             * @enum {string}
+             */
+            sex: "M" | "F" | "U";
+            /**
+             * Birth
+             * @default
+             */
+            birth: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -1649,6 +1688,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClanSummary"][];
+                };
+            };
+        };
+    };
+    post_clan_api_clans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClanStart"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClanSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -1,18 +1,18 @@
-// Столбец родовых деревьев слева от карты: поиск, порядок (имя, люди, статус), счёт людей, загрузка файла.
-// Кнопка «‹» прячет столбец — остаётся полоска «Родовые деревья»; выбор и порядок помнит браузер.
+// Список родословных слева от карты: поиск, порядок (имя, люди, статус), счёт людей, новый род и загрузка файла.
+// Шапку, сворачивание и ширину даёт док (panel/dock.ts); порядок помнит браузер.
 
 import { icon } from "./icons";
 import type { ClanSummary } from "../api/types";
 import { STATUS_NAMES, STATUS_ORDER } from "../canvas/status";
 import { escapeHtml } from "../format";
 
-const HIDDEN_KEY = "rodoslovnye.clans";
 const SORT_KEY = "rodoslovnye.clansSort";
 type Sort = "name" | "size" | "status";
 
 export interface ClanRailActions {
   pick: (clanId: number) => void;
   add: () => void; // загрузить новый род файлом
+  create: () => void; // начать новый род с первого человека
   share: (clanId: number, name: string) => void; // ссылка зрителям на это дерево
 }
 
@@ -21,25 +21,23 @@ export class ClanRail {
   private clans: ClanSummary[] = [];
   private current = 0;
   private query = "";
-  private hidden = false;
   private sort: Sort = "name";
   private editing = false; // ссылку зрителям выдаёт только редактор
 
   constructor(private readonly actions: ClanRailActions) {
     this.element = document.createElement("aside");
     this.element.className = "rail";
-    this.element.setAttribute("aria-label", "Родовые деревья");
+    this.element.setAttribute("aria-label", "Родословные");
     try {
-      this.hidden = localStorage.getItem(HIDDEN_KEY) === "off";
       const sort = localStorage.getItem(SORT_KEY);
       if (sort === "size" || sort === "status") this.sort = sort;
     } catch {
-      this.hidden = false;
+      // без хранилища порядок останется по имени
     }
     this.element.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest("[data-rail=toggle]")) return this.toggle();
       if (target.closest("[data-rail=add]")) return this.actions.add();
+      if (target.closest("[data-rail=create]")) return this.actions.create();
       const sort = target.closest<HTMLElement>("[data-sort]");
       if (sort) {
         this.sort = sort.dataset.sort as Sort;
@@ -85,32 +83,19 @@ export class ClanRail {
     this.draw();
   }
 
-  private toggle(): void {
-    this.hidden = !this.hidden;
-    try {
-      localStorage.setItem(HIDDEN_KEY, this.hidden ? "off" : "on");
-    } catch {
-      // без хранилища столбец просто вернётся открытым
-    }
-    this.draw();
-  }
-
   private draw(): void {
-    this.element.classList.toggle("mini", this.hidden);
-    if (this.hidden) {
-      this.element.innerHTML = `<button class="railBtn" data-rail="toggle" title="Показать родовые деревья" aria-label="Показать родовые деревья">${icon("right")}</button>` +
-        '<span class="vert">Родовые деревья</span>';
-      return;
-    }
     this.element.innerHTML =
-      `<div class="railTop"><div class="find"><i>${icon("search")}</i><input data-rail="q" placeholder="найти дерево" aria-label="Найти дерево"></div>` +
-      `<button class="railBtn" data-rail="toggle" title="Спрятать столбец" aria-label="Спрятать столбец">${icon("left")}</button></div>` +
+      `<div class="railTop"><div class="find"><i>${icon("search")}</i><input data-rail="q" placeholder="найти родословную" aria-label="Найти родословную"></div></div>` +
       '<div class="sortRow"><div class="sw">' +
       ([["name", "имени"], ["size", "людям"], ["status", "статусу"]] as [Sort, string][])
         .map(([key, title]) => `<button data-sort="${key}"${this.sort === key ? ' aria-pressed="true"' : ""}>${title}</button>`).join("") +
       "</div></div>" +
       '<div class="rows" data-role="rows"></div>' +
-      '<button class="railAdd" data-rail="add">+ загрузить .ged</button>';
+      // новый род и загрузка файла — дело редактора
+      (this.editing
+        ? '<div class="railAdds"><button class="railAdd" data-rail="create">+ новая родословная</button>' +
+          '<button class="railAdd" data-rail="add">+ загрузить .ged</button></div>'
+        : "");
     const input = this.element.querySelector<HTMLInputElement>("[data-rail=q]");
     if (input) input.value = this.query;
     this.drawRows();

@@ -47,7 +47,6 @@ export class ViewPanel {
     this.element = document.createElement("aside");
     this.element.className = "viewPanel";
     this.element.setAttribute("aria-label", "Вид");
-    this.element.hidden = true;
     this.element.addEventListener("click", (e) => {
       const target = (e.target as HTMLElement).closest<HTMLElement>("[data-set],[data-act]");
       if (!target) return;
@@ -86,7 +85,7 @@ export class ViewPanel {
   }
 
   private head(title: string): string {
-    return `<div class="vpTop"><b>${title}</b><button class="vpClose" data-act="close" title="Закрыть (Esc)" aria-label="Закрыть">${icon("close")}</button></div>`;
+    return title ? "" : ""; // название и сворачивание — у дока
   }
 
   private viewHtml(s: ViewState): string {

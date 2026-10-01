@@ -28,6 +28,7 @@ from app.db.photos import photo_path, remove_photo, save_photo
 from app.db.tagset import TagChange, TagError, delete_tag, set_status, tag_usage, update_tag
 from app.gedcom.export import ExportError, export_clan
 from app.gedcom.ru_dates import DateInputError, parse_input
+from app.db.newclan import ClanStart, NewClanError, start_clan
 from app.db.links import (Candidate, ClanLink, Link, LinkClashError, LinkError, LinkNotFoundError, LinkPerson,
                           candidates, clan_links, create_link, delete_link, list_links, reject_pair, search_persons,
                           set_link_see)
@@ -527,6 +528,18 @@ async def post_upload(request: Request, conn: Database, file_name: str = "фай
         branch_stubs=sum(p.is_branch_stub for p in data.persons.values()),
         warnings=data.warnings, suggested_name=suggested_name(data), clans=clan_matches(conn, data),
     )
+
+
+@app.post("/api/clans")
+def post_clan(body: ClanStart, conn: Database) -> ClanSummary:
+    """Новый род с нуля: имя рода и первый человек."""
+    try:
+        clan_id = start_clan(conn, body)
+    except ClanExistsError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from None
+    except NewClanError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from None
+    return next(c for c in list_clans(conn) if c.id == clan_id)
 
 
 @app.post("/api/uploads/{token}/clan")

@@ -1,4 +1,3 @@
-import { icon } from "./panel/icons";
 import "./fonts/fonts.css";
 import "./styles/app.css";
 import "./styles/cards.css";
@@ -29,6 +28,8 @@ import { LinkReview } from "./links/review";
 import { FamilyEditor } from "./editor/family";
 import { send } from "./editor/api";
 import { PersonEditor } from "./editor/form";
+import { Dock } from "./panel/dock";
+import { NewClan } from "./panel/newclan";
 import { Gate, whoami, type Me } from "./panel/gate";
 import { ShareBox } from "./panel/sharebox";
 import { Journal } from "./editor/journal";
@@ -110,7 +111,7 @@ async function start(root: HTMLElement): Promise<void> {
   const ribbon = document.createElement("div");
   ribbon.className = "ribbon";
   ribbon.hidden = true;
-  root.append(bar, ribbon, stage);
+  root.append(bar, stage);
 
   let clans = await getJson<ClanSummary[]>("/api/clans");
   if (!clans.length) {
@@ -123,9 +124,14 @@ async function start(root: HTMLElement): Promise<void> {
     const group = document.createElement("div");
     group.className = "grp";
     group.innerHTML = '<b>Род</b><div class="sw"></div>';
-    group.querySelector(".sw")!.append(add);
+    const fresh = new NewClan(stage, () => location.reload());
+    const start = document.createElement("button");
+    start.className = "add";
+    start.textContent = "+ Новая родословная";
+    start.addEventListener("click", () => fresh.open());
+    group.querySelector(".sw")!.append(start, add);
     bar.append(group);
-    stage.insertAdjacentHTML("afterbegin", '<div class="empty">Родов пока нет — загрузите файл .ged</div>');
+    stage.insertAdjacentHTML("afterbegin", '<div class="empty">Родословных пока нет — начните новую или загрузите файл .ged</div>');
     return;
   }
 
@@ -135,17 +141,28 @@ async function start(root: HTMLElement): Promise<void> {
       if (id === currentClan) return;
       if (upload.reviewing) {
         upload.cancel(false);
-        panel.element.hidden = false;
+        cardDock.element.hidden = false;
       }
       nav.forget(); // сменил род сам — дорога назад по связке больше не нужна
       void loadClan(id);
     },
     add: () => upload.choose(),
+    create: () => newClan.open(),
     share: (id, name) => void shareBox.open(id, name),
   });
-  stage.append(rail.element);
+  // три дока одного устройства: шапка с названием, сворачивание в полоску, у двух — растяжка за край
+  const redrawMap = () => window.dispatchEvent(new Event("resize"));
+  const clansDock = new Dock({ key: "clans", title: "Родословные", icon: "tree", side: "left", width: 216,
+    resize: { min: 170, max: 460 }, changed: redrawMap });
+  clansDock.body.append(rail.element);
+  stage.append(clansDock.element);
   const shareBox = new ShareBox(stage);
   const canvas = new TreeCanvas(stage);
+  // колонка карты: лента «глазами зрителя» лежит над картой, между панелями, а не поверх них
+  const mapCol = document.createElement("div");
+  mapCol.className = "mapCol";
+  canvas.viewport.replaceWith(mapCol);
+  mapCol.append(ribbon, canvas.viewport);
   let tree: ClanTree | null = null;
   let currentClan = clans[0]!.id;
   const clanName = (id: number) => clans.find((c) => c.id === id)?.name ?? "";
@@ -189,10 +206,10 @@ async function start(root: HTMLElement): Promise<void> {
     style: () => canvas.state.style,
     portraits: () => canvas.portraits,
     opened: () => {
-      panel.element.hidden = true;
+      cardDock.element.hidden = true;
     },
     closed: () => {
-      panel.element.hidden = false;
+      cardDock.element.hidden = false;
       if (tree && canvas.selected != null) void panel.show(tree, canvas.selected);
     },
     decided: () => void refreshLinks(),
@@ -239,7 +256,7 @@ async function start(root: HTMLElement): Promise<void> {
     canvas.select(id);
     canvas.goToSelected();
   };
-  let viewMode: ViewMode = null;
+  const viewMode: ViewMode = "view"; // панель «Вид» нарисована всегда, открыт ли её док — дело дока
   const viewPanel = new ViewPanel(stage, {
     style: (style) => {
       document.body.dataset.style = style;
@@ -281,7 +298,7 @@ async function start(root: HTMLElement): Promise<void> {
       canvas.unfoldAll();
       drawLegend();
     },
-    closed: () => setViewMode(null),
+    closed: () => viewDock.setOpen(false),
   });
   const legend = new LegendPanel(canvas.viewport, {
     filter: (tag) => {
@@ -324,14 +341,10 @@ async function start(root: HTMLElement): Promise<void> {
       ruler: canvas.state.ruler,
     });
   };
-  const setViewMode = (mode: ViewMode) => {
-    viewMode = viewMode === mode ? null : mode;
-    drawViewPanel();
-    viewBtn.setAttribute("aria-pressed", String(viewMode === "view"));
-  };
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && viewMode) setViewMode(null);
-  });
+  const viewDock = new Dock({ key: "view", title: "Вид", icon: "view", side: "right", width: 272, open: false, changed: redrawMap });
+  viewDock.element.classList.add("viewDock");
+  viewDock.body.append(viewPanel.element);
+  stage.append(viewDock.element);
 
   const panel = new PersonPanel(stage, {
     select: focus,
@@ -377,6 +390,11 @@ async function start(root: HTMLElement): Promise<void> {
       if (tree) void familyEditor.edit(tree, familyId);
     },
   });
+  const cardDock = new Dock({ key: "card", title: "Карточка человека", icon: "person", side: "right", width: 262,
+    resize: { min: 220, max: 520 }, changed: redrawMap });
+  cardDock.element.classList.add("cardDock");
+  cardDock.body.append(panel.element);
+  stage.append(cardDock.element);
   // что сейчас в панели: союз или человек
   const showCurrent = () => {
     if (!tree) return panel.clear();
@@ -462,6 +480,7 @@ async function start(root: HTMLElement): Promise<void> {
   };
   const gate = new Gate(stage);
   let me: Me = await whoami();
+  let syncEditRow = () => {}; // строка редактора собирается ниже, а режим переключается раньше
   const modeSwitch = switcher("Режим", [["view", "Просмотр"], ["edit", "Правка"]], "view", (mode) => {
     // правка без входа не открывается: сервер всё равно откажет, и лучше сказать это сразу
     if (mode === "edit" && me.guarded && !me.name) {
@@ -475,6 +494,7 @@ async function start(root: HTMLElement): Promise<void> {
     }
     editing = mode === "edit";
     journal.group.hidden = !editing;
+    syncEditRow();
     canvas.setEditing(editing);
     menu.close();
     if (editing) void journal.refresh();
@@ -533,6 +553,13 @@ async function start(root: HTMLElement): Promise<void> {
     stat.textContent = `${tree.persons.length} человек · ${tree.families.length} семей`;
   };
 
+  // новый род с нуля открывается сразу, как и загруженный файлом
+  const newClan = new NewClan(stage, async (clan) => {
+    trees.clear();
+    clans = await getJson<ClanSummary[]>("/api/clans");
+    await loadClan(clan.id);
+    void countQueue();
+  });
   const upload = new UploadFlow(stage, {
     created: async (clan) => {
       trees.clear();
@@ -543,7 +570,7 @@ async function start(root: HTMLElement): Promise<void> {
     },
     review: (preview, marks) => {
       beforeReview = currentClan;
-      panel.element.hidden = true;
+      cardDock.element.hidden = true;
       tree = preview.tree;
       search.setTree(preview.tree);
       canvas.setTree(preview.tree, NO_MARKS, marks);
@@ -552,7 +579,7 @@ async function start(root: HTMLElement): Promise<void> {
       if (!first.done) canvas.centreOnPerson(first.value); // сразу к первому изменению
     },
     finished: async (clanId, report) => {
-      panel.element.hidden = false;
+      cardDock.element.hidden = false;
       const target = report ? clanId : beforeReview;
       clans = await getJson<ClanSummary[]>("/api/clans");
       showClan(target);
@@ -601,11 +628,6 @@ async function start(root: HTMLElement): Promise<void> {
     void journal.refresh();
   };
 
-  const viewBtn = document.createElement("button");
-  viewBtn.className = "topBtn";
-  viewBtn.innerHTML = `${icon("view", true)}Вид`;
-  viewBtn.title = "Стиль, тема, древо, карточки";
-  viewBtn.addEventListener("click", () => setViewMode("view"));
   // масштаб: щелчок по числу открывает ввод, Delete в нём возвращает к 100 %
   const zoomValue = document.createElement("button");
   zoomValue.title = "Задать масштаб";
@@ -689,6 +711,7 @@ async function start(root: HTMLElement): Promise<void> {
     access.hidden = !me.guarded && !me.name;
     access.textContent = me.name ? `Выйти · ${me.name}` : "Войти";
     access.title = me.name ? "Закончить работу редактором" : "Войти, чтобы править роды";
+    // пока редактор не вошёл, режим один — просмотр: кнопки «Правка» нет вовсе
     modeSwitch.classList.toggle("locked", me.guarded && !me.name);
   };
   const leave = async () => {
@@ -699,25 +722,30 @@ async function start(root: HTMLElement): Promise<void> {
   };
   showAccess();
 
-  const titleRow = row(side("grow", clanTitle, search.element), side("right", stat, sep(), access, viewBtn));
+  // строка 1: имя рода слева, поиск ровно по центру, счёт и вход справа
+  const titleRow = row(clanTitle, search.element, side("right", stat, sep(), access));
+  titleRow.classList.add("top");
   const viewerBtn = document.createElement("button");
   viewerBtn.className = "topLink";
   viewerBtn.textContent = "Глазами зрителя";
   viewerBtn.title = "Посмотреть род так, как его увидит приглашённый по ссылке";
   viewerBtn.addEventListener("click", () => void lookAsViewer(currentClan));
-  const viewRow = row(side("left", zoomRow, placeRow), side("right", viewerBtn, addLink, exportLink, sep(), modeSwitch));
-  const editRow = row(side("left", queueGroup), side("right", journal.group));
+  // строка 2 — для всех; строка 3 — строка редактора, её видно только в правке.
+  // Правые стороны собраны одинаково: ссылка, черта, группа — «Загрузить» встаёт точно под «Выгрузить»,
+  // а журнал под переключателем режима
+  const viewRow = row(side("left", zoomRow, placeRow), side("right", exportLink, sep(), modeSwitch));
+  const editorMark = document.createElement("span");
+  editorMark.className = "editorMark";
+  editorMark.textContent = "редактор";
+  const editRow = row(side("left", editorMark, queueGroup, viewerBtn), side("right", addLink, sep(), journal.group));
+  editRow.classList.add("editRow");
   const tools = document.createElement("div");
   tools.className = "tools";
   tools.append(viewRow, editRow);
   bar.append(titleRow, tools);
-  // третья строка пустует в просмотре без связок — тогда её не видно вовсе
-  const syncEditRow = () => {
-    editRow.hidden = queueGroup.hidden && journal.group.hidden;
+  syncEditRow = () => {
+    editRow.hidden = !editing;
   };
-  const queueObserver = new MutationObserver(syncEditRow);
-  queueObserver.observe(queueGroup, { attributes: true, attributeFilter: ["hidden"] });
-  queueObserver.observe(journal.group, { attributes: true, attributeFilter: ["hidden"] });
   syncEditRow();
 
   await loadClan(clans[0]!.id);

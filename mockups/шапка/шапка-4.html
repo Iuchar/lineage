@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Шапка, панели, списки и новый род</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  .th { --bg: #241a12; --fg: #eadfc4; --mut: #a08d70; --acc: #c8a44e; --ink: #c8a44e; --edge: #3a2c1e; --panelbg: #19110a;
+        --on: #c8a44e; --onfg: #241a12; --warn: #b9552f; --font: 'Cormorant Garamond', Georgia, serif; }
+  .th.light { --bg: #ded2b6; --fg: #2a2116; --mut: #5d4f37; --acc: #a8801f; --ink: #644d1a; --edge: #bba98a; --panelbg: #d2c5a6;
+              --on: #8a691a; --onfg: #fff7ea; --warn: #9a3d1c; }
+  .th { --soft: color-mix(in srgb, var(--fg) 82%, var(--panelbg)); --btn: color-mix(in srgb, var(--fg) 8%, transparent);
+        --tools: color-mix(in srgb, var(--panelbg) 90%, var(--fg)); }
+  .th.light { --soft: color-mix(in srgb, var(--fg) 94%, var(--panelbg)); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #14100c; color: #eadfc4; font: 400 13px/1.5 'Golos Text', sans-serif; padding: 26px 30px 80px; }
+  h1 { font: 500 24px/1 'Cormorant Garamond', serif; margin: 0 0 6px; }
+  .lead { color: #a08d70; font-size: 12.5px; margin: 0 0 4px; max-width: 900px; }
+  .lead b, .say b { color: #eadfc4; font-weight: 500; }
+  h2 { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #c8a44e; margin: 40px 0 6px; }
+  h3 { font: 500 13px/1.3 'Golos Text', sans-serif; margin: 22px 0 3px; color: #eadfc4; }
+  h3 i { font-style: normal; font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #14100c; background: #c8a44e;
+         border-radius: 3px; padding: 3px 6px; margin-right: 8px; vertical-align: 1px; }
+  .say { color: #8d7a60; font-size: 12px; margin: 0 0 10px; max-width: 900px; }
+  .frame { border: 1px solid #2c211a; border-radius: 8px; overflow: hidden; max-width: 1240px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 1240px; }
+  .cap { font: 400 10px/1 'IBM Plex Mono', monospace; color: #6f5f4a; margin: 0 0 5px; letter-spacing: .06em; }
+
+  /* ── шапка ── */
+  .bar { background: var(--panelbg); color: var(--fg); border-bottom: 1px solid var(--edge); }
+  .row { display: flex; align-items: center; gap: 12px; padding: 8px 16px; }
+  .row.top { display: grid; grid-template-columns: 1fr minmax(180px, 400px) 1fr; gap: 20px; padding: 10px 16px; }
+  .tools { background: var(--tools); border-top: 1px solid color-mix(in srgb, var(--edge) 70%, transparent); }
+  .tools .row { padding: 7px 16px; }
+  .side { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .side.r { margin-left: auto; justify-content: flex-end; }
+  .clan { display: flex; align-items: center; gap: 16px; min-width: 0; }
+  .clan b { font: 500 25px/1 var(--font); letter-spacing: .005em; white-space: nowrap; }
+  .chip { font: 400 10px/1 'IBM Plex Mono', monospace; letter-spacing: .04em; color: var(--mut);
+          border: 1px solid var(--edge); border-radius: 999px; padding: 4px 9px; white-space: nowrap; }
+  .clan.stack { flex-direction: column; align-items: flex-start; gap: 3px; }
+  .clan.stack .chip { border: 0; padding: 0; }
+  .find { display: flex; align-items: center; gap: 8px; border: 1px solid var(--edge); border-radius: 6px; background: var(--btn);
+          padding: 6px 10px; color: var(--mut); font-size: 11.5px; }
+  .count { font: 400 11px/1 'IBM Plex Mono', monospace; color: var(--mut); white-space: nowrap; }
+  .sep { width: 1px; height: 20px; background: color-mix(in srgb, var(--fg) 22%, transparent); flex: none; }
+  .link { color: var(--soft); font: 500 11.5px/1 'Golos Text', sans-serif; white-space: nowrap; padding: 6px 2px; }
+  .sw { display: flex; border: 1px solid var(--edge); border-radius: 6px; overflow: hidden; }
+  .sw span { background: var(--btn); color: var(--soft); font: 500 11.5px/1 'Golos Text', sans-serif; padding: 6px 11px;
+             border-right: 1px solid var(--edge); white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+  .sw span:last-child { border-right: 0; }
+  .sw span.on { background: var(--on); color: var(--onfg); }
+  .sw span.off { opacity: .45; }
+  .ico { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* третья строка — строка редактора. Три способа отделить её от второй */
+  .edit { border-top: 1px solid color-mix(in srgb, var(--edge) 45%, transparent); }
+  .t1 .edit { background: color-mix(in srgb, var(--panelbg) 78%, #000); border-top-color: var(--edge); }
+  .th.light .t1 .edit { background: color-mix(in srgb, var(--panelbg) 86%, #000); }
+  .t2 .edit { background: color-mix(in srgb, var(--acc) 15%, var(--panelbg)); border-top: 1px solid color-mix(in srgb, var(--acc) 45%, transparent); }
+  .t3 .edit { background: color-mix(in srgb, var(--panelbg) 82%, #000); border-top-color: var(--edge);
+              box-shadow: inset 3px 0 0 var(--acc); }
+  .th.light .t3 .edit { background: color-mix(in srgb, var(--panelbg) 88%, #000); }
+  .who { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); margin-right: 2px; }
+  .canvas { background: var(--bg); height: 46px; }
+  /* в сравнении половинной ширины строки плотнее, чтобы ничего не обрезалось */
+  .two .row { padding-left: 12px; padding-right: 12px; gap: 8px; } .two .side { gap: 8px; } .sw { flex: none; }
+
+  /* ── панели ── */
+  .app { display: grid; background: var(--bg); color: var(--fg); height: 430px; }
+  .pane { background: var(--panelbg); display: flex; flex-direction: column; min-width: 0; position: relative; }
+  .pane.l { border-right: 1px solid var(--edge); } .pane.r { border-left: 1px solid var(--edge); }
+  .ph { display: flex; align-items: center; gap: 8px; padding: 9px 10px 9px 14px; border-bottom: 1px solid var(--edge); }
+  .ph b { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); flex: 1; }
+  .pbtn { width: 24px; height: 24px; border: 1px solid var(--edge); border-radius: 6px; background: var(--btn); color: var(--fg);
+          display: grid; place-items: center; flex: none; }
+  .pb { padding: 10px 10px 12px; flex: 1; min-height: 0; }
+  .grip { position: absolute; top: 0; bottom: 0; width: 7px; cursor: col-resize; }
+  .pane.l .grip { right: -4px; } .pane.r .grip { left: -4px; }
+  .grip::after { content: ""; position: absolute; top: 50%; left: 2px; width: 3px; height: 34px; margin-top: -17px; border-radius: 2px;
+                 background: color-mix(in srgb, var(--fg) 30%, transparent); }
+  .strip { background: var(--panelbg); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 9px 0; }
+  .strip.l { border-right: 1px solid var(--edge); } .strip.r { border-left: 1px solid var(--edge); }
+  .strip em { writing-mode: vertical-rl; transform: rotate(180deg); font: 500 10px/1 'IBM Plex Mono', monospace; font-style: normal;
+              letter-spacing: .16em; text-transform: uppercase; color: var(--mut); }
+  .map { position: relative; min-width: 0; overflow: hidden; }
+  .map::before { content: ""; position: absolute; inset: 0; opacity: .5;
+                 background: repeating-linear-gradient(90deg, transparent 0 3px, rgba(0,0,0,.14) 3px 4px); }
+  .ribbon { position: relative; z-index: 1; background: var(--warn); color: #fff3e6; font: 500 11.5px/1 'Golos Text', sans-serif;
+            padding: 8px 12px; display: flex; align-items: center; gap: 10px; }
+  .ribbon span { margin-left: auto; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+  .rim { position: absolute; inset: 0; border: 2px solid var(--warn); pointer-events: none; z-index: 1; }
+  .dot { position: absolute; width: 18px; height: 18px; border-radius: 50%; background: color-mix(in srgb, var(--fg) 80%, transparent); }
+  .rowc { display: flex; align-items: baseline; gap: 8px; padding: 6px 8px; border-radius: 5px; }
+  .rowc.on { background: color-mix(in srgb, var(--acc) 20%, transparent); }
+  .rowc b { flex: 1; font: 500 14px/1.2 var(--font); }
+  .rowc small { font: 400 11px 'IBM Plex Mono', monospace; color: var(--mut); }
+  .rowc.on small { color: var(--fg); }
+  .add { margin-top: 8px; border-top: 1px solid var(--edge); padding-top: 9px; display: flex; flex-direction: column; gap: 7px;
+         color: var(--ink); font: 500 11.5px/1 'Golos Text', sans-serif; }
+  .pname { font: 500 21px/1.15 var(--font); margin: 10px 0 2px; }
+  .psub { font: 400 11px/1.3 'IBM Plex Mono', monospace; color: var(--mut); }
+  .plbl { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); margin: 14px 0 4px; }
+  .prow { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--edge); font-size: 12.5px; }
+  .prow i { font-style: normal; color: var(--mut); text-align: right; }
+  .por { width: 54px; height: 66px; border: 1px solid var(--edge); background: color-mix(in srgb, var(--fg) 86%, transparent); }
+
+  /* ── списки и флажки ── */
+  .kit { background: var(--panelbg); color: var(--fg); padding: 16px 18px 18px; display: flex; gap: 34px; flex-wrap: wrap; align-items: flex-start; }
+  .kit > div { min-width: 190px; }
+  .kl { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); margin: 0 0 8px; }
+  .sel { display: flex; align-items: center; gap: 8px; border: 1px solid var(--edge); border-radius: 6px; background: var(--btn);
+         padding: 6px 9px 6px 11px; font: 500 11.5px/1 'Golos Text', sans-serif; width: 230px; }
+  .sel span { flex: 1; } .sel.open { border-color: var(--acc); }
+  .menu { margin-top: 4px; width: 230px; border: 1px solid var(--edge); border-radius: 6px; background: var(--panelbg); padding: 4px;
+          box-shadow: 0 14px 30px rgba(0,0,0,.4); }
+  .menu div { padding: 7px 9px; border-radius: 4px; font: 500 11.5px/1.25 'Golos Text', sans-serif; color: var(--soft); display: flex; gap: 8px; }
+  .menu div.hot { background: var(--btn); color: var(--fg); }
+  .menu div.cur { color: var(--fg); } .menu div.cur::after { content: ""; margin-left: auto; width: 9px; height: 5px; margin-top: 3px;
+          border-left: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); transform: rotate(-45deg); flex: none; }
+  .chk { display: flex; align-items: center; gap: 9px; font-size: 12.5px; padding: 4px 0; }
+  .box { width: 16px; height: 16px; border: 1px solid color-mix(in srgb, var(--fg) 40%, transparent); border-radius: 4px; background: var(--btn);
+         display: grid; place-items: center; flex: none; }
+  .box.on { background: var(--on); border-color: var(--on); color: var(--onfg); }
+  .tog { width: 30px; height: 16px; border-radius: 999px; background: color-mix(in srgb, var(--fg) 20%, transparent); position: relative; flex: none; }
+  .tog::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--fg); }
+  .tog.on { background: var(--on); } .tog.on::after { left: 16px; background: var(--onfg); }
+
+  /* ── новый род ── */
+  .dlgwrap { background: color-mix(in srgb, var(--bg) 45%, #000); padding: 26px; display: grid; place-items: center; }
+  .dlg { width: 380px; background: var(--panelbg); color: var(--fg); border: 1px solid var(--edge); border-radius: 8px; padding: 18px;
+         box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+  .dlg > b { display: block; font: 500 20px/1.1 var(--font); }
+  .dlg > p { color: var(--mut); font-size: 12px; margin: 4px 0 14px; }
+  .fl { display: block; font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); margin: 12px 0 5px; }
+  .in { border: 1px solid var(--edge); border-radius: 6px; background: var(--btn); padding: 8px 10px; font-size: 13px; }
+  .in.ph { color: var(--mut); } .in.f { border-color: var(--acc); }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hr { border-top: 1px solid var(--edge); margin: 16px 0 2px; }
+  .go { display: flex; gap: 8px; margin-top: 16px; }
+  .go span { border-radius: 6px; padding: 8px 14px; font: 500 12px/1 'Golos Text', sans-serif; border: 1px solid var(--edge); background: var(--btn); }
+  .go span.pri { background: var(--on); border-color: var(--on); color: var(--onfg); }
+</style>
+</head>
+<body>
+<h1>Шапка, панели, списки и новый род</h1>
+<p class="lead">Двенадцать замечаний от 1 октября. Стиль — <b>Зал предков</b>, обе темы; остальные четыре стиля берут те же правила своими красками.</p>
+
+<h2>1 · Шапка: что где</h2>
+<p class="say"><b>Строка 1</b> — имя рода крупнее (25 вместо 18), титул отодвинут и стал ярлыком, поиск ровно по центру, справа счёт и вход.
+<b>Строка 2</b> — для всех: масштаб, «Целиком», «К выбранному», «Выгрузить .ged», режим.
+<b>Строка 3</b> — строка редактора, её видно только в правке: «Проверить», «Глазами зрителя», «Загрузить .ged», журнал. В просмотре строки нет.</p>
+<div id="views"></div>
+
+<h2>2 · Чем третья строка отличается от второй</h2>
+<p class="say">Нужен ясный контраст: третья строка — редакторская. Три способа, каждый в тёмной и светлой теме. Показаны только вторая и третья строки — сравнивать их.</p>
+<div id="tones"></div>
+
+<h2>3 · Имя и титул</h2>
+<p class="say">Чтобы «Гленн Уриск род без титула» не читалось одной фразой.</p>
+<div id="names"></div>
+
+<h2>4 · Панели: Родословные, Карточка человека, Вид</h2>
+<p class="say">Три панели устроены одинаково: шапка с названием и кнопкой, сворачивание в полоску с вертикальной надписью.
+«Родословные» и «Карточка человека» тянутся за край — ручка посередине границы; ширина запоминается в браузере.
+Лента «Глазами зрителя» лежит только над картой, между панелями, и рамка идёт по карте, а не по всему окну.</p>
+<div id="panes"></div>
+
+<h2>5 · Списки и флажки</h2>
+<p class="say">Вместо системных: белый выпадающий список и синий флажок выбиваются из любого стиля.</p>
+<div id="kit"></div>
+
+<h2>6 · Новая родословная</h2>
+<p class="say">Кнопка «+ новая родословная» в панели «Родословные», рядом с «+ загрузить .ged», только в правке. Спрашивает имя рода и сразу первого человека.</p>
+<div id="dlg"></div>
+
+<script>
+const I = {
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
+  view: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  left: '<path d="m15 18-6-6 6-6"/>', right: '<path d="m9 18 6-6-6-6"/>', down: '<path d="m6 9 6 6 6-6"/>',
+  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  redo: '<path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
+  tree: '<path d="M12 4v6M6 20v-4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4M12 10v4"/><circle cx="12" cy="4" r="1.6"/><circle cx="6" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/>',
+  person: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0 1 14 0"/>',
+  check: '<path d="m5 12 4.5 4.5L19 7"/>',
+};
+const ico = (n) => `<svg class="ico" viewBox="0 0 24 24">${I[n]}</svg>`;
+
+function bar({ edit, tone = "t1", name = "chip", top: withTop = true }) {
+  const clan = name === "stack"
+    ? '<div class="clan stack"><b>Гленн Уриск</b><span class="chip">род без титула</span></div>'
+    : name === "plain"
+      ? '<div class="clan" style="gap:9px;align-items:baseline"><b style="font-size:18px">Гленн Уриск</b><span class="chip" style="border:0;padding:0">род без титула</span></div>'
+      : '<div class="clan"><b>Гленн Уриск</b><span class="chip">род без титула</span></div>';
+  const top = `<div class="row top">${clan}<div class="find">${ico("search")}имя или фамилия</div>` +
+    `<div class="side r"><span class="count">38 человек · 14 семей</span><span class="sep"></span><span class="link">${edit ? "Выйти · admin" : "Войти"}</span></div></div>`;
+  const second = `<div class="row"><div class="side"><div class="sw"><span>−</span><span>100%</span><span>+</span></div>` +
+    `<div class="sw"><span>Целиком</span><span>К выбранному</span></div></div>` +
+    `<div class="side r"><span class="link">Выгрузить .ged</span><span class="sep"></span>` +
+    `<div class="sw"><span class="${edit ? "" : "on"}">Просмотр</span><span class="${edit ? "on" : ""}">Правка</span></div></div></div>`;
+  const third = edit ? `<div class="row edit"><div class="side">${tone === "t3" ? '<span class="who">редактор</span>' : ""}` +
+    `<div class="sw"><span>Проверить <b style="font-weight:600">7</b></span></div><span class="link">Глазами зрителя</span><span class="link">+ Загрузить .ged</span></div>` +
+    `<div class="side r"><div class="sw"><span>${ico("undo")}Отменить</span><span class="off">${ico("redo")}</span><span>Журнал</span></div></div></div>` : "";
+  return `<div class="bar ${tone}">${withTop ? top : ""}<div class="tools">${second}${third}</div></div><div class="canvas"></div>`;
+}
+const frame = (inner, theme = "") => `<div class="frame th ${theme}">${inner}</div>`;
+
+document.getElementById("views").innerHTML =
+  '<p class="cap">ПРОСМОТР — две строки</p>' + frame(bar({ edit: false })) +
+  '<p class="cap" style="margin-top:14px">ПРАВКА — три строки</p>' + frame(bar({ edit: true }));
+
+const TONES = [["t1", "Т1", "Глубже", "третья строка темнее второй: ступенька вниз, как полка под столешницей. Самый спокойный."],
+  ["t2", "Т2", "В цвет акцента", "строка подкрашена акцентом стиля и отбита акцентной чертой: редакторское читается как «особое»."],
+  ["t3", "Т3", "С меткой", "темнее плюс акцентная полоса слева и слово «редактор» в начале строки: ясно даже без сравнения со второй."]];
+document.getElementById("tones").innerHTML = TONES.map(([t, id, title, say]) =>
+  `<h3><i>${id}</i>${title}</h3><p class="say">${say}</p><div class="two">${frame(bar({ edit: true, tone: t, top: false }))}${frame(bar({ edit: true, tone: t, top: false }), "light")}</div>`).join("");
+
+document.getElementById("names").innerHTML =
+  '<h3><i>И1</i>Титул ярлыком в строку</h3><p class="say">Имя 25 px, титул в рамке-ярлыке через 16 px. Высота шапки прежняя.</p>' + frame(bar({ edit: false, name: "chip" })) +
+  '<h3><i>И2</i>Титул второй строкой под именем</h3><p class="say">Имя и титул столбиком. Строка 1 выше на 12 px, зато длинное имя рода не толкает поиск.</p>' + frame(bar({ edit: false, name: "stack" })) +
+  '<h3 style="color:#8d7a60"><i style="background:#3a2c1e;color:#a08d70">было</i>Сейчас</h3>' + frame(bar({ edit: false, name: "plain" }));
+
+function panes(open, theme = "") {
+  const rail = open
+    ? `<div class="pane l"><div class="ph"><b>Родословные</b><span class="pbtn">${ico("left")}</span></div><div class="pb">
+        <div class="find" style="margin-bottom:8px">${ico("search")}найти</div>
+        <div class="sw" style="margin-bottom:8px"><span class="on" style="flex:1;justify-content:center">имени</span><span style="flex:1;justify-content:center">людям</span><span style="flex:1;justify-content:center">статусу</span></div>
+        <div class="rowc on"><b>Гленн Уриск</b><small>38</small></div><div class="rowc"><b>Монад Кройве</b><small>84</small></div>
+        <div class="rowc"><b>О'Дувейн</b><small>17</small></div><div class="rowc"><b>Уинтерхоуп</b><small>62</small></div>
+        <div class="add"><span>+ новая родословная</span><span>+ загрузить .ged</span></div></div><span class="grip"></span></div>`
+    : `<div class="strip l"><span class="pbtn">${ico("tree")}</span><em>Родословные</em></div>`;
+  const card = open
+    ? `<div class="pane r"><span class="grip"></span><div class="ph"><b>Карточка человека</b><span class="pbtn">${ico("right")}</span></div><div class="pb">
+        <div class="por"></div><div class="pname">Дэрмид Гленн Уриск</div><div class="psub">год неизвестен · @I1011@</div>
+        <div class="plbl">Сведения</div><div class="prow"><span>Пол</span><i>мужской</i></div><div class="prow"><span>Отец</span><i>Мурдо Гленн Уриск</i></div>
+        <div class="prow"><span>Мать</span><i>Аина Драммонд</i></div><div class="plbl">Брак</div><div class="prow"><span>Жена</span><i>Флора Максвелл</i></div></div></div>`
+    : `<div class="strip r"><span class="pbtn">${ico("person")}</span><em>Карточка человека</em></div>`;
+  const view = `<div class="strip r"><span class="pbtn">${ico("view")}</span><em>Вид</em></div>`;
+  const map = `<div class="map"><div class="ribbon">Глазами зрителя рода «Гленн Уриск»<span>вернуться к правке</span></div><div class="rim"></div>
+    <span class="dot" style="left:52%;top:28%"></span><span class="dot" style="left:58%;top:28%"></span><span class="dot" style="left:40%;top:48%"></span>
+    <span class="dot" style="left:46%;top:48%"></span><span class="dot" style="left:64%;top:48%"></span><span class="dot" style="left:34%;top:68%"></span><span class="dot" style="left:52%;top:68%"></span></div>`;
+  const cols = open ? "220px 1fr 270px 40px" : "40px 1fr 40px 40px";
+  return `<div class="frame th ${theme}"><div class="app" style="grid-template-columns:${cols}">${rail}${map}${card}${view}</div></div>`;
+}
+document.getElementById("panes").innerHTML =
+  '<p class="cap">РАЗВЁРНУТО: «Родословные» и «Карточка человека» открыты, «Вид» свёрнут в полоску</p>' + panes(true) +
+  '<p class="cap" style="margin-top:14px">ВСЁ СВЁРНУТО: карте достаётся почти вся ширина</p>' + panes(false) +
+  '<p class="cap" style="margin-top:14px">СВЕТЛАЯ ТЕМА</p>' + panes(true, "light");
+
+function kit(theme = "") {
+  return `<div class="frame th ${theme}"><div class="kit">
+    <div><p class="kl">Список закрыт</p><div class="sel"><span>род без титула</span>${ico("down")}</div></div>
+    <div><p class="kl">Список открыт</p><div class="sel open"><span>род без титула</span>${ico("down")}</div>
+      <div class="menu"><div>титулованный древний благородный род</div><div class="hot">древний благородный род</div><div class="cur">род без титула</div></div></div>
+    <div><p class="kl">Ф1 · флажок</p><div class="chk"><span class="box on">${ico("check")}</span>портреты</div><div class="chk"><span class="box"></span>линейка дат</div></div>
+    <div><p class="kl">Ф2 · переключатель</p><div class="chk"><span class="tog on"></span>портреты</div><div class="chk"><span class="tog"></span>линейка дат</div></div>
+  </div></div>`;
+}
+document.getElementById("kit").innerHTML = `<div class="two">${kit()}${kit("light")}</div>`;
+
+function dlg(theme = "") {
+  return `<div class="frame th ${theme}"><div class="dlgwrap"><div class="dlg"><b>Новая родословная</b><p>Род начинается с первого человека — остальных добавите плюсами на карте.</p>
+    <span class="fl" style="margin-top:0">имя рода</span><div class="in f">Маклауд из Дунвегана</div>
+    <span class="fl">титул</span><div class="sel" style="width:100%"><span>род без титула</span>${ico("down")}</div>
+    <div class="hr"></div><span class="fl">первый человек</span>
+    <div class="g2"><div class="in">Торквил</div><div class="in">Маклауд</div></div>
+    <div class="g2" style="margin-top:8px"><div class="sw"><span class="on" style="flex:1;justify-content:center">мужчина</span><span style="flex:1;justify-content:center">женщина</span></div><div class="in ph">год рождения</div></div>
+    <div class="go"><span class="pri">Создать</span><span>Отмена</span></div></div></div></div>`;
+}
+document.getElementById("dlg").innerHTML = `<div class="two">${dlg()}${dlg("light")}</div>`;
+</script>
+</body>
+</html>

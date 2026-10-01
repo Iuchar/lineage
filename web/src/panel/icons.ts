@@ -13,6 +13,8 @@ const PATHS = {
   down: '<path d="m6 9 6 6 6-6"/>',
   more: '<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
   close: '<path d="M18 6 6 18M6 6l12 12"/>',
+  tree: '<path d="M12 5.6V10M6 18.4V16a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2.4M12 10v4"/><circle cx="12" cy="4" r="1.6"/><circle cx="6" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/>',
+  person: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0 1 14 0"/>',
 } as const;
 
 export type IconName = keyof typeof PATHS;
