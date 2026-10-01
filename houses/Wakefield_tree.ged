@@ -5,6 +5,16 @@
 1 CHAR UTF-8
 1 LANG Russian
 0 @I6001@ INDI
+1 NAME Сьюзен /Уэйкфилд/
+2 GIVN Сьюзен
+2 SURN Уэйкфилд
+1 SEX F
+1 BIRT
+2 DATE 1962
+1 EVEN Растила сына одна, отец в роду не записан
+2 TYPE Comment
+1 FAMS @F6001@
+0 @I6002@ INDI
 1 NAME Гарри /Уэйкфилд/
 2 GIVN Гарри
 2 SURN Уэйкфилд
@@ -14,5 +24,32 @@
 1 EVEN Первый в роду, кто записал его сам
 2 TYPE Comment
 2 _SEE all
+1 FAMS @F6002@
+1 FAMC @F6001@
 1 _SEE portrait hidden
+0 @I6003@ INDI
+1 NAME Ли /Беннетт/
+2 GIVN Ли
+2 SURN Беннетт
+1 SEX U
+1 BIRT
+2 DATE 1990
+1 EVEN Живут с Гарри без венчания
+2 TYPE Comment
+1 FAMS @F6002@
+0 @I6004@ INDI
+1 NAME Роуэн /Уэйкфилд/
+2 GIVN Роуэн
+2 SURN Уэйкфилд
+1 SEX U
+1 BIRT
+2 DATE 12 SEP 2022
+1 FAMC @F6002@
+0 @F6001@ FAM
+1 WIFE @I6001@
+1 CHIL @I6002@
+0 @F6002@ FAM
+1 HUSB @I6002@
+1 WIFE @I6003@
+1 CHIL @I6004@
 0 TRLR
