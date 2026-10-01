@@ -50,7 +50,7 @@ export class PersonEditor {
     this.kin = new KinSection(tree, personId, form.marriage_order_manual, (at) => this.actions.addBirthParents(personId, at));
     this.host.innerHTML =
       `<div class="sideIn form"><span class="lbl" style="margin-top:0">правка</span>` +
-      `<h3>${escapeHtml([form.given, form.surname].filter(Boolean).join(" ") || "без имени")}</h3>` +
+      `<h3 aria-level="2">${escapeHtml([form.given, form.surname].filter(Boolean).join(" ") || "без имени")}</h3>` +
       this.portraitHtml(form, true) +
       this.fieldsHtml(form) + this.kin.html() + this.metaHtml(form, hasParents, true) +
       '<div class="err" data-role="err"></div>' +

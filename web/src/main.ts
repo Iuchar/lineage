@@ -98,9 +98,10 @@ async function start(root: HTMLElement): Promise<void> {
   document.body.dataset.style = "gobelen";
   document.body.dataset.theme = "dark";
 
-  const bar = document.createElement("div");
+  // шапка и основная часть — ориентиры: по ним читалка с экрана прыгает, не перебирая всё подряд
+  const bar = document.createElement("header");
   bar.className = "bar";
-  const stage = document.createElement("div");
+  const stage = document.createElement("main");
   stage.className = "stage";
   // «глазами зрителя рода N»: пока включено, все запросы идут с этими глазами
   let asViewer: number | null = null;
@@ -580,7 +581,7 @@ async function start(root: HTMLElement): Promise<void> {
     const clan = clans.find((c) => c.id === id);
     rail.setClans(clans, id);
     const status = clan?.status ?? "plain";
-    clanTitle.innerHTML = `<b>${escapeHtml(clan?.name ?? "")}</b>` + (editing
+    clanTitle.innerHTML = `<b role="heading" aria-level="1">${escapeHtml(clan?.name ?? "")}</b>` + (editing
       ? `<select class="statusPick" title="Титул рода">${Object.entries(STATUS_NAMES).map(([key, name]) =>
         `<option value="${key}"${key === status ? " selected" : ""}>${name}</option>`).join("")}</select>`
       : `<span class="clanStatus" title="${STATUS_NAMES[status] ?? ""}">${STATUS_NAMES[status] ?? ""}</span>`);

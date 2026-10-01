@@ -71,6 +71,7 @@ export class PersonPanel {
   ) {
     this.element = document.createElement("aside");
     this.element.className = "side";
+    this.element.setAttribute("aria-label", "Человек");
     this.element.addEventListener("click", (e) => {
       const target = (e.target as HTMLElement).closest<HTMLElement>("[data-id],[data-act],[data-add],[data-tab],[data-revert],[data-union]");
       if (!target) return;
@@ -233,11 +234,11 @@ export class PersonPanel {
     if (editing) h += '<div class="btns" style="margin:0 0 12px"><button class="pri" data-act="edit">Править</button></div>';
 
     if (person.is_branch_stub) {
-      h += `<h3>${escapeHtml(cardName(person))}</h3><div class="sub">ветка уходит дальше · ${escapeHtml(person.xref)}</div>`;
+      h += `<h3 aria-level="2">${escapeHtml(cardName(person))}</h3><div class="sub">ветка уходит дальше · ${escapeHtml(person.xref)}</div>`;
     } else {
       const photo = this.actions.portrait(person);
       h += photo ? `<div class="por" style="background:${photo} center / cover"></div>` : '<div class="por"></div>';
-      h += `<h3>${escapeHtml([person.given, person.surname].filter(Boolean).join(" ") || "без имени")}</h3>`;
+      h += `<h3 aria-level="2">${escapeHtml([person.given, person.surname].filter(Boolean).join(" ") || "без имени")}</h3>`;
       if (person.married_surname && person.married_surname !== person.surname) {
         h += `<div class="maiden">по мужу ${escapeHtml(person.married_surname)}</div>`;
       }

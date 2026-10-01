@@ -1,6 +1,7 @@
 // Вход редактора: окно поверх карты, дерево за ним остаётся открытым. Зритель входа не видит —
 // он приходит по ссылке, и пока в базе нет ни одного редактора, правка открыта всем.
 
+import { holdDialog, type DialogHold } from "./dialog";
 import { send } from "../editor/api";
 import { escapeHtml } from "../format";
 
@@ -17,6 +18,7 @@ export async function whoami(): Promise<Me> {
 export class Gate {
   readonly element: HTMLElement;
   private onDone: (me: Me) => void = () => {};
+  private hold: DialogHold | null = null;
 
   constructor(host: HTMLElement) {
     this.element = document.createElement("div");
@@ -33,13 +35,14 @@ export class Gate {
 
   open(done: (me: Me) => void): void {
     this.onDone = done;
+    this.hold = holdDialog(this.element, "Вход редактора");
     this.element.hidden = false;
     this.element.innerHTML =
       '<form class="gateBox">' +
       '<b>Вход редактора</b><p>Дерево останется открытым.</p>' +
       '<label><span>имя</span><input name="name" autocomplete="username" autofocus></label>' +
       '<label><span>пароль</span><input name="password" type="password" autocomplete="current-password"></label>' +
-      '<div class="gateNo" hidden></div>' +
+      '<div class="gateNo" role="alert" hidden></div>' +
       '<div class="gateRow"><button type="submit" class="gateGo">Войти</button>' +
       '<button type="button" class="gateOff">Отмена</button></div></form>';
     const form = this.element.querySelector("form")!;
@@ -54,6 +57,8 @@ export class Gate {
   close(): void {
     this.element.hidden = true;
     this.element.innerHTML = "";
+    this.hold?.release();
+    this.hold = null;
   }
 
   private async enter(form: HTMLFormElement): Promise<void> {

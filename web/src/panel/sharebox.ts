@@ -1,6 +1,7 @@
 // Ссылка зрителям на род: адрес целиком, сколько раз открывали, «выпустить заново» и «отозвать».
 // Открывается из строки дерева в столбце слева.
 
+import { holdDialog, type DialogHold } from "./dialog";
 import { send } from "../editor/api";
 import { escapeHtml } from "../format";
 
@@ -29,6 +30,7 @@ export class ShareBox {
   readonly element: HTMLElement;
   private clanId = 0;
   private name = "";
+  private hold: DialogHold | null = null;
 
   constructor(host: HTMLElement) {
     this.element = document.createElement("div");
@@ -37,12 +39,16 @@ export class ShareBox {
     this.element.addEventListener("click", (e) => {
       if (e.target === this.element) this.close();
     });
+    this.element.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") this.close();
+    });
     host.append(this.element);
   }
 
   async open(clanId: number, name: string): Promise<void> {
     this.clanId = clanId;
     this.name = name;
+    this.hold = holdDialog(this.element, `Ссылка зрителям · ${name}`);
     this.element.hidden = false;
     this.element.innerHTML = '<div class="shareBox"><b>Ссылка зрителям</b><p>…</p></div>';
     const result = await send<ShareInfo | null>("GET", `/api/clans/${clanId}/link`);
@@ -52,6 +58,8 @@ export class ShareBox {
   close(): void {
     this.element.hidden = true;
     this.element.innerHTML = "";
+    this.hold?.release();
+    this.hold = null;
   }
 
   private draw(link: ShareInfo | null): void {

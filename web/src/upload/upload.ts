@@ -58,6 +58,7 @@ export class UploadFlow {
 
     this.summary = document.createElement("aside");
     this.summary.className = "side";
+    this.summary.setAttribute("aria-label", "Сводка загрузки");
     this.summary.hidden = true;
     this.summary.addEventListener("click", (e) => this.onSummaryClick(e));
 

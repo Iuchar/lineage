@@ -41,6 +41,7 @@ export class LinkReview {
   constructor(host: HTMLElement, private readonly actions: ReviewActions) {
     this.pane = document.createElement("aside");
     this.pane.className = "side review";
+    this.pane.setAttribute("aria-label", "Проверка связок");
     this.pane.hidden = true;
     this.full = document.createElement("div");
     this.full.className = "queueWrap";

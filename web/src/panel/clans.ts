@@ -27,6 +27,7 @@ export class ClanRail {
   constructor(private readonly actions: ClanRailActions) {
     this.element = document.createElement("aside");
     this.element.className = "rail";
+    this.element.setAttribute("aria-label", "Родовые деревья");
     try {
       this.hidden = localStorage.getItem(HIDDEN_KEY) === "off";
       const sort = localStorage.getItem(SORT_KEY);
@@ -101,7 +102,7 @@ export class ClanRail {
       return;
     }
     this.element.innerHTML =
-      '<div class="railTop"><div class="find"><i>⌕</i><input data-rail="q" placeholder="найти дерево"></div>' +
+      '<div class="railTop"><div class="find"><i>⌕</i><input data-rail="q" placeholder="найти дерево" aria-label="Найти дерево"></div>' +
       '<button class="railBtn" data-rail="toggle" title="Спрятать столбец">‹</button></div>' +
       '<div class="sortRow"><div class="sw">' +
       ([["name", "имени"], ["size", "людям"], ["status", "статусу"]] as [Sort, string][])

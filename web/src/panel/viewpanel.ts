@@ -45,6 +45,7 @@ export class ViewPanel {
   constructor(host: HTMLElement, private readonly actions: ViewActions) {
     this.element = document.createElement("aside");
     this.element.className = "viewPanel";
+    this.element.setAttribute("aria-label", "Вид");
     this.element.hidden = true;
     this.element.addEventListener("click", (e) => {
       const target = (e.target as HTMLElement).closest<HTMLElement>("[data-set],[data-act]");
