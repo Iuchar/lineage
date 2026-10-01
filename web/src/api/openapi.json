@@ -127,7 +127,7 @@
       },
       "post": {
         "summary": "Post Share Link",
-        "description": "Выпускает ссылку заново: прежняя перестаёт работать.",
+        "description": "Выпускает ссылку заново на выбранный срок: прежняя перестаёт работать.",
         "operationId": "post_share_link_api_clans__clan_id__link_post",
         "parameters": [
           {
@@ -140,6 +140,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ShareTerm"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1929,6 +1946,24 @@
         ],
         "title": "ChangeInfo"
       },
+      "ClanAccess": {
+        "properties": {
+          "clan_id": {
+            "type": "integer",
+            "title": "Clan Id"
+          },
+          "until": {
+            "type": "string",
+            "title": "Until"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clan_id",
+          "until"
+        ],
+        "title": "ClanAccess"
+      },
       "ClanLink": {
         "properties": {
           "link_id": {
@@ -2840,6 +2875,14 @@
             },
             "type": "array",
             "title": "Clans",
+            "default": []
+          },
+          "access": {
+            "items": {
+              "$ref": "#/components/schemas/ClanAccess"
+            },
+            "type": "array",
+            "title": "Access",
             "default": []
           }
         },
@@ -3794,16 +3837,32 @@
               }
             ],
             "title": "Opened At"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
           }
         },
         "type": "object",
         "required": [
           "url",
           "created_at",
-          "opened"
+          "opened",
+          "expires_at"
         ],
         "title": "ShareInfo",
         "description": "Ссылка зрителям на род: адрес показывается редактору целиком, чтобы его можно было отдать."
+      },
+      "ShareTerm": {
+        "properties": {
+          "days": {
+            "type": "integer",
+            "title": "Days",
+            "default": 90
+          }
+        },
+        "type": "object",
+        "title": "ShareTerm"
       },
       "SpouseChange": {
         "properties": {

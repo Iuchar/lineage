@@ -17,7 +17,7 @@ from app.db.author import set_author
 from app.db.clans import ClanExistsError, import_clan
 from app.db.eyes import Eyes, sift, sift_links, sift_person
 from app.gedcom.meta import See
-from app.db.share import ShareError, ShareLink, enter, issue, link_of, revoke, viewer_clans
+from app.db.share import DEFAULT_TERM, ShareError, ShareLink, enter, issue, link_of, revoke, viewer_access, viewer_clans
 from app.db.connection import connect
 from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonFields, PersonForm, add_person,
                            delete_person, delete_preview, person_form, update_person)
@@ -98,10 +98,16 @@ async def guard_edits(request: Request, call_next):  # type: ignore[no-untyped-d
     return await call_next(request)
 
 
+class ClanAccess(BaseModel):
+    clan_id: int
+    until: str  # до какого момента действует доступ по ссылке
+
+
 class Me(BaseModel):
     name: str | None = None  # имя вошедшего редактора; null — не вошёл
     guarded: bool  # заведён ли хоть один редактор: пока нет, правка открыта всем
     clans: list[int] = []  # роды, для которых предъявитель ссылки свой
+    access: list[ClanAccess] = []  # те же роды со сроком: гость должен видеть, до какого дня он свой
 
 
 class LoginForm(BaseModel):
@@ -112,10 +118,12 @@ class LoginForm(BaseModel):
 @app.get("/api/me")
 def get_me(conn: Database, request: Request) -> Me:
     editor = _current_editor(conn, request)
+    access = viewer_access(conn, request.cookies.get(VIEWER_COOKIE))
     return Me(
         name=editor.name if editor else None,
         guarded=editors_exist(conn),
-        clans=viewer_clans(conn, request.cookies.get(VIEWER_COOKIE)),
+        clans=[a.clan_id for a in access],
+        access=[ClanAccess(clan_id=a.clan_id, until=a.until) for a in access],
     )
 
 
@@ -146,12 +154,17 @@ class ShareInfo(BaseModel):
     created_at: str
     opened: int
     opened_at: str | None = None
+    expires_at: str  # до какого момента ссылка открывается
+
+
+class ShareTerm(BaseModel):
+    days: int = DEFAULT_TERM  # на сколько дней выпустить: 30, 90, 180 или 365
 
 
 def _share(request: Request, link: ShareLink) -> ShareInfo:
     base = str(request.base_url).rstrip("/")
     return ShareInfo(url=f"{base}/r/{link.key}", created_at=link.created_at,
-                     opened=link.opened, opened_at=link.opened_at)
+                     opened=link.opened, opened_at=link.opened_at, expires_at=link.expires_at)
 
 
 @app.get("/api/clans/{clan_id}/link")
@@ -161,12 +174,12 @@ def get_share_link(clan_id: int, conn: Database, request: Request) -> ShareInfo 
 
 
 @app.post("/api/clans/{clan_id}/link")
-def post_share_link(clan_id: int, conn: Database, request: Request) -> ShareInfo:
-    """Выпускает ссылку заново: прежняя перестаёт работать."""
+def post_share_link(clan_id: int, conn: Database, request: Request, body: ShareTerm | None = None) -> ShareInfo:
+    """Выпускает ссылку заново на выбранный срок: прежняя перестаёт работать."""
     try:
-        return _share(request, issue(conn, clan_id))
+        return _share(request, issue(conn, clan_id, body.days if body else DEFAULT_TERM))
     except ShareError as error:
-        raise HTTPException(status_code=404, detail=str(error)) from None
+        raise HTTPException(status_code=404 if "рода" in str(error) else 400, detail=str(error)) from None
 
 
 @app.delete("/api/clans/{clan_id}/link")

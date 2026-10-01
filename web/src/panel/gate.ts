@@ -8,6 +8,7 @@ import { escapeHtml } from "../format";
 export interface Me {
   name: string | null; // кто вошёл
   guarded: boolean; // заведён ли хоть один редактор
+  access?: { clan_id: number; until: string }[]; // роды, для которых гость свой по ссылке, и до какого дня
 }
 
 export async function whoami(): Promise<Me> {

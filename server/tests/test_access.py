@@ -76,7 +76,7 @@ def test_api_without_editors_lets_edit(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(app.main, "DB_PATH", tmp_path / "base.sqlite3")
     client = TestClient(app.main.app)
     me = client.get("/api/me").json()
-    assert me == {"name": None, "guarded": False, "clans": []}
+    assert me == {"name": None, "guarded": False, "clans": [], "access": []}
     # рода нет, но ответ приходит от самого обработчика, а не от заслона
     assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 400
 
@@ -94,7 +94,7 @@ def test_api_with_editor_demands_login(tmp_path, monkeypatch) -> None:
     base.close()
 
     client = TestClient(app.main.app)
-    assert client.get("/api/me").json() == {"name": None, "guarded": True, "clans": []}
+    assert client.get("/api/me").json() == {"name": None, "guarded": True, "clans": [], "access": []}
     assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 401
 
     assert client.post("/api/login", json={"name": "Tyr", "password": "не тот"}).status_code == 401
@@ -103,7 +103,7 @@ def test_api_with_editor_demands_login(tmp_path, monkeypatch) -> None:
     cookie = entered.headers["set-cookie"].lower()
     assert "max-age" not in cookie and "expires" not in cookie and "httponly" in cookie
     assert entered.status_code == 200 and entered.json()["name"] == "Tyr"
-    assert client.get("/api/me").json() == {"name": "Tyr", "guarded": True, "clans": []}
+    assert client.get("/api/me").json() == {"name": "Tyr", "guarded": True, "clans": [], "access": []}
     # вошли: заслон пропускает, дальше отвечает сам обработчик
     assert client.put("/api/clans/1/status", json={"status": "old"}).status_code == 400
 
@@ -158,3 +158,25 @@ def test_hand_counted_pbkdf2_matches_the_library_one() -> None:
         assert access._pbkdf2(password, salt, 1000, 32) == library
     finally:
         access.HAS_PBKDF2 = monkey
+
+
+def test_idle_session_goes_out_by_itself(conn: sqlite3.Connection) -> None:
+    """Сессия, по которой полдня не было запросов, гаснет: вход не живёт вечно."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.db.access import IDLE_HOURS, add_editor, editor_by_key, login
+
+    add_editor(conn, "Tyr", "длинный пароль")
+    key = login(conn, "Tyr", "длинный пароль")
+    assert editor_by_key(conn, key) is not None
+
+    def seen(hours_ago: float) -> None:
+        moment = (datetime.now(UTC) - timedelta(hours=hours_ago)).isoformat(timespec="seconds")
+        with conn:
+            conn.execute("UPDATE sessions SET seen_at = ?", (moment,))
+
+    seen(IDLE_HOURS - 1)
+    assert editor_by_key(conn, key) is not None  # запрос продлил сессию
+    seen(IDLE_HOURS + 1)
+    assert editor_by_key(conn, key) is None
+    assert conn.execute("SELECT count(*) FROM sessions").fetchone()[0] == 0

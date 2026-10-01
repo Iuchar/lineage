@@ -10,7 +10,7 @@ import hmac
 import secrets
 import sqlite3
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 SCRYPT_N = 2 ** 14
 SCRYPT_R = 8
@@ -22,6 +22,7 @@ HAS_SCRYPT = hasattr(hashlib, "scrypt")
 HAS_PBKDF2 = hasattr(hashlib, "pbkdf2_hmac")
 PBKDF2_ROUNDS = 200_000  # быстрая реализация на месте
 SLOW_ROUNDS = 20_000  # счёт вручную, иначе вход в браузере занимал бы секунды
+IDLE_HOURS = 12  # столько сессия редактора живёт без единого запроса
 
 
 def _pbkdf2(password: bytes, salt: bytes, rounds: int, length: int) -> bytes:
@@ -148,11 +149,16 @@ def editor_by_key(conn: sqlite3.Connection, key: str | None) -> Editor | None:
     if not key:
         return None
     row = conn.execute(
-        "SELECT e.id AS id, e.name AS name FROM sessions s JOIN editors e ON e.id = s.editor_id"
+        "SELECT e.id AS id, e.name AS name, s.seen_at AS seen_at FROM sessions s JOIN editors e ON e.id = s.editor_id"
         " WHERE s.fingerprint = ?",
         (_fingerprint(key),),
     ).fetchone()
     if row is None:
+        return None
+    # сессия, по которой давно не было запросов, гаснет сама: забытый вход и украденная cookie не живут вечно
+    idle = datetime.now(UTC) - datetime.fromisoformat(row["seen_at"])
+    if idle > timedelta(hours=IDLE_HOURS):
+        logout(conn, key)
         return None
     with conn:
         conn.execute("UPDATE sessions SET seen_at = ? WHERE fingerprint = ?", (_now(), _fingerprint(key)))

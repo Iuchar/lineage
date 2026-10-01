@@ -5,7 +5,9 @@ import sqlite3
 import pytest
 
 from app.db.connection import migrate
-from app.db.share import ShareError, enter, issue, link_of, revoke, viewer_clans
+from datetime import UTC, datetime, timedelta
+
+from app.db.share import DEFAULT_TERM, TERMS, ShareError, enter, issue, link_of, revoke, viewer_access, viewer_clans
 
 
 @pytest.fixture()
@@ -99,9 +101,58 @@ def test_api_issues_shows_and_revokes(tmp_path, monkeypatch) -> None:
     assert viewer.get(f"/r/{key}", follow_redirects=False).status_code == 303
     assert viewer.get("/api/me").json()["clans"] == [1]
     assert editor.get("/api/clans/1/link").json()["opened"] == 1
+    # срок виден обоим: редактору — у ссылки, гостю — у его доступа
+    assert viewer.get("/api/me").json()["access"] == [{"clan_id": 1, "until": made["expires_at"]}]
+    year = editor.post("/api/clans/1/link", json={"days": 365}).json()
+    assert year["expires_at"] > made["expires_at"]
+    assert editor.post("/api/clans/1/link", json={"days": 7}).status_code == 400
+    made = editor.get("/api/clans/1/link").json()
+    key = made["url"].rsplit("/", 1)[1]
+    assert viewer.get(f"/r/{key}", follow_redirects=False).status_code == 303
 
     editor.delete("/api/clans/1/link")
     assert editor.get("/api/clans/1/link").json() is None
     assert viewer.get("/api/me").json()["clans"] == []
     # отозванная ссылка не пускает, а ведёт на страницу с оговоркой
     assert viewer.get(f"/r/{key}", follow_redirects=False).headers["location"].startswith("/?")
+
+
+def _days_left(iso: str) -> float:
+    return (datetime.fromisoformat(iso) - datetime.now(UTC)).total_seconds() / 86400
+
+
+def test_link_has_a_term_and_no_eternal_one(conn: sqlite3.Connection) -> None:
+    assert TERMS == (30, 90, 180, 365) and DEFAULT_TERM == 90
+    assert 89.9 < _days_left(issue(conn, 1).expires_at) <= 90
+    assert 364.9 < _days_left(issue(conn, 1, 365).expires_at) <= 365
+    for days in (0, 7, 1000):
+        with pytest.raises(ShareError, match="срока"):
+            issue(conn, 1, days)
+
+
+def test_guest_is_own_until_the_day_of_the_link(conn: sqlite3.Connection) -> None:
+    link = issue(conn, 1, 30)
+    session, _ = enter(conn, link.key, None)
+    access = viewer_access(conn, session)
+    assert [a.clan_id for a in access] == [1] and access[0].until == link.expires_at
+
+
+def test_expired_link_does_not_open_and_access_ends(conn: sqlite3.Connection) -> None:
+    link = issue(conn, 1, 30)
+    session, _ = enter(conn, link.key, None)
+    past = (datetime.now(UTC) - timedelta(minutes=1)).isoformat(timespec="seconds")
+    with conn:
+        conn.execute("UPDATE share_links SET expires_at = ?", (past,))
+        conn.execute("UPDATE viewer_clans SET until = ?", (past,))
+    with pytest.raises(ShareError, match="Срок"):
+        enter(conn, link.key, None)
+    assert viewer_clans(conn, session) == [] and viewer_access(conn, session) == []
+    # редактор по-прежнему видит ссылку — и то, что срок вышел
+    assert link_of(conn, 1) is not None and link_of(conn, 1).expires_at == past
+
+
+def test_new_link_extends_the_guest_who_opens_it(conn: sqlite3.Connection) -> None:
+    session, _ = enter(conn, issue(conn, 1, 30).key, None)
+    longer = issue(conn, 1, 365)
+    enter(conn, longer.key, session)
+    assert viewer_access(conn, session)[0].until == longer.expires_at

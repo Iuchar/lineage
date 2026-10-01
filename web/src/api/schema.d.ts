@@ -67,7 +67,7 @@ export interface paths {
         put?: never;
         /**
          * Post Share Link
-         * @description Выпускает ссылку заново: прежняя перестаёт работать.
+         * @description Выпускает ссылку заново на выбранный срок: прежняя перестаёт работать.
          */
         post: operations["post_share_link_api_clans__clan_id__link_post"];
         /**
@@ -665,6 +665,13 @@ export interface components {
             /** Reverts */
             reverts: number | null;
         };
+        /** ClanAccess */
+        ClanAccess: {
+            /** Clan Id */
+            clan_id: number;
+            /** Until */
+            until: string;
+        };
         /**
          * ClanLink
          * @description Для карты рода: у своего человека есть двойник в другом роду.
@@ -993,6 +1000,11 @@ export interface components {
              * @default []
              */
             clans: number[];
+            /**
+             * Access
+             * @default []
+             */
+            access: components["schemas"]["ClanAccess"][];
         };
         /** NewClan */
         NewClan: {
@@ -1324,6 +1336,16 @@ export interface components {
             opened: number;
             /** Opened At */
             opened_at?: string | null;
+            /** Expires At */
+            expires_at: string;
+        };
+        /** ShareTerm */
+        ShareTerm: {
+            /**
+             * Days
+             * @default 90
+             */
+            days: number;
         };
         /**
          * SpouseChange
@@ -1596,7 +1618,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ShareTerm"] | null;
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

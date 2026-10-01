@@ -17,7 +17,7 @@ import "./styles/editor.css";
 
 import type { ChangeInfo, ClanSummary, ClanTree, LinkPerson, TreePerson } from "./api/types";
 import { NO_MARKS } from "./canvas/cards";
-import { escapeHtml } from "./format";
+import { escapeHtml, untilText } from "./format";
 import { TreeCanvas } from "./canvas/canvas";
 import { STATUS_NAMES } from "./canvas/status";
 import { mergeData, treeData } from "./canvas/treedata";
@@ -29,6 +29,7 @@ import { FamilyEditor } from "./editor/family";
 import { send } from "./editor/api";
 import { PersonEditor } from "./editor/form";
 import { Dock } from "./panel/dock";
+import { beginVisit } from "./session";
 import { NewClan } from "./panel/newclan";
 import { Gate, whoami, type Me } from "./panel/gate";
 import { ShareBox } from "./panel/sharebox";
@@ -99,6 +100,7 @@ function switcher<T extends string | number>(
 }
 
 async function start(root: HTMLElement): Promise<void> {
+  const freshVisit = beginVisit();
   document.body.dataset.style = "gobelen";
   document.body.dataset.theme = "dark";
 
@@ -488,6 +490,8 @@ async function start(root: HTMLElement): Promise<void> {
     void countQueue();
   };
   const gate = new Gate(stage);
+  // новый заход — редактор выходит сам: браузер мог вернуть его cookie, восстановив вкладки
+  if (freshVisit) await send<Me>("POST", "/api/logout");
   let me: Me = await whoami();
   let syncEditRow = () => {}; // строка редактора собирается ниже, а режим переключается раньше
   // редактор — вошедший, а пока редакторы не заведены, правка открыта каждому
@@ -514,6 +518,16 @@ async function start(root: HTMLElement): Promise<void> {
   };
   // плашка над картой говорит, чей это вид и чего в нём нет
   const drawRibbon = () => {
+    // настоящий гость по ссылке: говорим, чей он гость и до какого дня — ссылка не вечна
+    if (look === null) {
+      const mine = me.access?.find((a) => a.clan_id === currentClan);
+      ribbon.hidden = !mine;
+      if (mine) {
+        ribbon.innerHTML = `<b>Вы гость рода «${escapeHtml(clanName(currentClan))}»</b>` +
+          `<span>доступ по ссылке ${untilText(mine.until)}</span>`;
+      }
+      return;
+    }
     if (look !== "all" && look !== "clan") return;
     const total = clans.find((c) => c.id === currentClan)?.persons ?? 0;
     const lost = Math.max(0, total - (tree?.persons.length ?? 0));

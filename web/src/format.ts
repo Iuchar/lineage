@@ -49,3 +49,18 @@ export function lifeYears(person: TreePerson): string {
   if (!birth) return "год неизвестен";
   return death ? `${birth} — ${death}` : birth;
 }
+
+/** «до 31 октября 2026», а в последнюю неделю — ещё и сколько дней осталось. Дни считаются по календарю:
+ *  срок кончается шестого, сегодня первое — осталось пять дней, который бы ни был час. */
+export function untilText(iso: string, now = Date.now()): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const day = date.toLocaleDateString("ru", { day: "numeric", month: "long", year: "numeric" }).replace(" г.", "");
+  if (date.getTime() <= now) return `закончился ${day}`;
+  const midnight = (ms: number) => new Date(ms).setHours(0, 0, 0, 0);
+  const left = Math.round((midnight(date.getTime()) - midnight(now)) / 86_400_000);
+  if (left > 7) return `до ${day}`;
+  if (left === 0) return `до ${day} · заканчивается сегодня`;
+  const word = left === 1 ? "день" : left <= 4 ? "дня" : "дней";
+  return `до ${day} · ${left === 1 ? "остался" : "осталось"} ${left} ${word}`;
+}

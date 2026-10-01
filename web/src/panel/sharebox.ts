@@ -1,16 +1,25 @@
-// Ссылка зрителям на род: адрес целиком, сколько раз открывали, «выпустить заново» и «отозвать».
+// Ссылка зрителям на род: срок действия, адрес целиком, сколько раз открывали, «выпустить заново» и «отозвать».
+// Ссылка не вечна: срок выбирается при выпуске и показан и редактору здесь, и гостю над картой.
 // Открывается из строки дерева в столбце слева.
 
 import { holdDialog, type DialogHold } from "./dialog";
 import { send } from "../editor/api";
-import { escapeHtml } from "../format";
+import { escapeHtml, untilText } from "../format";
 
 export interface ShareInfo {
   url: string;
   created_at: string;
   opened: number;
   opened_at?: string | null;
+  expires_at: string; // до какого момента ссылка открывается
 }
+
+// на сколько выпускается ссылка; бессрочной нет
+const TERMS: [number, string][] = [[30, "30 дней"], [90, "90 дней"], [180, "полгода"], [365, "год"]];
+const DEFAULT_TERM = 90;
+const termPick = (): string =>
+  `<label class="shareTerm"><span>срок действия</span><select data-term>${TERMS.map(([days, title]) =>
+    `<option value="${days}"${days === DEFAULT_TERM ? " selected" : ""}>${title}</option>`).join("")}</select></label>`;
 
 const when = (iso: string | null | undefined): string => {
   if (!iso) return "";
@@ -67,19 +76,23 @@ export class ShareBox {
     if (!link) {
       this.element.innerHTML = `<div class="shareBox">${head}` +
         '<p>Ссылки пока нет. Кто её откроет, станет своим для этого рода: увидит даты жизни и родовые заметки,' +
-        ' а чужие роды — только общим слоем.</p>' +
-        '<div class="shareRow"><button class="gateGo" data-do="issue">Выпустить ссылку</button>' +
+        ' а чужие роды — только общим слоем. Ссылка действует выбранный срок и потом гаснет сама.</p>' +
+        `<div class="shareRow">${termPick()}<span class="shareGap"></span>` +
+        '<button class="gateGo" data-do="issue">Выпустить ссылку</button>' +
         '<button class="gateOff" data-do="close">Закрыть</button></div></div>';
     } else {
+      const expired = new Date(link.expires_at).getTime() <= Date.now();
       this.element.innerHTML = `<div class="shareBox">${head}` +
         `<div class="shareUrl"><code>${escapeHtml(link.url)}</code>` +
         '<button class="gateOff" data-do="copy">Копировать</button></div>' +
+        `<div class="shareTill${expired ? " over" : ""}">${expired ? "Срок вышел — ссылка не открывается, " : "Действует "}` +
+        `${untilText(link.expires_at)}</div>` +
         `<div class="shareWhen">выпущена ${when(link.created_at)} · ${openedWord(link.opened)}` +
         `${link.opened_at ? ` · последний раз ${when(link.opened_at)}` : ""}</div>` +
-        '<p>Открывший ссылку становится своим для этого рода. «Выпустить заново» гасит старую ссылку,' +
-        ' «Отозвать» закрывает род и для тех, кто уже приходил.</p>' +
-        '<div class="shareRow"><button class="gateOff" data-do="issue">Выпустить заново</button>' +
-        '<span class="shareGap"></span>' +
+        '<p>Открывший ссылку становится своим для этого рода — до того же дня; эту дату он видит у себя над картой.' +
+        ' «Выпустить заново» гасит старую ссылку, «Отозвать» закрывает род и для тех, кто уже приходил.</p>' +
+        `<div class="shareRow">${termPick()}<button class="gateOff" data-do="issue">Выпустить заново</button></div>` +
+        '<div class="shareRow"><span class="shareGap"></span>' +
         '<button class="gateOff shareOff" data-do="revoke">Отозвать</button>' +
         '<button class="gateGo" data-do="close">Готово</button></div></div>';
     }
@@ -97,7 +110,8 @@ export class ShareBox {
       return;
     }
     if (what === "issue") {
-      const made = await send<ShareInfo>("POST", `/api/clans/${this.clanId}/link`);
+      const days = Number(this.element.querySelector<HTMLSelectElement>("[data-term]")?.value) || DEFAULT_TERM;
+      const made = await send<ShareInfo>("POST", `/api/clans/${this.clanId}/link`, { days });
       return this.draw(made.ok ? made.data : link);
     }
     if (what === "revoke") {
