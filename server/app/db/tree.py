@@ -43,6 +43,8 @@ class TreePerson(BaseModel):
     is_branch_stub: bool
     birth: LifeDate | None
     death: LifeDate | None
+    # место по старшинству среди людей рода — зрителю вместо года: раскладке нужен порядок, а не сама дата
+    birth_rank: int | None = None
     parent_families: list[int]
     spouse_families: list[int]  # в порядке браков
     # служебные теги приложения из записи человека (app/gedcom/meta.py)

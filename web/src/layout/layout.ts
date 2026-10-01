@@ -120,6 +120,13 @@ function birthYear(person: TreePerson | undefined): number | null {
   return birth ? (birth.year ?? birth.end_year ?? null) : null;
 }
 
+// Ключ старшинства: по нему ставят братьев, корни и семьи без родителей. Зрителю сервер отдаёт не год,
+// а место по старшинству (birth_rank) — годы ему видны не все, а дерево должно стоять так же, как у редактора.
+// Линейке дат нужен настоящий год, поэтому она по-прежнему берёт birthYear.
+function ageKey(person: TreePerson | undefined): number | null {
+  return person?.birth_rank ?? birthYear(person);
+}
+
 // Поколение: родители одной семьи на одном ярусе, дети — ярусом ниже. Повторяется до устойчивости.
 export function generations(tree: ClanTree): Map<number, number> {
   const gen = new Map(tree.persons.map((p) => [p.id, 0]));
@@ -153,7 +160,7 @@ export function generations(tree: ClanTree): Map<number, number> {
 // после датированных, между собой по идентификатору.
 function byAge(idx: Index, order: readonly number[]) {
   const keys = new Map<number, number>();
-  const dated = order.map((id) => birthYear(idx.persons.get(id)));
+  const dated = order.map((id) => ageKey(idx.persons.get(id)));
   order.forEach((id, i) => {
     if (dated[i] != null) return keys.set(id, dated[i]!);
     if (idx.persons.get(id)?.is_branch_stub) return;
@@ -303,11 +310,12 @@ function placeHorizontally(idx: Index, metrics: CardMetrics, options: LayoutOpti
       p.parent_families.length === 0 &&
       p.spouse_families.some((f) => (idx.families.get(f)?.children.length ?? 0) > 0 || folded.has(f)),
   );
-  roots.sort((a, b) => (birthYear(a) || 9999) - (birthYear(b) || 9999));
+  // место по старшинству бывает нулём — поэтому сравниваем с пустотой, а не «ложно ли»
+  roots.sort((a, b) => (ageKey(a) ?? 9999) - (ageKey(b) ?? 9999));
 
   // сначала семьи без родителей: иначе пришлый супруг одного из братьев заберёт его в свою ветку
   const broods = idx.familyOrder.filter(parentless);
-  const eldest = (f: TreeFamily) => Math.min(9999, ...f.children.map((c) => birthYear(idx.persons.get(c)) || 9999));
+  const eldest = (f: TreeFamily) => Math.min(9999, ...f.children.map((c) => ageKey(idx.persons.get(c)) ?? 9999));
   broods.sort((a, b) => eldest(a) - eldest(b));
 
   const seen = new Set<number>();

@@ -48,6 +48,14 @@ def sift(tree: ClanTree, eyes: Eyes) -> ClanTree:
         return tree
 
     clan_id = tree.clan.id
+    # Раскладка ставит старшего левее и сверяется для этого с годами рождения. Зрителю годы видны не все,
+    # а без них дерево разъезжается в другую форму. Поэтому зритель получает место человека по старшинству —
+    # порядок без самой даты; «кто старше» и так видно на карте. Считаем до того, как даты уйдут.
+    years = {p.id: p.birth.year or p.birth.end_year for p in tree.persons if p.birth and (p.birth.year or p.birth.end_year)}
+    place = {year: at for at, year in enumerate(sorted(set(years.values())))}
+    for person in tree.persons:
+        if person.id in years:
+            person.birth_rank = place[years[person.id]]
     keep = [p for p in tree.persons if eyes.allows(p.see, clan_id)]
     gone = {p.id for p in tree.persons} - {p.id for p in keep}
     for person in keep:

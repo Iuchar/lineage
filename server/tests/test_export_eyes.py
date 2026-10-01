@@ -135,6 +135,15 @@ def test_editor_can_look_as_either_viewer(tmp_path: Path) -> None:
         assert born("?as_viewer=1") == {"Тормод": 1700, "Мурдо": 1730}
         # общий зритель: скрытых нет, родовые даты закрыты, открытые всем — видны
         assert born("?as_viewer=0") == {"Тормод": None, "Мурдо": 1730}
+
+        def rank(as_viewer: str) -> dict[str, int | None]:
+            tree = client.get(f"/api/clans/1/tree{as_viewer}").json()
+            return {p["given"]: p["birth_rank"] for p in tree["persons"]}
+
+        # зрителю вместо года — место по старшинству: раскладке нужен порядок, а не дата.
+        # Редактору оно ни к чему: у него есть сами годы
+        assert rank("?as_viewer=0") == {"Тормод": 0, "Мурдо": 1} and rank("?as_viewer=1") == {"Тормод": 0, "Мурдо": 1}
+        assert set(rank("").values()) == {None}
         common = client.get("/api/clans/1/export?as_viewer=0").text
         assert "2 DATE 1700" not in common and "Арендатор" not in common
         assert "2 DATE 1700" in client.get("/api/clans/1/export?as_viewer=1").text

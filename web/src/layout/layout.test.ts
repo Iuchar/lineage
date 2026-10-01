@@ -154,3 +154,40 @@ describe("поколения", () => {
     expect(Object.fromEntries(generations(tree))).toEqual({ 1: 0, 2: 1, 3: 1, 4: 2 });
   });
 });
+
+// Зрителю сервер отдаёт не годы рождения, а место по старшинству: годы ему видны не все.
+// Дерево при этом должно стоять точно так же, как у редактора, — иначе род у гостя разъезжается в другую форму.
+describe("зритель без дат видит ту же раскладку", () => {
+  const withoutDates = (tree: ClanTree): ClanTree => {
+    const year = (p: ClanTree["persons"][number]) => p.birth?.year ?? p.birth?.end_year ?? null;
+    const place = new Map([...new Set(tree.persons.map(year).filter((y): y is number => y != null))]
+      .sort((a, b) => a - b).map((y, at) => [y, at]));
+    return {
+      ...tree,
+      persons: tree.persons.map((p) => {
+        const y = year(p);
+        return { ...p, birth: null, death: null, birth_rank: y == null ? null : place.get(y)! };
+      }),
+    };
+  };
+
+  for (const [name, tree] of Object.entries(TREES)) {
+    for (const rootAtBottom of [false, true]) {
+      it(`${name}, основатель ${rootAtBottom ? "снизу" : "сверху"}`, () => {
+        const metrics = STYLE_METRICS.gobelen;
+        const full = layoutTree(tree, metrics, { ruler: false, rootAtBottom });
+        const bare = layoutTree(withoutDates(tree), metrics, { ruler: false, rootAtBottom });
+        expect(bare.width).toBe(full.width);
+        expect([...bare.positions]).toEqual([...full.positions]);
+      });
+    }
+  }
+
+  it("без места по старшинству дерево действительно разъезжается — проверка самой проверки", () => {
+    const tree = TREES.monadh!;
+    const blind: ClanTree = { ...tree, persons: tree.persons.map((p) => ({ ...p, birth: null, death: null })) };
+    const full = layoutTree(tree, STYLE_METRICS.gobelen, { ruler: false, rootAtBottom: false });
+    const lost = layoutTree(blind, STYLE_METRICS.gobelen, { ruler: false, rootAtBottom: false });
+    expect([...lost.positions]).not.toEqual([...full.positions]);
+  });
+});

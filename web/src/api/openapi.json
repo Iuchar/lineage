@@ -4081,6 +4081,17 @@
               }
             ]
           },
+          "birth_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Rank"
+          },
           "parent_families": {
             "items": {
               "type": "integer"

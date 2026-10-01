@@ -1418,6 +1418,8 @@ export interface components {
             is_branch_stub: boolean;
             birth: components["schemas"]["LifeDate"] | null;
             death: components["schemas"]["LifeDate"] | null;
+            /** Birth Rank */
+            birth_rank?: number | null;
             /** Parent Families */
             parent_families: number[];
             /** Spouse Families */
