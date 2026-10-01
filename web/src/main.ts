@@ -160,7 +160,8 @@ async function start(root: HTMLElement): Promise<void> {
   });
   // три дока одного устройства: шапка с названием, сворачивание в полоску, у двух — растяжка за край
   const redrawMap = () => window.dispatchEvent(new Event("resize"));
-  const clansDock = new Dock({ key: "clans", title: "Родословные", icon: "tree", side: "left", width: 216,
+  // список родословных по умолчанию свёрнут в полоску: карте нужнее место, а род меняют нечасто
+  const clansDock = new Dock({ key: "clans", title: "Родословные", icon: "tree", side: "left", width: 216, open: false,
     resize: { min: 170, max: 460 }, changed: redrawMap });
   clansDock.body.append(rail.element);
   stage.append(clansDock.element);
