@@ -99,6 +99,9 @@ def test_api_with_editor_demands_login(tmp_path, monkeypatch) -> None:
 
     assert client.post("/api/login", json={"name": "Tyr", "password": "не тот"}).status_code == 401
     entered = client.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
+    # вход живёт, пока открыт браузер: у cookie нет срока, и с закрытием браузера она пропадает
+    cookie = entered.headers["set-cookie"].lower()
+    assert "max-age" not in cookie and "expires" not in cookie and "httponly" in cookie
     assert entered.status_code == 200 and entered.json()["name"] == "Tyr"
     assert client.get("/api/me").json() == {"name": "Tyr", "guarded": True, "clans": []}
     # вошли: заслон пропускает, дальше отвечает сам обработчик

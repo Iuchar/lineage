@@ -1,6 +1,7 @@
 // Список родословных слева от карты: поиск, порядок (имя, люди, статус), счёт людей, новый род и загрузка файла.
-// Шапку, сворачивание и ширину даёт док (panel/dock.ts); порядок помнит браузер.
+// Шапку, сворачивание и ширину даёт док (panel/dock.ts); порядок помнится до закрытия браузера.
 
+import { dropLongMemory, recall, remember } from "../session";
 import { icon } from "./icons";
 import type { ClanSummary } from "../api/types";
 import { STATUS_NAMES, STATUS_ORDER } from "../canvas/status";
@@ -28,12 +29,9 @@ export class ClanRail {
     this.element = document.createElement("aside");
     this.element.className = "rail";
     this.element.setAttribute("aria-label", "Родословные");
-    try {
-      const sort = localStorage.getItem(SORT_KEY);
-      if (sort === "size" || sort === "status") this.sort = sort;
-    } catch {
-      // без хранилища порядок останется по имени
-    }
+    const sort = recall(SORT_KEY);
+    if (sort === "size" || sort === "status") this.sort = sort;
+    dropLongMemory(SORT_KEY);
     this.element.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
       if (target.closest("[data-rail=add]")) return this.actions.add();
@@ -41,11 +39,7 @@ export class ClanRail {
       const sort = target.closest<HTMLElement>("[data-sort]");
       if (sort) {
         this.sort = sort.dataset.sort as Sort;
-        try {
-          localStorage.setItem(SORT_KEY, this.sort);
-        } catch {
-          // без хранилища порядок вернётся к имени
-        }
+        remember(SORT_KEY, this.sort);
         return this.draw();
       }
       const share = target.closest<HTMLElement>("[data-share]");

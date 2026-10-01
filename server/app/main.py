@@ -58,7 +58,6 @@ Database = Annotated[sqlite3.Connection, Depends(database)]
 
 SESSION_COOKIE = "rodoslovnye_editor"
 VIEWER_COOKIE = "rodoslovnye_viewer"
-SESSION_DAYS = 30
 VIEWER_DAYS = 365
 # вход и проверка себя открыты всем: иначе войти было бы нечем
 OPEN_PATHS = {"/api/login", "/api/logout", "/api/me"}
@@ -126,10 +125,8 @@ def post_login(conn: Database, body: LoginForm, response: Response) -> Me:
         key = login(conn, body.name, body.password)
     except AccessError as error:
         raise HTTPException(status_code=401, detail=str(error)) from None
-    response.set_cookie(
-        SESSION_COOKIE, key, max_age=SESSION_DAYS * 24 * 3600,
-        httponly=True, samesite="lax", path="/",
-    )
+    # без срока жизни: вход держится, пока открыт браузер, и кончается вместе с ним
+    response.set_cookie(SESSION_COOKIE, key, httponly=True, samesite="lax", path="/")
     return Me(name=body.name.strip(), guarded=True)
 
 

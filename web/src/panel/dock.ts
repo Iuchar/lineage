@@ -1,11 +1,13 @@
 // Док — общая рамка боковых панелей: шапка с названием, сворачивание в полоску с вертикальной надписью,
 // растяжка за край. Что лежит внутри, доку всё равно: родословные, карточка человека, вид.
-// Док ничего не помнит: при каждой загрузке страницы он встаёт в исходное состояние и исходную ширину.
+// Открыт ли док и какой он ширины, помнится до закрытия браузера: перезагрузка страницы их сохраняет,
+// новый заход начинается с исходного.
 
+import { dropLongMemory, recall, remember } from "../session";
 import { icon, type IconName } from "./icons";
 
 export interface DockOptions {
-  key: string; // имя дока в разметке
+  key: string; // имя дока в разметке и в памяти захода
   title: string;
   icon: IconName;
   side: "left" | "right";
@@ -22,9 +24,10 @@ export class Dock {
   private width: number;
 
   constructor(private readonly options: DockOptions) {
-    this.open = options.open ?? true;
-    this.width = this.clamp(options.width);
-    this.forget();
+    const saved = this.read();
+    this.open = saved.open ?? options.open ?? true;
+    this.width = this.clamp(saved.width ?? options.width);
+    dropLongMemory(this.storeKey);
 
     this.element = document.createElement("div");
     this.element.className = `dock ${options.side}`;
@@ -51,6 +54,7 @@ export class Dock {
   setOpen(open: boolean): void {
     if (this.open === open) return;
     this.open = open;
+    this.save();
     this.apply();
     this.options.changed?.();
   }
@@ -86,23 +90,32 @@ export class Dock {
       if (!from) return;
       from = null;
       this.element.classList.remove("resizing");
+      this.save();
     };
     grip.addEventListener("pointerup", end);
     grip.addEventListener("pointercancel", end);
     // двойной щелчок возвращает исходную ширину
     grip.addEventListener("dblclick", () => {
       this.width = this.clamp(this.options.width);
+      this.save();
       this.apply();
       this.options.changed?.();
     });
   }
 
-  // прежние версии клали состояние дока в браузер — убираем, чтобы оно не лежало мёртвым грузом
-  private forget(): void {
+  private get storeKey(): string {
+    return `rodoslovnye.dock.${this.options.key}`;
+  }
+
+  private read(): { open?: boolean; width?: number } {
     try {
-      localStorage.removeItem(`rodoslovnye.dock.${this.options.key}`);
+      return JSON.parse(recall(this.storeKey) ?? "{}") as { open?: boolean; width?: number };
     } catch {
-      // хранилища нет — и убирать нечего
+      return {}; // испорченная запись — док встанет как задумано по умолчанию
     }
+  }
+
+  private save(): void {
+    remember(this.storeKey, JSON.stringify({ open: this.open, width: this.width }));
   }
 }

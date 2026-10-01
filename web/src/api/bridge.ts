@@ -2,6 +2,8 @@
 // Клиентский код не знает о подмене — он по-прежнему зовёт fetch("/api/…"), только ответ приходит
 // не по сети, а из ядра, которое работает на этой же странице.
 
+import { dropLongMemory, recall, remember } from "../session";
+
 const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/";
 const CORE = "core.zip"; // ядро и эталонные роды, собирает scripts/pack-core.mjs
 // на витрине заводим редактора с простым паролем: иначе гость не увидит, как устроена правка
@@ -178,21 +180,18 @@ const JAR = "rodoslovnye.jar";
 const jar = new Map<string, string>();
 
 function loadJar(): void {
+  dropLongMemory(JAR);
   try {
-    for (const [name, value] of Object.entries(JSON.parse(localStorage.getItem(JAR) ?? "{}") as Record<string, string>)) {
+    for (const [name, value] of Object.entries(JSON.parse(recall(JAR) ?? "{}") as Record<string, string>)) {
       jar.set(name, value);
     }
   } catch {
-    // без хранилища вход просто не переживёт перезагрузку
+    // испорченная запись — вход просто не переживёт перезагрузку
   }
 }
 
 function saveJar(): void {
-  try {
-    localStorage.setItem(JAR, JSON.stringify(Object.fromEntries(jar)));
-  } catch {
-    // и здесь то же самое
-  }
+  remember(JAR, JSON.stringify(Object.fromEntries(jar)));
 }
 
 function takeCookies(headers: [string, string][]): void {

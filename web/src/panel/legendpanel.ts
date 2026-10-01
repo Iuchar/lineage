@@ -1,6 +1,7 @@
 // Легенда карты: плашка внизу слева. Свёрнутая — значок стиля и примета дерева; раскрытая — знаки
 // в несколько колонок и метки рода отдельной вкладкой. Что раскрыто, помнит браузер.
 
+import { dropLongMemory, recall, remember } from "../session";
 import { icon } from "./icons";
 import { legendBadge, legendSigns, placeGlyphs, tagGlyph, type LegendFacts } from "../canvas/legend";
 import { TAG_COLORS, type TagSet } from "../canvas/tags";
@@ -47,11 +48,8 @@ export class LegendPanel {
 
   constructor(host: HTMLElement, private readonly actions: LegendActions) {
     this.host = host;
-    try {
-      this.open = localStorage.getItem(KEY) === "open";
-    } catch {
-      this.open = false;
-    }
+    this.open = recall(KEY) === "open";
+    dropLongMemory(KEY);
     this.element = document.createElement("div");
     this.element.className = "legend";
     this.element.hidden = true;
@@ -67,11 +65,7 @@ export class LegendPanel {
       if (tag) return this.actions.filter(this.state?.filter === tag.dataset.tag ? null : tag.dataset.tag ?? null);
       if (target.closest(".lgTop")) {
         this.open = !this.open;
-        try {
-          localStorage.setItem(KEY, this.open ? "open" : "closed");
-        } catch {
-          // без хранилища легенда просто откроется заново
-        }
+        remember(KEY, this.open ? "open" : "closed");
         this.draw();
       }
     });
