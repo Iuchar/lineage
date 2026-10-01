@@ -1,11 +1,11 @@
 // Док — общая рамка боковых панелей: шапка с названием, сворачивание в полоску с вертикальной надписью,
 // растяжка за край. Что лежит внутри, доку всё равно: родословные, карточка человека, вид.
-// Открыт ли док и какой он ширины, помнит браузер.
+// Док ничего не помнит: при каждой загрузке страницы он встаёт в исходное состояние и исходную ширину.
 
 import { icon, type IconName } from "./icons";
 
 export interface DockOptions {
-  key: string; // под этим именем состояние лежит в браузере
+  key: string; // имя дока в разметке
   title: string;
   icon: IconName;
   side: "left" | "right";
@@ -15,11 +15,6 @@ export interface DockOptions {
   changed?: () => void; // ширина или состояние сменились — карте пора пересчитаться
 }
 
-interface Saved {
-  open?: boolean;
-  width?: number;
-}
-
 export class Dock {
   readonly element: HTMLElement;
   readonly body: HTMLElement;
@@ -27,9 +22,9 @@ export class Dock {
   private width: number;
 
   constructor(private readonly options: DockOptions) {
-    const saved = this.read();
-    this.open = saved.open ?? options.open ?? true;
-    this.width = this.clamp(saved.width ?? options.width);
+    this.open = options.open ?? true;
+    this.width = this.clamp(options.width);
+    this.forget();
 
     this.element = document.createElement("div");
     this.element.className = `dock ${options.side}`;
@@ -56,7 +51,6 @@ export class Dock {
   setOpen(open: boolean): void {
     if (this.open === open) return;
     this.open = open;
-    this.save();
     this.apply();
     this.options.changed?.();
   }
@@ -92,33 +86,23 @@ export class Dock {
       if (!from) return;
       from = null;
       this.element.classList.remove("resizing");
-      this.save();
     };
     grip.addEventListener("pointerup", end);
     grip.addEventListener("pointercancel", end);
     // двойной щелчок возвращает исходную ширину
     grip.addEventListener("dblclick", () => {
       this.width = this.clamp(this.options.width);
-      this.save();
       this.apply();
       this.options.changed?.();
     });
   }
 
-  private read(): Saved {
+  // прежние версии клали состояние дока в браузер — убираем, чтобы оно не лежало мёртвым грузом
+  private forget(): void {
     try {
-      const raw = localStorage.getItem(`rodoslovnye.dock.${this.options.key}`);
-      return raw ? (JSON.parse(raw) as Saved) : {};
+      localStorage.removeItem(`rodoslovnye.dock.${this.options.key}`);
     } catch {
-      return {}; // без хранилища док откроется как задумано по умолчанию
-    }
-  }
-
-  private save(): void {
-    try {
-      localStorage.setItem(`rodoslovnye.dock.${this.options.key}`, JSON.stringify({ open: this.open, width: this.width }));
-    } catch {
-      // не запомнилось — в следующий раз встанет исходная ширина
+      // хранилища нет — и убирать нечего
     }
   }
 }
