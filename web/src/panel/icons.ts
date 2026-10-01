@@ -15,6 +15,7 @@ const PATHS = {
   close: '<path d="M18 6 6 18M6 6l12 12"/>',
   tree: '<path d="M12 5.6V10M6 18.4V16a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2.4M12 10v4"/><circle cx="12" cy="4" r="1.6"/><circle cx="6" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/>',
   person: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0 1 14 0"/>',
+  out: '<path d="M14 5h5v5M19 5l-8 8M11 7H6v11h11v-5"/>', // ссылка наружу, в новую вкладку
 } as const;
 
 export type IconName = keyof typeof PATHS;

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Плашка внизу страницы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  .th { --bg: #241a12; --fg: #eadfc4; --mut: #a08d70; --acc: #c8a44e; --ink: #c8a44e; --edge: #3a2c1e; --panelbg: #19110a;
+        --font: 'Cormorant Garamond', Georgia, serif; }
+  .th.light { --bg: #ded2b6; --fg: #2a2116; --mut: #5d4f37; --acc: #a8801f; --ink: #644d1a; --edge: #bba98a; --panelbg: #d2c5a6; }
+  .th.gazeta { --bg: #f6f3ea; --fg: #14120e; --mut: #5d564a; --acc: #a81f1f; --ink: #a81f1f; --edge: #cdc6b4; --panelbg: #efeade;
+               --font: 'PT Serif', Georgia, serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #14100c; color: #eadfc4; font: 400 13px/1.5 'Golos Text', sans-serif; padding: 26px 30px 70px; }
+  h1 { font: 500 24px/1 'Cormorant Garamond', serif; margin: 0 0 6px; }
+  .lead { color: #a08d70; font-size: 12.5px; margin: 0 0 4px; max-width: 900px; }
+  .lead b, .say b { color: #eadfc4; font-weight: 500; }
+  h3 { font: 500 13px/1.3 'Golos Text', sans-serif; margin: 26px 0 3px; color: #eadfc4; }
+  h3 i { font-style: normal; font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #14100c; background: #c8a44e;
+         border-radius: 3px; padding: 3px 6px; margin-right: 8px; vertical-align: 1px; }
+  .say { color: #8d7a60; font-size: 12px; margin: 0 0 10px; max-width: 900px; }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 1240px; }
+  .three.wide { grid-template-columns: repeat(2, 1fr); }
+  .cap { font: 400 10px/1 'IBM Plex Mono', monospace; color: #6f5f4a; margin: 0 0 5px; letter-spacing: .06em; text-transform: uppercase; }
+  .frame { border: 1px solid #2c211a; border-radius: 8px; overflow: hidden; }
+
+  /* низ приложения: полоски панелей, карта, плашка */
+  .app { display: flex; flex-direction: column; background: var(--bg); color: var(--fg); height: 190px; }
+  .mid { flex: 1; display: grid; grid-template-columns: 34px 1fr 34px; min-height: 0; }
+  .strip { background: var(--panelbg); } .strip.l { border-right: 1px solid var(--edge); } .strip.r { border-left: 1px solid var(--edge); }
+  .map { position: relative; overflow: hidden; }
+  .map::before { content: ""; position: absolute; inset: 0; opacity: .45;
+                 background: repeating-linear-gradient(90deg, transparent 0 3px, rgba(0,0,0,.13) 3px 4px); }
+  .dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: color-mix(in srgb, var(--fg) 78%, transparent); }
+  .lg { position: absolute; left: 10px; bottom: 10px; border: 1px solid var(--edge); background: var(--panelbg); border-radius: 6px;
+        padding: 5px 10px; font: 500 11px/1 'Golos Text', sans-serif; z-index: 1; }
+
+  a { color: inherit; text-decoration: none; white-space: nowrap; }
+  .ext { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+         vertical-align: -1px; margin-left: 3px; opacity: .75; }
+
+  /* П1 — полоса, всё по центру одной строкой */
+  .f1 { flex: none; display: flex; justify-content: center; align-items: center; gap: 10px; height: 28px; padding: 0 14px;
+        background: var(--panelbg); border-top: 1px solid var(--edge);
+        font: 400 11px/1 'IBM Plex Mono', monospace; color: var(--mut); letter-spacing: .04em; }
+  .f1 b { font-weight: 500; color: var(--fg); }
+  .f1 a { color: var(--ink); } .f1 i { font-style: normal; opacity: .5; }
+
+  /* П2 — полоса, подпись слева, ссылки справа */
+  .f2 { flex: none; display: flex; align-items: center; gap: 16px; height: 30px; padding: 0 14px;
+        background: var(--panelbg); border-top: 1px solid var(--edge); font: 500 11.5px/1 'Golos Text', sans-serif; color: var(--mut); }
+  .f2 .who { font: 500 15px/1 var(--font); color: var(--fg); letter-spacing: .01em; }
+  .f2 .who small { font: 400 11px/1 'IBM Plex Mono', monospace; color: var(--mut); margin-right: 7px; letter-spacing: .04em; }
+  .f2 .gap { flex: 1; } .f2 a { color: var(--ink); }
+
+  /* П3 — без полосы: подпись в углу карты, высоту у карты не отнимает */
+  .f3 { position: absolute; right: 10px; bottom: 10px; z-index: 1; display: flex; align-items: center; gap: 9px;
+        border: 1px solid var(--edge); border-radius: 6px; padding: 5px 10px;
+        background: color-mix(in srgb, var(--panelbg) 88%, transparent);
+        font: 400 11px/1 'IBM Plex Mono', monospace; color: var(--mut); letter-spacing: .03em; white-space: nowrap; }
+  .f3 b { font-weight: 500; color: var(--fg); } .f3 a { color: var(--ink); } .f3 i { font-style: normal; opacity: .5; }
+</style>
+</head>
+<body>
+<h1>Плашка внизу страницы</h1>
+<p class="lead">«Разработано Тюром» и две ссылки: <b>ВКонтакте</b> — vk.ru/max_gpt, <b>Telegram</b> — t.me/Maks_GPT. Открываются в новой вкладке.
+Показан низ приложения в трёх красках: Зал предков тёмный и светлый, Типография светлая.</p>
+
+<div id="out"></div>
+
+<script>
+const ext = '<svg class="ext" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M11 7H6v11h11v-5"/></svg>';
+const vk = `<a href="https://vk.ru/max_gpt">ВКонтакте${ext}</a>`;
+const tg = `<a href="https://t.me/Maks_GPT">Telegram${ext}</a>`;
+const map = (extra = "") => `<div class="mid"><div class="strip l"></div><div class="map">
+  <span class="dot" style="left:46%;top:22%"></span><span class="dot" style="left:54%;top:22%"></span>
+  <span class="dot" style="left:36%;top:52%"></span><span class="dot" style="left:44%;top:52%"></span><span class="dot" style="left:62%;top:52%"></span>
+  <span class="lg">● Легенда</span>${extra}</div><div class="strip r"></div></div>`;
+const V = {
+  f1: () => map() + `<div class="f1">Разработано <b>Тюром</b><i>·</i>${vk}<i>·</i>${tg}</div>`,
+  f2: () => map() + `<div class="f2"><span class="who"><small>разработано</small>Тюром</span><span class="gap"></span>${vk}${tg}</div>`,
+  f3: () => map(`<div class="f3">Разработано <b>Тюром</b><i>·</i>${vk}<i>·</i>${tg}</div>`),
+};
+const TEXT = [
+  ["f1", "П1", "Полоса, всё по центру", "Тонкая полоса во всю ширину, 28 px. Одна строка моноширинным, приглушённо; имя и ссылки ярче. Самый тихий вариант."],
+  ["f2", "П2", "Полоса: подпись слева, ссылки справа", "30 px. Имя набрано шрифтом стиля, как имя рода в шапке; ссылки прижаты к правому краю, под «Выгрузить» и «Загрузить»."],
+  ["f3", "П3", "Без полосы: подпись в углу карты", "Плашка в правом нижнем углу карты, напротив «Легенды». Высоту у карты не отнимает, но лежит поверх дерева."],
+];
+const THEMES = [["", "Зал предков · тёмная"], ["light", "Зал предков · светлая"], ["gazeta", "Типография · светлая"]];
+document.getElementById("out").innerHTML = TEXT.map(([key, id, title, say]) =>
+  `<h3><i>${id}</i>${title}</h3><p class="say">${say}</p><div class="three${key === "f3" ? " wide" : ""}">` +
+  // угловой плашке нужна ширина настоящей карты: в узкой рамке она легла бы на «Легенду»
+  (key === "f3" ? THEMES.slice(0, 2) : THEMES).map(([cls, cap]) => `<div><p class="cap">${cap}</p><div class="frame th ${cls}"><div class="app">${V[key]()}</div></div></div>`).join("") +
+  "</div>").join("");
+</script>
+</body>
+</html>

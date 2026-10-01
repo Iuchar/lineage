@@ -29,6 +29,7 @@ import { FamilyEditor } from "./editor/family";
 import { send } from "./editor/api";
 import { PersonEditor } from "./editor/form";
 import { Dock } from "./panel/dock";
+import { icon } from "./panel/icons";
 import { beginVisit } from "./session";
 import { NewClan } from "./panel/newclan";
 import { Gate, whoami, type Me } from "./panel/gate";
@@ -121,7 +122,14 @@ async function start(root: HTMLElement): Promise<void> {
   const ribbon = document.createElement("div");
   ribbon.className = "ribbon";
   ribbon.hidden = true;
-  root.append(bar, stage);
+  // подпись автора внизу страницы: видна всем, в любом режиме
+  const foot = document.createElement("footer");
+  foot.className = "foot";
+  const outside = (href: string, text: string) =>
+    `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}${icon("out")}</a>`;
+  foot.innerHTML = `<span>Разработано <b>Тюром</b></span><i>·</i>${outside("https://vk.ru/max_gpt", "ВКонтакте")}` +
+    `<i>·</i>${outside("https://t.me/Maks_GPT", "Telegram")}`;
+  root.append(bar, stage, foot);
 
   let clans = await getJson<ClanSummary[]>("/api/clans");
   if (!clans.length) {
