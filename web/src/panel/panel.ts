@@ -1,5 +1,6 @@
 // Панель выбранного человека справа: сведения, родня, браки, заметки, место среди братьев.
 
+import { icon } from "./icons";
 import type { ChangeInfo, ClanLink, ClanTree, FamilyForm, PersonDetails, PersonEvent, TreePerson } from "../api/types";
 import type { PlusKind } from "../canvas/canvas";
 import { historyHtml, revertChange } from "../editor/journal";
@@ -177,7 +178,7 @@ export class PersonPanel {
     const home = back && (members.includes(back) || family.children.includes(back.id)) ? back : members[0] ?? null;
     const full = (p: TreePerson) => [p.given, p.surname].filter(Boolean).join(" ") || "без имени";
     let h = '<div class="sideIn">';
-    if (home) h += `<button class="back" data-id="${home.id}">‹ ${escapeHtml(full(home))}</button>`;
+    if (home) h += `<button class="back" data-id="${home.id}">${icon("left", true)}${escapeHtml(full(home))}</button>`;
     h += '<span class="lbl" style="margin-top:0">союз</span>';
     if (this.actions.editing()) h += '<div class="btns" style="margin:0 0 12px"><button class="pri" data-act="family-edit">Править</button></div>';
     h += `<div class="unionHead">${members.map((p) => escapeHtml(full(p))).join(" и ") || "Родители не записаны"}</div>`;
@@ -296,7 +297,7 @@ export class PersonPanel {
           if (text || EVENT_LABELS[event.tag]) h += row(EVENT_LABELS[event.tag] ?? event.tag, text || "—");
         }
         h += row("Дети", marriage.children.length ? marriage.children.map(kin).join(", ") : "нет");
-        h += `<button class="unionLink" data-union="${marriage.family.id}">Союз: венчание, развод, дети<span>›</span></button>`;
+        h += `<button class="unionLink" data-union="${marriage.family.id}">Союз: венчание, развод, дети<span>${icon("right")}</span></button>`;
         if (marriage.children.length) {
           const folded = this.actions.isFolded(marriage.family.id);
           const count = descendantsOf(tree, marriage.family.id).size;

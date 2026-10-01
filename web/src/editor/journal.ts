@@ -2,6 +2,7 @@
 // История человека — во вкладке панели: только его правки, у каждой «вернуть» новой правкой.
 // И короткое «Сохранено · Отменить» внизу карты после каждой правки.
 
+import { icon } from "../panel/icons";
 import type { ChangeInfo } from "../api/types";
 import { escapeHtml } from "../format";
 import { send } from "./api";
@@ -36,8 +37,8 @@ export class Journal {
   constructor(stage: HTMLElement, private readonly actions: JournalActions) {
     this.group = document.createElement("div");
     this.group.className = "grp";
-    this.group.innerHTML = '<div class="sw"><button class="undo" title="Отменить последнюю правку (Ctrl+Z)">↶ Отменить</button>' +
-      '<button title="Повторить отменённое (Ctrl+Shift+Z)">↷</button><button>Журнал</button></div>';
+    this.group.innerHTML = `<div class="sw"><button class="undo" title="Отменить последнюю правку (Ctrl+Z)">${icon("undo", true)}Отменить</button>` +
+      `<button title="Повторить отменённое (Ctrl+Shift+Z)" aria-label="Повторить отменённое">${icon("redo")}</button><button>Журнал</button></div>`;
     const buttons = this.group.querySelectorAll("button");
     this.undoBtn = buttons[0]!;
     this.redoBtn = buttons[1]!;
@@ -121,7 +122,7 @@ export class Journal {
       return;
     }
     let h = `<div class="head2"><span>Все правки рода · ${this.changes.length}</span>` +
-      (this.changes.some((c) => c.undone) ? '<button data-redo>↷ Повторить</button>' : "") + "</div>";
+      (this.changes.some((c) => c.undone) ? `<button data-redo>${icon("redo", true)}Повторить</button>` : "") + "</div>";
     let last = "";
     for (const change of this.changes) {
       const d = day(change.created_at);

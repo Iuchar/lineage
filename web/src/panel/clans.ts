@@ -1,6 +1,7 @@
 // Столбец родовых деревьев слева от карты: поиск, порядок (имя, люди, статус), счёт людей, загрузка файла.
 // Кнопка «‹» прячет столбец — остаётся полоска «Родовые деревья»; выбор и порядок помнит браузер.
 
+import { icon } from "./icons";
 import type { ClanSummary } from "../api/types";
 import { STATUS_NAMES, STATUS_ORDER } from "../canvas/status";
 import { escapeHtml } from "../format";
@@ -97,13 +98,13 @@ export class ClanRail {
   private draw(): void {
     this.element.classList.toggle("mini", this.hidden);
     if (this.hidden) {
-      this.element.innerHTML = '<button class="railBtn" data-rail="toggle" title="Показать родовые деревья">›</button>' +
+      this.element.innerHTML = `<button class="railBtn" data-rail="toggle" title="Показать родовые деревья" aria-label="Показать родовые деревья">${icon("right")}</button>` +
         '<span class="vert">Родовые деревья</span>';
       return;
     }
     this.element.innerHTML =
-      '<div class="railTop"><div class="find"><i>⌕</i><input data-rail="q" placeholder="найти дерево" aria-label="Найти дерево"></div>' +
-      '<button class="railBtn" data-rail="toggle" title="Спрятать столбец">‹</button></div>' +
+      `<div class="railTop"><div class="find"><i>${icon("search")}</i><input data-rail="q" placeholder="найти дерево" aria-label="Найти дерево"></div>` +
+      `<button class="railBtn" data-rail="toggle" title="Спрятать столбец" aria-label="Спрятать столбец">${icon("left")}</button></div>` +
       '<div class="sortRow"><div class="sw">' +
       ([["name", "имени"], ["size", "людям"], ["status", "статусу"]] as [Sort, string][])
         .map(([key, title]) => `<button data-sort="${key}"${this.sort === key ? ' aria-pressed="true"' : ""}>${title}</button>`).join("") +
@@ -128,7 +129,7 @@ export class ClanRail {
     const row = (c: ClanSummary) => `<div class="row${c.id === this.current ? " on" : ""}" data-clan="${c.id}" role="button" ` +
       `tabindex="0"${c.id === this.current ? ' aria-current="true"' : ""} aria-label="${escapeHtml(c.name)}, людей: ${c.persons}">` +
       `<b>${escapeHtml(c.name)}</b><small>${c.persons}</small>` +
-      (this.editing ? `<i class="railShare" data-share="${c.id}" title="Ссылка зрителям на это дерево">⋯</i>` : "") +
+      (this.editing ? `<i class="railShare" data-share="${c.id}" title="Ссылка зрителям на это дерево">${icon("more")}</i>` : "") +
       "</div>";
     // по статусу — группами с подписью, в остальных порядках подписей нет
     const html = this.sort === "status"

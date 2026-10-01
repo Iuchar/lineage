@@ -1,6 +1,7 @@
 // Легенда карты: плашка внизу слева. Свёрнутая — значок стиля и примета дерева; раскрытая — знаки
 // в несколько колонок и метки рода отдельной вкладкой. Что раскрыто, помнит браузер.
 
+import { icon } from "./icons";
 import { legendBadge, legendSigns, placeGlyphs, tagGlyph, type LegendFacts } from "../canvas/legend";
 import { TAG_COLORS, type TagSet } from "../canvas/tags";
 import type { ClanTree } from "../api/types";
@@ -162,7 +163,7 @@ export class LegendPanel {
       `${legendBadge(s.style)}<b>Легенда</b>` +
       (this.open
         ? `${s.line ? `<span>${escapeHtml(s.line)}</span>` : ""}` +
-          '<span class="chev" title="Свернуть легенду">▾</span>'
+          `<span class="chev" title="Свернуть легенду">${icon("down")}</span>`
         : "") + "</div>";
     if (!this.open) {
       this.element.innerHTML = head;

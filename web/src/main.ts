@@ -1,3 +1,4 @@
+import { icon } from "./panel/icons";
 import "./fonts/fonts.css";
 import "./styles/app.css";
 import "./styles/cards.css";
@@ -602,7 +603,7 @@ async function start(root: HTMLElement): Promise<void> {
 
   const viewBtn = document.createElement("button");
   viewBtn.className = "topBtn";
-  viewBtn.textContent = "⚙ Вид";
+  viewBtn.innerHTML = `${icon("view", true)}Вид`;
   viewBtn.title = "Стиль, тема, древо, карточки";
   viewBtn.addEventListener("click", () => setViewMode("view"));
   // масштаб: щелчок по числу открывает ввод, Delete в нём возвращает к 100 %

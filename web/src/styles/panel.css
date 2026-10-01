@@ -5,8 +5,8 @@
 .side .por { width: 58px; height: 70px; border: 1px solid var(--edge); background: rgba(127,127,127,.1); }
 .side h3 { margin: 12px 0 0; font-size: 21px; font-family: var(--font); font-weight: 600; line-height: 1.15; }
 .side .maiden { font-size: 12px; color: var(--mut); margin-top: 3px; }
-.side .sub { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: var(--mut); margin-top: 6px; }
-.side .lbl { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+.side .sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--mut); margin-top: 6px; }
+.side .lbl { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
   color: var(--acc-ink); margin: 16px 0 6px; }
 .side .row { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; padding: 4px 0;
   border-bottom: 1px solid var(--edge); }
@@ -24,7 +24,7 @@
 .nudge button:hover, .foldRow button:hover, .side .actions button:hover { border-color: var(--acc); color: var(--acc-ink); }
 .foldRow button { flex: 0 1 auto; padding: 6px 12px; }
 .foldRow button[aria-pressed=true] { border-color: var(--acc); color: var(--acc-ink); }
-.nudge span, .foldRow span { font: 400 9.5px/1 'IBM Plex Mono', monospace; color: var(--mut); min-width: 48px; text-align: center; }
+.nudge span, .foldRow span { font: 400 11px/1 'IBM Plex Mono', monospace; color: var(--mut); min-width: 48px; text-align: center; }
 .side .actions { display: flex; margin-top: 18px; }
 
 /* ═══ Поиск в верхней панели — в цветах выбранного стиля ═══ */
@@ -36,10 +36,10 @@
   background: var(--ch-bg); border: 1px solid var(--ch-edge); border-radius: 6px; padding: 4px 0; z-index: 30;
   box-shadow: 0 8px 24px rgba(0,0,0,.45); }
 .search .hit { padding: 6px 11px; font-size: 12px; color: var(--ch-fg); cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
-.search .hit small { font: 400 10px/1.6 'IBM Plex Mono', monospace; color: var(--ch-mut); white-space: nowrap; }
+.search .hit small { font: 400 11px/1.6 'IBM Plex Mono', monospace; color: var(--ch-mut); white-space: nowrap; }
 .search .hit.on, .search .hit:hover { background: var(--ch-btn); color: var(--ch-acc); }
 .search .miss { padding: 8px 11px; font-size: 12px; color: var(--ch-mut); }
 
 /* кто поставил связку: подписью под именем двойника */
-.twin small .who { display: block; font: 400 10px 'IBM Plex Mono', monospace; font-style: normal;
+.twin small .who { display: block; font: 400 11px 'IBM Plex Mono', monospace; font-style: normal;
   color: var(--mut); margin-top: 2px; }

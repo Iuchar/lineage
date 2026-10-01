@@ -89,11 +89,11 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .bar .clanTitle { display: flex; align-items: baseline; gap: 9px; flex: none; width: clamp(200px, 27vw, 360px); min-width: 0; }
 .bar .clanTitle b { flex: none; font-family: var(--font, 'Cormorant Garamond', serif); font-size: 18px; line-height: 1.05;
   font-weight: 500; color: var(--ch-fg); letter-spacing: .02em; }
-.bar .clanStatus { font: 400 10.5px/1.2 'IBM Plex Mono', monospace; color: var(--ch-mut); letter-spacing: .02em; 
+.bar .clanStatus { font: 400 11px/1.2 'IBM Plex Mono', monospace; color: var(--ch-mut); letter-spacing: .02em; 
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bar .statusPick { flex: 1; min-width: 0; max-width: 240px; background: var(--ch-btn); color: var(--ch-fg); border: 1px solid var(--ch-edge);
-  border-radius: 5px; font: 400 10.5px 'Golos Text', sans-serif; padding: 2px 4px; }
-.bar .lbl2 { font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ch-mut); }
+  border-radius: 5px; font: 400 11px 'Golos Text', sans-serif; padding: 2px 4px; }
+.bar .lbl2 { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--ch-mut); }
 .bar .topBtn { border: 1px solid var(--ch-edge); background: var(--ch-btn); color: var(--ch-fg); border-radius: 6px; padding: 6px 11px;
   font: 500 11.5px/1 'Golos Text', sans-serif; cursor: pointer; white-space: nowrap; }
 .bar .topBtn[aria-pressed=true] { background: var(--ch-on); color: var(--ch-onfg); border-color: var(--ch-on); }
@@ -110,7 +110,7 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .rail .sortRow { display: flex; margin-bottom: 8px; }
 .rail .sortRow .sw { flex: 1; }
 .rail .sortRow .sw button { flex: 1; padding: 5px 3px; font-size: 11px; }
-.rail .railGroup { font: 500 8.5px/1.3 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase;
+.rail .railGroup { font: 500 10px/1.3 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase;
   color: var(--ch-mut); padding: 10px 8px 3px; }
 .rail .railTop { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
 .rail .find { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; border: 1px solid var(--ch-edge); border-radius: 6px;
@@ -127,7 +127,7 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .rail .row.on { background: color-mix(in srgb, var(--acc) 20%, transparent); }
 .rail .row.on small { color: var(--ch-fg); } /* на подсвеченной строке приглушённое число не читается */
 .rail .row b { flex: 1; font-family: var(--font, 'Golos Text', sans-serif); font-size: 14px; font-weight: 500; color: var(--ch-fg); }
-.rail .row small { font: 400 10px 'IBM Plex Mono', monospace; color: var(--ch-mut); }
+.rail .row small { font: 400 11px 'IBM Plex Mono', monospace; color: var(--ch-mut); }
 .rail .railAdd { margin-top: 8px; border: 0; border-top: 1px solid var(--ch-edge); background: none; color: var(--ch-acc);
   font: 500 11.5px 'Golos Text', sans-serif; padding: 8px 8px 2px; text-align: left; cursor: pointer; }
 .rail .railNote { color: var(--ch-mut); font-size: 11px; padding: 6px 8px; }
@@ -141,7 +141,7 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 .viewPanel .vpClose { border: 0; background: none; color: var(--ch-mut); font-size: 16px; cursor: pointer; padding: 0 2px; }
 .viewPanel .sec { margin-top: 14px; }
 .viewPanel .sec:first-of-type { margin-top: 0; }
-.viewPanel .lbl2 { display: block; font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
+.viewPanel .lbl2 { display: block; font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase;
   color: var(--ch-mut); margin-bottom: 7px; }
 .viewPanel .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .viewPanel .vpBtn { border: 1px solid var(--ch-edge); background: var(--ch-btn); color: var(--ch-fg); border-radius: 6px; padding: 7px 8px;
@@ -193,11 +193,11 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 /* только подпись строки: знак пишет свой текст тоже в <i>, и правила подписи его портили */
 .legend .lgItem > div { min-width: 0; }
 .legend .lgItem > div > b { display: block; font: 500 11.5px/1.25 'Golos Text', sans-serif; }
-.legend .lgItem > div > i { display: block; font-style: normal; font-size: 10.5px; line-height: 1.3; color: var(--ch-mut); }
+.legend .lgItem > div > i { display: block; font-style: normal; font-size: 11px; line-height: 1.3; color: var(--ch-mut); }
 .legend .lgItem.tag { border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
-.legend .lgItem > small { margin-left: auto; padding-left: 12px; font: 400 10px 'IBM Plex Mono', monospace; color: var(--ch-mut); }
+.legend .lgItem > small { margin-left: auto; padding-left: 12px; font: 400 11px 'IBM Plex Mono', monospace; color: var(--ch-mut); }
 .legend .lgItem.tag[aria-pressed=true] > div > b { color: var(--ch-acc); }
-.legend .lgNote { color: var(--ch-mut); font-size: 10.5px; line-height: 1.4; padding: 0 12px 11px; }
+.legend .lgNote { color: var(--ch-mut); font-size: 11px; line-height: 1.4; padding: 0 12px 11px; }
 /* на время замера каждая строка разворачивается в одну линию по своему содержимому —
    так видна настоящая ширина каждой, а не общая по самой длинной */
 .legend.measuring .lgGrid { grid-template-columns: max-content; }
@@ -236,7 +236,7 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
   font-weight: 500; margin-bottom: 2px; }
 .gateBox > p { color: var(--ch-mut); font-size: 12px; margin: 0 0 14px; }
 .gateBox label { display: block; margin-bottom: 10px; }
-.gateBox label span { display: block; font: 500 9px/1 'IBM Plex Mono', monospace; letter-spacing: .16em;
+.gateBox label span { display: block; font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em;
   text-transform: uppercase; color: var(--ch-mut); margin-bottom: 5px; }
 .gateBox input { width: 100%; border: 1px solid var(--ch-edge); border-radius: 6px; background: var(--ch-btn);
   color: var(--ch-fg); font: 400 13px 'Golos Text', sans-serif; padding: 8px 10px; outline: none; }
@@ -265,7 +265,7 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
   background: var(--ch-btn); padding: 8px 10px; }
 .shareUrl code { flex: 1; min-width: 0; font: 400 11.5px 'IBM Plex Mono', monospace; color: var(--ch-fg);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.shareWhen { font: 400 10.5px 'IBM Plex Mono', monospace; color: var(--ch-mut); margin-top: 8px; }
+.shareWhen { font: 400 11px 'IBM Plex Mono', monospace; color: var(--ch-mut); margin-top: 8px; }
 .shareRow { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
 .shareGap { flex: 1; }
 .shareOff { color: var(--warn, #b9552f); border-color: color-mix(in srgb, var(--warn, #b9552f) 45%, transparent); }
@@ -297,3 +297,7 @@ body[data-style][data-theme=light] { --ch-on: color-mix(in srgb, var(--acc) 82%,
 /* карточка на карте: толщина рамки делится на масштаб, иначе на мелком плане её не видно */
 .canvas .node:focus-visible { outline: calc(2px * var(--unzoom, 1)) solid var(--acc-ink, #c8a44e);
   outline-offset: calc(4px * var(--unzoom, 1)); border-radius: 4px; }
+
+/* иконка в строке текста: размер от кегля, сидит на базовой линии, от подписи отделена пробелом */
+.ico { width: 1.2em; height: 1.2em; flex: none; vertical-align: -.22em; }
+.ico.lead { margin-right: .4em; }

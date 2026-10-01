@@ -8,7 +8,7 @@
 .side .field.bad { border-color: #c9564a; }
 .side .fl { display: block; font-size: 11px; color: var(--mut); margin: 10px 0 4px; }
 .side .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.side .parse, .pop .parse { font: 400 10.5px/1.4 'IBM Plex Mono', monospace; color: var(--mut); margin-top: 4px; min-height: 14px; }
+.side .parse, .pop .parse { font: 400 11px/1.4 'IBM Plex Mono', monospace; color: var(--mut); margin-top: 4px; min-height: 14px; }
 /* подсказка у даты — всегда одна строка: при наборе форма не прыгает */
 .side [data-parse] { height: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .side .parse b { color: var(--acc-ink); font-weight: 500; }
@@ -51,7 +51,7 @@
 .side .addGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .side .addGrid button { border: 1px dashed var(--edge); background: transparent; color: var(--fg); border-radius: 4px; padding: 7px 6px;
   font: 500 11.5px/1.2 'Golos Text', sans-serif; cursor: pointer; text-align: left; }
-.side .addGrid button small { display: block; color: var(--mut); font-size: 10.5px; font-weight: 400; margin-top: 2px; }
+.side .addGrid button small { display: block; color: var(--mut); font-size: 11px; font-weight: 400; margin-top: 2px; }
 .side .addGrid button.done { border-style: solid; opacity: .5; cursor: default; }
 .side .addGrid button.wide { grid-column: 1 / -1; }
 .side .addGrid button:hover:not(.done) { border-color: var(--acc); color: var(--acc-ink); }
@@ -61,9 +61,9 @@
 .side .tabs2 button { flex: 1; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--mut);
   padding: 9px 0; font: 500 12px 'Golos Text', sans-serif; cursor: pointer; }
 .side .tabs2 button.on { color: var(--fg); border-bottom-color: var(--acc); }
-.side .jr .day { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); padding: 12px 0 5px; }
+.side .jr .day { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); padding: 12px 0 5px; }
 .side .jr .e { display: grid; grid-template-columns: 38px 1fr; gap: 2px 8px; padding: 6px 0; border-bottom: 1px solid var(--edge); font-size: 12px; line-height: 1.4; }
-.side .jr .e time { font: 400 10px 'IBM Plex Mono', monospace; color: var(--mut); }
+.side .jr .e time { font: 400 11px 'IBM Plex Mono', monospace; color: var(--mut); }
 .side .jr .e button { grid-column: 2; justify-self: start; border: 0; background: none; color: var(--acc-ink); padding: 2px 0 0; cursor: pointer;
   font: 500 11px 'Golos Text', sans-serif; }
 
@@ -77,7 +77,7 @@
 /* список у плюса — в цветах стиля, поверх всего */
 .pop { position: fixed; z-index: 40; width: 290px; background: var(--panelbg, #16181b); color: var(--fg); border: 1px solid var(--edge);
   border-radius: 5px; box-shadow: 0 10px 30px rgba(0,0,0,.4); padding: 10px 11px 8px; font-size: 12px; }
-.pop .t { font: 500 8.5px/1.3 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--acc-ink); margin-bottom: 8px; }
+.pop .t { font: 500 10px/1.3 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--acc-ink); margin-bottom: 8px; }
 .pop .seg { margin-bottom: 4px; }
 .pop .opt { display: flex; justify-content: space-between; gap: 8px; width: 100%; padding: 7px 0; border: 0; border-top: 1px solid var(--edge);
   background: transparent; color: var(--fg); font: 400 12px 'Golos Text', sans-serif; text-align: left; cursor: pointer; }
@@ -89,10 +89,10 @@
 .journalDrop { position: fixed; z-index: 40; width: 380px; max-height: 70vh; overflow: auto; background: #1d2126; color: #d9d4c8;
   border: 1px solid #333941; border-radius: 6px; box-shadow: 0 12px 34px rgba(0,0,0,.5); padding: 4px 0 6px; font-size: 12px; }
 .journalDrop .head2 { display: flex; justify-content: space-between; padding: 8px 12px 4px; color: #aeb6c2; }
-.journalDrop .day { font: 500 8.5px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #7c8492; padding: 10px 12px 5px; }
+.journalDrop .day { font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #7c8492; padding: 10px 12px 5px; }
 .journalDrop .e { display: grid; grid-template-columns: 38px 1fr auto; gap: 8px; padding: 6px 12px; align-items: baseline; }
 .journalDrop .e:hover { background: #2a2f36; }
-.journalDrop .e time { font: 400 10px 'IBM Plex Mono', monospace; color: #7c8492; }
+.journalDrop .e time { font: 400 11px 'IBM Plex Mono', monospace; color: #7c8492; }
 .journalDrop .e span { cursor: pointer; }
 .journalDrop .e.undone { opacity: .45; text-decoration: line-through; }
 .journalDrop button { border: 0; background: none; color: #e9c46a; font: 500 11px 'Golos Text', sans-serif; cursor: pointer; white-space: nowrap; }
@@ -128,7 +128,7 @@
 .side .swatches button.on { border-color: var(--fg); }
 .side .flag { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; padding: 4px 0; cursor: pointer; }
 .side .flag input { accent-color: var(--acc); margin: 2px 0 0; }
-.side .flag i { display: block; font-style: normal; color: var(--mut); font-size: 10.5px; margin-top: 1px; }
+.side .flag i { display: block; font-style: normal; color: var(--mut); font-size: 11px; margin-top: 1px; }
 
 /* набор меток рода в форме */
 .side .chip.quiet { color: var(--mut); border-style: dashed; }
@@ -171,7 +171,7 @@
 .side .kinList > div > span { flex: 1 1 calc(100% - 40px); min-width: 0; }
 /* действия — второй строкой по правому краю: имя и годы не сжимаются */
 .side .kinList > div > span + button { margin-left: auto; }
-.side .kinList small { display: block; color: var(--mut); font-size: 10.5px; margin-top: 1px; }
+.side .kinList small { display: block; color: var(--mut); font-size: 11px; margin-top: 1px; }
 .side .kinList .off > span { text-decoration: line-through; opacity: .55; }
 .side .kinList .moved { background: color-mix(in srgb, var(--acc) 12%, transparent); }
 .side .kinList > div > button { border: 0; background: none; color: var(--acc-ink); font: 500 12px 'Golos Text', sans-serif; cursor: pointer; padding: 0 2px; white-space: nowrap; }
@@ -179,7 +179,7 @@
 .side .kinList .num { width: 14px; color: var(--acc-ink); font: 500 12px 'IBM Plex Mono', monospace; }
 .side .kinList .kin { font-size: 12px; text-align: left; display: inline; }
 .side .seg.mini { flex: 1 1 100%; }
-.side .seg.mini button { padding: 4px 2px; font-size: 10.5px; }
+.side .seg.mini button { padding: 4px 2px; font-size: 11px; }
 .side .kinPick { border: 1px solid var(--acc); border-radius: 4px; padding: 8px; margin: 4px 0 8px; }
 .side .kinPick .pickList { max-height: 180px; overflow: auto; margin: 6px 0; }
 
@@ -199,5 +199,5 @@
 .twin .lockPick { margin: 6px 0 0; }
 
 /* кто правил: подписью под самим делом, как в макете Ж2 */
-.jr .e .who { display: block; font: 400 10px 'IBM Plex Mono', monospace; font-style: normal;
+.jr .e .who { display: block; font: 400 11px 'IBM Plex Mono', monospace; font-style: normal;
   color: var(--mut); margin-top: 2px; }

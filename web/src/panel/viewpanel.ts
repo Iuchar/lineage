@@ -1,6 +1,7 @@
 // Две панели справа: «Вид» — стиль, тема и всё про показ древа; «Легенда» — что значат линии,
 // знаки и пометки на карте, и метки этого рода. Открыты по одной, поверх панели человека.
 
+import { icon } from "./icons";
 import type { StyleName } from "../layout/metrics";
 
 export type ViewMode = "view" | null;
@@ -85,7 +86,7 @@ export class ViewPanel {
   }
 
   private head(title: string): string {
-    return `<div class="vpTop"><b>${title}</b><button class="vpClose" data-act="close" title="Закрыть (Esc)">×</button></div>`;
+    return `<div class="vpTop"><b>${title}</b><button class="vpClose" data-act="close" title="Закрыть (Esc)" aria-label="Закрыть">${icon("close")}</button></div>`;
   }
 
   private viewHtml(s: ViewState): string {
@@ -94,7 +95,7 @@ export class ViewPanel {
       STYLE_NAMES.map(([id, name]) =>
         `<button type="button" class="vpBtn${id === s.style ? " on" : ""}" data-set="style" data-v="${id}">${name}</button>`).join("") +
       "</div></div>" +
-      `<div class="sec"><span class="lbl2">тема</span>${this.seg("theme", [["dark", "☾ тёмная"], ["light", "☀ светлая"]], s.theme)}</div>` +
+      `<div class="sec"><span class="lbl2">тема</span>${this.seg("theme", [["dark", `${icon("moon", true)}тёмная`], ["light", `${icon("sun", true)}светлая`]], s.theme)}</div>` +
       '<div class="sec"><span class="lbl2">древо</span>' +
       // «главная ветвь» видна всегда: без отмеченных продолжателей — приглушённой, с подсказкой
       `<div class="seg2${s.hasHeirs ? "" : " off"}"${s.hasHeirs ? "" : ' title="Отметьте продолжателей в правке"'}>` +
