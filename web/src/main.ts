@@ -127,7 +127,7 @@ async function start(root: HTMLElement): Promise<void> {
   foot.className = "foot";
   const outside = (href: string, text: string) =>
     `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}${icon("out")}</a>`;
-  foot.innerHTML = `<span>Разработано <b>Тюром</b></span><i>·</i>${outside("https://vk.ru/max_gpt", "ВКонтакте")}` +
+  foot.innerHTML = `<span>Автор идеи <b>Тюр</b></span><i>·</i>${outside("https://vk.ru/max_gpt", "ВКонтакте")}` +
     `<i>·</i>${outside("https://t.me/Maks_GPT", "Telegram")}`;
   root.append(bar, stage, foot);
 
