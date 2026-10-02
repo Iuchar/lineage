@@ -210,42 +210,43 @@ describe("линейка дат", () => {
   });
 });
 
-// Семья без родителей рисуется кружком-узлом с подписью «родители не записаны» над шиной братьев.
-// Когда таких семей в роду несколько и их выводки стоят близко, подписи ложатся одна на другую.
-// Координаты взяты с рода Прайс, где это и вылезло: центры выводков разошлись всего на 39 пикселей.
-describe("узлы «родители не записаны» не налезают друг на друга", () => {
+// Семья без родителей рисуется кружком над шиной братьев, подпись «родители не записаны» — справа от кружка.
+// Когда выводки стоят близко, две одинаковые подписи ложились одна на другую. Повторять надпись незачем:
+// она достаётся левому узлу, остальным остаётся кружок. Координаты взяты с рода Прайс, где это и вылезло:
+// центры выводков разошлись всего на 39 пикселей при ширине подписи 148.
+describe("подпись «родители не записаны» одна на соседние семьи", () => {
   const person = (id: number, family: number) => ({
     id, xref: `@I${id}@`, given: `Дитя${id}`, surname: "Прайс", married_surname: null, sex: "M", is_branch_stub: false,
     birth: null, death: null, parent_families: [family], spouse_families: [],
   });
-  const broods = [[10, 11, 12], [20, 21]];
-  const tree = {
-    clan: { id: 1, name: "Прайс", persons: 5, families: 2 },
+  const tree = (broods: number[][]) => ({
+    clan: { id: 1, name: "Прайс", persons: broods.flat().length, families: broods.length },
     persons: broods.flatMap((kids, f) => kids.map((id) => person(id, f + 1))),
     families: broods.map((kids, f) => ({ id: f + 1, xref: `@F${f + 1}@`, husband: null, wife: null, children: kids })),
-  } as unknown as ClanTree;
+  } as unknown as ClanTree);
 
-  // раскладка задана руками: проверяем разведение узлов, а не расстановку карточек
-  const at: Record<number, number> = { 10: 620, 11: 790, 12: 960, 20: 700, 21: 870 };
-  const layout = {
-    positions: new Map(Object.entries(at).map(([id, x]) => [+id, { x, y: 120 }])),
-    generation: new Map(tree.persons.map((p) => [p.id, 0])),
-    cardWidth: 104, cardHeight: 126, width: 1200, height: 600, ruler: null, rootAtBottom: false,
-  } as unknown as LayoutResult;
+  const drawn = (style: StyleName, broods: number[][], at: Record<number, number>) => {
+    const layout = {
+      positions: new Map(Object.entries(at).map(([id, x]) => [+id, { x, y: 120 }])),
+      generation: new Map(broods.flat().map((id) => [id, 0])),
+      cardWidth: 104, cardHeight: 126, width: 4000, height: 600, ruler: null, rootAtBottom: false,
+    } as unknown as LayoutResult;
+    const marks = drawLinks(tree(broods), layout, style, (_, fallback) => fallback).marks;
+    return {
+      кружков: [...marks.matchAll(/<circle class="knot"/g)].length,
+      подписей: [...marks.matchAll(/<text class="knotLbl"/g)].length,
+    };
+  };
 
-  const labels = (style: StyleName) =>
-    [...drawLinks(tree, layout, style, (_, fallback) => fallback).marks
-      .matchAll(/<text class="knotLbl" x="([\d.-]+)" y="([\d.-]+)"/g)]
-      .map((m) => ({ left: +m[1]!, right: +m[1]! + "родители не записаны".length * 6.7, y: +m[2]! }));
+  const рядом: [number[][], Record<number, number>] = [[[10, 11, 12], [20, 21]], { 10: 620, 11: 790, 12: 960, 20: 700, 21: 870 }];
+  const врозь: [number[][], Record<number, number>] = [[[10, 11], [20, 21]], { 10: 200, 11: 370, 20: 1800, 21: 1970 }];
 
   for (const style of Object.keys(STYLE_METRICS) as StyleName[]) {
     it(style, () => {
-      const boxes = labels(style);
-      expect(boxes.length).toBe(2);
-      const near = Math.abs(boxes[0]!.y - boxes[1]!.y) < 15;
-      const overlap = boxes[0]!.left < boxes[1]!.right && boxes[0]!.right > boxes[1]!.left;
-      expect(overlap).toBe(true); // выводки и правда стоят близко — иначе проверка ничего не стоит
-      expect(near).toBe(false); // а подписи всё равно разведены по высоте
+      // выводки вплотную: два кружка, но подпись одна
+      expect(drawn(style, ...рядом)).toEqual({ кружков: 2, подписей: 1 });
+      // далеко друг от друга — у каждого своя подпись
+      expect(drawn(style, ...врозь)).toEqual({ кружков: 2, подписей: 2 });
     });
   }
 });

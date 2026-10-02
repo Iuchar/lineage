@@ -67,11 +67,9 @@ const EXTRA_MARRIAGE_ROOM = 34; // разнос шин на каждый сле�
 const SHIFT_SHARE = 0.34; // сдвиг внутри яруса — не больше трети карточки
 const CHILD_DROP = 12;
 // Место над детьми семьи без родителей: там идёт их шина, а над ней — узел с подписью «родители не записаны».
-// Рисует его canvas/links.ts этими же мерками; когда таких семей рядом несколько, узлы разводятся по высоте,
-// и каждому следующему нужен ещё шаг. Иначе подпись уезжает за верхний край полотна и обрезается.
+// Рисует его canvas/links.ts этими же мерками. Без запаса подпись уезжала бы за верхний край полотна.
 export const KNOT_BUS_DROP = 30; // шина братьев — на столько выше верха карточек
 export const KNOT_LIFT = 22; // узел — на столько выше шины
-export const KNOT_STEP = 24; // на столько поднимается узел, если подпись упирается в чужую
 export const KNOT_LABEL_H = 15; // высота подписи
 const KNOT_TOP_PAD = 12; // половина подписи и воздух над ней
 const PARENTLESS_ROOM = KNOT_BUS_DROP + KNOT_LIFT + KNOT_TOP_PAD;
@@ -526,15 +524,9 @@ export function layoutTree(tree: ClanTree, metrics: CardMetrics, options: Layout
     if (ruler) for (const [g, value] of ruler.rowY) ruler.rowY.set(g, total - value - height);
   }
 
-  const broodTops = tree.families.filter(parentless)
-    .map((f) => Math.min(...f.children.filter((c) => y.has(c)).map((c) => y.get(c)!)))
-    .filter((top) => Number.isFinite(top));
-  const kidsTop = Math.min(...broodTops);
-  // сколько таких семей стоит у самого верха: их узлы разойдутся по высоте, и верхнему нужно место
-  const atTop = broodTops.filter((top) => top - kidsTop < height).length;
-  const lift = Number.isFinite(kidsTop)
-    ? Math.max(0, PARENTLESS_ROOM + Math.max(0, atTop - 1) * KNOT_STEP - kidsTop)
-    : 0;
+  const kidsTop = Math.min(...tree.families.filter(parentless)
+    .flatMap((f) => f.children.filter((c) => y.has(c)).map((c) => y.get(c)!)));
+  const lift = Number.isFinite(kidsTop) ? Math.max(0, PARENTLESS_ROOM - kidsTop) : 0;
   if (lift) {
     for (const [id, value] of y) y.set(id, value + lift);
     if (ruler) {
