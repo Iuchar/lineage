@@ -174,4 +174,43 @@ def convert(records: list[Record]) -> ClanData:
             if xref not in persons:
                 warnings.append(f"{family.xref}: ребёнок {xref} не найден")
 
+    warnings += _loose_parts(persons, families)
     return ClanData(header=header, persons=persons, families=families, extras=extras, warnings=warnings)
+
+
+def _loose_parts(persons: dict[str, Person], families: dict[str, Family]) -> list[str]:
+    """Род — одно связное дерево: все в нём родня друг другу хотя бы через кого-то.
+
+    Если в файле несколько не связанных между собой кусков, это обычно значит, что в один род попали
+    разные семьи, — таким место в отдельном роду со связкой между ними. Загрузку это не отменяет:
+    человек сам решит, что с этим делать, — но в сводке он об этом прочтёт.
+    """
+    if len(persons) < 2:
+        return []
+    root = {xref: xref for xref in persons}
+
+    def find(a: str) -> str:
+        while root[a] != a:
+            root[a] = root[root[a]]
+            a = root[a]
+        return a
+
+    for family in families.values():
+        members = [x for x in [family.husband, family.wife, *family.children] if x in root]
+        for other in members[1:]:
+            first, second = find(members[0]), find(other)
+            if first != second:
+                root[first] = second
+
+    parts: dict[str, int] = {}
+    for xref in persons:
+        key = find(xref)
+        parts[key] = parts.get(key, 0) + 1
+    if len(parts) < 2:
+        return []
+    sizes = sorted(parts.values(), reverse=True)
+    apart = sum(sizes[1:])
+    people = "человек" if apart % 10 == 1 and apart % 100 != 11 else "человека" if 2 <= apart % 10 <= 4 and not 12 <= apart % 100 <= 14 else "человек"
+    return [f"В файле {len(parts)} не связанных между собой частей: {apart} {people} не в родстве с главным деревом."
+            " Обычно таким место в отдельном роду, а между родами ставится связка."]
+

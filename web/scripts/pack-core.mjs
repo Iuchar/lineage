@@ -12,7 +12,7 @@ const ROOT = resolve(HERE, "..", "..");
 const CORE = resolve(ROOT, "server", "app");
 const OUT = resolve(ROOT, "web", "public", "core.zip");
 // роды проекта: их видит гость при первом заходе
-const CLANS = ["Ashford_tree.ged", "Hartley_tree.ged", "Pryce_tree.ged", "Drake_tree.ged", "Macintosh_tree.ged",
+const CLANS = ["Ashford_tree.ged", "Hartley_tree.ged", "Pryce_tree.ged", "Drake_tree.ged", "Macintosh_tree.ged", "Davis_tree.ged",
   "Wakefield_tree.ged"];
 
 async function* walk(dir) {

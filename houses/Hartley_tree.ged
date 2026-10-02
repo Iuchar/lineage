@@ -248,32 +248,10 @@
 1 SEX F
 1 BIRT
 2 DATE 1936
-1 EVEN Эвакуирована из Лондона в 1940-м; родители погибли при бомбёжке
+1 EVEN Эвакуирована из Лондона в 1940-м, взята под опеку Хартли; родные — в роду Дэвис
 2 TYPE Comment
-1 FAMC @F2006@
 1 FAMC @F2007@
 2 PEDI foster
-0 @I2021@ INDI
-1 NAME Реджиналд /Дэвис/
-2 GIVN Реджиналд
-2 SURN Дэвис
-1 SEX M
-1 BIRT
-2 DATE 1912
-1 DEAT
-2 DATE 10 MAY 1941
-1 FAMS @F2006@
-0 @I2022@ INDI
-1 NAME Нора /Дэвис/
-2 GIVN Нора
-2 SURN Эванс
-2 _MARNM Дэвис
-1 SEX F
-1 BIRT
-2 DATE 1915
-1 DEAT
-2 DATE 10 MAY 1941
-1 FAMS @F2006@
 0 @I2023@ INDI
 1 NAME Роджер /Лейн/
 2 GIVN Роджер
@@ -386,12 +364,6 @@
 1 CHIL @I2014@
 1 MARR
 2 DATE 1873
-0 @F2006@ FAM
-1 HUSB @I2021@
-1 WIFE @I2022@
-1 CHIL @I2020@
-1 MARR
-2 DATE 1934
 0 @F2007@ FAM
 1 HUSB @I2013@
 1 WIFE @I2015@
