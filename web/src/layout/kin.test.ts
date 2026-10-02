@@ -103,3 +103,37 @@ describe("развод", () => {
     expect(after.unions.get(family.id)).toEqual(before.unions.get(family.id));
   });
 });
+
+// Родные родители приёмного ребёнка входят в род снизу: своих родителей в роду у них нет, зато есть дочь.
+// Поколение шло только сверху вниз, и такая пара висела на самом верхнем ярусе — рядом с основателем рода,
+// хотя родилась двумя веками позже. Родитель должен стоять ровно ярусом выше своего ребёнка.
+describe("ветвь, вошедшая в род снизу", () => {
+  const person = (id: number, given: string, parents: number[], spouses: number[]) => ({
+    id, xref: `@I${id}@`, given, surname: "Проба", married_surname: null, sex: "M", is_branch_stub: false,
+    birth: null, death: null, parent_families: parents, spouse_families: spouses,
+  });
+
+  // прадед → дед → отец → дочь; у дочери вторая семья: родные родители без своих предков
+  const tree = {
+    clan: { id: 1, name: "Проба", persons: 7, families: 5 },
+    persons: [
+      person(1, "Прадед", [], [1]), person(2, "Дед", [1], [2]), person(3, "Отец", [2], [3]),
+      person(4, "Дочь", [3, 4], []),
+      person(5, "Родной", [], [4]), person(6, "Родная", [], [4]),
+    ],
+    families: [
+      { id: 1, xref: "@F1@", husband: 1, wife: null, children: [2] },
+      { id: 2, xref: "@F2@", husband: 2, wife: null, children: [3] },
+      { id: 3, xref: "@F3@", husband: 3, wife: null, children: [4] },
+      { id: 4, xref: "@F4@", husband: 5, wife: 6, children: [4] },
+    ],
+  } as unknown as ClanTree;
+
+  it("родные родители стоят ярусом выше дочери, а не на верхнем ярусе рода", () => {
+    const gen = generations(tree);
+    expect(gen.get(4)).toBe(3); // дочь — четвёртое поколение по приёмной линии
+    expect(gen.get(5)).toBe(2); // родной отец — ровно над ней
+    expect(gen.get(6)).toBe(2);
+    expect(gen.get(1)).toBe(0); // прадед остался основателем
+  });
+});

@@ -152,6 +152,16 @@ export function generations(tree: ClanTree): Map<number, number> {
           changed = true;
         }
       }
+      // Родитель стоит ярусом выше своего ребёнка. Без этого правила ветвь, входящая в род снизу —
+      // родные родители приёмного ребёнка, например, — висела на самом верхнем ярусе: своих родителей
+      // в роду у неё нет, а поколение шло только сверху вниз.
+      const deepest = Math.max(-1, ...family.children.map(at));
+      for (const id of parents) {
+        if (deepest > 0 && at(id) < deepest - 1) {
+          gen.set(id, deepest - 1);
+          changed = true;
+        }
+      }
     }
   }
   return gen;
