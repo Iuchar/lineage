@@ -1,0 +1,52 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 LANG Russian
+0 @I4001@ INDI
+1 NAME Реджиналд /Дэвис/
+2 GIVN Реджиналд
+2 SURN Дэвис
+1 SEX M
+1 BIRT
+2 DATE 1912
+2 PLAC Лондон
+1 DEAT
+2 DATE 10 MAY 1941
+2 PLAC Лондон
+1 EVEN Погиб при налёте на Лондон вместе с женой
+2 TYPE Comment
+1 FAMS @F4001@
+0 @I4002@ INDI
+1 NAME Нора /Эванс/
+2 GIVN Нора
+2 SURN Эванс
+2 _MARNM Дэвис
+1 SEX F
+1 BIRT
+2 DATE 1915
+2 PLAC Лондон
+1 DEAT
+2 DATE 10 MAY 1941
+2 PLAC Лондон
+1 FAMS @F4001@
+0 @I4003@ INDI
+1 NAME Мэри /Дэвис/
+2 GIVN Мэри
+2 SURN Дэвис
+1 SEX F
+1 BIRT
+2 DATE 1936
+2 PLAC Лондон
+1 EVEN После гибели родителей взята под опеку Хартли; там же её вторая семья
+2 TYPE Comment
+1 FAMC @F4001@
+0 @F4001@ FAM
+1 HUSB @I4001@
+1 WIFE @I4002@
+1 CHIL @I4003@
+1 MARR
+2 DATE 1934
+2 PLAC Лондон
+0 TRLR
