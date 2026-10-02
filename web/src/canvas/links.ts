@@ -2,7 +2,8 @@
 // Функция чистая: раскладка и цвета на входе, разметка на выходе. Сверена со стендом побайтно.
 
 import type { ClanTree, TreeFamily, TreePerson } from "../api/types";
-import { type LayoutResult, parentless, type Point, primaryFamilies } from "../layout/layout";
+import { KNOT_BUS_DROP, KNOT_LABEL_H, KNOT_LIFT, KNOT_STEP, type LayoutResult, parentless, type Point, primaryFamilies }
+  from "../layout/layout";
 import type { StyleName } from "../layout/metrics";
 import { LINK_STYLES, marriageLevel, ROMAN } from "./styles";
 
@@ -35,7 +36,9 @@ export interface FoldAnchor {
 }
 
 const FOLD_DROP = 30;
-const BUS_DROP = 30; // шина выводка — на столько выше верха детей
+const BUS_DROP = KNOT_BUS_DROP; // шина выводка — на столько выше верха детей
+const KNOT_LABEL = "родители не записаны";
+const KNOT_LABEL_W = KNOT_LABEL.length * 6.7 + 14; // моноширинная подпись справа от узла
 const BUS_STEP = 34; // разнос шин разных браков одного человека
 const FOSTER_DASH = "5 4"; // спуск к приёмному или под опекой — заметный штрих во всех стилях // от низа карточек до стопки
 
@@ -106,6 +109,7 @@ export function drawLinks(
     folded, visible, primary, persons, pos, cardWidth: w, gap: S.descentGap,
     union: (family) => unionOf(family),
   });
+  const knots = knotLevels(tree, { visible, primary, pos, cardWidth: w });
 
   for (const family of tree.families) {
     const parents = [family.husband, family.wife].filter((id): id is number => id != null && visible(id));
@@ -120,7 +124,8 @@ export function drawLinks(
       const bus = kidsTop - 30;
       const xs = kids.map((id) => pos.get(id)!.x + w / 2);
       const x = (Math.min(...xs) + Math.max(...xs)) / 2;
-      const knot = bus - 22; // подпись выше плюса «брат или сестра» на шине
+      // подпись выше плюса «брат или сестра» на шине; у соседних семей узлы разведены, иначе подписи лягут друг на друга
+      const knot = knots.get(family.id) ?? bus - KNOT_LIFT;
       descents.set(family.id, { x, y: knot, bus, curl: null, kidEnd: S.descentGap });
       paths += `<path d="M${x} ${knot + 5}V${bus}M${Math.min(...xs)} ${bus}H${Math.max(...xs)}" stroke="${CL}" stroke-width="${S.width}" fill="none"/>`;
       for (const id of kids) {
@@ -454,4 +459,48 @@ function clashes(routes: Route[], slots: number[]): number {
 function permutations<T>(items: T[]): T[][] {
   if (items.length <= 1) return [items];
   return items.flatMap((item, i) => permutations([...items.slice(0, i), ...items.slice(i + 1)]).map((rest) => [item, ...rest]));
+}
+
+// Высоты узлов «родители не записаны». Каждый такой узел стоит над шиной своих братьев и подписан справа;
+// когда рядом две семьи без родителей, подписи ложатся одна на другую, а чужая шина режет их насквозь.
+// Поэтому узлы разводятся: идём слева направо и поднимаем каждый, пока его подпись упирается в уже
+// поставленную или в чужую шину. Одинокая семья остаётся на прежней высоте.
+function knotLevels(
+  tree: ClanTree,
+  c: { visible: (id: number) => boolean; primary: Map<number, number>; pos: Map<number, Point>; cardWidth: number },
+): Map<number, number> {
+  const out = new Map<number, number>();
+  const broods = tree.families
+    .filter((family) => parentless(family))
+    .map((family) => {
+      const kids = family.children.filter((id) => c.visible(id) && c.primary.get(id) === family.id);
+      if (!kids.length) return null;
+      const xs = kids.map((id) => c.pos.get(id)!.x + c.cardWidth / 2);
+      const bus = Math.min(...kids.map((id) => c.pos.get(id)!.y)) - BUS_DROP;
+      return { family: family.id, left: Math.min(...xs), right: Math.max(...xs), at: (Math.min(...xs) + Math.max(...xs)) / 2, bus };
+    })
+    .filter((brood) => brood !== null)
+    .sort((a, b) => a.at - b.at);
+  if (broods.length < 2) {
+    for (const brood of broods) out.set(brood.family, brood.bus - KNOT_LIFT);
+    return out;
+  }
+
+  const busy: { left: number; right: number; top: number; bottom: number }[] = broods.map((brood) => ({
+    left: brood.left, right: brood.right, top: brood.bus - 2, bottom: brood.bus + 2,
+  }));
+  for (const brood of broods) {
+    let y = brood.bus - KNOT_LIFT;
+    for (let guard = 0; guard < 12; guard++) {
+      // подпись идёт вправо от узла; сам узел — кружок на оси
+      const box = { left: brood.at - 6, right: brood.at + KNOT_LABEL_W, top: y - KNOT_LABEL_H / 2, bottom: y + KNOT_LABEL_H / 2 };
+      const hit = busy.some((other) =>
+        box.left < other.right && box.right > other.left && box.top < other.bottom && box.bottom > other.top);
+      if (!hit) break;
+      y -= KNOT_STEP;
+    }
+    out.set(brood.family, y);
+    busy.push({ left: brood.at - 6, right: brood.at + KNOT_LABEL_W, top: y - KNOT_LABEL_H / 2, bottom: y + KNOT_LABEL_H / 2 });
+  }
+  return out;
 }

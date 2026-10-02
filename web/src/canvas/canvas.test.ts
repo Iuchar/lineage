@@ -6,7 +6,7 @@ import type { ClanTree } from "../api/types";
 import { cardName, formatDate, lifeYears } from "../format";
 import gleannTree from "../layout/fixtures/gleann.tree.json";
 import monadhTree from "../layout/fixtures/monadh.tree.json";
-import { layoutTree } from "../layout/layout";
+import { type LayoutResult, layoutTree } from "../layout/layout";
 import { STYLE_METRICS, type StyleName } from "../layout/metrics";
 import standLinks from "./fixtures/stand-links.json";
 import { drawLinks } from "./links";
@@ -208,4 +208,44 @@ describe("линейка дат", () => {
       expect(range.max).toBeLessThanOrEqual(band.to + 6);
     }
   });
+});
+
+// Семья без родителей рисуется кружком-узлом с подписью «родители не записаны» над шиной братьев.
+// Когда таких семей в роду несколько и их выводки стоят близко, подписи ложатся одна на другую.
+// Координаты взяты с рода Прайс, где это и вылезло: центры выводков разошлись всего на 39 пикселей.
+describe("узлы «родители не записаны» не налезают друг на друга", () => {
+  const person = (id: number, family: number) => ({
+    id, xref: `@I${id}@`, given: `Дитя${id}`, surname: "Прайс", married_surname: null, sex: "M", is_branch_stub: false,
+    birth: null, death: null, parent_families: [family], spouse_families: [],
+  });
+  const broods = [[10, 11, 12], [20, 21]];
+  const tree = {
+    clan: { id: 1, name: "Прайс", persons: 5, families: 2 },
+    persons: broods.flatMap((kids, f) => kids.map((id) => person(id, f + 1))),
+    families: broods.map((kids, f) => ({ id: f + 1, xref: `@F${f + 1}@`, husband: null, wife: null, children: kids })),
+  } as unknown as ClanTree;
+
+  // раскладка задана руками: проверяем разведение узлов, а не расстановку карточек
+  const at: Record<number, number> = { 10: 620, 11: 790, 12: 960, 20: 700, 21: 870 };
+  const layout = {
+    positions: new Map(Object.entries(at).map(([id, x]) => [+id, { x, y: 120 }])),
+    generation: new Map(tree.persons.map((p) => [p.id, 0])),
+    cardWidth: 104, cardHeight: 126, width: 1200, height: 600, ruler: null, rootAtBottom: false,
+  } as unknown as LayoutResult;
+
+  const labels = (style: StyleName) =>
+    [...drawLinks(tree, layout, style, (_, fallback) => fallback).marks
+      .matchAll(/<text class="knotLbl" x="([\d.-]+)" y="([\d.-]+)"/g)]
+      .map((m) => ({ left: +m[1]!, right: +m[1]! + "родители не записаны".length * 6.7, y: +m[2]! }));
+
+  for (const style of Object.keys(STYLE_METRICS) as StyleName[]) {
+    it(style, () => {
+      const boxes = labels(style);
+      expect(boxes.length).toBe(2);
+      const near = Math.abs(boxes[0]!.y - boxes[1]!.y) < 15;
+      const overlap = boxes[0]!.left < boxes[1]!.right && boxes[0]!.right > boxes[1]!.left;
+      expect(overlap).toBe(true); // выводки и правда стоят близко — иначе проверка ничего не стоит
+      expect(near).toBe(false); // а подписи всё равно разведены по высоте
+    });
+  }
 });
