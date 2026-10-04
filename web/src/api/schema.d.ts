@@ -398,7 +398,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Clan Changes */
+        /**
+         * Get Clan Changes
+         * @description Только редактору: журнал помнит и прежние значения полей, и тех, кого скрыли от зрителя.
+         */
         get: operations["get_clan_changes_api_clans__clan_id__changes_get"];
         put?: never;
         post?: never;
@@ -415,7 +418,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Person Changes */
+        /**
+         * Get Person Changes
+         * @description Только редактору: история человека — тот же журнал, отобранный по одному из них.
+         */
         get: operations["get_person_changes_api_persons__person_id__changes_get"];
         put?: never;
         post?: never;

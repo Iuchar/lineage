@@ -180,3 +180,40 @@ def test_idle_session_goes_out_by_itself(conn: sqlite3.Connection) -> None:
     seen(IDLE_HOURS + 1)
     assert editor_by_key(conn, key) is None
     assert conn.execute("SELECT count(*) FROM sessions").fetchone()[0] == 0
+
+
+def test_journal_is_closed_to_strangers(tmp_path, monkeypatch) -> None:
+    """Журнал — рабочий стол редактора: он помнит и прежние значения полей, и имена скрытых.
+
+    Скрытого человека нет в дереве зрителя вовсе, и журнал не должен выдавать его с чёрного хода.
+    """
+    import app.config
+    import app.main
+    from app.db.clans import import_clan
+    from app.db.connection import connect
+    from app.db.editor import PersonFields, update_person
+    from app.gedcom.load import load_file
+    from conftest import source
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    base = connect(path)
+    import_clan(base, "Гленн Уриск", load_file(source("Гленн Уриск")))
+    hidden = base.execute(
+        "SELECT id, given FROM persons WHERE clan_id = 1 AND given <> '' AND given IS NOT NULL ORDER BY id LIMIT 1"
+    ).fetchone()
+    update_person(base, hidden["id"], PersonFields(given=hidden["given"], see="hidden"))
+    add_editor(base, "Tyr", "длинный пароль")
+    base.close()
+
+    stranger = TestClient(app.main.app)
+    assert stranger.get("/api/clans/1/changes").status_code == 401
+    assert stranger.get(f"/api/persons/{hidden['id']}/changes").status_code == 401
+
+    editor = TestClient(app.main.app)
+    editor.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
+    changes = editor.get("/api/clans/1/changes")
+    assert changes.status_code == 200 and changes.json()
+    assert hidden["given"] in changes.text  # редактору журнал виден целиком
+    assert editor.get(f"/api/persons/{hidden['id']}/changes").status_code == 200

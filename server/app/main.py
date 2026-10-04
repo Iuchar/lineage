@@ -391,13 +391,15 @@ def remove_person(person_id: int, conn: Database, branch: bool = False) -> Chang
         raise _edit_errors(error) from None
 
 
-@app.get("/api/clans/{clan_id}/changes")
+@app.get("/api/clans/{clan_id}/changes", dependencies=[Depends(only_editor)])
 def get_clan_changes(clan_id: int, conn: Database) -> list[ChangeInfo]:
+    """Только редактору: журнал помнит и прежние значения полей, и тех, кого скрыли от зрителя."""
     return clan_changes(conn, clan_id)
 
 
-@app.get("/api/persons/{person_id}/changes")
+@app.get("/api/persons/{person_id}/changes", dependencies=[Depends(only_editor)])
 def get_person_changes(person_id: int, conn: Database) -> list[ChangeInfo]:
+    """Только редактору: история человека — тот же журнал, отобранный по одному из них."""
     return person_changes(conn, person_id)
 
 
