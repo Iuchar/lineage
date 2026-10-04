@@ -67,6 +67,12 @@ def _current_editor(conn: sqlite3.Connection, request: Request) -> Editor | None
     return editor_by_key(conn, request.cookies.get(SESSION_COOKIE))
 
 
+def only_editor(conn: Database, request: Request) -> None:
+    """Маршрут не для чужих глаз. Пока ни одного редактора не заведено, правка открыта — тогда открыто и это."""
+    if editors_exist(conn) and _current_editor(conn, request) is None:
+        raise HTTPException(status_code=401, detail="Нужен вход редактора")
+
+
 def _eyes(conn: sqlite3.Connection, request: Request, as_viewer: int | None = None) -> Eyes:
     """Чьими глазами смотрят: редактор видит всё, зритель — общий слой и свои роды по ссылкам.
 
@@ -167,8 +173,9 @@ def _share(request: Request, link: ShareLink) -> ShareInfo:
                      opened=link.opened, opened_at=link.opened_at, expires_at=link.expires_at)
 
 
-@app.get("/api/clans/{clan_id}/link")
+@app.get("/api/clans/{clan_id}/link", dependencies=[Depends(only_editor)])
 def get_share_link(clan_id: int, conn: Database, request: Request) -> ShareInfo | None:
+    """Только редактору: ссылка — это и есть доступ к роду, кто её прочитал, тот и вошёл."""
     link = link_of(conn, clan_id)
     return _share(request, link) if link else None
 

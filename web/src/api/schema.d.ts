@@ -62,7 +62,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Share Link */
+        /**
+         * Get Share Link
+         * @description Только редактору: ссылка — это и есть доступ к роду, кто её прочитал, тот и вошёл.
+         */
         get: operations["get_share_link_api_clans__clan_id__link_get"];
         put?: never;
         /**

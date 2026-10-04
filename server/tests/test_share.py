@@ -156,3 +156,41 @@ def test_new_link_extends_the_guest_who_opens_it(conn: sqlite3.Connection) -> No
     longer = issue(conn, 1, 365)
     enter(conn, longer.key, session)
     assert viewer_access(conn, session)[0].until == longer.expires_at
+
+
+def test_link_is_not_given_away_to_a_stranger(tmp_path, monkeypatch) -> None:
+    """Ссылка — это и есть доступ к роду: кто её прочитал, тот вошёл. Отдавать её можно только редактору."""
+    from fastapi.testclient import TestClient
+
+    import app.config
+    import app.main
+    from app.db.access import add_editor
+    from app.db.connection import connect
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    base = connect(path)
+    with base:
+        base.execute("INSERT INTO clans (id, name, imported_at) VALUES (1, 'Гленн Уриск', '2026-09-28')")
+    add_editor(base, "Tyr", "длинный пароль")
+    base.close()
+
+    editor = TestClient(app.main.app)
+    editor.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
+    made = editor.post("/api/clans/1/link").json()
+    assert "/r/" in made["url"]
+
+    stranger = TestClient(app.main.app)
+    assert stranger.get("/api/clans/1/link").status_code == 401
+    # и род не достаётся обходом: без ссылки он чужой
+    assert stranger.get("/api/me").json()["clans"] == []
+
+    # зритель, вошедший по ссылке, тоже не читает её заново: он свой для рода, но не редактор
+    viewer = TestClient(app.main.app)
+    viewer.get(f"/r/{made['url'].rsplit('/', 1)[1]}", follow_redirects=False)
+    assert viewer.get("/api/me").json()["clans"] == [1]
+    assert viewer.get("/api/clans/1/link").status_code == 401
+
+    # редактор свою ссылку видит целиком — её для того и выпускают
+    assert editor.get("/api/clans/1/link").json()["url"] == made["url"]

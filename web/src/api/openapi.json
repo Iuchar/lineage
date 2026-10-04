@@ -82,6 +82,7 @@
     "/api/clans/{clan_id}/link": {
       "get": {
         "summary": "Get Share Link",
+        "description": "Только редактору: ссылка — это и есть доступ к роду, кто её прочитал, тот и вошёл.",
         "operationId": "get_share_link_api_clans__clan_id__link_get",
         "parameters": [
           {
