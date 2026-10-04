@@ -217,3 +217,77 @@ def test_journal_is_closed_to_strangers(tmp_path, monkeypatch) -> None:
     assert changes.status_code == 200 and changes.json()
     assert hidden["given"] in changes.text  # редактору журнал виден целиком
     assert editor.get(f"/api/persons/{hidden['id']}/changes").status_code == 200
+
+
+def test_login_does_not_say_whether_the_editor_exists(conn: sqlite3.Connection) -> None:
+    """Ответ одинаков и на слово, и на секундомер: иначе имя редактора подбирается по времени."""
+    import time
+
+    from app.db import access
+
+    add_editor(conn, "Tyr", "длинный пароль")
+
+    def how_long(name: str) -> float:
+        start = time.perf_counter()
+        with pytest.raises(AccessError):
+            login(conn, name, "не тот пароль")
+        return time.perf_counter() - start
+
+    access.spare_attempts(conn, "Tyr")
+    access.spare_attempts(conn, "НетТакого")
+    known = how_long("Tyr")
+    access.spare_attempts(conn, "Tyr")
+    unknown = how_long("НетТакого")
+    # заведомо грубый порог: ловим разницу в разы, а не дрожание машины
+    assert unknown > known / 3, f"по существующему {known * 1000:.0f} мс, по выдуманному {unknown * 1000:.0f} мс"
+
+
+def test_login_slows_down_after_a_run_of_misses(conn: sqlite3.Connection) -> None:
+    """Перебор упирается в задержку. Хозяин не заперт: он ждёт и входит, а правильный пароль всё снимает."""
+    from app.db.access import TooManyTries, FREE_TRIES, spare_attempts
+
+    add_editor(conn, "Tyr", "длинный пароль")
+    for _ in range(FREE_TRIES):
+        with pytest.raises(AccessError):
+            login(conn, "Tyr", "не тот пароль")
+    # следующая попытка уже не проверяет пароль, а просит подождать
+    with pytest.raises(TooManyTries) as waiting:
+        login(conn, "Tyr", "не тот пароль")
+    assert waiting.value.seconds > 0
+    # и верный пароль в эту минуту тоже не пускает: иначе отпор обходится подбором
+    with pytest.raises(TooManyTries):
+        login(conn, "Tyr", "длинный пароль")
+
+    # выдуманное имя считается отдельно и тоже упирается — иначе 429 выдавал бы, кто заведён
+    for _ in range(FREE_TRIES):
+        with pytest.raises(AccessError):
+            login(conn, "НетТакого", "не тот пароль")
+    with pytest.raises(TooManyTries):
+        login(conn, "НетТакого", "не тот пароль")
+
+    # переждал — пускает, и успешный вход обнуляет счёт
+    spare_attempts(conn, "Tyr")
+    assert login(conn, "Tyr", "длинный пароль")
+    with pytest.raises(AccessError):
+        login(conn, "Tyr", "не тот пароль")  # счёт начат заново, а не продолжен
+
+
+def test_api_answers_429_when_tries_run_out(tmp_path, monkeypatch) -> None:
+    import app.config
+    import app.main
+    from app.db.access import FREE_TRIES
+    from app.db.connection import connect
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    base = connect(path)
+    add_editor(base, "Tyr", "длинный пароль")
+    base.close()
+
+    client = TestClient(app.main.app)
+    for _ in range(FREE_TRIES):
+        assert client.post("/api/login", json={"name": "Tyr", "password": "не тот"}).status_code == 401
+    answer = client.post("/api/login", json={"name": "Tyr", "password": "не тот"})
+    assert answer.status_code == 429
+    assert answer.headers.get("retry-after")

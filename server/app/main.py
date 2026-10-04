@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from app import uploads
 from app.config import DB_PATH, DIST
-from app.db.access import AccessError, Editor, editor_by_key, editors_exist, login, logout
+from app.db.access import AccessError, Editor, TooManyTries, editor_by_key, editors_exist, login, logout
 from app.db.author import set_author
 from app.db.clans import ClanExistsError, import_clan
 from app.db.eyes import Eyes, sift, sift_links, sift_person
@@ -137,6 +137,10 @@ def get_me(conn: Database, request: Request) -> Me:
 def post_login(conn: Database, body: LoginForm, response: Response) -> Me:
     try:
         key = login(conn, body.name, body.password)
+    except TooManyTries as error:
+        # 429 с Retry-After: страница показывает, сколько ждать, а не повторяет «пароль не тот»
+        raise HTTPException(status_code=429, detail=str(error),
+                            headers={"Retry-After": str(error.seconds)}) from None
     except AccessError as error:
         raise HTTPException(status_code=401, detail=str(error)) from None
     # без срока жизни: вход держится, пока открыт браузер, и кончается вместе с ним
