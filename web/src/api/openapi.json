@@ -953,7 +953,7 @@
     "/api/families/{family_id}/form": {
       "get": {
         "summary": "Get Family Form",
-        "description": "Союз для карточки и формы: венчание, развод, дети по порядку файла.",
+        "description": "Союз для карточки и формы: венчание, развод, дети по порядку файла.\n\nКарточку открывает и зритель — щелчком по союзу на карте, — поэтому маршрут не закрыт, а просеян:\nскрытый уходит из союза так же, как уходит из дерева, и следа по себе не оставляет.",
         "operationId": "get_family_form_api_families__family_id__form_get",
         "parameters": [
           {
@@ -963,6 +963,22 @@
             "schema": {
               "type": "integer",
               "title": "Family Id"
+            }
+          },
+          {
+            "name": "as_viewer",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Viewer"
             }
           }
         ],

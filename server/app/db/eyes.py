@@ -6,8 +6,10 @@
 «родители не записаны», такой знак на карте и так есть у братьев без родителей.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
+from app.db.kin import FamilyForm
 from app.db.links import ClanLink
 from app.db.person import PersonDetails
 from app.db.tree import ClanTree
@@ -32,6 +34,22 @@ def sift_links(links: list[ClanLink], eyes: Eyes, clan_id: int) -> list[ClanLink
     if eyes.editor:
         return links
     return [link for link in links if eyes.allows(link.see, clan_id)]
+
+
+def sift_family(form: FamilyForm, eyes: Eyes, hidden: Callable[[int], bool]) -> FamilyForm:
+    """Карточка союза: скрытый уходит из неё так же, как уходит из дерева.
+
+    Союз остаётся — без скрытого супруга и без скрытого ребёнка. Иначе зритель, щёлкнув по союзу,
+    узнавал бы, что у пары есть кто-то ещё: самого человека не видно, а след от него оставался.
+    """
+    if eyes.editor:
+        return form
+    if form.husband is not None and hidden(form.husband):
+        form.husband = None
+    if form.wife is not None and hidden(form.wife):
+        form.wife = None
+    form.children = [child for child in form.children if not hidden(child.id)]
+    return form
 
 
 def sift_person(details: PersonDetails, eyes: Eyes) -> PersonDetails:

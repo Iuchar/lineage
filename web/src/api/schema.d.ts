@@ -347,6 +347,9 @@ export interface paths {
         /**
          * Get Family Form
          * @description Союз для карточки и формы: венчание, развод, дети по порядку файла.
+         *
+         *     Карточку открывает и зритель — щелчком по союзу на карте, — поэтому маршрут не закрыт, а просеян:
+         *     скрытый уходит из союза так же, как уходит из дерева, и следа по себе не оставляет.
          */
         get: operations["get_family_form_api_families__family_id__form_get"];
         put?: never;
@@ -2231,7 +2234,9 @@ export interface operations {
     };
     get_family_form_api_families__family_id__form_get: {
         parameters: {
-            query?: never;
+            query?: {
+                as_viewer?: number | null;
+            };
             header?: never;
             path: {
                 family_id: number;

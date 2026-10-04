@@ -1,8 +1,9 @@
 """Один процесс отдаёт и API, и собранный интерфейс."""
 
+import json
 import sqlite3
 from urllib.parse import quote
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
@@ -15,8 +16,8 @@ from app.config import DB_PATH, DIST
 from app.db.access import AccessError, Editor, TooManyTries, editor_by_key, editors_exist, login, logout
 from app.db.author import set_author
 from app.db.clans import ClanExistsError, import_clan
-from app.db.eyes import Eyes, sift, sift_links, sift_person
-from app.gedcom.meta import See
+from app.db.eyes import Eyes, sift, sift_family, sift_links, sift_person
+from app.gedcom.meta import See, read_meta
 from app.db.share import DEFAULT_TERM, ShareError, ShareLink, enter, issue, link_of, revoke, viewer_access, viewer_clans
 from app.db.connection import connect
 from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonFields, PersonForm, add_person,
@@ -36,7 +37,7 @@ from app.db.person import PersonDetails, PersonNotFoundError, person_details
 from app.db.reload import ClanMatch, ReloadPreview, ReloadReport, clan_matches, preview_reload, reload_clan, suggested_name
 from app.db.tree import ClanNotFoundError, ClanSummary, ClanTree, clan_tree, list_clans
 from app.gedcom.load import load_text
-from app.gedcom.records import GedcomSyntaxError
+from app.gedcom.records import GedcomSyntaxError, Record
 
 app = FastAPI(
     title="Родословные",
@@ -71,6 +72,17 @@ def only_editor(conn: Database, request: Request) -> None:
     """Маршрут не для чужих глаз. Пока ни одного редактора не заведено, правка открыта — тогда открыто и это."""
     if editors_exist(conn) and _current_editor(conn, request) is None:
         raise HTTPException(status_code=401, detail="Нужен вход редактора")
+
+
+def _is_hidden(conn: sqlite3.Connection, clan_id: int, eyes: Eyes) -> Callable[[int], bool]:
+    """Кого этим глазам видеть не положено. Уровень лежит в самой записи, поэтому читаем её, а не колонку."""
+    def hidden(person_id: int) -> bool:
+        row = conn.execute("SELECT raw FROM persons WHERE id = ?", (person_id,)).fetchone()
+        if row is None:
+            return False
+        return not eyes.allows(read_meta(Record.from_json(json.loads(row["raw"]))).see, clan_id)
+
+    return hidden
 
 
 def _eyes(conn: sqlite3.Connection, request: Request, as_viewer: int | None = None) -> Eyes:
@@ -241,7 +253,7 @@ def get_person(person_id: int, conn: Database, request: Request, as_viewer: int 
         raise HTTPException(status_code=404, detail="Такого человека нет") from None
 
 
-@app.get("/api/persons")
+@app.get("/api/persons", dependencies=[Depends(only_editor)])
 def find_persons(q: str, conn: Database, exclude_clan: int | None = None) -> list[LinkPerson]:
     """Поиск по всем родам — для ручной связки."""
     return search_persons(conn, q, exclude_clan)
@@ -269,12 +281,12 @@ class PairDecision(BaseModel):
     b: int
 
 
-@app.get("/api/links")
+@app.get("/api/links", dependencies=[Depends(only_editor)])
 def get_links(conn: Database) -> list[Link]:
     return list_links(conn)
 
 
-@app.get("/api/links/candidates")
+@app.get("/api/links/candidates", dependencies=[Depends(only_editor)])
 def get_candidates(conn: Database) -> list[Candidate]:
     return candidates(conn)
 
@@ -322,7 +334,7 @@ class ParsedDate(BaseModel):
     kind: str
 
 
-@app.get("/api/dates/parse")
+@app.get("/api/dates/parse", dependencies=[Depends(only_editor)])
 def get_parsed_date(text: str = "") -> ParsedDate:
     """Как поле даты поняло набранное — для подсказки на лету. Непонятное — 400 с причиной."""
     try:
@@ -338,7 +350,7 @@ def _edit_errors(error: Exception) -> HTTPException:
     return HTTPException(status_code=400, detail=str(error))
 
 
-@app.get("/api/persons/{person_id}/form")
+@app.get("/api/persons/{person_id}/form", dependencies=[Depends(only_editor)])
 def get_person_form(person_id: int, conn: Database) -> PersonForm:
     try:
         return person_form(conn, person_id)
@@ -363,12 +375,18 @@ def post_person(clan_id: int, body: NewPerson, conn: Database) -> Created:
 
 
 @app.get("/api/families/{family_id}/form")
-def get_family_form(family_id: int, conn: Database) -> FamilyForm:
-    """Союз для карточки и формы: венчание, развод, дети по порядку файла."""
+def get_family_form(family_id: int, conn: Database, request: Request, as_viewer: int | None = None) -> FamilyForm:
+    """Союз для карточки и формы: венчание, развод, дети по порядку файла.
+
+    Карточку открывает и зритель — щелчком по союзу на карте, — поэтому маршрут не закрыт, а просеян:
+    скрытый уходит из союза так же, как уходит из дерева, и следа по себе не оставляет.
+    """
     try:
-        return family_form(conn, family_id)
+        form = family_form(conn, family_id)
     except KinError as error:
         raise HTTPException(status_code=404, detail=str(error)) from None
+    eyes = _eyes(conn, request, as_viewer)
+    return sift_family(form, eyes, _is_hidden(conn, form.clan_id, eyes))
 
 
 @app.put("/api/families/{family_id}")
@@ -379,7 +397,7 @@ def put_family(family_id: int, body: FamilyFields, conn: Database) -> ChangeInfo
         raise _edit_errors(error) from None
 
 
-@app.get("/api/persons/{person_id}/delete-preview")
+@app.get("/api/persons/{person_id}/delete-preview", dependencies=[Depends(only_editor)])
 def get_delete_preview(person_id: int, conn: Database) -> DeletePreview:
     try:
         return delete_preview(conn, person_id)
@@ -446,7 +464,7 @@ def put_clan_status(clan_id: int, body: ClanStatus, conn: Database) -> ChangeInf
         raise _edit_errors(error) from None
 
 
-@app.get("/api/clans/{clan_id}/tags/{name}/usage")
+@app.get("/api/clans/{clan_id}/tags/{name}/usage", dependencies=[Depends(only_editor)])
 def get_tag_usage(clan_id: int, name: str, conn: Database) -> int:
     """Сколько людей носят метку — чтобы перед удалением сказать, с кого она снимется."""
     return tag_usage(conn, clan_id, name)
@@ -581,7 +599,7 @@ def post_new_clan(token: str, body: NewClan, conn: Database) -> ClanSummary:
     return next(c for c in list_clans(conn) if c.id == report.clan_id)
 
 
-@app.get("/api/uploads/{token}/reload/{clan_id}")
+@app.get("/api/uploads/{token}/reload/{clan_id}", dependencies=[Depends(only_editor)])
 def get_reload_preview(token: str, clan_id: int, conn: Database) -> ReloadPreview:
     upload = _upload(token)
     try:
