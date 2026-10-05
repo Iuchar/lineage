@@ -1,15 +1,13 @@
-name: Витрина
+name: Проверки и витрина
 
-# Витрина пересобирается и выкладывается на GitHub Pages при каждом изменении интерфейса,
-# ядра или родов в main. Запустить вручную можно кнопкой на вкладке Actions.
+# Проверки идут на каждый пуш в main и на каждое предложение изменений: правка в тестах или
+# в документе тоже может разойтись с кодом, поэтому оглядки на пути здесь нет.
+# Витрина пересобирается и выкладывается только после того, как проверки прошли, и только из main:
+# иначе на сайт уехало бы то, что не работает.
 on:
   push:
     branches: [main]
-    paths:
-      - web/**
-      - server/app/**
-      - houses/**
-      - .github/workflows/pages.yml
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -17,15 +15,53 @@ permissions:
   pages: write
   id-token: write
 
-# выкладывается одна витрина: новый запуск ждёт предыдущий, а не спорит с ним за публикацию
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
   # ключ задачи GitHub Actions читает только латиницей, показное имя может быть любым
+  server:
+    name: Сервер
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: server/uv.lock
+
+      - name: Зависимости
+        run: uv sync --project server
+
+      - name: Тесты
+        run: uv run --project server pytest -q
+
+  web:
+    name: Интерфейс
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Зависимости
+        working-directory: web
+        run: npm ci
+
+      - name: Типы
+        working-directory: web
+        run: npx tsc --noEmit
+
+      - name: Тесты
+        working-directory: web
+        run: npm test
+
   build:
-    name: Сборка
+    name: Сборка витрины
+    needs: [server, web]
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,6 +90,10 @@ jobs:
     name: Публикация
     needs: build
     runs-on: ubuntu-latest
+    # выкладывается одна витрина: новый запуск ждёт предыдущий, а не спорит с ним за публикацию
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.pages.outputs.page_url }}
