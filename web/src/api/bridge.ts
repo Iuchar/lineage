@@ -2,6 +2,8 @@
 // Клиентский код не знает о подмене — он по-прежнему зовёт fetch("/api/…"), только ответ приходит
 // не по сети, а из ядра, которое работает на этой же странице.
 
+// список родов один на всё приложение: его же читает упаковщик, складывая их в архив витрины
+import CLANS from "../../../houses/роды.json";
 import { dropLongMemory, recall, remember } from "../session";
 
 const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/";
@@ -164,9 +166,7 @@ from app.db.connection import connect
 from app.gedcom.load import load_file
 
 conn = connect(os.environ["RODOSLOVNYE_DB"])
-for name, file in [("Эшфорд", "Ashford_tree.ged"), ("Хартли", "Hartley_tree.ged"), ("Прайс", "Pryce_tree.ged"),
-                   ("Дрейк", "Drake_tree.ged"), ("Макинтош", "Macintosh_tree.ged"), ("Уэйкфилд", "Wakefield_tree.ged"),
-                   ("Дэвис", "Davis_tree.ged")]:
+for name, file in ${JSON.stringify(CLANS.map((c) => [c.name, c.file]))}:
     import_clan(conn, name, load_file(pathlib.Path("/core/houses") / file), source_file=file)
 if not editors_exist(conn):
     add_editor(conn, ${JSON.stringify(DEMO_EDITOR.name)}, ${JSON.stringify(DEMO_EDITOR.password)})

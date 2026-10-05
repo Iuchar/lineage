@@ -10,8 +10,10 @@ __pycache__/
 data/*
 !data/.gitkeep
 
-# рода: в git едут только роды проекта, личные остаются на диске
+# рода: в git едут только роды проекта, личные остаются на диске.
+# Список родов проекта лежит рядом в роды.json — его читают и витрина, и упаковщик
 houses/*
+!houses/роды.json
 !houses/Ashford_tree.ged
 !houses/Hartley_tree.ged
 !houses/Pryce_tree.ged

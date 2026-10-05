@@ -1,0 +1,9 @@
+[
+  { "name": "Эшфорд", "file": "Ashford_tree.ged" },
+  { "name": "Хартли", "file": "Hartley_tree.ged" },
+  { "name": "Прайс", "file": "Pryce_tree.ged" },
+  { "name": "Дрейк", "file": "Drake_tree.ged" },
+  { "name": "Макинтош", "file": "Macintosh_tree.ged" },
+  { "name": "Уэйкфилд", "file": "Wakefield_tree.ged" },
+  { "name": "Дэвис", "file": "Davis_tree.ged" }
+]

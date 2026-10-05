@@ -1,6 +1,7 @@
 // Складывает ядро (server/app) и роды проекта в архив, который страница распаковывает в браузере.
 // Руками ничего не копируем: витрина всегда едет с тем же кодом, что и настоящий сервер.
 
+import { spawnSync } from "node:child_process";
 import { createWriteStream } from "node:fs";
 import { mkdir, readdir, readFile, stat } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
@@ -11,15 +12,17 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "..", "..");
 const CORE = resolve(ROOT, "server", "app");
 const OUT = resolve(ROOT, "web", "public", "core.zip");
-// роды проекта: их видит гость при первом заходе
-const CLANS = ["Ashford_tree.ged", "Hartley_tree.ged", "Pryce_tree.ged", "Drake_tree.ged", "Macintosh_tree.ged", "Davis_tree.ged",
-  "Wakefield_tree.ged"];
+// роды проекта: их видит гость при первом заходе. Список один на всё приложение — витрина берёт
+// отсюда и файлы для архива, и имена родов: раньше он лежал в трёх местах и однажды разошёлся
+const CLANS = JSON.parse(await readFile(resolve(ROOT, "houses", "роды.json"), "utf8")).map((c) => c.file);
 
 async function* walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === "__pycache__") continue;
+      // в витрину едет только само ядро: следы запусков и служебные папки надстроек ей ни к чему,
+      // а на сервере сборки их и нет — локальный архив не должен отличаться от собранного там
+      if (entry.name === "__pycache__" || entry.name.startsWith(".")) continue;
       yield* walk(path);
     } else if (!entry.name.endsWith(".pyc")) {
       yield path;
@@ -96,6 +99,24 @@ async function pack(files) {
   end.writeUInt32LE(directory.length, 12);
   end.writeUInt32LE(offset, 16);
   return Buffer.concat([...parts, directory, end]);
+}
+
+// Роды в .gitignore перечислены поимённо — так личное дерево не уедет в репозиторий случайно.
+// Обратная сторона: про новый род легко забыть, и тогда он есть на своём компьютере, но не на сервере
+// сборки, где витрина собирается из того, что в git. Поэтому проверяем здесь, пока это дешёво.
+function untracked(names) {
+  // core.quotepath=off: иначе git отдаёт кириллицу в именах экранированной, и сверять её не с чем
+  const seen = spawnSync("git", ["-c", "core.quotepath=off", "ls-files", "houses"], { cwd: ROOT, encoding: "utf8" });
+  if (seen.status !== 0) return []; // git недоступен — проверять нечем, не мешаем сборке
+  const inGit = new Set(seen.stdout.split(/\r?\n/).map((line) => line.trim().split("/").pop()));
+  return names.filter((name) => !inGit.has(name));
+}
+
+const forgotten = untracked([...CLANS, "роды.json"]);
+if (forgotten.length) {
+  console.error(`Роды есть в списке, но не в git: ${forgotten.join(", ")}.`);
+  console.error("На сервере сборки их не будет. Добавьте исключение в .gitignore и закоммитьте файл.");
+  process.exit(1);
 }
 
 const files = [];
