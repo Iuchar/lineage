@@ -64,6 +64,13 @@ VIEWER_DAYS = 365
 OPEN_PATHS = {"/api/login", "/api/logout", "/api/me"}
 
 
+def _encrypted(request: Request) -> bool:
+    """Шифрованное ли соединение. За обратным прокси схема у приложения всегда http, а снаружи https —
+    про это говорит заголовок, который прокси подставляет (uvicorn читает его с --proxy-headers)."""
+    forwarded = request.headers.get("x-forwarded-proto", "").split(",")[0].strip().lower()
+    return (forwarded or request.url.scheme) == "https"
+
+
 def _current_editor(conn: sqlite3.Connection, request: Request) -> Editor | None:
     return editor_by_key(conn, request.cookies.get(SESSION_COOKIE))
 
@@ -146,7 +153,7 @@ def get_me(conn: Database, request: Request) -> Me:
 
 
 @app.post("/api/login")
-def post_login(conn: Database, body: LoginForm, response: Response) -> Me:
+def post_login(conn: Database, body: LoginForm, request: Request, response: Response) -> Me:
     try:
         key = login(conn, body.name, body.password)
     except TooManyTries as error:
@@ -155,8 +162,11 @@ def post_login(conn: Database, body: LoginForm, response: Response) -> Me:
                             headers={"Retry-After": str(error.seconds)}) from None
     except AccessError as error:
         raise HTTPException(status_code=401, detail=str(error)) from None
-    # без срока жизни: вход держится, пока открыт браузер, и кончается вместе с ним
-    response.set_cookie(SESSION_COOKIE, key, httponly=True, samesite="lax", path="/")
+    # без срока жизни: вход держится, пока открыт браузер, и кончается вместе с ним.
+    # secure — только по https: на открытом соединении браузер отказался бы хранить cookie,
+    # и приложение перестало бы работать на localhost и в домашней сети
+    response.set_cookie(SESSION_COOKIE, key, httponly=True, samesite="lax", path="/",
+                        secure=_encrypted(request))
     return Me(name=body.name.strip(), guarded=True)
 
 
@@ -222,7 +232,7 @@ def open_share_link(key: str, conn: Database, request: Request) -> RedirectRespo
     answer = RedirectResponse("/", status_code=303)
     answer.set_cookie(
         VIEWER_COOKIE, session, max_age=VIEWER_DAYS * 24 * 3600,
-        httponly=True, samesite="lax", path="/",
+        httponly=True, samesite="lax", path="/", secure=_encrypted(request),
     )
     return answer
 

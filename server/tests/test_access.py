@@ -291,3 +291,81 @@ def test_api_answers_429_when_tries_run_out(tmp_path, monkeypatch) -> None:
     answer = client.post("/api/login", json={"name": "Tyr", "password": "не тот"})
     assert answer.status_code == 429
     assert answer.headers.get("retry-after")
+
+
+def test_cookies_are_secure_behind_https(tmp_path, monkeypatch) -> None:
+    """По шифрованному соединению cookie помечается secure, иначе ключ сессии уйдёт и по открытому.
+
+    На http метка не ставится: без неё браузер отказался бы хранить cookie, и приложение
+    перестало бы работать на localhost и в домашней сети.
+    """
+    import app.config
+    import app.main
+    from app.db.connection import connect
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    base = connect(path)
+    add_editor(base, "Tyr", "длинный пароль")
+    base.close()
+
+    plain = TestClient(app.main.app, base_url="http://rodoslovnye.local")
+    entered = plain.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
+    assert "secure" not in entered.headers["set-cookie"].lower()
+
+    # за обратным прокси схема приходит заголовком — её и слушаем
+    safe = TestClient(app.main.app, base_url="https://rodoslovnye.local")
+    entered = safe.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"},
+                        headers={"X-Forwarded-Proto": "https"})
+    cookie = entered.headers["set-cookie"].lower()
+    assert "secure" in cookie and "httponly" in cookie and "samesite=lax" in cookie
+
+
+def test_new_password_puts_out_the_old_sessions(conn: sqlite3.Connection) -> None:
+    """Пароль меняют, когда он утёк. Значит и сессии, открытые прежним, должны погаснуть сразу,
+    а не доживать свои двенадцать часов."""
+    add_editor(conn, "Tyr", "длинный пароль")
+    key = login(conn, "Tyr", "длинный пароль")
+    assert editor_by_key(conn, key)
+
+    set_password(conn, "Tyr", "совсем другой пароль")
+    assert editor_by_key(conn, key) is None
+    assert conn.execute("SELECT count(*) FROM sessions").fetchone()[0] == 0
+    # новым паролем входят заново
+    assert editor_by_key(conn, login(conn, "Tyr", "совсем другой пароль"))
+
+
+def test_session_does_not_outlive_its_ceiling(conn: sqlite3.Connection, monkeypatch) -> None:
+    """У сессии есть и потолок, а не только простой: иначе украденная cookie жила бы, пока ею пользуются."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.db import access
+
+    add_editor(conn, "Tyr", "длинный пароль")
+    key = login(conn, "Tyr", "длинный пароль")
+    # отодвинем начало сессии за потолок, а последний запрос оставим свежим
+    long_ago = (datetime.now(UTC) - timedelta(days=access.LIFE_DAYS + 1)).isoformat(timespec="seconds")
+    with conn:
+        conn.execute("UPDATE sessions SET created_at = ?", (long_ago,))
+    assert editor_by_key(conn, key) is None
+    assert conn.execute("SELECT count(*) FROM sessions").fetchone()[0] == 0
+
+
+def test_dead_sessions_do_not_pile_up(conn: sqlite3.Connection) -> None:
+    """Погасшая сессия убирается не только при обращении по её же ключу: иначе таблица растёт без конца."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.db import access
+
+    add_editor(conn, "Tyr", "длинный пароль")
+    stale = login(conn, "Tyr", "длинный пароль")
+    fresh = login(conn, "Tyr", "длинный пароль")
+    with conn:
+        conn.execute("UPDATE sessions SET seen_at = ? WHERE fingerprint <> ?",
+                     ((datetime.now(UTC) - timedelta(hours=access.IDLE_HOURS + 1)).isoformat(timespec="seconds"),
+                      access._fingerprint(fresh)))
+    # ходит живая сессия, а подбирается и чужая погасшая
+    assert editor_by_key(conn, fresh)
+    assert conn.execute("SELECT count(*) FROM sessions").fetchone()[0] == 1
+    assert editor_by_key(conn, stale) is None

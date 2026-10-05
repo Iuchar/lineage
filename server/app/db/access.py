@@ -23,6 +23,7 @@ HAS_PBKDF2 = hasattr(hashlib, "pbkdf2_hmac")
 PBKDF2_ROUNDS = 200_000  # быстрая реализация на месте
 SLOW_ROUNDS = 20_000  # счёт вручную, иначе вход в браузере занимал бы секунды
 IDLE_HOURS = 12  # столько сессия редактора живёт без единого запроса
+LIFE_DAYS = 30  # потолок: дальше сессия гаснет, сколько бы ею ни пользовались
 FREE_TRIES = 5  # столько промахов подряд проходят без задержки: человек ошибается, и это нормально
 # дальше каждая неудача отодвигает следующую попытку. Запирать имя насовсем нельзя: тогда любой
 # прохожий закрыл бы редактору вход, просто набирая чепуху. Поэтому не запрет, а ожидание.
@@ -185,12 +186,16 @@ def add_editor(conn: sqlite3.Connection, name: str, password: str) -> Editor:
 
 
 def set_password(conn: sqlite3.Connection, name: str, password: str) -> None:
+    """Меняет пароль и гасит все сессии этого редактора: пароль меняют, когда он утёк, и вход
+    по старому должен кончиться сразу, а не доживать свой срок."""
     if len(password) < 8:
         raise AccessError("Пароль короче восьми знаков.")
     with conn:
         changed = conn.execute("UPDATE editors SET secret = ? WHERE name = ?", (_secret(password), name)).rowcount
+        conn.execute("DELETE FROM sessions WHERE editor_id IN (SELECT id FROM editors WHERE name = ?)", (name,))
     if not changed:
         raise AccessError(f"Редактора «{name}» нет.")
+    spare_attempts(conn, name)
 
 
 def list_editors(conn: sqlite3.Connection) -> list[Editor]:
@@ -225,20 +230,32 @@ def logout(conn: sqlite3.Connection, key: str) -> None:
         conn.execute("DELETE FROM sessions WHERE fingerprint = ?", (_fingerprint(key),))
 
 
+def sweep_sessions(conn: sqlite3.Connection) -> int:
+    """Убирает погасшие сессии — и те, по которым давно не ходили, и перестоявшие потолок.
+
+    Своя сессия узнаётся по ключу, а чужие погасшие иначе лежали бы в таблице вечно.
+    """
+    now = datetime.now(UTC)
+    with conn:
+        # порознь, а не одним запросом через OR: так каждое условие идёт по своему указателю
+        idle = conn.execute("DELETE FROM sessions WHERE seen_at < ?",
+                            ((now - timedelta(hours=IDLE_HOURS)).isoformat(timespec="seconds"),)).rowcount
+        old = conn.execute("DELETE FROM sessions WHERE created_at < ?",
+                           ((now - timedelta(days=LIFE_DAYS)).isoformat(timespec="seconds"),)).rowcount
+    return idle + old
+
+
 def editor_by_key(conn: sqlite3.Connection, key: str | None) -> Editor | None:
     if not key:
         return None
+    # заодно подбираем чужие погасшие: отдельного дворника у приложения нет
+    sweep_sessions(conn)
     row = conn.execute(
-        "SELECT e.id AS id, e.name AS name, s.seen_at AS seen_at FROM sessions s JOIN editors e ON e.id = s.editor_id"
+        "SELECT e.id AS id, e.name AS name FROM sessions s JOIN editors e ON e.id = s.editor_id"
         " WHERE s.fingerprint = ?",
         (_fingerprint(key),),
     ).fetchone()
     if row is None:
-        return None
-    # сессия, по которой давно не было запросов, гаснет сама: забытый вход и украденная cookie не живут вечно
-    idle = datetime.now(UTC) - datetime.fromisoformat(row["seen_at"])
-    if idle > timedelta(hours=IDLE_HOURS):
-        logout(conn, key)
         return None
     with conn:
         conn.execute("UPDATE sessions SET seen_at = ? WHERE fingerprint = ?", (_now(), _fingerprint(key)))
