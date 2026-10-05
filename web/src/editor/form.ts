@@ -348,8 +348,10 @@ export class PersonEditor {
   }
 
   private read(): PersonFields {
-    const value = (name: string) => this.host.querySelector<HTMLInputElement>(`[data-field=${name}]`)?.value.trim() || null;
-    const date = (name: string) => this.host.querySelector<HTMLInputElement>(`[data-date=${name}]`)?.value.trim() || null;
+    // форма шлёт человека целиком, поэтому пустое поле — это «очистить», и уходит пустой строкой:
+    // отсутствие поля на той стороне значит «не трогать», и стереть им ничего нельзя
+    const value = (name: string) => this.host.querySelector<HTMLInputElement>(`[data-field=${name}]`)?.value.trim() ?? "";
+    const date = (name: string) => this.host.querySelector<HTMLInputElement>(`[data-date=${name}]`)?.value.trim() ?? "";
     return {
       given: value("given"), surname: value("surname"), married_surname: value("married_surname"),
       sex: (this.segValue("sex") ?? null) as PersonFields["sex"],

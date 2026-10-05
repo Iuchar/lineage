@@ -17,8 +17,18 @@ from app.db.journal import ChangeInfo, Edit, JournalError
 from app.db.kin import DateValue, KinChanges, KinError, apply_kin, manual_order
 from app.gedcom.convert import _person
 from app.gedcom.dates import parse_date
-from app.gedcom.meta import (DEFAULT_SEE_NOTE, SEE_NAMES, TAG_COLORS, PersonMeta, See, add_tag_def, read_meta,
-                             read_note_see, write_meta, write_note_see)
+from app.gedcom.meta import (
+    DEFAULT_SEE_NOTE,
+    SEE_NAMES,
+    TAG_COLORS,
+    PersonMeta,
+    See,
+    add_tag_def,
+    read_meta,
+    read_note_see,
+    write_meta,
+    write_note_see,
+)
 from app.gedcom.records import Record
 from app.gedcom.ru_dates import DateInputError, format_ru, parse_input
 
@@ -65,7 +75,7 @@ class PersonFields(BaseModel):
     sex: Sex | None = None
     birth: str | None = None
     death: str | None = None
-    notes: list[NoteForm] = []
+    notes: list[NoteForm] | None = None  # пустой список очищает заметки, отсутствие — не трогает
     # служебное: метки (новые — с цветом), состояния, главная линия, портрет
     # не прислано (None) — остаётся как было: частичная форма ничего не стирает
     tags: list[str] | None = None
@@ -172,9 +182,25 @@ def _notes(record: Record) -> list[Record]:
     return [c for c in record.children if c.tag == "EVEN" and c.value_of("TYPE") == "Comment"]
 
 
+def _read_name(record: Record) -> dict[str, str]:
+    """Имя, как оно записано сейчас: нужно, чтобы не прислать поле и тем его не стереть."""
+    name = record.first("NAME")
+    if name is None:
+        return {"given": "", "surname": "", "married": ""}
+    given, surname = name.value_of("GIVN"), name.value_of("SURN")
+    if given is None and surname is None:  # имя одной строкой: «Эоган /Гленн Уриск/»
+        head, _, tail = (name.value or "").partition("/")
+        given, surname = head.strip(), tail.rsplit("/", 1)[0].strip()
+    return {"given": given or "", "surname": surname or "", "married": name.value_of("_MARNM") or ""}
+
+
 def _apply_fields(record: Record, fields: PersonFields) -> None:
-    given = (fields.given or "").strip()
-    surname = (fields.surname or "").strip()
+    # не прислано (None) — остаётся как было; прислана пустая строка — поле очищается.
+    # Разница важна: форма шлёт человека целиком, а правка одного поля не должна стирать остальные.
+    was = _read_name(record)
+    given = was["given"] if fields.given is None else fields.given.strip()
+    surname = was["surname"] if fields.surname is None else fields.surname.strip()
+    married = was["married"] if fields.married_surname is None else fields.married_surname.strip()
     name = record.first("NAME")
     value = f"{given} /{surname}/".strip() if surname else given
     if name is None:
@@ -185,14 +211,17 @@ def _apply_fields(record: Record, fields: PersonFields) -> None:
     if name.first("GIVN") is not None or name.first("SURN") is not None:
         _set_child(name, "GIVN", given or None)
         _set_child(name, "SURN", surname or None)
-    _set_child(name, "_MARNM", (fields.married_surname or "").strip() or None)
-    _set_child(record, "SEX", fields.sex)
+    _set_child(name, "_MARNM", married or None)
+    if fields.sex is not None:  # снимают пол не пустотой, а «неизвестен»
+        _set_child(record, "SEX", fields.sex)
     if record.first("SEX") is not None:  # пол — сразу после имени
         sex = record.first("SEX")
         record.children.remove(sex)  # type: ignore[arg-type]
         record.children.insert(record.children.index(name) + 1, sex)  # type: ignore[arg-type]
-    _set_event_date(record, "BIRT", _date(fields.birth, "Рождение"))
-    _set_event_date(record, "DEAT", _date(fields.death, "Смерть"))
+    if fields.birth is not None:
+        _set_event_date(record, "BIRT", _date(fields.birth, "Рождение"))
+    if fields.death is not None:
+        _set_event_date(record, "DEAT", _date(fields.death, "Смерть"))
 
     was = read_meta(record)
     write_meta(record, PersonMeta(
@@ -206,6 +235,8 @@ def _apply_fields(record: Record, fields: PersonFields) -> None:
         photo=was.photo,
     ))
 
+    if fields.notes is None:  # заметок не прислали — значит их и не трогали
+        return
     old = _notes(record)
     fresh_notes = [n for n in fields.notes if n.text.strip()]
     for note, want in zip(old, fresh_notes, strict=False):

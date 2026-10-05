@@ -7,8 +7,18 @@ import pytest
 
 from app.db.clans import import_clan
 from app.db.connection import connect
-from app.db.editor import (EditError, NoteForm, NewPerson, PersonFields, Relation, add_person, delete_person, delete_preview,
-                           person_form, update_person)
+from app.db.editor import (
+    EditError,
+    NewPerson,
+    NoteForm,
+    PersonFields,
+    Relation,
+    add_person,
+    delete_person,
+    delete_preview,
+    person_form,
+    update_person,
+)
 from app.db.journal import RevertConflictError, clan_changes, person_changes, redo, revert, undo, undo_to
 from app.db.links import create_link
 from app.db.tree import clan_tree
@@ -208,4 +218,44 @@ def test_revert_from_person_history(conn: sqlite3.Connection) -> None:
     back = revert(conn, death.id)
     assert person_form(conn, murdo).death.gedcom == "1851"
     assert back.reverts == death.id and back.summary.startswith("Вернуть:")
-    assert [c.id for c in person_changes(conn, murdo)][0] == back.id
+    assert next(c.id for c in person_changes(conn, murdo)) == back.id
+
+
+def test_partial_form_does_not_wipe_what_it_did_not_send(conn: sqlite3.Connection) -> None:
+    """Правка одного поля не стирает остальные.
+
+    Так обещает сам PersonFields: «не прислано (None) — остаётся как было». Для служебного блока
+    это и работало, а имя, пол, даты и заметки пропадали: не прислал — значит пусто. Очистить поле
+    по-прежнему можно, но для этого присылают пустую строку, а не ничего.
+    """
+    person = next(p for p in clan_tree(conn, 1).persons if p.given and p.birth)
+    was = person_form(conn, person.id)
+    assert was.given and was.birth.gedcom
+
+    update_person(conn, person.id, PersonFields(see="hidden"))
+    now = person_form(conn, person.id)
+    assert now.given == was.given
+    assert now.surname == was.surname
+    assert now.sex == was.sex
+    assert now.birth.gedcom == was.birth.gedcom
+    assert [n.text for n in now.notes] == [n.text for n in was.notes]
+    assert now.see == "hidden"  # а то, что прислали, записалось
+
+
+def test_empty_string_still_clears_a_field(conn: sqlite3.Connection) -> None:
+    """Пустая строка — это «очистить», и она должна работать: иначе поле не стереть вовсе."""
+    person = next(p for p in clan_tree(conn, 1).persons if p.given and p.birth)
+    update_person(conn, person.id, PersonFields(given="", birth=""))
+    now = person_form(conn, person.id)
+    assert not now.given
+    assert not now.birth.gedcom
+    assert now.surname  # соседнее поле не тронуто
+
+
+def test_notes_are_cleared_by_an_empty_list_not_by_silence(conn: sqlite3.Connection) -> None:
+    person = next(p for p in clan_tree(conn, 1).persons if person_form(conn, p.id).notes)
+    assert person_form(conn, person.id).notes
+    update_person(conn, person.id, PersonFields(burnt=True))  # заметок не прислали
+    assert person_form(conn, person.id).notes
+    update_person(conn, person.id, PersonFields(notes=[]))  # прислали пустой список
+    assert not person_form(conn, person.id).notes
