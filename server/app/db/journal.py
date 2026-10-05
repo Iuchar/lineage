@@ -18,10 +18,10 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from app.db.author import author
 from app.db.clans import _insert_event
 from app.db.houses import save_house
 from app.gedcom.convert import FAMILY_EVENT_TAGS, _event, _family, _person
-from app.db.author import author
 from app.gedcom.records import Record
 
 

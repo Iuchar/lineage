@@ -15,7 +15,8 @@ from app.db.photos import remove_photo, save_photo
 from app.db.tree import clan_tree
 from app.gedcom.export import export_clan
 from app.gedcom.load import load_file, load_text
-from app.main import app as web, database
+from app.main import app as web
+from app.main import database
 from conftest import source
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 32
@@ -35,7 +36,7 @@ def murdo(conn: sqlite3.Connection) -> int:
     return conn.execute("SELECT id FROM persons WHERE xref = '@I1007@'").fetchone()[0]
 
 
-def person(conn: sqlite3.Connection, pid: int):  # noqa: ANN201
+def person(conn: sqlite3.Connection, pid: int):
     return next(p for p in clan_tree(conn, 1).persons if p.id == pid)
 
 

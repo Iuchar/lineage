@@ -106,7 +106,7 @@ def parse_input(text: str | None) -> ParsedInput:
     for words, code in ((_ABOUT, "ABT"), (("до",), "BEF"), (("после",), "AFT")):
         for word in words:
             match = re.fullmatch(rf"{re.escape(word)}\.?\s*(.+)", low)
-            if match and (word == "~" or low.startswith(word + " ") or low.startswith(word + ".")):
+            if match and (word == "~" or low.startswith((word + " ", word + "."))):
                 return _done(f"{code} {_point(match.group(1))}")
     return _done(_point(low))
 

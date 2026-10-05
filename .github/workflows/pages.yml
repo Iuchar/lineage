@@ -31,6 +31,9 @@ jobs:
       - name: Зависимости
         run: uv sync --project server
 
+      - name: Разбор кода
+        run: uv run --project server ruff check server/app server/tests
+
       - name: Тесты
         run: uv run --project server pytest -q
 

@@ -210,7 +210,8 @@ def _loose_parts(persons: dict[str, Person], families: dict[str, Family]) -> lis
         return []
     sizes = sorted(parts.values(), reverse=True)
     apart = sum(sizes[1:])
-    people = "человек" if apart % 10 == 1 and apart % 100 != 11 else "человека" if 2 <= apart % 10 <= 4 and not 12 <= apart % 100 <= 14 else "человек"
-    return [f"В файле {len(parts)} не связанных между собой частей: {apart} {people} не в родстве с главным деревом."
-            " Обычно таким место в отдельном роду, а между родами ставится связка."]
+    tail, hundred = apart % 10, apart % 100
+    people = "человек" if tail == 1 and hundred != 11 else "человека" if 2 <= tail <= 4 and not 12 <= hundred <= 14 else "человек"
+    return [(f"В файле {len(parts)} не связанных между собой частей: {apart} {people} не в родстве с главным деревом."
+             " Обычно таким место в отдельном роду, а между родами ставится связка.")]
 

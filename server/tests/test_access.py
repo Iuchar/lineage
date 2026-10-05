@@ -150,7 +150,7 @@ def test_hand_counted_pbkdf2_matches_the_library_one() -> None:
 
     import app.db.access as access
 
-    password, salt = "пароль".encode("utf-8"), "соль".encode("utf-8")
+    password, salt = "пароль".encode(), "соль".encode()
     library = hashlib.pbkdf2_hmac("sha256", password, salt, 1000, 32)
     monkey = access.HAS_PBKDF2
     try:
@@ -244,7 +244,7 @@ def test_login_does_not_say_whether_the_editor_exists(conn: sqlite3.Connection) 
 
 def test_login_slows_down_after_a_run_of_misses(conn: sqlite3.Connection) -> None:
     """Перебор упирается в задержку. Хозяин не заперт: он ждёт и входит, а правильный пароль всё снимает."""
-    from app.db.access import TooManyTries, FREE_TRIES, spare_attempts
+    from app.db.access import FREE_TRIES, TooManyTries, spare_attempts
 
     add_editor(conn, "Tyr", "длинный пароль")
     for _ in range(FREE_TRIES):

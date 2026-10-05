@@ -1,8 +1,8 @@
 """Новый род с нуля: имя рода и первый человек."""
 
+import sqlite3
 from collections.abc import Iterator
 from pathlib import Path
-import sqlite3
 
 import pytest
 from fastapi.testclient import TestClient

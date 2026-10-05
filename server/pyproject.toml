@@ -16,6 +16,7 @@ rodoslovnye = "app.cli:main"
 dev = [
     "pytest>=8",
     "httpx>=0.27",
+    "ruff>=0.14",
 ]
 
 [build-system]
@@ -27,3 +28,17 @@ packages = ["app"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+# длина под сложившийся стиль: в проекте много строк, которые читаются лучше одной, чем тремя
+line-length = 140
+target-version = "py313"
+
+[tool.ruff.lint]
+# F и B ловят настоящие ошибки, остальное держит код однообразным
+select = ["E", "F", "W", "I", "UP", "B", "C4", "PIE", "ISC", "RUF"]
+# проект русский: кириллица в строках, описаниях и комментариях — это текст, а не опечатка
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "conftest"]

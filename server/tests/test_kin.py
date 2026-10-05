@@ -28,11 +28,11 @@ def pid(conn: sqlite3.Connection, clan: int, xref: str) -> int:
     return conn.execute("SELECT id FROM persons WHERE clan_id = ? AND xref = ?", (clan, xref)).fetchone()[0]
 
 
-def person(conn: sqlite3.Connection, clan: int, person_id: int):  # noqa: ANN201
+def person(conn: sqlite3.Connection, clan: int, person_id: int):
     return next(p for p in clan_tree(conn, clan).persons if p.id == person_id)
 
 
-def family(conn: sqlite3.Connection, clan: int, family_id: int):  # noqa: ANN201
+def family(conn: sqlite3.Connection, clan: int, family_id: int):
     return next(f for f in clan_tree(conn, clan).families if f.id == family_id)
 
 
@@ -105,7 +105,7 @@ def test_spouse_drop_and_replace(conn: sqlite3.Connection) -> None:
     moira = by_name(conn, 1, "Мойра", union)
     her_union = person(conn, 1, moira).spouse_families[0]
     other = next(p.id for p in clan_tree(conn, 1).persons if p.given == "Юна")
-    fields = dict(given="Мойра", surname="Гленн Уриск", sex="F", birth="1787", death="1884")
+    fields = {"given": "Мойра", "surname": "Гленн Уриск", "sex": "F", "birth": "1787", "death": "1884"}
     change = update_person(conn, moira, PersonFields(**fields, kin=KinChanges(spouses=[
         SpouseChange(family_id=her_union, action="replace", to_person_id=other)])))
     assert "Юна — заменила" in change.summary
@@ -123,8 +123,8 @@ def test_marriage_order_by_hand(conn: sqlite3.Connection) -> None:
     wanted = [ruled[0], ruled[2], ruled[1]]
     base = person_form(conn, aili)
     assert not base.marriage_order_manual
-    fields = dict(given=base.given, surname=base.surname, sex=base.sex, birth=base.birth.input, death=base.death.input,
-                  notes=base.notes)
+    fields = {"given": base.given, "surname": base.surname, "sex": base.sex,
+              "birth": base.birth.input, "death": base.death.input, "notes": base.notes}
     change = update_person(conn, aili, PersonFields(**fields, kin=KinChanges(marriage_order=wanted)))
     assert change.summary == "Айли: очередь браков"
     assert person(conn, 2, aili).spouse_families == wanted and person_form(conn, aili).marriage_order_manual

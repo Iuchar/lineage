@@ -2973,7 +2973,6 @@
           "fields": {
             "$ref": "#/components/schemas/PersonFields",
             "default": {
-              "notes": [],
               "new_tags": {}
             }
           },
@@ -3380,12 +3379,18 @@
             "title": "Death"
           },
           "notes": {
-            "items": {
-              "$ref": "#/components/schemas/NoteForm"
-            },
-            "type": "array",
-            "title": "Notes",
-            "default": []
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NoteForm"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
           },
           "tags": {
             "anyOf": [

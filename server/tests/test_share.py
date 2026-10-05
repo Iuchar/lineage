@@ -1,12 +1,11 @@
 """Ссылки зрителям: выпуск, отзыв, вход по ссылке и список своих родов."""
 
 import sqlite3
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
 from app.db.connection import migrate
-from datetime import UTC, datetime, timedelta
-
 from app.db.share import DEFAULT_TERM, TERMS, ShareError, enter, issue, link_of, revoke, viewer_access, viewer_clans
 
 

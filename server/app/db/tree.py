@@ -154,7 +154,10 @@ def _marriage_order(conn: sqlite3.Connection, clan_id: int, spouses: dict[int, l
         first_child = {f: min((y for k in children.get(f, []) if (y := year(births, k)) is not None), default=None)
                        for f in families}
 
-        def compare(a: int, b: int) -> int | None:
+        # мерки этого человека связываются с его же сравнением: оно живёт один виток цикла,
+        # и привязка оставляет его верным, даже если вызов когда-нибудь переедет за виток
+        def compare(a: int, b: int, first_child: dict[int, int | None] = first_child,
+                    spouse: dict[int, int | None] = spouse) -> int | None:
             if a in marr and b in marr:
                 return marr[a] - marr[b]
             ca, cb = first_child[a], first_child[b]
@@ -162,7 +165,8 @@ def _marriage_order(conn: sqlite3.Connection, clan_id: int, spouses: dict[int, l
                 return ca - cb
             for childless, other, sign in ((a, b, -1), (b, a, 1)):
                 died = year(deaths, spouse[childless])
-                if first_child[childless] is None and first_child[other] is not None and died is not None                         and died < first_child[other]:
+                if (first_child[childless] is None and first_child[other] is not None
+                        and died is not None and died < first_child[other]):
                     return sign
             sa, sb = year(births, spouse[a]), year(births, spouse[b])
             return None if sa is None or sb is None else sa - sb

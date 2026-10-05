@@ -7,8 +7,7 @@ from fastapi.testclient import TestClient
 
 from app.db.clans import import_clan
 from app.db.connection import connect
-from app.db.links import (LinkClashError, LinkError, candidates, clan_links, create_link, delete_link, reject_pair,
-                          search_persons)
+from app.db.links import LinkClashError, LinkError, candidates, clan_links, create_link, delete_link, reject_pair, search_persons
 from app.gedcom.load import load_file
 from app.main import app, database
 from conftest import CLANS, source

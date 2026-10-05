@@ -8,8 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.db.clans import import_clan
 from app.db.connection import connect
-from app.db.editor import NoteForm, NewPerson, PersonFields, Relation, add_person, update_person
-from app.db.editor import person_form
+from app.db.editor import NewPerson, NoteForm, PersonFields, Relation, add_person, person_form, update_person
 from app.gedcom.export import export_clan
 from app.gedcom.load import load_file, load_text
 from app.main import app, database

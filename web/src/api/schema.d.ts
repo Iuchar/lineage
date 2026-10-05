@@ -1047,7 +1047,6 @@ export interface components {
         NewPerson: {
             /**
              * @default {
-             *       "notes": [],
              *       "new_tags": {}
              *     }
              */
@@ -1178,11 +1177,8 @@ export interface components {
             birth?: string | null;
             /** Death */
             death?: string | null;
-            /**
-             * Notes
-             * @default []
-             */
-            notes: components["schemas"]["NoteForm"][];
+            /** Notes */
+            notes?: components["schemas"]["NoteForm"][] | null;
             /** Tags */
             tags?: string[] | null;
             /**
