@@ -2,12 +2,13 @@
 
 import json
 import sqlite3
-from urllib.parse import quote
 from collections.abc import Callable, Iterator
 from typing import Annotated
+from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -16,33 +17,59 @@ from app.config import DB_PATH, DIST
 from app.db.access import AccessError, Editor, TooManyTries, editor_by_key, editors_exist, login, logout
 from app.db.author import set_author
 from app.db.clans import ClanExistsError, import_clan
-from app.db.eyes import Eyes, sift, sift_family, sift_links, sift_person
-from app.gedcom.meta import See, read_meta
-from app.db.share import DEFAULT_TERM, ShareError, ShareLink, enter, issue, link_of, revoke, viewer_access, viewer_clans
 from app.db.connection import connect
-from app.db.editor import (Created, DeletePreview, EditError, NewPerson, PersonFields, PersonForm, add_person,
-                           delete_person, delete_preview, person_form, update_person)
-from app.db.journal import (ChangeInfo, JournalError, RevertConflictError, clan_changes, person_changes, redo, revert,
-                            undo, undo_to)
+from app.db.editor import (
+    Created,
+    DeletePreview,
+    EditError,
+    NewPerson,
+    PersonFields,
+    PersonForm,
+    add_person,
+    delete_person,
+    delete_preview,
+    person_form,
+    update_person,
+)
+from app.db.eyes import Eyes, sift, sift_family, sift_links, sift_person
+from app.db.journal import ChangeInfo, JournalError, RevertConflictError, clan_changes, person_changes, redo, revert, undo, undo_to
 from app.db.kin import FamilyFields, FamilyForm, KinError, family_form, update_family
-from app.db.photos import photo_path, remove_photo, save_photo
-from app.db.tagset import TagChange, TagError, delete_tag, set_status, tag_usage, update_tag
-from app.gedcom.export import ExportError, export_clan
-from app.gedcom.ru_dates import DateInputError, parse_input
+from app.db.links import (
+    Candidate,
+    ClanLink,
+    Link,
+    LinkClashError,
+    LinkError,
+    LinkNotFoundError,
+    LinkPerson,
+    candidates,
+    clan_links,
+    create_link,
+    delete_link,
+    list_links,
+    reject_pair,
+    search_persons,
+    set_link_see,
+)
 from app.db.newclan import ClanStart, NewClanError, start_clan
-from app.db.links import (Candidate, ClanLink, Link, LinkClashError, LinkError, LinkNotFoundError, LinkPerson,
-                          candidates, clan_links, create_link, delete_link, list_links, reject_pair, search_persons,
-                          set_link_see)
 from app.db.person import PersonDetails, PersonNotFoundError, person_details
+from app.db.photos import photo_path, remove_photo, save_photo
 from app.db.reload import ClanMatch, ReloadPreview, ReloadReport, clan_matches, preview_reload, reload_clan, suggested_name
+from app.db.share import DEFAULT_TERM, ShareError, ShareLink, enter, issue, link_of, revoke, viewer_access, viewer_clans
+from app.db.tagset import TagChange, TagError, delete_tag, set_status, tag_usage, update_tag
 from app.db.tree import ClanNotFoundError, ClanSummary, ClanTree, clan_tree, list_clans
+from app.gedcom.export import ExportError, export_clan
 from app.gedcom.load import load_text
+from app.gedcom.meta import See, read_meta
 from app.gedcom.records import GedcomSyntaxError, Record
+from app.gedcom.ru_dates import DateInputError, parse_input
 
+# Описание API встроенное мы выключаем и раздаём своё: оно показывает всю поверхность приложения
+# разом, и постороннему это ни к чему. Адреса прежние, только за входом редактора.
 app = FastAPI(
     title="Родословные",
-    docs_url="/api/docs",
-    openapi_url="/api/openapi.json",
+    docs_url=None,
+    openapi_url=None,
     redoc_url=None,
 )
 
@@ -235,6 +262,16 @@ def open_share_link(key: str, conn: Database, request: Request) -> RedirectRespo
         httponly=True, samesite="lax", path="/", secure=_encrypted(request),
     )
     return answer
+
+
+@app.get("/api/openapi.json", include_in_schema=False, dependencies=[Depends(only_editor)])
+def get_openapi_schema() -> JSONResponse:
+    return JSONResponse(app.openapi())
+
+
+@app.get("/api/docs", include_in_schema=False, dependencies=[Depends(only_editor)])
+def get_docs() -> HTMLResponse:
+    return get_swagger_ui_html(openapi_url="/api/openapi.json", title="Родословные — описание API")
 
 
 @app.get("/api/health")

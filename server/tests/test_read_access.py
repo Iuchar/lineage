@@ -55,7 +55,7 @@ def world(tmp_path: Path, monkeypatch) -> Iterator[dict]:
     editor = TestClient(app.main.app)
     editor.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
     yield {"editor": editor, "guest": TestClient(app.main.app), "family": family, "hidden": kid,
-           "other": [p for p in editor.get("/api/clans/1/tree").json()["persons"] if p["id"] != kid][0]["id"]}
+           "other": next(p["id"] for p in editor.get("/api/clans/1/tree").json()["persons"] if p["id"] != kid)}
 
 
 def test_editor_desks_are_closed_to_a_guest(world: dict) -> None:
@@ -102,3 +102,11 @@ def test_clan_list_and_photos_stay_open(world: dict) -> None:
     """Список родословных и снимки нужны любому: зритель видит общий слой каждого рода."""
     assert world["guest"].get("/api/clans").status_code == 200
     assert world["guest"].get("/api/health").status_code == 200
+
+
+def test_api_description_is_for_the_editor(world: dict) -> None:
+    """Описание API само по себе не данные, но показывает всю поверхность приложения разом.
+    Постороннему оно ни к чему, а редактору пригождается."""
+    for url in ("/api/docs", "/api/openapi.json"):
+        assert world["guest"].get(url).status_code == 401, f"{url} открыт постороннему"
+        assert world["editor"].get(url).status_code == 200, f"{url} закрылся и от редактора"
