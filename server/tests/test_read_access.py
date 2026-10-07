@@ -110,3 +110,19 @@ def test_api_description_is_for_the_editor(world: dict) -> None:
     for url in ("/api/docs", "/api/openapi.json"):
         assert world["guest"].get(url).status_code == 401, f"{url} открыт постороннему"
         assert world["editor"].get(url).status_code == 200, f"{url} закрылся и от редактора"
+
+
+def test_hidden_person_card_does_not_exist_for_a_guest(world: dict) -> None:
+    """Скрытого нет в дереве зрителя — значит и по номеру его нет. Номера идут подряд и перебираются,
+    так что карточка обязана отвечать так же, как на несуществующего человека."""
+    hidden = world["guest"].get(f"/api/persons/{world['hidden']}")
+    missing = world["guest"].get("/api/persons/999999")
+    assert hidden.status_code == 404
+    assert hidden.json() == missing.json()  # ответ не отличает «скрыт» от «нет такого»
+
+    # обычный человек открывается, редактор видит и скрытого
+    assert world["guest"].get(f"/api/persons/{world['other']}").status_code == 200
+    assert world["editor"].get(f"/api/persons/{world['hidden']}").status_code == 200
+    # редактор, глядящий глазами зрителя, скрытого тоже не видит
+    assert world["editor"].get(f"/api/persons/{world['hidden']}?as_viewer=0").status_code == 404
+    assert world["editor"].get(f"/api/persons/{world['hidden']}?as_viewer=1").status_code == 404

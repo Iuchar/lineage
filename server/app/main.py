@@ -295,9 +295,15 @@ def get_clan_tree(clan_id: int, conn: Database, request: Request, as_viewer: int
 @app.get("/api/persons/{person_id}")
 def get_person(person_id: int, conn: Database, request: Request, as_viewer: int | None = None) -> PersonDetails:
     try:
-        return sift_person(person_details(conn, person_id), _eyes(conn, request, as_viewer))
+        details = person_details(conn, person_id)
     except PersonNotFoundError:
         raise HTTPException(status_code=404, detail="Такого человека нет") from None
+    eyes = _eyes(conn, request, as_viewer)
+    # скрытого нет в дереве зрителя — нет его и по номеру: номера идут подряд и перебираются.
+    # Ответ тот же, что на несуществующего, чтобы «скрыт» не отличался от «нет такого»
+    if _is_hidden(conn, details.clan_id, eyes)(person_id):
+        raise HTTPException(status_code=404, detail="Такого человека нет")
+    return sift_person(details, eyes)
 
 
 @app.get("/api/persons", dependencies=[Depends(only_editor)])
