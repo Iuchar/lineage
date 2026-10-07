@@ -158,3 +158,16 @@ def test_life_dates_in_the_card_follow_the_person_level(world: dict) -> None:
     family = tree["families"][0]["id"]
     assert world["editor"].put(f"/api/families/{family}", json={"marriage": "1790"}).status_code == 200
     assert world["guest"].get(f"/api/families/{family}/form").json()["marriage"]["gedcom"] == "1790"
+
+
+def test_tree_says_when_dates_are_closed_rather_than_unknown(world: dict) -> None:
+    """Пустая дата бывает двух родов: год не записан и год закрыт от этих глаз. Интерфейс пишет
+    «год неизвестен» только в первом случае, поэтому дерево помечает второй."""
+    def person(client, suffix: str = "") -> dict:
+        tree = client.get(f"/api/clans/1/tree{suffix}").json()
+        return next(p for p in tree["persons"] if p["id"] == world["other"])
+
+    assert person(world["editor"])["dates_closed"] is False
+    assert person(world["editor"], "?as_viewer=1")["dates_closed"] is False  # свой для рода даты видит
+    closed = person(world["guest"])
+    assert closed["dates_closed"] is True and closed["birth"] is None and closed["death"] is None

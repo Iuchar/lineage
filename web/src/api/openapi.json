@@ -4105,6 +4105,11 @@
               }
             ]
           },
+          "dates_closed": {
+            "type": "boolean",
+            "title": "Dates Closed",
+            "default": false
+          },
           "layout_birth": {
             "anyOf": [
               {

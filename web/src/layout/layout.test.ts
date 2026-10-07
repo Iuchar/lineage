@@ -143,7 +143,7 @@ describe("поколения", () => {
         id, xref: `@I${id}@`, given: null, surname: null, married_surname: null, sex: null,
         is_branch_stub: false, birth: null, death: null, parent_families: [], spouse_families: [],
         tags: [], burnt: false, see: "all" as const, see_dates: "clan" as const,
-        see_portrait: "all" as const, heir: false, portrait: "auto" as const, photo: null,
+        see_portrait: "all" as const, dates_closed: false, heir: false, portrait: "auto" as const, photo: null,
       })),
       families: [
         { id: 10, xref: "@F10@", husband: 1, wife: null, children: [2], child_pedigree: ["birth"], divorced: false },

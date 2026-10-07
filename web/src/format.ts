@@ -46,8 +46,15 @@ export function formatDate(date: LifeDate | null): string | null {
 export function lifeYears(person: TreePerson): string {
   const birth = formatDate(person.birth);
   const death = formatDate(person.death);
-  if (!birth) return "год неизвестен";
+  // пустая дата бывает двух родов: год не записан — и год закрыт от этих глаз. Во втором случае
+  // на месте годов ничего нет: «неизвестен» было бы неправдой, а «закрыто» — лишним намёком
+  if (!birth) return person.dates_closed ? "" : "год неизвестен";
   return death ? `${birth} — ${death}` : birth;
+}
+
+/** Склеивает подпись через точку, пропуская пустое: закрытые годы не оставляют повисший разделитель. */
+export function dotted(...parts: (string | null | undefined)[]): string {
+  return parts.filter(Boolean).join(" · ");
 }
 
 /** «до 31 октября 2026», а в последнюю неделю — ещё и сколько дней осталось. Дни считаются по календарю:

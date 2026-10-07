@@ -4,7 +4,7 @@ import { icon } from "./icons";
 import type { ChangeInfo, ClanLink, ClanTree, FamilyForm, PersonDetails, PersonEvent, TreePerson } from "../api/types";
 import type { PlusKind } from "../canvas/canvas";
 import { historyHtml, revertChange } from "../editor/journal";
-import { cardName, escapeHtml, formatDate, lifeYears } from "../format";
+import { cardName, dotted, escapeHtml, formatDate, lifeYears } from "../format";
 import { silhouette } from "../canvas/portrait";
 import { TAG_COLORS, type Tag } from "../canvas/tags";
 import { SEE_NAMES, SEE_SIGNS, type See } from "../canvas/see";
@@ -205,7 +205,7 @@ export class PersonPanel {
         return kind === "adopted" ? (f ? "приёмная" : "приёмный") : f ? "родная" : "родной";
       };
       h += `<div class="kinList">${kids.map((p, i) => `<div><b class="num">${i + 1}</b><span>${kin(p)}` +
-        `<small>${escapeHtml(lifeYears(p))} · ${word(p)}</small></span></div>`).join("")}</div>`;
+        `<small>${escapeHtml(dotted(lifeYears(p), word(p)))}</small></span></div>`).join("")}</div>`;
       const folded = this.actions.isFolded(familyId);
       h += `<div class="foldRow"><button data-act="fold" data-family="${familyId}" aria-pressed="${folded}">` +
         `${folded ? "Развернуть ветку" : "Свернуть ветку"}</button><span>${descendantsOf(tree, familyId).size} в ветке</span></div>`;
@@ -245,7 +245,7 @@ export class PersonPanel {
       if (person.married_surname && person.married_surname !== person.surname) {
         h += `<div class="maiden">по мужу ${escapeHtml(person.married_surname)}</div>`;
       }
-      h += `<div class="sub">${escapeHtml(lifeYears(person))} · ${escapeHtml(person.xref)}</div>`;
+      h += `<div class="sub">${escapeHtml(dotted(lifeYears(person), person.xref))}</div>`;
       const tags = this.actions.tagsOf(person.id);
       if (tags.length) {
         h += `<div class="chips">${tags

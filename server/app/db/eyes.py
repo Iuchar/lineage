@@ -86,6 +86,7 @@ def sift(tree: ClanTree, eyes: Eyes) -> ClanTree:
         if not eyes.allows(person.see_dates, clan_id):
             person.birth = None
             person.death = None
+            person.dates_closed = True
         if not eyes.allows(person.see_portrait, clan_id):
             person.photo = None
             person.portrait = "silhouette"

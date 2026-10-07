@@ -1426,6 +1426,11 @@ export interface components {
             is_branch_stub: boolean;
             birth: components["schemas"]["LifeDate"] | null;
             death: components["schemas"]["LifeDate"] | null;
+            /**
+             * Dates Closed
+             * @default false
+             */
+            dates_closed: boolean;
             /** Layout Birth */
             layout_birth?: number | null;
             /** Layout Death */
