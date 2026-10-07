@@ -23,6 +23,7 @@ class LinkPerson(BaseModel):
     name: str
     born: int | None
     died: int | None
+    dates_closed: bool = False  # годы есть, но этим глазам закрыты: не «неизвестны», а пусто
 
 
 class Link(BaseModel):

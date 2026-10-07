@@ -121,9 +121,14 @@ def test_hidden_link_is_not_shown_to_viewer(conn: sqlite3.Connection) -> None:
         ClanLink(link_id=2, person_id=1, see="clan", other=other),
         ClanLink(link_id=3, person_id=1, see="hidden", other=other),
     ]
-    assert [link.link_id for link in sift_links(links, Eyes(editor=True), 1)] == [1, 2, 3]
-    assert [link.link_id for link in sift_links(links, Eyes(editor=False, clans=frozenset({1})), 1)] == [1, 2]
-    assert [link.link_id for link in sift_links(links, Eyes(editor=False, clans=frozenset()), 1)] == [1]
+    from app.gedcom.meta import PersonMeta
+
+    def open_to_all(_person_id: int) -> PersonMeta:  # здесь проверяется уровень связки, люди открыты
+        return PersonMeta()
+
+    assert [link.link_id for link in sift_links(links, Eyes(editor=True), 1, open_to_all)] == [1, 2, 3]
+    assert [link.link_id for link in sift_links(links, Eyes(editor=False, clans=frozenset({1})), 1, open_to_all)] == [1, 2]
+    assert [link.link_id for link in sift_links(links, Eyes(editor=False, clans=frozenset()), 1, open_to_all)] == [1]
 
 
 def test_editor_can_look_with_viewer_eyes(tmp_path, monkeypatch) -> None:

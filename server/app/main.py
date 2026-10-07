@@ -319,7 +319,7 @@ def find_persons(q: str, conn: Database, exclude_clan: int | None = None) -> lis
 
 @app.get("/api/clans/{clan_id}/links")
 def get_clan_links(clan_id: int, conn: Database, request: Request, as_viewer: int | None = None) -> list[ClanLink]:
-    return sift_links(clan_links(conn, clan_id), _eyes(conn, request, as_viewer), clan_id)
+    return sift_links(clan_links(conn, clan_id), _eyes(conn, request, as_viewer), clan_id, lambda pid: _levels(conn, pid))
 
 
 class NewLink(BaseModel):

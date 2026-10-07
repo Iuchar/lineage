@@ -978,6 +978,11 @@ export interface components {
             born: number | null;
             /** Died */
             died: number | null;
+            /**
+             * Dates Closed
+             * @default false
+             */
+            dates_closed: boolean;
         };
         /** LinkSee */
         LinkSee: {

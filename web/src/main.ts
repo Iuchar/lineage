@@ -188,7 +188,7 @@ async function start(root: HTMLElement): Promise<void> {
   const fullName = (p: TreePerson) => [p.given, p.surname].filter(Boolean).join(" ") || "без имени";
   const brief = (p: TreePerson): LinkPerson => ({
     id: p.id, clan_id: currentClan, clan_name: clanName(currentClan), name: fullName(p),
-    born: p.birth?.year ?? null, died: p.death?.year ?? null,
+    born: p.birth?.year ?? null, died: p.death?.year ?? null, dates_closed: p.dates_closed,
   });
 
   // связки: сноска на карте и строка в панели ведут в другой род, лента над картой — обратно

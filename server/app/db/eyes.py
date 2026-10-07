@@ -13,7 +13,7 @@ from app.db.kin import FamilyForm
 from app.db.links import ClanLink
 from app.db.person import PersonDetails
 from app.db.tree import ClanTree
-from app.gedcom.meta import See
+from app.gedcom.meta import PersonMeta, See
 
 
 @dataclass(frozen=True)
@@ -29,11 +29,31 @@ class Eyes:
         return level == "all" or clan_id in self.clans
 
 
-def sift_links(links: list[ClanLink], eyes: Eyes, clan_id: int) -> list[ClanLink]:
-    """Связки: уровень свой у каждой. Скрытую зритель не видит, и перехода по ней у него нет."""
+def sift_links(links: list[ClanLink], eyes: Eyes, clan_id: int,
+               levels: Callable[[int], PersonMeta | None]) -> list[ClanLink]:
+    """Связки: уровень свой у каждой. Скрытую зритель не видит, и перехода по ней у него нет.
+
+    Связка приносит имя и годы человека из другого рода, поэтому держит и правила его дерева:
+    скрытого на любом из концов для зрителя нет вовсе, а годы приходят, только если открыты
+    в ТОМ роду — свой здесь не значит свой там. Кто поставил связку, зрителю не говорится:
+    это имя редактора, под ним входят.
+    """
     if eyes.editor:
         return links
-    return [link for link in links if eyes.allows(link.see, clan_id)]
+    seen = []
+    for link in links:
+        own, other = levels(link.person_id), levels(link.other.id)
+        if own is None or other is None or not eyes.allows(link.see, clan_id):
+            continue
+        if not eyes.allows(own.see, clan_id) or not eyes.allows(other.see, link.other.clan_id):
+            continue
+        link.created_by = None
+        if not eyes.allows(other.see_dates, link.other.clan_id):
+            link.other.born = None
+            link.other.died = None
+            link.other.dates_closed = True
+        seen.append(link)
+    return seen
 
 
 def sift_family(form: FamilyForm, eyes: Eyes, hidden: Callable[[int], bool]) -> FamilyForm:

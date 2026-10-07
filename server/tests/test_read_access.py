@@ -171,3 +171,50 @@ def test_tree_says_when_dates_are_closed_rather_than_unknown(world: dict) -> Non
     assert person(world["editor"], "?as_viewer=1")["dates_closed"] is False  # свой для рода даты видит
     closed = person(world["guest"])
     assert closed["dates_closed"] is True and closed["birth"] is None and closed["death"] is None
+
+
+def test_links_do_not_give_away_what_the_tree_hides(tmp_path: Path, monkeypatch) -> None:
+    """Связка ведёт к человеку в другом роду — и приносит о нём имя и годы. Она обязана держать те же
+    правила, что и дерево того рода: скрытого на том конце нет вовсе, закрытые годы не приходят.
+    И имя редактора, поставившего связку, — не для чужих глаз: под ним входят."""
+    import app.config
+    import app.main
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    houses = Path(__file__).parents[2] / "houses"
+    conn = connect(path)
+    import_clan(conn, "Хартли", load_file(houses / "Hartley_tree.ged"))
+    import_clan(conn, "Дэвис", load_file(houses / "Davis_tree.ged"))
+    add_editor(conn, "Tyr", "длинный пароль")
+    conn.close()
+
+    editor = TestClient(app.main.app)
+    editor.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
+    guest = TestClient(app.main.app)
+    pair = editor.get("/api/links/candidates").json()[0]
+    here, there = pair["a"]["person"], pair["b"]["person"]
+    assert editor.post("/api/links", json={"a": here["id"], "b": there["id"]}).status_code == 200
+
+    def links(client, clan: int, suffix: str = "") -> list[dict]:
+        return client.get(f"/api/clans/{clan}/links{suffix}").json()
+
+    seen = links(guest, here["clan_id"])
+    assert len(seen) == 1 and seen[0]["other"]["name"]  # связка общая — прохожий её видит
+    assert seen[0]["created_by"] is None  # но не того, кто её поставил
+    assert seen[0]["other"]["born"] is None and seen[0]["other"]["died"] is None  # годы у человека родовые
+    assert seen[0]["other"]["dates_closed"] is True  # и сказано, что закрыты, а не неизвестны
+    at_editor = links(editor, here["clan_id"])[0]
+    assert at_editor["created_by"] == "Tyr" and at_editor["other"]["born"] == there["born"]
+    # свой для ТОГО рода годы видит; свой только для этого — нет
+    assert links(editor, here["clan_id"], f"?as_viewer={there['clan_id']}")[0]["other"]["born"] == there["born"]
+    assert links(editor, here["clan_id"], f"?as_viewer={here['clan_id']}")[0]["other"]["born"] is None
+
+    # человека на том конце скрыли — связки к нему для зрителя больше нет, с обеих сторон
+    conn = connect(path)
+    update_person(conn, there["id"], PersonFields(see="hidden"))
+    conn.close()
+    assert links(guest, here["clan_id"]) == []
+    assert links(guest, there["clan_id"]) == []
+    assert len(links(editor, here["clan_id"])) == 1

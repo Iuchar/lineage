@@ -2801,6 +2801,11 @@
               }
             ],
             "title": "Died"
+          },
+          "dates_closed": {
+            "type": "boolean",
+            "title": "Dates Closed",
+            "default": false
           }
         },
         "type": "object",
