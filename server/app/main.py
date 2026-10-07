@@ -60,7 +60,7 @@ from app.db.tagset import TagChange, TagError, delete_tag, set_status, tag_usage
 from app.db.tree import ClanNotFoundError, ClanSummary, ClanTree, clan_tree, list_clans
 from app.gedcom.export import ExportError, export_clan
 from app.gedcom.load import load_text
-from app.gedcom.meta import See, read_meta
+from app.gedcom.meta import PersonMeta, See, read_meta
 from app.gedcom.records import GedcomSyntaxError, Record
 from app.gedcom.ru_dates import DateInputError, parse_input
 
@@ -108,13 +108,17 @@ def only_editor(conn: Database, request: Request) -> None:
         raise HTTPException(status_code=401, detail="Нужен вход редактора")
 
 
+def _levels(conn: sqlite3.Connection, person_id: int) -> PersonMeta | None:
+    """Уровни видимости человека. Лежат в самой записи, поэтому читаем её, а не колонку."""
+    row = conn.execute("SELECT raw FROM persons WHERE id = ?", (person_id,)).fetchone()
+    return read_meta(Record.from_json(json.loads(row["raw"]))) if row else None
+
+
 def _is_hidden(conn: sqlite3.Connection, clan_id: int, eyes: Eyes) -> Callable[[int], bool]:
-    """Кого этим глазам видеть не положено. Уровень лежит в самой записи, поэтому читаем её, а не колонку."""
+    """Кого этим глазам видеть не положено."""
     def hidden(person_id: int) -> bool:
-        row = conn.execute("SELECT raw FROM persons WHERE id = ?", (person_id,)).fetchone()
-        if row is None:
-            return False
-        return not eyes.allows(read_meta(Record.from_json(json.loads(row["raw"]))).see, clan_id)
+        levels = _levels(conn, person_id)
+        return levels is not None and not eyes.allows(levels.see, clan_id)
 
     return hidden
 
@@ -301,9 +305,10 @@ def get_person(person_id: int, conn: Database, request: Request, as_viewer: int 
     eyes = _eyes(conn, request, as_viewer)
     # скрытого нет в дереве зрителя — нет его и по номеру: номера идут подряд и перебираются.
     # Ответ тот же, что на несуществующего, чтобы «скрыт» не отличался от «нет такого»
-    if _is_hidden(conn, details.clan_id, eyes)(person_id):
+    levels = _levels(conn, person_id)
+    if levels is not None and not eyes.allows(levels.see, details.clan_id):
         raise HTTPException(status_code=404, detail="Такого человека нет")
-    return sift_person(details, eyes)
+    return sift_person(details, eyes, levels.see_dates if levels else "all")
 
 
 @app.get("/api/persons", dependencies=[Depends(only_editor)])

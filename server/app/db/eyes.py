@@ -52,11 +52,19 @@ def sift_family(form: FamilyForm, eyes: Eyes, hidden: Callable[[int], bool]) -> 
     return form
 
 
-def sift_person(details: PersonDetails, eyes: Eyes) -> PersonDetails:
-    """Карточка человека: заметки уровнем выше доступного уходят вовсе, а не прячутся многоточием."""
+def sift_person(details: PersonDetails, eyes: Eyes, see_dates: See = "all") -> PersonDetails:
+    """Карточка человека: заметки уровнем выше доступного уходят вовсе, а не прячутся многоточием.
+
+    Годы жизни держатся уровня самого человека (see_dates) — того же, что в дереве и в выгрузке:
+    у рождения и смерти уходит дата, место остаётся. Иначе закрытое в дереве читалось бы щелчком.
+    """
     if eyes.editor:
         return details
     details.events = [e for e in details.events if eyes.allows(e.see, details.clan_id)]
+    if not eyes.allows(see_dates, details.clan_id):
+        for event in details.events:
+            if event.tag in ("BIRT", "DEAT"):
+                event.date = None
     return details
 
 

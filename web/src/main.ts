@@ -407,6 +407,7 @@ async function start(root: HTMLElement): Promise<void> {
       if (person) manual.open(brief(person));
     },
     editing: () => editing,
+    eyes: () => eyes(),
     startEdit: (id) => {
       if (tree) void editor.edit(tree, id);
     },

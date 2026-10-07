@@ -29,6 +29,8 @@ export interface PanelActions {
   linkWith: (personId: number) => void;
   // режим правки
   editing: () => boolean;
+  /** Хвост запроса «чьими глазами»: карточка должна приходить тем же взглядом, что и дерево. */
+  eyes: () => string;
   startEdit: (personId: number) => void;
   addRelative: (kind: PlusKind, personId: number, at: DOMRect) => void;
   reverted: (change: ChangeInfo) => void;
@@ -150,7 +152,7 @@ export class PersonPanel {
     this.family = null;
     const request = ++this.request;
     this.render(tree, person, null); // сразу из дерева, подробности дорисуются
-    const response = await fetch(`/api/persons/${personId}`);
+    const response = await fetch(`/api/persons/${personId}${this.actions.eyes()}`);
     if (request !== this.request || !response.ok) return;
     this.render(tree, person, (await response.json()) as PersonDetails);
   }
@@ -163,7 +165,7 @@ export class PersonPanel {
     const request = ++this.request;
     this.family = familyId;
     this.drawFamily(tree, familyId, back ?? null, null);
-    const response = await fetch(`/api/families/${familyId}/form`);
+    const response = await fetch(`/api/families/${familyId}/form${this.actions.eyes()}`);
     if (request !== this.request || !response.ok) return;
     this.drawFamily(tree, familyId, back ?? null, (await response.json()) as FamilyForm);
   }

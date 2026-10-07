@@ -126,3 +126,35 @@ def test_hidden_person_card_does_not_exist_for_a_guest(world: dict) -> None:
     # редактор, глядящий глазами зрителя, скрытого тоже не видит
     assert world["editor"].get(f"/api/persons/{world['hidden']}?as_viewer=0").status_code == 404
     assert world["editor"].get(f"/api/persons/{world['hidden']}?as_viewer=1").status_code == 404
+
+
+def test_life_dates_in_the_card_follow_the_person_level(world: dict) -> None:
+    """Годы жизни у человека родовые по умолчанию: в дереве общему зрителю они закрыты.
+    Карточка обязана держать то же правило — иначе закрытое в дереве читается щелчком по человеку."""
+    import app.main
+    from app.db.share import issue
+
+    tree = world["editor"].get("/api/clans/1/tree").json()
+    person = next(p for p in tree["persons"] if p["birth"] and p["see_dates"] == "clan" and p["id"] != world["hidden"])
+
+    def life_dates(client, suffix: str = "") -> list:
+        card = client.get(f"/api/persons/{person['id']}{suffix}").json()
+        return [e["date"] for e in card["events"] if e["tag"] in ("BIRT", "DEAT") and e["date"]]
+
+    assert life_dates(world["editor"])  # у редактора даты есть
+    assert life_dates(world["guest"]) == []  # прохожему — нет, как и в дереве
+    assert life_dates(world["editor"], "?as_viewer=0") == []  # редактор глазами общего зрителя
+    assert life_dates(world["editor"], "?as_viewer=1")  # глазами своего для рода — есть
+
+    # гость, пришедший по ссылке рода, свой: ему даты открыты
+    conn = connect(app.main.DB_PATH)
+    key = issue(conn, 1).key
+    conn.close()
+    invited = TestClient(app.main.app)
+    invited.get(f"/r/{key}", follow_redirects=False)
+    assert life_dates(invited)
+
+    # дата венчания — общий слой: её видит и прохожий
+    family = tree["families"][0]["id"]
+    assert world["editor"].put(f"/api/families/{family}", json={"marriage": "1790"}).status_code == 200
+    assert world["guest"].get(f"/api/families/{family}/form").json()["marriage"]["gedcom"] == "1790"
