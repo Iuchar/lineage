@@ -575,11 +575,30 @@ def delete_photo(person_id: int, conn: Database) -> ChangeInfo:
 
 
 @app.get("/api/photos/{clan}/{name}", include_in_schema=False)
-def get_photo(clan: str, name: str) -> FileResponse:
+def get_photo(clan: str, name: str, conn: Database, request: Request) -> FileResponse:
+    """Снимок держит те же уровни, что и дерево: скрытого человека и закрытый портрет файл не отдаёт.
+
+    Имя файла начинается с номера человека — по нему и находится, чей это снимок. Отказ тот же,
+    что на несуществующий файл: по ответу не понять, закрыт снимок или его нет.
+    """
+    missing = HTTPException(status_code=404, detail="Снимка нет")
     try:
-        return FileResponse(photo_path(clan, name))
+        path = photo_path(clan, name)
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Снимка нет") from None
+        raise missing from None
+    eyes = _eyes(conn, request)
+    if not eyes.editor:
+        person_id = int(name.split("-", 1)[0]) if name.split("-", 1)[0].isdigit() else None
+        row = conn.execute("SELECT clan_id FROM persons WHERE id = ?", (person_id,)).fetchone() if person_id else None
+        levels = _levels(conn, person_id) if row else None
+        # папка в адресе должна быть родом самого человека: иначе уровень сверялся бы не с тем родом
+        if levels is None or str(row["clan_id"]) != clan:
+            raise missing
+        if not eyes.allows(levels.see, row["clan_id"]) or not eyes.allows(levels.see_portrait, row["clan_id"]):
+            raise missing
+    # private: снимок не оседает в общих кэшах по дороге — там его отдали бы уже без проверки.
+    # У самого зрителя он держится час: переспрашивать каждый портрет при каждой загрузке накладно
+    return FileResponse(path, headers={"Cache-Control": "private, max-age=3600"})
 
 
 @app.get("/api/clans/{clan_id}/export", response_class=PlainTextResponse)

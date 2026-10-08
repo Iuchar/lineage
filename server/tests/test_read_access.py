@@ -324,3 +324,42 @@ def test_export_drops_a_union_whose_only_members_are_hidden(tmp_path: Path, monk
     text = TestClient(app.main.app).get("/api/clans/1/export").text
     assert f"0 {orphaned['xref']} FAM" not in text
     assert f"0 {orphaned['xref']} FAM" in editor.get("/api/clans/1/export").text
+
+
+def test_photo_file_follows_the_portrait_level(world: dict) -> None:
+    """Дерево не отдаёт зрителю адрес закрытого портрета — но сам файл отдавался любому, кто адрес знает.
+    А знает его всякий, кто видел портрет раньше или получил ссылку. Файл обязан держать те же уровни."""
+    import app.main
+    from app.db.share import issue
+
+    png = bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
+                        "0000000d49444154789c6360000002000001e221bc330000000049454e44ae426082")
+    who = world["other"]
+    assert world["editor"].post(f"/api/persons/{who}/photo", content=png,
+                                headers={"Content-Type": "image/png"}).status_code == 200
+    url = next(p for p in world["editor"].get("/api/clans/1/tree").json()["persons"] if p["id"] == who)["photo"]
+    assert url and url.startswith("/api/photos/")
+
+    conn = connect(app.main.DB_PATH)
+    key = issue(conn, 1).key
+    conn.close()
+    invited = TestClient(app.main.app)
+    invited.get(f"/r/{key}", follow_redirects=False)
+
+    def level(**fields) -> None:
+        conn = connect(app.main.DB_PATH)
+        update_person(conn, who, PersonFields(**fields))
+        conn.close()
+
+    assert world["guest"].get(url).status_code == 200  # портрет общий — виден всем
+    level(see_portrait="clan")
+    assert world["guest"].get(url).status_code == 404  # родовой: прохожему нет…
+    assert invited.get(url).status_code == 200  # …а своему для рода — да
+    level(see_portrait="hidden")
+    assert invited.get(url).status_code == 404
+    assert world["editor"].get(url).status_code == 200  # редактор видит всегда
+    level(see_portrait="all", see="hidden")
+    assert world["guest"].get(url).status_code == 404  # человек скрыт — и снимка его нет
+    assert invited.get(url).status_code == 404
+    # файл чужого рода под номером этого человека не достать
+    assert world["guest"].get(url.replace("/photos/1/", "/photos/2/")).status_code == 404
