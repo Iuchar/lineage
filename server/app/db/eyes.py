@@ -56,31 +56,45 @@ def sift_links(links: list[ClanLink], eyes: Eyes, clan_id: int,
     return seen
 
 
-def sift_family(form: FamilyForm, eyes: Eyes, hidden: Callable[[int], bool]) -> FamilyForm:
+def sift_family(form: FamilyForm, eyes: Eyes, hidden: Callable[[int], bool]) -> FamilyForm | None:
     """Карточка союза: скрытый уходит из неё так же, как уходит из дерева.
 
     Союз остаётся — без скрытого супруга и без скрытого ребёнка. Иначе зритель, щёлкнув по союзу,
     узнавал бы, что у пары есть кто-то ещё: самого человека не видно, а след от него оставался.
+    Если скрыт супруг, уходит и всё о браке; а когда показывать больше нечего, союза для зрителя нет (None).
     """
     if eyes.editor:
         return form
+    lost = False  # супруг ушёл из союза, потому что скрыт
     if form.husband is not None and hidden(form.husband):
-        form.husband = None
+        form.husband, lost = None, True
     if form.wife is not None and hidden(form.wife):
-        form.wife = None
+        form.wife, lost = None, True
     form.children = [child for child in form.children if not hidden(child.id)]
+    if lost:
+        # венчание, место и развод говорят, что супруг был: от такого союза зрителю остаются только дети
+        form.marriage = form.marriage.model_copy(update={"gedcom": None, "ru": "", "input": ""})
+        form.divorce = form.divorce.model_copy(update={"gedcom": None, "ru": "", "input": ""})
+        form.place, form.divorced = None, False
+        if not form.children:
+            return None
+    if form.husband is None and form.wife is None and not form.children:
+        return None
     return form
 
 
-def sift_person(details: PersonDetails, eyes: Eyes, see_dates: See = "all") -> PersonDetails:
+def sift_person(details: PersonDetails, eyes: Eyes, see_dates: See = "all",
+                veiled: Callable[[int], bool] = lambda _family: False) -> PersonDetails:
     """Карточка человека: заметки уровнем выше доступного уходят вовсе, а не прячутся многоточием.
 
     Годы жизни держатся уровня самого человека (see_dates) — того же, что в дереве и в выгрузке:
     у рождения и смерти уходит дата, место остаётся. Иначе закрытое в дереве читалось бы щелчком.
+    Брак со скрытым супругом (veiled) из карточки уходит целиком: венчание выдавало бы, что супруг был.
     """
     if eyes.editor:
         return details
     details.events = [e for e in details.events if eyes.allows(e.see, details.clan_id)]
+    details.marriages = [m for m in details.marriages if not veiled(m.family_id)]
     if not eyes.allows(see_dates, details.clan_id):
         for event in details.events:
             if event.tag in ("BIRT", "DEAT"):
@@ -114,6 +128,7 @@ def sift(tree: ClanTree, eyes: Eyes) -> ClanTree:
     families = []
     for family in tree.families:
         # скрытый родитель уходит из семьи: остаётся союз без него, а без обоих — «родители не записаны»
+        lost = family.husband in gone or family.wife in gone
         if family.husband in gone:
             family.husband = None
         if family.wife in gone:
@@ -127,6 +142,11 @@ def sift(tree: ClanTree, eyes: Eyes) -> ClanTree:
             family.child_pedigree = [kind for _, kind in pairs]
         if family.husband is None and family.wife is None and not family.children:
             continue
+        if lost:
+            # развод выдавал бы, что супруг был; а бездетный союз со скрытым показывать нечем — его нет
+            family.divorced = False
+            if not family.children:
+                continue
         families.append(family)
 
     alive = {f.id for f in families}

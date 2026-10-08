@@ -218,3 +218,109 @@ def test_links_do_not_give_away_what_the_tree_hides(tmp_path: Path, monkeypatch)
     assert links(guest, here["clan_id"]) == []
     assert links(guest, there["clan_id"]) == []
     assert len(links(editor, here["clan_id"])) == 1
+
+
+def test_marriage_to_a_hidden_spouse_leaves_no_trace(tmp_path: Path, monkeypatch) -> None:
+    """Скрытый не намекает на себя — значит, и брак с ним не должен. Венчание, место и развод говорят,
+    что супруг был; зрителю от такого союза остаются только дети, как у одинокого родителя.
+    А бездетного союза со скрытым для зрителя нет вовсе: показывать в нём нечего."""
+    import app.config
+    import app.main
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    conn = connect(path)
+    import_clan(conn, "Прайс", load_file(Path(__file__).parents[2] / "houses" / "Pryce_tree.ged"))
+    add_editor(conn, "Tyr", "длинный пароль")
+    conn.close()
+    editor = TestClient(app.main.app)
+    editor.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
+    guest = TestClient(app.main.app)
+
+    tree = editor.get("/api/clans/1/tree").json()
+    both = [f for f in tree["families"] if f["husband"] and f["wife"]]
+    dated = lambda f: editor.get(f"/api/families/{f['id']}/form").json()["marriage"]["gedcom"]  # noqa: E731
+    parents = next(f for f in both if f["children"] and dated(f))
+    divorced = next(f for f in both if f["divorced"] and f["children"])
+    childless = next(f for f in both if not f["children"] and dated(f))
+    untouched = next(f for f in both if f["children"] and dated(f) and f not in (parents, divorced))
+
+    conn = connect(path)
+    for family in (parents, divorced, childless):
+        update_person(conn, family["wife"], PersonFields(see="hidden"))
+    conn.close()
+
+    def family_in_tree(family: dict) -> dict | None:
+        return next((f for f in guest.get("/api/clans/1/tree").json()["families"] if f["id"] == family["id"]), None)
+
+    def card_marriages(person: int) -> list[int]:
+        return [m["family_id"] for m in guest.get(f"/api/persons/{person}").json()["marriages"]]
+
+    # союз с детьми остаётся ради детей, но о браке в нём больше ничего
+    kept = family_in_tree(parents)
+    assert kept and kept["wife"] is None and kept["children"] == parents["children"]
+    form = guest.get(f"/api/families/{parents['id']}/form").json()
+    assert form["wife"] is None and form["marriage"]["gedcom"] is None and form["place"] is None
+    assert parents["id"] not in card_marriages(parents["husband"])
+
+    # развод со скрытой — тоже след
+    assert family_in_tree(divorced)["divorced"] is False
+    gone = guest.get(f"/api/families/{divorced['id']}/form").json()
+    assert gone["divorced"] is False and gone["divorce"]["gedcom"] is None
+
+    # бездетного союза со скрытой для зрителя нет: ни в дереве, ни карточкой, ни в карточке мужа
+    assert family_in_tree(childless) is None
+    assert guest.get(f"/api/families/{childless['id']}/form").status_code == 404
+    assert childless["id"] not in card_marriages(childless["husband"])
+    husband = next(p for p in guest.get("/api/clans/1/tree").json()["persons"] if p["id"] == childless["husband"])
+    assert childless["id"] not in husband["spouse_families"]
+
+    # выгрузка зрителя держит то же правило: файл уходит наружу и читается кем угодно
+    text = guest.get("/api/clans/1/export").text
+
+    def record(family: dict) -> str | None:
+        head = f"0 {family['xref']} FAM\n"
+        return text.split(head, 1)[1].split("\n0 ", 1)[0] if head in text else None
+
+    assert "MARR" not in record(parents) and "CHIL" in record(parents)
+    assert "DIV" not in record(divorced) and "MARR" not in record(divorced)
+    assert record(childless) is None
+    assert "MARR" in record(untouched)
+    assert f"FAMS {childless['xref']}" not in text  # и ссылки на исчезнувший союз у мужа нет
+
+    # союз, где никто не скрыт, цел: венчание — общий слой
+    assert guest.get(f"/api/families/{untouched['id']}/form").json()["marriage"]["gedcom"]
+    assert untouched["id"] in card_marriages(untouched["husband"])
+    # редактор видит всё как было
+    assert editor.get(f"/api/families/{childless['id']}/form").json()["marriage"]["gedcom"]
+    assert childless["id"] in [m["family_id"] for m in editor.get(f"/api/persons/{childless['husband']}").json()["marriages"]]
+
+
+def test_export_drops_a_union_whose_only_members_are_hidden(tmp_path: Path, monkeypatch) -> None:
+    """Союз без записанных родителей, где скрыты все дети: в выгрузке зрителя от него не должно
+    остаться и пустой записи — она сама была бы намёком на скрытых."""
+    import app.config
+    import app.main
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    conn = connect(path)
+    import_clan(conn, "Прайс", load_file(Path(__file__).parents[2] / "houses" / "Pryce_tree.ged"))
+    add_editor(conn, "Tyr", "длинный пароль")
+    conn.close()
+    editor = TestClient(app.main.app)
+    editor.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"})
+    tree = editor.get("/api/clans/1/tree").json()
+    orphaned = next(f for f in tree["families"] if not f["husband"] and not f["wife"] and f["children"])
+    # у союза без родителей появляется дата — чтобы в записи было что-то кроме людей
+    assert editor.put(f"/api/families/{orphaned['id']}", json={"marriage": "1820"}).status_code == 200
+    conn = connect(path)
+    for child in orphaned["children"]:
+        update_person(conn, child, PersonFields(see="hidden"))
+    conn.close()
+
+    text = TestClient(app.main.app).get("/api/clans/1/export").text
+    assert f"0 {orphaned['xref']} FAM" not in text
+    assert f"0 {orphaned['xref']} FAM" in editor.get("/api/clans/1/export").text

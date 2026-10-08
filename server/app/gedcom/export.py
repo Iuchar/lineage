@@ -78,9 +78,16 @@ def _sift(persons: list[Record], families: list[Record], allows: Allows) -> tupl
     unions = []
     dropped: set[str] = set()
     for family in families:
+        lost = any(c.tag in ("HUSB", "WIFE") and c.value in gone for c in family.children)
         family.children = [c for c in family.children if not (c.tag in ("HUSB", "WIFE", "CHIL") and c.value in gone)]
-        # союз, в котором не осталось никого, — намёк на скрытых: его тоже нет
-        if not any(c.tag in ("HUSB", "WIFE", "CHIL") for c in family.children):
+        if lost:
+            # супруг скрыт — уходит и всё о браке: венчание и развод говорили бы, что он был.
+            # То же правило, что в дереве и в карточке союза: остаются только дети
+            family.children = [c for c in family.children if c.tag in ("HUSB", "WIFE", "CHIL")]
+        # союз, в котором не осталось никого, — намёк на скрытых: его тоже нет.
+        # Как и бездетный союз со скрытым супругом: показывать в нём нечего
+        members = {c.tag for c in family.children} & {"HUSB", "WIFE", "CHIL"}
+        if not members or (lost and "CHIL" not in members):
             if family.xref:
                 dropped.add(family.xref)
             continue

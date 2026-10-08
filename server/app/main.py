@@ -308,7 +308,13 @@ def get_person(person_id: int, conn: Database, request: Request, as_viewer: int 
     levels = _levels(conn, person_id)
     if levels is not None and not eyes.allows(levels.see, details.clan_id):
         raise HTTPException(status_code=404, detail="Такого человека нет")
-    return sift_person(details, eyes, levels.see_dates if levels else "all")
+    hidden = _is_hidden(conn, details.clan_id, eyes)
+
+    def veiled(family_id: int) -> bool:  # в союзе есть скрытый супруг
+        row = conn.execute("SELECT husband_id, wife_id FROM families WHERE id = ?", (family_id,)).fetchone()
+        return row is not None and any(spouse is not None and hidden(spouse) for spouse in row)
+
+    return sift_person(details, eyes, levels.see_dates if levels else "all", veiled)
 
 
 @app.get("/api/persons", dependencies=[Depends(only_editor)])
@@ -444,7 +450,10 @@ def get_family_form(family_id: int, conn: Database, request: Request, as_viewer:
     except KinError as error:
         raise HTTPException(status_code=404, detail=str(error)) from None
     eyes = _eyes(conn, request, as_viewer)
-    return sift_family(form, eyes, _is_hidden(conn, form.clan_id, eyes))
+    seen = sift_family(form, eyes, _is_hidden(conn, form.clan_id, eyes))
+    if seen is None:  # союза для этих глаз нет — отвечаем как на несуществующий
+        raise HTTPException(status_code=404, detail="Такой семьи нет")
+    return seen
 
 
 @app.put("/api/families/{family_id}")
