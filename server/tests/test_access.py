@@ -369,3 +369,62 @@ def test_dead_sessions_do_not_pile_up(conn: sqlite3.Connection) -> None:
     assert editor_by_key(conn, fresh)
     assert conn.execute("SELECT count(*) FROM sessions").fetchone()[0] == 1
     assert editor_by_key(conn, stale) is None
+
+
+def test_strangers_misses_do_not_keep_the_owner_out(conn: sqlite3.Connection) -> None:
+    """Промахи считаются по имени и адресу вместе. Иначе прохожий держал бы редактора за дверью,
+    просто набирая чепуху под его именем: один запрос раз в пять минут — и верный пароль не пускает."""
+    from app.db.access import FREE_TRIES, TooManyTries
+
+    add_editor(conn, "Tyr", "длинный пароль")
+    for _ in range(FREE_TRIES + 3):
+        with pytest.raises(AccessError):
+            login(conn, "Tyr", "не тот пароль", source="203.0.113.7")
+    # чужой адрес упёрся в ожидание…
+    with pytest.raises(TooManyTries):
+        login(conn, "Tyr", "длинный пароль", source="203.0.113.7")
+    # …а хозяин со своего входит сразу
+    assert login(conn, "Tyr", "длинный пароль", source="198.51.100.4")
+    # и его вход не снимает ожидание с чужого адреса
+    with pytest.raises(TooManyTries):
+        login(conn, "Tyr", "не тот пароль", source="203.0.113.7")
+
+
+def test_old_misses_are_swept_so_the_table_does_not_grow(conn: sqlite3.Connection) -> None:
+    """Счёт ведётся и по выдуманным именам, поэтому таблицу можно было набивать без конца."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.db import access
+
+    add_editor(conn, "Tyr", "длинный пароль")
+    for i in range(6):
+        with pytest.raises(AccessError):
+            login(conn, f"выдуманный{i}", "что угодно", source="203.0.113.7")
+    assert conn.execute("SELECT count(*) FROM login_tries").fetchone()[0] == 6
+    long_ago = (datetime.now(UTC) - timedelta(hours=access.TRIES_FORGOTTEN_HOURS + 1)).isoformat(timespec="seconds")
+    with conn:
+        conn.execute("UPDATE login_tries SET last_at = ?", (long_ago,))
+    with pytest.raises(AccessError):
+        login(conn, "ещё один", "что угодно", source="203.0.113.7")
+    assert conn.execute("SELECT count(*) FROM login_tries").fetchone()[0] == 1  # давние убраны, остался свежий
+
+
+def test_api_counts_misses_by_address(tmp_path, monkeypatch) -> None:
+    import app.config
+    import app.main
+    from app.db.access import FREE_TRIES
+    from app.db.connection import connect
+
+    path = tmp_path / "base.sqlite3"
+    monkeypatch.setattr(app.config, "DB_PATH", path)
+    monkeypatch.setattr(app.main, "DB_PATH", path)
+    base = connect(path)
+    add_editor(base, "Tyr", "длинный пароль")
+    base.close()
+
+    stranger = TestClient(app.main.app, client=("203.0.113.7", 50000))
+    for _ in range(FREE_TRIES):
+        assert stranger.post("/api/login", json={"name": "Tyr", "password": "не тот"}).status_code == 401
+    assert stranger.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"}).status_code == 429
+    owner = TestClient(app.main.app, client=("198.51.100.4", 50000))
+    assert owner.post("/api/login", json={"name": "Tyr", "password": "длинный пароль"}).status_code == 200

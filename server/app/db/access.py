@@ -124,8 +124,9 @@ def _decoy_secret() -> str:
     return _decoy
 
 
-def _tries(conn: sqlite3.Connection, name: str) -> tuple[int, str | None]:
-    row = conn.execute("SELECT misses, last_at, open_at FROM login_tries WHERE name = ?", (name,)).fetchone()
+def _tries(conn: sqlite3.Connection, name: str, source: str) -> tuple[int, str | None]:
+    row = conn.execute("SELECT misses, last_at, open_at FROM login_tries WHERE name = ? AND source = ?",
+                       (name, source)).fetchone()
     if row is None:
         return 0, None
     # давние промахи забываются: считаем неудачи подряд, а не за всю жизнь
@@ -134,8 +135,8 @@ def _tries(conn: sqlite3.Connection, name: str) -> tuple[int, str | None]:
     return int(row["misses"]), row["open_at"]
 
 
-def _check_tries(conn: sqlite3.Connection, name: str) -> None:
-    _, open_at = _tries(conn, name)
+def _check_tries(conn: sqlite3.Connection, name: str, source: str) -> None:
+    _, open_at = _tries(conn, name, source)
     if open_at is None:
         return
     left = (datetime.fromisoformat(open_at) - datetime.now(UTC)).total_seconds()
@@ -143,25 +144,32 @@ def _check_tries(conn: sqlite3.Connection, name: str) -> None:
         raise TooManyTries(int(left) + 1)
 
 
-def _count_miss(conn: sqlite3.Connection, name: str) -> None:
-    misses = _tries(conn, name)[0] + 1
+def _count_miss(conn: sqlite3.Connection, name: str, source: str) -> None:
+    misses = _tries(conn, name, source)[0] + 1
     # пятый промах подряд уже отодвигает шестую попытку: свободных ровно FREE_TRIES
     wait = WAIT_STEPS[min(misses - FREE_TRIES, len(WAIT_STEPS) - 1)] if misses >= FREE_TRIES else 0
     now = datetime.now(UTC)
     open_at = (now + timedelta(seconds=wait)).isoformat(timespec="seconds") if wait else None
     with conn:
+        # заодно убираем давние: счёт ведётся и по выдуманным именам, и без уборки таблица росла бы без конца
+        conn.execute("DELETE FROM login_tries WHERE last_at < ?",
+                     ((now - timedelta(hours=TRIES_FORGOTTEN_HOURS)).isoformat(timespec="seconds"),))
         conn.execute(
-            "INSERT INTO login_tries (name, misses, last_at, open_at) VALUES (?, ?, ?, ?)"
-            " ON CONFLICT(name) DO UPDATE SET misses = excluded.misses, last_at = excluded.last_at,"
+            "INSERT INTO login_tries (name, source, misses, last_at, open_at) VALUES (?, ?, ?, ?, ?)"
+            " ON CONFLICT(name, source) DO UPDATE SET misses = excluded.misses, last_at = excluded.last_at,"
             " open_at = excluded.open_at",
-            (name, misses, now.isoformat(timespec="seconds"), open_at),
+            (name, source, misses, now.isoformat(timespec="seconds"), open_at),
         )
 
 
-def spare_attempts(conn: sqlite3.Connection, name: str) -> None:
-    """Счёт промахов начинается заново: так делает удачный вход, и так же снимают ожидание вручную."""
+def spare_attempts(conn: sqlite3.Connection, name: str, source: str | None = None) -> None:
+    """Счёт промахов начинается заново: так делает удачный вход — для своего адреса, — и так же снимают
+    ожидание вручную. Без адреса счёт снимается по имени целиком: так делает смена пароля."""
     with conn:
-        conn.execute("DELETE FROM login_tries WHERE name = ?", (name,))
+        if source is None:
+            conn.execute("DELETE FROM login_tries WHERE name = ?", (name,))
+        else:
+            conn.execute("DELETE FROM login_tries WHERE name = ? AND source = ?", (name, source))
 
 
 def editors_exist(conn: sqlite3.Connection) -> bool:
@@ -203,18 +211,22 @@ def list_editors(conn: sqlite3.Connection) -> list[Editor]:
     return [Editor(id=row["id"], name=row["name"]) for row in rows]
 
 
-def login(conn: sqlite3.Connection, name: str, password: str) -> str:
-    """Проверяет пароль и заводит сессию. Возвращает ключ, который уходит в cookie."""
+def login(conn: sqlite3.Connection, name: str, password: str, source: str = "") -> str:
+    """Проверяет пароль и заводит сессию. Возвращает ключ, который уходит в cookie.
+
+    source — адрес, с которого пришла попытка. Промахи считаются по имени и адресу вместе: чужие
+    промахи с чужого адреса не задерживают хозяина, а подбор с одного адреса упирается в ожидание.
+    """
     name = name.strip()
     # промахи считаются и по выдуманному имени: иначе отказ «подождите» сам говорил бы, кто заведён
-    _check_tries(conn, name)
+    _check_tries(conn, name, source)
     row = conn.execute("SELECT id, name, secret FROM editors WHERE name = ?", (name,)).fetchone()
     # одинаковый ответ на «нет такого» и «пароль не тот» — и по слову, и по времени: под выдуманным
     # именем пароль сверяется с подставным отпечатком, чтобы счёт занял столько же
     if not _matches(row["secret"] if row else _decoy_secret(), password) or row is None:
-        _count_miss(conn, name)
+        _count_miss(conn, name, source)
         raise AccessError("Имя или пароль не подходят.")
-    spare_attempts(conn, name)
+    spare_attempts(conn, name, source)
     key = secrets.token_urlsafe(32)
     now = _now()
     with conn:

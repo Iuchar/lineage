@@ -189,7 +189,9 @@ def get_me(conn: Database, request: Request) -> Me:
 @app.post("/api/login")
 def post_login(conn: Database, body: LoginForm, request: Request, response: Response) -> Me:
     try:
-        key = login(conn, body.name, body.password)
+        # адрес — тот, что видит сервер: за обратным прокси настоящий доходит только с --proxy-headers,
+        # а заголовок X-Forwarded-For сами не читаем — его может прислать кто угодно
+        key = login(conn, body.name, body.password, source=request.client.host if request.client else "")
     except TooManyTries as error:
         # 429 с Retry-After: страница показывает, сколько ждать, а не повторяет «пароль не тот»
         raise HTTPException(status_code=429, detail=str(error),
