@@ -363,3 +363,25 @@ def test_photo_file_follows_the_portrait_level(world: dict) -> None:
     assert invited.get(url).status_code == 404
     # файл чужого рода под номером этого человека не достать
     assert world["guest"].get(url.replace("/photos/1/", "/photos/2/")).status_code == 404
+
+
+def test_answers_carry_protective_headers(world: dict) -> None:
+    """Второй рубеж за экранированием: браузеру сказано, что страница грузит только своё,
+    в чужую рамку не встаёт и типы содержимого не угадываются."""
+    for url in ("/api/health", "/api/clans", "/api/clans/1/tree"):
+        headers = world["guest"].get(url).headers
+        assert headers["x-content-type-options"] == "nosniff"
+        assert headers["x-frame-options"] == "DENY"
+        assert headers["referrer-policy"] == "same-origin"
+        policy = headers["content-security-policy"]
+        assert "default-src 'self'" in policy and "frame-ancestors 'none'" in policy and "object-src 'none'" in policy
+        assert "script-src 'self'" in policy and "'unsafe-inline'" not in policy.split("script-src")[1].split(";")[0]
+
+    # отказы тоже отвечают с заголовками: заслон не должен их терять
+    refused = world["guest"].put("/api/clans/1/status", json={"status": "old"})
+    assert refused.status_code == 401 and refused.headers["x-content-type-options"] == "nosniff"
+
+    # описание API грузит свой интерфейс с CDN, поэтому политика содержимого у него своя, а остальное — как у всех
+    docs = world["editor"].get("/api/docs")
+    assert docs.status_code == 200 and docs.headers["x-frame-options"] == "DENY"
+    assert "cdn.jsdelivr.net" in docs.headers["content-security-policy"]

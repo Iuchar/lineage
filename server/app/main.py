@@ -137,6 +137,23 @@ def _eyes(conn: sqlite3.Connection, request: Request, as_viewer: int | None = No
     return Eyes(editor=False, clans=frozenset(viewer_clans(conn, request.cookies.get(VIEWER_COOKIE))))
 
 
+# Что странице можно грузить. Только своё: скрипт, стили, шрифты; картинки — свои и встроенные (силуэты).
+# Стили в атрибутах разрешены — карта расставляет карточки координатами прямо в разметке; скриптов
+# в разметке нет, и политика их не пускает: это второй рубеж на случай, если экранирование где-то подведёт.
+PAGE_POLICY = "; ".join((
+    "default-src 'self'", "script-src 'self'", "style-src 'self' 'unsafe-inline'", "img-src 'self' data:",
+    "font-src 'self'", "connect-src 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'",
+    "frame-ancestors 'none'",
+))
+# Описание API рисует Swagger: его скрипт и стили приходят с CDN и запускаются из разметки.
+# Страница за входом редактора, поэтому ей позволено больше, но тоже поимённо.
+DOCS_POLICY = "; ".join((
+    "default-src 'self'", "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net", "img-src 'self' data: https://fastapi.tiangolo.com",
+    "connect-src 'self'", "object-src 'none'", "base-uri 'self'", "frame-ancestors 'none'",
+))
+
+
 @app.middleware("http")
 async def guard_edits(request: Request, call_next):  # type: ignore[no-untyped-def]
     """Пока заведён хотя бы один редактор, менять данные может только вошедший."""
@@ -155,6 +172,22 @@ async def guard_edits(request: Request, call_next):  # type: ignore[no-untyped-d
         finally:
             opened.close()
     return await call_next(request)
+
+
+@app.middleware("http")
+async def shield(request: Request, call_next):  # type: ignore[no-untyped-def]
+    """Защитные заголовки на каждом ответе — и на странице, и на данных, и на отказах заслона.
+
+    Объявлена после заслона намеренно: внешней становится прослойка, объявленная последней,
+    а заголовки должны лечь и на отказ, который заслон выдаёт сам.
+    """
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")  # тип не угадывается: снимок не станет скриптом
+    response.headers.setdefault("X-Frame-Options", "DENY")  # в чужую рамку страница не встаёт
+    response.headers.setdefault("Referrer-Policy", "same-origin")  # наружу адрес страницы не уходит
+    response.headers.setdefault("Content-Security-Policy",
+                                DOCS_POLICY if request.url.path == "/api/docs" else PAGE_POLICY)
+    return response
 
 
 class ClanAccess(BaseModel):
