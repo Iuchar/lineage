@@ -143,14 +143,17 @@ async def guard_edits(request: Request, call_next):  # type: ignore[no-untyped-d
     path = request.url.path
     set_author(None)
     if request.method in {"POST", "PUT", "PATCH", "DELETE"} and path.startswith("/api/") and path not in OPEN_PATHS:
-        conn = connect(DB_PATH)
+        # база берётся тем же путём, что и в обработчиках, — через зависимость, которую можно подменить.
+        # Иначе заслон ходил бы в рабочую базу, даже когда всё остальное приложение смотрит в другую
+        opened = app.dependency_overrides.get(database, database)()
+        conn = next(opened)
         try:
             editor = _current_editor(conn, request)
             if editors_exist(conn) and editor is None:
                 return JSONResponse({"detail": "Нужен вход редактора"}, status_code=401)
             set_author(editor.name if editor else None)
         finally:
-            conn.close()
+            opened.close()
     return await call_next(request)
 
 
